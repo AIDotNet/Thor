@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <EntityFrameworkCoreVersion>8.0.2</EntityFrameworkCoreVersion>
+    <SdcbSparkDeskVersion>3.0.0</SdcbSparkDeskVersion>
+    <SemanticKernelVersion>1.6.1</SemanticKernelVersion>
+  </PropertyGroup>
+</Project>
