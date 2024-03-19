@@ -8,11 +8,6 @@ public sealed class TokenInput
     public string Name { get; set; } = null!;
     
     /// <summary>
-    /// 使用额度
-    /// </summary>
-    public long UsedQuota { get; set; }
-    
-    /// <summary>
     /// 无限额度
     /// </summary>
     public bool UnlimitedQuota { get; set; }
