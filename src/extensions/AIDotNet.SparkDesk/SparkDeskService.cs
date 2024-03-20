@@ -104,6 +104,7 @@ public class SparkDeskService : IADNChatCompletionService
             }
             else
             {
+                Console.WriteLine("Invalid API Key format, expected appId|appKey|appSecret");
                 throw new ArgumentException("Invalid API Key format, expected appId|appKey|appSecret");
             }
         }

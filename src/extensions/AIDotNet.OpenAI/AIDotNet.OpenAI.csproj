@@ -8,12 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\AIDotNet.Abstractions\AIDotNet.Abstractions.csproj" />
-      <ProjectReference Include="..\..\AIDotNet.API.Service\AIDotNet.API.Service.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Dto\" />
+        <PackageReference Include="AIDotNet.Abstractions" Version="*" />
     </ItemGroup>
 
 </Project>

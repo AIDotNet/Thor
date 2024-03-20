@@ -5,9 +5,9 @@
     <SemanticKernelVersion>1.6.1</SemanticKernelVersion>
     <Company>AIDotNet</Company>
     <Product>AIDotNet.API</Product>
-    <Version>0.0.1</Version>
+    <Version>0.0.4</Version>
     <Copyright>Apache-2.0 license</Copyright>
-    <AssemblyVersion>0.0.1</AssemblyVersion>
+    <AssemblyVersion>0.0.4</AssemblyVersion>
     <OpenSourceUrl>https://github.com/AIDotNet/AIDotNet.API</OpenSourceUrl>
     <Authors>AI DotNet</Authors>
     <Description>AI DotNet API</Description>

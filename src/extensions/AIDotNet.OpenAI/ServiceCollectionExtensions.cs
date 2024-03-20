@@ -1,6 +1,4 @@
 ﻿using AIDotNet.Abstractions;
-using AIDotNet.API.Service.Service;
-using Azure.AI.OpenAI;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AIDotNet.OpenAI;

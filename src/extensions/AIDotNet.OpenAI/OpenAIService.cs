@@ -97,7 +97,7 @@ public class OpenAiService : IADNChatCompletionService
             Model = settings.ModelId,
             Temperature = settings.Temperature,
             MaxTokens = settings.MaxTokens ?? 500,
-            Stream = false,
+            Stream = true,
             FrequencyPenalty = settings.FrequencyPenalty,
             TopP = settings.TopP
         };
@@ -108,14 +108,16 @@ public class OpenAiService : IADNChatCompletionService
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 
-
-        string? line;
-        while ((line = await stream.ReadLineAsync(cancellationToken)) != null)
+        using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
+        string? line = string.Empty;
+        while ((line = await reader.ReadLineAsync()) != null)
         {
-            if (line.StartsWith("data:"))
-                line = line["data:".Length..];
+            line += Environment.NewLine;
 
-            line = line.TrimStart();
+            if (line.StartsWith("data:"))
+                line = line.Substring("data:".Length);
+
+            line = line.Trim();
 
             if (line == "[DONE]")
             {
@@ -127,13 +129,11 @@ public class OpenAiService : IADNChatCompletionService
             }
             else if (!string.IsNullOrWhiteSpace(line))
             {
-                var res = JsonSerializer.Deserialize<OpenAIResultDto>(line, new JsonSerializerOptions()
+                var result = JsonSerializer.Deserialize<OpenAIResultDto>(line, new JsonSerializerOptions()
                 {
                     IgnoreNullValues = true,
                 });
-
-                yield return new StreamingChatMessageContent(AuthorRole.Assistant,
-                    res.Choices.FirstOrDefault().Message.Content);
+                yield return new StreamingChatMessageContent(AuthorRole.Assistant, result?.Choices[0].Delta?.Content);
             }
         }
     }
