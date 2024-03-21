@@ -8,8 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="AIDotNet.Abstractions" Version="*" />
-        <PackageReference Include="Sdcb.SparkDesk" Version="$(SdcbSparkDeskVersion)"/>
+        <PackageReference Include="Sdcb.SparkDesk" Version="$(SdcbSparkDeskVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\AIDotNet.Abstractions\AIDotNet.Abstractions.csproj" />
     </ItemGroup>
 
 </Project>

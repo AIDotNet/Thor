@@ -13,10 +13,13 @@ public class OpenAiService : IADNChatCompletionService
 {
     private readonly OpenAIOptions openAiOptions;
 
+    static OpenAiService()
+    {
+        IADNChatCompletionService.ServiceNames.Add(OpenAIOptions.ServiceName);
+    }
     public OpenAiService(OpenAIOptions options)
     {
         openAiOptions = options;
-        IADNChatCompletionService.ServiceNames.Add(OpenAIOptions.ServiceName);
     }
 
     public IReadOnlyDictionary<string, object?> Attributes { get; }

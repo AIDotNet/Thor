@@ -11,10 +11,13 @@ public class SparkDeskService : IADNChatCompletionService
 {
     private readonly SparkDeskOptions options;
 
+    static SparkDeskService()
+    {
+        IADNChatCompletionService.ServiceNames.Add(SparkDeskOptions.ServiceName);
+    }
     public SparkDeskService(SparkDeskOptions options)
     {
         this.options = options;
-        IADNChatCompletionService.ServiceNames.Add(SparkDeskOptions.ServiceName);
     }
 
     public IReadOnlyDictionary<string, object?> Attributes { get; set; }

@@ -10,12 +10,15 @@ namespace AIDotNet.AliyunFC;
 
 public class AliyunFCService : IADNChatCompletionService
 {
+    static AliyunFCService()
+    {
+        IADNChatCompletionService.ServiceNames.Add(AliyunFCOptions.ServiceName);
+    }
     public AliyunFCOptions options { get; }
 
     public AliyunFCService(AliyunFCOptions options)
     {
         this.options = options;
-        IADNChatCompletionService.ServiceNames.Add(AliyunFCOptions.ServiceName);
     }
 
     public IReadOnlyDictionary<string, object?> Attributes { get; set; }

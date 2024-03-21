@@ -1,4 +1,5 @@
-﻿using AIDotNet.API.Service.Dto;
+﻿using AIDotNet.Abstractions;
+using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Model;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -64,4 +65,11 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         return ResultDto<bool>.CreateSuccess(result > 0);
     }
+
+    /// <summary>
+    /// 获取支持的模型服务
+    /// </summary>
+    /// <returns></returns>
+    public ResultDto<List<string>> GetModelServices()
+        => ResultDto<List<string>>.CreateSuccess(IADNChatCompletionService.ServiceNames);
 }
