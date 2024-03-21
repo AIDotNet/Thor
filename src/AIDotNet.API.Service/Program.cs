@@ -1,16 +1,14 @@
-using Mapster;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using TokenApi.Contract;
-using TokenApi.Contract.Domain;
 using AIDotNet.API.Service;
-using AIDotNet.API.Service.Contract;
 using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domina;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
+using Mapster;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using TokenApi.Contract.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,7 +71,8 @@ builder.Services.AddTransient<AuthorizeService>()
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddAliyunFCService()
-    .AddSparkDeskService();
+    .AddSparkDeskService()
+    .AddMetaGLMClientV4();
 
 builder.Services.AddDbContext<TokenApiDbContext>(options =>
 {
@@ -157,6 +156,9 @@ channel.MapGet("{id}", async (ChannelService service, string id) =>
 
 channel.MapPut(string.Empty, async (ChannelService service, ChatChannel input) =>
     await service.UpdateAsync(input));
+
+channel.MapGet("/model-services", async (ChannelService services) =>
+    services.GetModelServices());
 
 #endregion
 

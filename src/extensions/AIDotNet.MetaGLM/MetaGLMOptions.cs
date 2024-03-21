@@ -1,10 +1,10 @@
-namespace AIDotNet.OpenAI;
+﻿namespace AIDotNet.MetaGLM;
 
-public class OpenAIOptions
+public class MetaGLMOptions
 {
     public const string ServiceName = "OpenAI";
 
     public IServiceProvider ServiceProvider { get; set; }
-    
-    public HttpClient? Client { get; set; }
+
+    public MetaGLMClientV4? Client { get; set; }
 }
