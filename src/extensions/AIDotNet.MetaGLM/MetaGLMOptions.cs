@@ -2,7 +2,7 @@
 
 public class MetaGLMOptions
 {
-    public const string ServiceName = "OpenAI";
+    public const string ServiceName = "MetaGLM";
 
     public IServiceProvider ServiceProvider { get; set; }
 

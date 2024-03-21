@@ -1,13 +1,14 @@
 <Project>
   <PropertyGroup>
     <EntityFrameworkCoreVersion>8.0.2</EntityFrameworkCoreVersion>
+    <LangVersion>12.0</LangVersion>
     <SdcbSparkDeskVersion>3.0.0</SdcbSparkDeskVersion>
     <SemanticKernelVersion>1.6.1</SemanticKernelVersion>
     <Company>AIDotNet</Company>
     <Product>AIDotNet.API</Product>
-    <Version>0.0.4</Version>
+    <Version>0.0.5</Version>
     <Copyright>Apache-2.0 license</Copyright>
-    <AssemblyVersion>0.0.4</AssemblyVersion>
+    <AssemblyVersion>0.0.5</AssemblyVersion>
     <OpenSourceUrl>https://github.com/AIDotNet/AIDotNet.API</OpenSourceUrl>
     <Authors>AI DotNet</Authors>
     <Description>AI DotNet API</Description>

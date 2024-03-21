@@ -5,5 +5,14 @@ namespace AIDotNet.MetaGLM.Models.RequestModels
         public string role { get; set; }
         public string content { get; set; }
 
+        public MessageItem(string role, string content)
+        {
+            this.role = role;
+            this.content = content;
+        }
+        
+        public MessageItem()
+        {
+        }
     }
 }

@@ -51,12 +51,21 @@ namespace AIDotNet.MetaGLM.Models.RequestModels
 
         public TextRequestBase SetTopP(double topP)
         {
+            if (topP is <= 0.0 or >= 1.0)
+            {
+                topP = 0.1;
+            }
             this.top_p = topP;
             return this;
         }
 
         public TextRequestBase SetTemperature(double temperature)
         {
+            if (temperature is <= 0.0 or >= 1.0)
+            {
+                temperature = 0.1;
+            }
+
             this.temperature = temperature;
             return this;
         }

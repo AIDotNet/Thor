@@ -77,10 +77,10 @@ public class MetaGLMService : IADNChatCompletionService
         dto.SetTemperature(settings.Temperature);
         dto.SetTopP(settings.TopP);
 
-        await foreach (var item in _openAiOptions.Client.Chat.Stream(dto, apiKey))
+        await foreach (var item in _openAiOptions.Client?.Chat.Stream(dto, apiKey))
         {
             yield return
-                new StreamingChatMessageContent(AuthorRole.Assistant, item.choices.FirstOrDefault()?.message.content);
+                new StreamingChatMessageContent(AuthorRole.Assistant, item.choices.FirstOrDefault()?.delta.content);
         }
     }
 }
