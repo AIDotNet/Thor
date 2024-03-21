@@ -93,8 +93,7 @@ public class SparkDeskService : IADNChatCompletionService
         if (executionSettings is not OpenAIPromptExecutionSettings settings) throw new NotImplementedException();
 
         SparkDeskClient client;
-        if (
-            executionSettings?.ExtensionData?.TryGetValue(Constant.API_KEY, out var key) == true)
+        if (executionSettings?.ExtensionData?.TryGetValue(Constant.API_KEY, out var key) == true)
         {
             // appId|appKey|appSecret
             var parts = key.ToString().Split('|');
@@ -110,7 +109,7 @@ public class SparkDeskService : IADNChatCompletionService
         }
         else
         {
-            throw new InvalidOperationException("Client is not initialized");
+            throw new InvalidOperationException("未找到 APIKEY配置");
         }
 
 
@@ -139,6 +138,11 @@ public class SparkDeskService : IADNChatCompletionService
         var topK = Convert.ToInt32(Math.Round(settings.TopP + 1));
 
         var results = chatHistory.Select(x => new ChatMessage(x.Role.ToString(), x.Content)).ToArray();
+
+        if (settings.Temperature <= 0)
+        {
+            settings.Temperature = 0.1;
+        }
 
         var msg = client.ChatAsStreamAsync(modelVersion,
             results, new ChatRequestParameters
