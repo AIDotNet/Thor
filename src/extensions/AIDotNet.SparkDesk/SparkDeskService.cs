@@ -13,8 +13,9 @@ public class SparkDeskService : IADNChatCompletionService
 
     static SparkDeskService()
     {
-        IADNChatCompletionService.ServiceNames.Add(SparkDeskOptions.ServiceName);
+        IADNChatCompletionService.ServiceNames.Add("星火大模型", SparkDeskOptions.ServiceName);
     }
+
     public SparkDeskService(SparkDeskOptions options)
     {
         this.options = options;

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AIDotNet.MetaGLM
 {
-    public class AuthenticationUtils
+    public static class AuthenticationUtils
     {
         public static string GenerateToken(string apiKey, int expSeconds)
         {

@@ -8,10 +8,11 @@ public class ClaudiaService : IADNChatCompletionService
 {
     static ClaudiaService()
     {
-        IADNChatCompletionService.ServiceNames.Add("Claudia");
+        IADNChatCompletionService.ServiceNames.Add("Claudia", ClaudiaOptions.ServiceName);
     }
 
     private readonly ClaudiaOptions _openAiOptions;
+
     public ClaudiaService(ClaudiaOptions openAiOptions)
     {
         _openAiOptions = openAiOptions;
@@ -19,8 +20,9 @@ public class ClaudiaService : IADNChatCompletionService
 
     public IReadOnlyDictionary<string, object?> Attributes { get; }
 
-    public Task<IReadOnlyList<ChatMessageContent>> GetChatMessageContentsAsync(ChatHistory chatHistory, PromptExecutionSettings? executionSettings = null,
-        Kernel? kernel = null, CancellationToken cancellationToken = new ())
+    public Task<IReadOnlyList<ChatMessageContent>> GetChatMessageContentsAsync(ChatHistory chatHistory,
+        PromptExecutionSettings? executionSettings = null,
+        Kernel? kernel = null, CancellationToken cancellationToken = new())
     {
         throw new NotImplementedException();
     }

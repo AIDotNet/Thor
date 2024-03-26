@@ -37,7 +37,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     {
         var result = await DbContext.Channels.Where(x => x.Id == id)
             .ExecuteDeleteAsync();
-        
+
         return ResultDto<bool>.CreateSuccess(result > 0);
     }
 
@@ -70,6 +70,6 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     /// 获取支持的模型服务
     /// </summary>
     /// <returns></returns>
-    public ResultDto<List<string>> GetModelServices()
-        => ResultDto<List<string>>.CreateSuccess(IADNChatCompletionService.ServiceNames);
+    public ResultDto<Dictionary<string, string>> GetModelServices()
+        => ResultDto<Dictionary<string, string>>.CreateSuccess(IADNChatCompletionService.ServiceNames);
 }

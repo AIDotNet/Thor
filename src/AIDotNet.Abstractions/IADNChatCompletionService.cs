@@ -7,5 +7,5 @@ public interface IADNChatCompletionService : IChatCompletionService
     /// <summary>
     ///  The service name
     /// </summary>
-    public static List<string> ServiceNames { get; } = new();
+    public static Dictionary<string,string> ServiceNames { get; } = new();
 }

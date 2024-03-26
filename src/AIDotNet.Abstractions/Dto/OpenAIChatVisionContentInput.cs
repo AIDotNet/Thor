@@ -7,4 +7,5 @@ public class OpenAIChatVisionContentInput
     public string text { get; set; }
 
     public object image_url { get; set; }
+    
 }

@@ -12,8 +12,9 @@ public class AliyunFCService : IADNChatCompletionService
 {
     static AliyunFCService()
     {
-        IADNChatCompletionService.ServiceNames.Add(AliyunFCOptions.ServiceName);
+        IADNChatCompletionService.ServiceNames.Add("阿里云FC", AliyunFCOptions.ServiceName);
     }
+
     public AliyunFCOptions options { get; }
 
     public AliyunFCService(AliyunFCOptions options)

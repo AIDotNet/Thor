@@ -15,8 +15,9 @@ public class OpenAiService : IADNChatCompletionService
 
     static OpenAiService()
     {
-        IADNChatCompletionService.ServiceNames.Add(OpenAIOptions.ServiceName);
+        IADNChatCompletionService.ServiceNames.Add("OpenAI", OpenAIOptions.ServiceName);
     }
+
     public OpenAiService(OpenAIOptions options)
     {
         openAiOptions = options;
@@ -82,7 +83,7 @@ public class OpenAiService : IADNChatCompletionService
 
         if (executionSettings?.ExtensionData?.TryGetValue(Constant.API_KEY, out var key) == true)
         {
-            apiKey = key.ToString();
+            apiKey = key?.ToString();
         }
 
         if (executionSettings?.ExtensionData?.TryGetValue(Constant.API_URL, out var url) == true)
