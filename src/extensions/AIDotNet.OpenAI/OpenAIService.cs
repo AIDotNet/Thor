@@ -56,7 +56,7 @@ public class OpenAiService : IADNChatCompletionService
             MaxTokens = settings.MaxTokens ?? 500,
             Stream = false,
             FrequencyPenalty = settings.FrequencyPenalty,
-            TopP = settings.TopP
+            TopP = settings.TopP,
         };
 
         using var response = await openAiOptions.Client.PostAsync(
