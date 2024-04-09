@@ -1,9 +1,10 @@
-import { Button, Dropdown, Input, Notification, Table } from "@douyinfe/semi-ui"
+import { Button, Dropdown, Input, Notification, Switch, Table } from "@douyinfe/semi-ui"
 import { useMemo, useState } from "react";
 import styled from "styled-components"
 import CreateToken from "./features/CreateToken";
 import { disable, getTokens, Remove } from '../../services/TokenService'
 import UpdateToken from "./features/UpdateToken";
+import { IconClose, IconTick } from "@douyinfe/semi-icons";
 
 const Header = styled.header`
 
@@ -18,12 +19,23 @@ export default function Token() {
         {
             title: '是否禁用',
             dataIndex: 'disabled',
-            render: (value: any) => {
-                if (value) {
-                    return <span>禁用</span>
-                } else {
-                    return <span>正常</span>
-                }
+            render: (value: any,item:any) => {
+                return <Switch size='large'
+                    defaultChecked={!value} onChange={(v) => {
+                        disable(item.id)
+                            .then((item) => {
+                                item.success ? Notification.success({
+                                    title: '操作成功',
+                                }) : Notification.error({
+                                    title: '操作失败',
+                                });
+                                loadingData();
+                            }), () => Notification.error({
+                                title: '操作失败',
+                            });
+                    }} checkedText={<IconTick />} uncheckedText={<IconClose />} style={{
+                        width: '50px',
+                    }} aria-label="a switch for semi demo"></Switch>
             }
         },
         {

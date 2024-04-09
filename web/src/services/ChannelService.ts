@@ -28,3 +28,7 @@ export const getChannel = (id: string) => {
 export const disable = (id: string) => {
   return put(prefix + "/disable/" + id);
 }
+
+export const test = (id: string) => {
+  return put(prefix + "/test/" + id);
+}

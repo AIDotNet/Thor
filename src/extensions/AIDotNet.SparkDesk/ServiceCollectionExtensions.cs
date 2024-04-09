@@ -9,6 +9,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSparkDeskService(this IServiceCollection services,
         Action<SparkDeskOptions>? configureOptions = null, ServiceLifetime lifetime = ServiceLifetime.Singleton)
     {
+        IADNChatCompletionService.ServiceNames.Add("星火大模型", SparkDeskOptions.ServiceName);
+
         switch (lifetime)
         {
             case ServiceLifetime.Singleton:
@@ -19,7 +21,7 @@ public static class ServiceCollectionExtensions
                         {
                             ServiceProvider = provider
                         };
-                        
+
                         configureOptions?.Invoke(deskOptions);
 
                         return new SparkDeskService(deskOptions);

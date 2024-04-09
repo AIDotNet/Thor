@@ -67,8 +67,8 @@ namespace AIDotNet.API.Service.Migrations
                     b.Property<long>("RemainQuota")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime?>("ResponseTime")
-                        .HasColumnType("TEXT");
+                    b.Property<long?>("ResponseTime")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -86,11 +86,17 @@ namespace AIDotNet.API.Service.Migrations
                     b.ToTable("Channels");
                 });
 
-            modelBuilder.Entity("AIDotNet.API.Service.Domain.Logger", b =>
+            modelBuilder.Entity("AIDotNet.API.Service.Domain.ChatLogger", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ChannelId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ChannelName")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("CompletionTokens")
                         .HasColumnType("INTEGER");
@@ -128,11 +134,21 @@ namespace AIDotNet.API.Service.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Creator");
 
+                    b.HasIndex("ModelName");
+
                     b.HasIndex("TokenName");
+
+                    b.HasIndex("UserName");
 
                     b.ToTable("Loggers");
                 });
@@ -198,10 +214,13 @@ namespace AIDotNet.API.Service.Migrations
                     b.ToTable("Tokens");
                 });
 
-            modelBuilder.Entity("TokenApi.Contract.Domain.User", b =>
+            modelBuilder.Entity("AIDotNet.API.Service.Domain.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
+
+                    b.Property<long>("ConsumeToken")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -230,6 +249,16 @@ namespace AIDotNet.API.Service.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<long>("RequestCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ResidualCredit")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
@@ -244,12 +273,16 @@ namespace AIDotNet.API.Service.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "67b806e5-5deb-4f6a-88b1-914487aa0212",
+                            Id = "5dac91d8-0ed4-4727-a534-e6f9c52434e3",
+                            ConsumeToken = 0L,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "239573049@qq.com",
                             IsDelete = false,
-                            Password = "f02648e32b1b479bf964b0d33da58780",
-                            PasswordHas = "9ad551538f784ce7abd656ce5bab0ae2",
+                            Password = "76c359997c2ec8ac655aeb7a7917304b",
+                            PasswordHas = "37747d67812549bcae99032d020efd3f",
+                            RequestCount = 0L,
+                            ResidualCredit = 0L,
+                            Role = "admin",
                             UserName = "admin"
                         });
                 });

@@ -10,12 +10,6 @@ namespace AIDotNet.SparkDesk;
 public class SparkDeskService : IADNChatCompletionService
 {
     private readonly SparkDeskOptions options;
-
-    static SparkDeskService()
-    {
-        IADNChatCompletionService.ServiceNames.Add("星火大模型", SparkDeskOptions.ServiceName);
-    }
-
     public SparkDeskService(SparkDeskOptions options)
     {
         this.options = options;

@@ -1,4 +1,4 @@
-import { Layout, Nav, Button, Avatar, Switch } from '@douyinfe/semi-ui';
+import { Layout, Nav, Button, Avatar, Switch, Dropdown } from '@douyinfe/semi-ui';
 import { IconMoon, IconSun, IconBytedanceLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -30,7 +30,7 @@ export default function MainLayout() {
         });
     }
 
-    useEffect(()=>{
+    useEffect(() => {
         // 获取当前路由
         const path = window.location.pathname;
         // 绑定key
@@ -57,7 +57,7 @@ export default function MainLayout() {
                 setKey('Setting');
                 break;
         }
-    },[])
+    }, [])
 
     return (
         <Layout style={{
@@ -121,9 +121,21 @@ export default function MainLayout() {
                                 <Switch onChange={(v, e) => {
                                     SwitchTheme(v);
                                 }} checked={dark} checkedText={<IconSun />} uncheckedText={<IconMoon />} size="large" style={{ marginRight: 5 }} />
-                                <Avatar color="orange" size="small">
-                                    Token
-                                </Avatar>
+                                <Dropdown
+                                    render={
+                                        <Dropdown.Menu>
+                                            <Dropdown.Item key="1">个人中心</Dropdown.Item>
+                                            <Dropdown.Item key="2"onClick={()=>{
+                                                localStorage.removeItem('token');
+                                                navigation('/login');
+                                            }}>退出登录</Dropdown.Item>
+                                        </Dropdown.Menu>
+                                    }
+                                >
+                                    <Avatar color="orange" size="small">
+                                        Token
+                                    </Avatar>
+                                </Dropdown>
                             </>
                         }
                     ></Nav>

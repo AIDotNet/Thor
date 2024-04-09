@@ -1,9 +1,10 @@
-import { Button, Dropdown, Input, Notification, Table, Tag } from "@douyinfe/semi-ui"
+import { Button, Switch, Dropdown, Input, Notification, Table, Tag } from "@douyinfe/semi-ui"
 import { useMemo, useState } from "react";
 import styled from "styled-components"
-import { getChannels,disable,Remove } from "../../services/ChannelService";
+import { getChannels, disable, Remove, test } from "../../services/ChannelService";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
+import { IconTick, IconClose } from "@douyinfe/semi-icons";
 
 const Header = styled.header`
 
@@ -19,11 +20,22 @@ export default function Channel() {
             title: '是否禁用',
             dataIndex: 'disable',
             render: (value: any) => {
-                if (value) {
-                    return <span>禁用</span>
-                } else {
-                    return <span>正常</span>
-                }
+                return <Switch size='large'
+                    defaultChecked={!value} onChange={(v) => {
+                        disable(value.id)
+                            .then((item) => {
+                                item.success ? Notification.success({
+                                    title: '操作成功',
+                                }) : Notification.error({
+                                    title: '操作失败',
+                                });
+                                loadingData();
+                            }), () => Notification.error({
+                                title: '操作失败',
+                            });
+                    }} checkedText={<IconTick />} uncheckedText={<IconClose />} style={{
+                        width: '50px',
+                    }} aria-label="a switch for semi demo"></Switch>
             }
         },
         {
@@ -35,7 +47,28 @@ export default function Channel() {
         },
         {
             title: '响应时间',
-            dataIndex: 'responseTime'
+            dataIndex: 'responseTime',
+            render: (value: any, item: any) => {
+                if (value) {
+                    // 小于3000毫秒显示绿色
+                    let color;
+                    if (value < 3000) {
+                        color = 'green';
+                    } else if (value < 5000) {
+                        color = 'yellow';
+                    } else {
+                        color = 'red';
+                    }
+
+                    return <Tag 
+                    size='large'
+                    shape='circle'
+                    type='solid'
+                    color={color as any} onClick={() => testToken(item.id)}>{value / 1000}秒</Tag>
+                } else {
+                    return <Tag onClick={() => testToken(item.id)}>未测试</Tag>
+                }
+            }
         },
         {
             title: '创建时间',
@@ -107,16 +140,20 @@ export default function Channel() {
         keyword: '',
     });
 
-    function copyKey(key: string) {
-        navigator.clipboard.writeText(key).then(() => {
-            Notification.success({
-                title: '复制成功',
+    function testToken(id: string) {
+        test(id)
+            .then((v) => {
+                if (v.success) {
+                    Notification.success({
+                        title: '测试成功',
+                    })
+                    loadingData();
+                } else {
+                    Notification.error({
+                        title: '测试失败',
+                    })
+                }
             })
-        }).catch(() => {
-            Notification.error({
-                title: '复制失败',
-            })
-        });
     }
 
     function removeToken(id: string) {

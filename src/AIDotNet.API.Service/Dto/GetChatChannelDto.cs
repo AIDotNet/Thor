@@ -1,9 +1,8 @@
 ﻿using AIDotNet.API.Service.Domain.Core;
-using AIDotNet.API.Service.Domina.Core;
 
-namespace AIDotNet.API.Service.Domain;
+namespace AIDotNet.API.Service.Dto;
 
-public sealed class ChatChannel : Entity<string>
+public sealed class GetChatChannelDto : Entity<string>
 {
     /// <summary>
     /// 优先级
@@ -23,14 +22,9 @@ public sealed class ChatChannel : Entity<string>
     public string Address { get; set; }
 
     /// <summary>
-    /// 响应时间 (ms)
+    /// 响应时间
     /// </summary>
     public long? ResponseTime { get; set; }
-
-    /// <summary>
-    /// 密钥
-    /// </summary>
-    public string Key { get; set; } = string.Empty;
 
     /// <summary>
     /// 模型

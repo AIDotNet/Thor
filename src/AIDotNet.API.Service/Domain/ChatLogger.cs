@@ -1,12 +1,12 @@
-﻿using AIDotNet.API.Service.Domain.Core;
-using AIDotNet.API.Service.Domina.Core;
+﻿using AIDotNet.Abstractions;
+using AIDotNet.API.Service.Domain.Core;
 
 namespace AIDotNet.API.Service.Domain;
 
-public sealed class Logger : Entity<long>
+public sealed class ChatLogger : Entity<long>
 {
-    public int Type { get; set; }
-    
+    public ChatLoggerType Type { get; set; }
+
     public string Content { get; set; }
 
     /// <summary>
@@ -33,4 +33,18 @@ public sealed class Logger : Entity<long>
     /// token名称
     /// </summary>
     public string TokenName { get; set; }
+
+    public string? UserName { get; set; }
+
+    public string? UserId { get; set; }
+
+    /// <summary>
+    /// 渠道Id
+    /// </summary>
+    public string? ChannelId { get; set; }
+
+    /// <summary>
+    /// 渠道名称
+    /// </summary>
+    public string? ChannelName { get; set; }
 }

@@ -93,8 +93,8 @@ export default function UpdateChannel({
                         }]}
                         field='type' label='渠道类型' style={{ width: '100%' }} placeholder='请选择渠道类型'>
                         {
-                            types && Object.keys(types).map(key => {
-                                return <Form.Select.Option key={key} value={key}>{types[key]}</Form.Select.Option>
+                            types && Object.keys(types).map((key) => {
+                                return <Form.Select.Option key={key} value={types[key]}>{key}</Form.Select.Option>
                             })
                         }
                     </Form.Select>

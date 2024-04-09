@@ -20,7 +20,7 @@ namespace AIDotNet.API.Service.Migrations
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Address = table.Column<string>(type: "TEXT", nullable: false),
-                    ResponseTime = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    ResponseTime = table.Column<long>(type: "INTEGER", nullable: true),
                     Key = table.Column<string>(type: "TEXT", nullable: false),
                     Models = table.Column<string>(type: "TEXT", nullable: false),
                     Other = table.Column<string>(type: "TEXT", nullable: false),
@@ -51,6 +51,10 @@ namespace AIDotNet.API.Service.Migrations
                     Quota = table.Column<int>(type: "INTEGER", nullable: false),
                     ModelName = table.Column<string>(type: "TEXT", nullable: false),
                     TokenName = table.Column<string>(type: "TEXT", nullable: false),
+                    UserName = table.Column<string>(type: "TEXT", nullable: true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    ChannelId = table.Column<string>(type: "TEXT", nullable: true),
+                    ChannelName = table.Column<string>(type: "TEXT", nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Modifier = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -97,8 +101,12 @@ namespace AIDotNet.API.Service.Migrations
                     Email = table.Column<string>(type: "TEXT", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: false),
                     PasswordHas = table.Column<string>(type: "TEXT", nullable: false),
+                    Role = table.Column<string>(type: "TEXT", nullable: false),
                     IsDelete = table.Column<bool>(type: "INTEGER", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    ConsumeToken = table.Column<long>(type: "INTEGER", nullable: false),
+                    RequestCount = table.Column<long>(type: "INTEGER", nullable: false),
+                    ResidualCredit = table.Column<long>(type: "INTEGER", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Modifier = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -111,8 +119,8 @@ namespace AIDotNet.API.Service.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreatedAt", "Creator", "DeletedAt", "Email", "IsDelete", "Modifier", "Password", "PasswordHas", "UpdatedAt", "UserName" },
-                values: new object[] { "67b806e5-5deb-4f6a-88b1-914487aa0212", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "239573049@qq.com", false, null, "f02648e32b1b479bf964b0d33da58780", "9ad551538f784ce7abd656ce5bab0ae2", null, "admin" });
+                columns: new[] { "Id", "ConsumeToken", "CreatedAt", "Creator", "DeletedAt", "Email", "IsDelete", "Modifier", "Password", "PasswordHas", "RequestCount", "ResidualCredit", "Role", "UpdatedAt", "UserName" },
+                values: new object[] { "5dac91d8-0ed4-4727-a534-e6f9c52434e3", 0L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "239573049@qq.com", false, null, "76c359997c2ec8ac655aeb7a7917304b", "37747d67812549bcae99032d020efd3f", 0L, 0L, "admin", null, "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Channels_Creator",
@@ -130,9 +138,19 @@ namespace AIDotNet.API.Service.Migrations
                 column: "Creator");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Loggers_ModelName",
+                table: "Loggers",
+                column: "ModelName");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Loggers_TokenName",
                 table: "Loggers",
                 column: "TokenName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Loggers_UserName",
+                table: "Loggers",
+                column: "UserName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tokens_Creator",

@@ -7,15 +7,22 @@ using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
-using TokenApi.Contract.Domain;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
 using TokenApi.Service.Exceptions;
 using AuthorRole = Microsoft.SemanticKernel.ChatCompletion.AuthorRole;
 using ChatHistory = Microsoft.SemanticKernel.ChatCompletion.ChatHistory;
 
 namespace AIDotNet.API.Service.Service;
 
-public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
+public sealed class ChatService(
+    IServiceProvider serviceProvider,
+    ChannelService channelService,
+    UserService userService,
+    LoggerService loggerService)
+    : ApplicationService(serviceProvider)
 {
+    private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
+
     private static readonly Dictionary<string, decimal> PromptRate = new();
     private static readonly Dictionary<string, decimal> CompletionRate = new();
 
@@ -35,7 +42,7 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
 
         var key = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
 
-        var token = await DbContext.Tokens.FirstOrDefaultAsync(x => x.Key == key);
+        var token = await DbContext.Tokens.AsNoTracking().FirstOrDefaultAsync(x => x.Key == key);
 
         if (token == null)
         {
@@ -57,6 +64,22 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
             return;
         }
 
+
+        var user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == token.Creator);
+
+        if (user == null)
+        {
+            context.Response.StatusCode = 401;
+            return;
+        }
+
+        // 判断额度是否足够
+        if (user.ResidualCredit < 10000)
+        {
+            context.Response.StatusCode = 402;
+            return;
+        }
+
         #endregion
 
         using var body = new MemoryStream();
@@ -70,10 +93,8 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
         }
 
         // 获取渠道 通过算法计算权重
-        var channel = CalculateWeight(await DbContext.Channels.AsNoTracking()
-            .Where(x => !x.Disable)
-            .Where(x => x.Models.Contains(module.Model))
-            .ToListAsync());
+        var channel = CalculateWeight((await channelService.GetChannelsAsync())
+            .Where(x => x.Models.Contains(module.Model)));
 
         if (channel == null)
         {
@@ -85,7 +106,7 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
 
         if (openService == null)
         {
-            await WriteEndAsync(context, "为找到对应的实现服务");
+            await WriteEndAsync(context, "渠道服务不存在");
             return;
         }
 
@@ -94,9 +115,12 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
             int requestToken;
             int responseToken = 0;
 
-            if (module.ToolChoice == "auto")
+            var tools =
+                JsonSerializer.Deserialize<OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput>>(body.ToArray());
+
+            if (tools.ToolChoice == "auto")
             {
-                var message = JsonSerializer.Deserialize<OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput>>(
+                var message = JsonSerializer.Deserialize<OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput>>(
                     body.ToArray());
 
                 requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
@@ -143,12 +167,18 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
                 var responseMessage = new StringBuilder();
 
                 var chatHistory = new ChatHistory();
+
                 chatHistory.AddRange(message.Messages.Select(x => new ChatMessageContent(
                     new AuthorRole(x.Role), x.Content)));
 
-                var setting = new PromptExecutionSettings
+                var setting = new OpenAIPromptExecutionSettings
                 {
-                    ExtensionData = new Dictionary<string, object>()
+                    ExtensionData = new Dictionary<string, object>(),
+                    ModelId = module.Model,
+                    Temperature = module.Temperature,
+                    MaxTokens = module.MaxTokens,
+                    FrequencyPenalty = module.FrequencyPenalty,
+                    TopP = module.TopP
                 };
                 setting.ExtensionData.Add("API_KEY", channel.Key);
                 setting.ExtensionData.Add("API_URL", channel.Address);
@@ -172,18 +202,12 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
             // 将quota 四舍五入
             quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
-            var logger = new Logger()
-            {
-                Content = "",
-                ModelName = module.Model,
-                PromptTokens = requestToken,
-                CompletionTokens = responseToken,
-                Quota = (int)quota,
-                TokenName = token.Name,
-                Type = 2,
-            };
 
-            await DbContext.Loggers.AddAsync(logger);
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio), module.Model,
+                requestToken, responseToken, (int)quota, token.Name, user?.UserName, token.Creator, channel.Id,
+                channel.Name);
+
+            await userService.ConsumeAsync(token.Creator, (long)quota, requestToken);
 
             await DbContext.SaveChangesAsync();
         }
@@ -253,16 +277,22 @@ public sealed class ChatService(IServiceProvider serviceProvider) : ApplicationS
         await context.Response.Body.FlushAsync();
     }
 
-    private ChatChannel CalculateWeight(List<ChatChannel> channel)
+    /// <summary>
+    /// 权重算法
+    /// </summary>
+    /// <param name="channel"></param>
+    /// <returns></returns>
+    private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel)
     {
         // order越大，权重越大，order越小，权重越小，然后随机一个
-        var total = channel.Sum(x => x.Order);
+        var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
+        var total = chatChannels.Sum(x => x.Order);
 
         var random = new Random();
 
         var value = random.Next(0, total);
 
-        var result = channel.First(x =>
+        var result = chatChannels.First(x =>
         {
             value -= x.Order;
             return value <= 0;

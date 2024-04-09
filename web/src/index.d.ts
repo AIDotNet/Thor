@@ -47,3 +47,14 @@ export interface SoftDeletion {
     isDelete: boolean;
     deletedAt: string | null;
 }
+export interface ChatLogger extends Entity<number> {
+    type: ChatLoggerType;
+    content: string;
+    promptTokens: number;
+    completionTokens: number;
+    quota: number;
+    modelName: string;
+    tokenName: string;
+    userName: string | null;
+    userId: string | null;
+}

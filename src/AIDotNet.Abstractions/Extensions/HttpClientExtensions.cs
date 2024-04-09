@@ -19,10 +19,7 @@ public static class HttpClientExtensions
             }
             else
             {
-                string jsonContent = JsonSerializer.Serialize(postData, new JsonSerializerOptions
-                {
-                    IgnoreNullValues = true
-                });
+                string jsonContent = JsonSerializer.Serialize(postData, AIDtoNetJsonSerializer.DefaultOptions);
                 var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
                 req.Content = stringContent;
             }
@@ -50,10 +47,7 @@ public static class HttpClientExtensions
             }
             else
             {
-                string jsonContent = JsonSerializer.Serialize(postData, new JsonSerializerOptions
-                {
-                    IgnoreNullValues = true
-                });
+                string jsonContent = JsonSerializer.Serialize(postData, AIDtoNetJsonSerializer.DefaultOptions);
                 var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
                 req.Content = stringContent;
             }
@@ -77,10 +71,7 @@ public static class HttpClientExtensions
             }
             else
             {
-                string jsonContent = JsonSerializer.Serialize(postData, new JsonSerializerOptions
-                {
-                    IgnoreNullValues = true
-                });
+                string jsonContent = JsonSerializer.Serialize(postData, AIDtoNetJsonSerializer.DefaultOptions);
                 var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
                 req.Content = stringContent;
             }

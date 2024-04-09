@@ -5,7 +5,6 @@ using AIDotNet.API.Service.Domina;
 using AIDotNet.API.Service.Domina.Core;
 using AIDotNet.API.Service.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using TokenApi.Contract.Domain;
 
 namespace AIDotNet.API.Service.DataAccess;
 
@@ -17,7 +16,7 @@ public sealed class TokenApiDbContext(
 
     public DbSet<Token> Tokens { get; set; }
 
-    public DbSet<Logger> Loggers { get; set; }
+    public DbSet<ChatLogger> Loggers { get; set; }
 
     public DbSet<ChatChannel> Channels { get; set; }
 
@@ -47,13 +46,17 @@ public sealed class TokenApiDbContext(
             options.Property(x => x.Key).HasMaxLength(42);
         });
 
-        modelBuilder.Entity<Logger>(options =>
+        modelBuilder.Entity<ChatLogger>(options =>
         {
             options.HasKey(x => x.Id);
 
             options.HasIndex(x => x.Creator);
 
             options.HasIndex(x => x.TokenName);
+
+            options.HasIndex(x => x.ModelName);
+
+            options.HasIndex(x => x.UserName);
         });
 
         modelBuilder.Entity<ChatChannel>(options =>
@@ -74,6 +77,8 @@ public sealed class TokenApiDbContext(
         });
 
         var user = new User(Guid.NewGuid().ToString(), "admin", "239573049@qq.com", "admin");
+        user.SetAdmin();
+        user.SetResidualCredit(10000000);
 
         modelBuilder.Entity<User>().HasData(user);
     }

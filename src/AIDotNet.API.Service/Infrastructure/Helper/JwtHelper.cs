@@ -1,10 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Options;
 using Microsoft.IdentityModel.Tokens;
-using TokenApi.Contract.Domain;
 
 namespace AIDotNet.API.Service.Infrastructure.Helper;
 
@@ -49,6 +49,7 @@ public static class JwtHelper
         {
             new(ClaimTypes.NameIdentifier, user.UserName),
             new(ClaimTypes.Sid, user.Id),
+            new(ClaimTypes.Role, user.Role)
         });
     }
 

@@ -1,3 +1,4 @@
+using AIDotNet.Abstractions;
 using AIDotNet.API.Service;
 using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
@@ -8,7 +9,6 @@ using AIDotNet.API.Service.Service;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using TokenApi.Contract.Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,14 +68,18 @@ builder.Services.AddSwaggerGen(options =>
     options.DocInclusionPredicate((docName, action) => true);
 }).AddJwtBearerAuthentication();
 
+builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<AuthorizeService>()
     .AddTransient<TokenService>()
     .AddTransient<ChatService>()
+    .AddTransient<LoggerService>()
+    .AddTransient<UserService>()
     .AddTransient<ChannelService>();
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
-    .AddOpenAIService();
+    .AddOpenAIService()
+    .AddSparkDeskService();
 
 builder.Services
     .AddCors(options =>
@@ -180,8 +184,11 @@ channel.MapGet("{id}", async (ChannelService service, string id) =>
 channel.MapPut("{id}", async (ChannelService service, ChatChannelInput input, string id) =>
     await service.UpdateAsync(id, input));
 
-channel.MapPut("/disable/{id}", async (ChannelService services,string id) =>
+channel.MapPut("/disable/{id}", async (ChannelService services, string id) =>
     await services.DisableAsync(id));
+
+channel.MapPut("/test/{id}", async (ChannelService services, string id) =>
+    await services.TestChannelAsync(id));
 
 #endregion
 
@@ -201,6 +208,44 @@ model.MapGet("/models",
         ModelService.GetModels)
     .WithDescription("获取模型")
     .WithOpenApi();
+
+#endregion
+
+#region Logger
+
+var logger = app.MapGroup("/api/v1/logger")
+    .WithGroupName("Logger")
+    .WithTags("Logger")
+    .AddEndpointFilter<ResultFilter>()
+    .RequireAuthorization();
+
+logger.MapGet(string.Empty,
+        async (LoggerService service, int page, int pageSize, ChatLoggerType? type, string? model, DateTime? startTime,
+                DateTime? endTime, string? keyword) =>
+            await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword))
+    .WithDescription("获取日志")
+    .WithDisplayName("获取日志")
+    .WithOpenApi();
+
+#endregion
+
+#region User
+
+var user = app.MapGroup("/api/v1/user")
+    .WithGroupName("User")
+    .WithTags("User")
+    .AddEndpointFilter<ResultFilter>()
+    .RequireAuthorization();
+
+user.MapPost(string.Empty, async (UserService service, CreateUserInput input) =>
+    await service.CreateAsync(input));
+
+user.MapGet(string.Empty, async (UserService service, int page, int pageSize, string? keyword) =>
+    await service.GetAsync(page, pageSize, keyword));
+
+
+user.MapDelete("{id}", async (UserService service, string id) =>
+    await service.RemoveAsync(id));
 
 #endregion
 

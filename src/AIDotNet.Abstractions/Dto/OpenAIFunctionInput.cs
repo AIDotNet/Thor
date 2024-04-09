@@ -2,13 +2,22 @@
 
 namespace AIDotNet.Abstractions.Dto;
 
+public sealed class OpenAIToolsFunctionInput<T> : OpenAIChatCompletionInput<T>
+{
+    [JsonPropertyName("tools")] 
+    public OpenAIFunctionInput[] Tools { get; set; } = Array.Empty<OpenAIFunctionInput>();
+    /// <summary>
+    /// Function to use for selecting the next token. One of: "greedy", "top_k", "nucleus"
+    /// </summary>
+    [JsonPropertyName("tool_choice")]
+    public string ToolChoice { get; set; }
+}
+
 public class OpenAIFunctionInput
 {
-    [JsonPropertyName("type")]
-    public string Type { get; set; }
-    
-    [JsonPropertyName("function")]
-    public OpenAIFunctionFunction Function { get; set; }
+    [JsonPropertyName("type")] public string Type { get; set; }
+
+    [JsonPropertyName("function")] public OpenAIFunctionFunction Function { get; set; }
 }
 
 public class OpenAIFunctionFunction

@@ -125,14 +125,14 @@ public class OpenAiService : IADNChatCompletionService
 
             if (line.StartsWith(":"))
             {
+                continue;
             }
-            else if (!string.IsNullOrWhiteSpace(line))
+
+            if (!string.IsNullOrWhiteSpace(line))
             {
-                var result = JsonSerializer.Deserialize<OpenAIResultDto>(line, new JsonSerializerOptions()
-                {
-                    IgnoreNullValues = true,
-                });
-                yield return new StreamingChatMessageContent(AuthorRole.Assistant, result?.Choices[0].Delta?.Content);
+                var result = JsonSerializer.Deserialize<OpenAIResultDto>(line,AIDtoNetJsonSerializer.DefaultOptions);
+                yield return new StreamingChatMessageContent(AuthorRole.Assistant,
+                    result?.Choices.FirstOrDefault()?.Delta?.Content);
             }
         }
     }
