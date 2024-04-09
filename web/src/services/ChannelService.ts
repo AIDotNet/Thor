@@ -1,14 +1,10 @@
-import { del, fetch, get, postJson, putJson } from "../uitls/fetch";
+import { del, fetch, get, postJson, put, putJson } from "../uitls/fetch";
 
 const prefix = "/api/v1/channel";
 
 export const getChannels = (page: number, pageSize: number) => {
-  return fetch(prefix + "/list", {
-    method: "GET",
-    query: {
-      page,
-      pageSize,
-    },
+  return fetch(prefix + "/list?page=" + page + "&pageSize=" + pageSize, {
+    method: "GET"
   });
 };
 
@@ -20,10 +16,15 @@ export const Add = (data: any) => {
   return postJson(prefix, data);
 };
 
-export const Update = (data: any) => {
-  return putJson(prefix, data);
+export const Update = (id: string, data: any) => {
+  return putJson(prefix + "/" + id, data);
 };
 
 export const getChannel = (id: string) => {
   return get(prefix + "/" + id);
 };
+
+
+export const disable = (id: string) => {
+  return put(prefix + "/disable/" + id);
+}

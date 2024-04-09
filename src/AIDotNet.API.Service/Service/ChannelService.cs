@@ -1,4 +1,5 @@
 ﻿using AIDotNet.Abstractions;
+using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Model;
 using MapsterMapper;
@@ -21,40 +22,46 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
     public async Task<PagingDto<ChatChannel>> GetAsync(int page, int pageSize)
     {
-        var result = await DbContext.Channels
-            .AsNoTracking()
-            .OrderByDescending(x => x.Id)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
         var total = await DbContext.Channels.CountAsync();
 
-        return new PagingDto<ChatChannel>(total, result);
+        if (total > 0)
+        {
+            var result = await DbContext.Channels
+                .AsNoTracking()
+                .OrderByDescending(x => x.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+
+            return new PagingDto<ChatChannel>(total, result);
+        }
+
+        return new PagingDto<ChatChannel>(total, new List<ChatChannel>());
     }
 
-    public async Task<ResultDto<bool>> RemoveAsync(string id)
+    public async Task<bool> RemoveAsync(string id)
     {
         var result = await DbContext.Channels.Where(x => x.Id == id)
             .ExecuteDeleteAsync();
 
-        return ResultDto<bool>.CreateSuccess(result > 0);
+        return result > 0;
     }
 
-    public async Task<ResultDto<ChatChannel>> GetAsync(string id)
+    public async Task<ChatChannel> GetAsync(string id)
     {
         var chatChannel = await DbContext.Channels.FindAsync(id);
         if (chatChannel == null)
         {
-            return ResultDto<ChatChannel>.CreateFail("渠道不存在");
+            throw new Exception("渠道不存在");
         }
 
-        return ResultDto<ChatChannel>.CreateSuccess(chatChannel);
+        return chatChannel;
     }
 
-    public async Task<ResultDto<bool>> UpdateAsync(ChatChannel chatChannel)
+    public async Task<bool> UpdateAsync(string id, ChatChannelInput chatChannel)
     {
-        var result = await DbContext.Channels.Where(x => x.Id == chatChannel.Id)
+        var result = await DbContext.Channels.Where(x => x.Id == id)
             .ExecuteUpdateAsync(item =>
                 item.SetProperty(x => x.Type, chatChannel.Type)
                     .SetProperty(x => x.Name, chatChannel.Name)
@@ -63,13 +70,14 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
                     .SetProperty(x => x.Other, chatChannel.Other)
                     .SetProperty(x => x.Models, chatChannel.Models));
 
-        return ResultDto<bool>.CreateSuccess(result > 0);
+        return result > 0;
     }
 
-    /// <summary>
-    /// 获取支持的模型服务
-    /// </summary>
-    /// <returns></returns>
-    public ResultDto<Dictionary<string, string>> GetModelServices()
-        => ResultDto<Dictionary<string, string>>.CreateSuccess(IADNChatCompletionService.ServiceNames);
+    public async Task DisableAsync(string id)
+    {
+        // 更新状态
+        await DbContext.Channels
+            .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.Disable, a => !a.Disable));
+    }
 }

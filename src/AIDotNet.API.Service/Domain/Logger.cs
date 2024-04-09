@@ -1,6 +1,7 @@
-﻿using AIDotNet.API.Service.Domina.Core;
+﻿using AIDotNet.API.Service.Domain.Core;
+using AIDotNet.API.Service.Domina.Core;
 
-namespace TokenApi.Contract.Domain;
+namespace AIDotNet.API.Service.Domain;
 
 public sealed class Logger : Entity<long>
 {

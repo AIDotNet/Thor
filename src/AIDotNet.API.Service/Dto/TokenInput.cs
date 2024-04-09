@@ -22,4 +22,9 @@ public sealed class TokenInput
     /// </summary>
     public DateTime? ExpiredTime { get; set; }
 
+    /// <summary>
+    /// 不过期
+    /// </summary>
+    public bool UnlimitedExpired { get; set; }
+
 }

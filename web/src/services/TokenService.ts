@@ -1,4 +1,4 @@
-import { del, get, postJson } from "../uitls/fetch";
+import { del, get, postJson, put, putJson } from "../uitls/fetch";
 
 const prefix = "/api/v1/token";
 
@@ -11,7 +11,7 @@ export const Remove = (id: string) => {
 };
 
 export const Update = (data: any) => {
-  return postJson(prefix, data);
+  return putJson(prefix, data);
 };
 
 export const getTokens = (page: number, pageSize: number) => {
@@ -21,3 +21,8 @@ export const getTokens = (page: number, pageSize: number) => {
 export const getToken = (id: string) => {
   return get(prefix + "/" + id);
 };
+
+
+export const disable = (id: string) => {
+  return put(prefix + "/disable/" + id);
+}

@@ -7,7 +7,7 @@ public sealed class ChatChannelInput
     /// <summary>
     /// 根地址
     /// </summary>
-    public string Address { get; set; }
+    public string Address { get; set; } = string.Empty;
 
     /// <summary>
     /// 密钥
@@ -22,10 +22,10 @@ public sealed class ChatChannelInput
     /// <summary>
     /// 
     /// </summary>
-    public string Other { get; set; }
-    
+    public string Other { get; set; } = string.Empty;
+
     /// <summary>
     /// AI类型
     /// </summary>
-    public string Type { get; set; } 
+    public string Type { get; set; }
 }

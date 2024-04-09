@@ -1,6 +1,7 @@
-﻿using AIDotNet.API.Service.Domina.Core;
+﻿using AIDotNet.API.Service.Domain.Core;
+using AIDotNet.API.Service.Domina.Core;
 
-namespace AIDotNet.API.Service.Domina;
+namespace AIDotNet.API.Service.Domain;
 
 public sealed class Token : Entity<long>, ISoftDeletion
 {
@@ -38,11 +39,16 @@ public sealed class Token : Entity<long>, ISoftDeletion
     /// 过期时间
     /// </summary>
     public DateTime? ExpiredTime { get; set; }
+
+    /// <summary>
+    /// 不过期
+    /// </summary>
+    public bool UnlimitedExpired { get; set; }
     
     /// <summary>
-    /// 状态
+    /// 是否禁用
     /// </summary>
-    public uint Status { get; set; }
+    public bool Disabled { get; set; }
     
     public bool IsDelete { get; set; }
     

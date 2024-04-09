@@ -8,6 +8,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOpenAIService(this IServiceCollection services,
         Action<OpenAIOptions>? configureOptions = null, ServiceLifetime lifetime = ServiceLifetime.Singleton)
     {
+        IADNChatCompletionService.ServiceNames.Add("OpenAI", OpenAIOptions.ServiceName);
         switch (lifetime)
         {
             case ServiceLifetime.Singleton:

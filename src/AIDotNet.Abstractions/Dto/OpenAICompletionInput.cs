@@ -4,11 +4,9 @@ namespace AIDotNet.Abstractions.Dto;
 
 public class OpenAICompletionInput
 {
-    [JsonPropertyName("model")]
-    public string Model { get; set; }
+    [JsonPropertyName("model")] public string Model { get; set; }
 
-    [JsonPropertyName("temperature")]
-    public double Temperature { get; set; } = 0.7f;
+    [JsonPropertyName("temperature")] public double Temperature { get; set; } = 0.7f;
 
     /// <summary>
     /// 用温度采样的另一种方法称为核采样，其中模型考虑具有top_p概率质量的token的结果。因此0.1意味着只考虑包含前10%概率质量的标记。我们通常建议改变这个或“温度”，但不建议两者都改变。
@@ -16,8 +14,7 @@ public class OpenAICompletionInput
     [JsonPropertyName("top_p")]
     public double? TopP { get; set; }
 
-    [JsonPropertyName("stream")]
-    public bool Stream { get; set; } = true;
+    [JsonPropertyName("stream")] public bool Stream { get; set; } = true;
 
     /// <summary>
     /// 生成的答案允许的最大标记数。默认情况下，模型可以返回的token数量为(4096 -提示token)。
@@ -31,6 +28,14 @@ public class OpenAICompletionInput
     [JsonPropertyName("frequency_penalty")]
     public double? FrequencyPenalty { get; set; }
 
-    [JsonPropertyName("error")]
-    public OpenAIErrorDto Error { get; set; }
+    [JsonPropertyName("error")] public OpenAIErrorDto Error { get; set; }
+
+    /// <summary>
+    /// Function to use for selecting the next token. One of: "greedy", "top_k", "nucleus"
+    /// </summary>
+    [JsonPropertyName("tool_choice")]
+    public string ToolChoice { get; set; }
+
+    [JsonPropertyName("tools")] 
+    public OpenAIFunctionInput[] Tools { get; set; } = Array.Empty<OpenAIFunctionInput>();
 }

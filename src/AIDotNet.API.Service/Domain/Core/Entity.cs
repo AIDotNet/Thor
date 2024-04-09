@@ -1,4 +1,4 @@
-﻿namespace AIDotNet.API.Service.Domina.Core;
+﻿namespace AIDotNet.API.Service.Domain.Core;
 
 public abstract class Entity<TKey> : ICreatable, IUpdatable
 {

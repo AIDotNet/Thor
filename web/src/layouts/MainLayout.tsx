@@ -1,7 +1,7 @@
 import { Layout, Nav, Button, Avatar, Switch } from '@douyinfe/semi-ui';
 import { IconMoon, IconSun, IconBytedanceLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 const body = document.body;
 
 localStorage.getItem('theme-mode') === 'dark' && body.setAttribute('theme-mode', 'dark');
@@ -29,6 +29,36 @@ export default function MainLayout() {
             }
         });
     }
+
+    useEffect(()=>{
+        // 获取当前路由
+        const path = window.location.pathname;
+        // 绑定key
+        switch (path) {
+            case '/panel':
+                setKey('Home');
+                break;
+            case '/channel':
+                setKey('Channel');
+                break;
+            case '/token':
+                setKey('Token');
+                break;
+            case '/logger':
+                setKey('Logger');
+                break;
+            case '/user':
+                setKey('User');
+                break;
+            case '/current':
+                setKey('Current');
+                break;
+            case '/setting':
+                setKey('Setting');
+                break;
+        }
+    },[])
+
     return (
         <Layout style={{
             height: '100vh',

@@ -1,6 +1,6 @@
 using AIDotNet.API.Service;
 using AIDotNet.API.Service.DataAccess;
-using AIDotNet.API.Service.Domina;
+using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Options;
@@ -17,6 +17,11 @@ builder.Configuration.GetSection(JwtOptions.Name)
 
 builder.Configuration.GetSection(OpenAIOptions.Name)
     .Get<OpenAIOptions>();
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());
+});
 
 builder.Services.AddHttpClient();
 
@@ -70,9 +75,18 @@ builder.Services.AddTransient<AuthorizeService>()
     .AddTransient<ChannelService>();
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
-    .AddAliyunFCService()
-    .AddSparkDeskService()
-    .AddMetaGLMClientV4();
+    .AddOpenAIService();
+
+builder.Services
+    .AddCors(options =>
+    {
+        options.AddPolicy("AllowAll",
+            builder => builder
+                .SetIsOriginAllowed(_ => true)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials());
+    });
 
 builder.Services.AddDbContext<TokenApiDbContext>(options =>
 {
@@ -84,6 +98,8 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -99,6 +115,7 @@ if (app.Environment.IsDevelopment())
 app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, string account, string password) =>
         await service.TokenAsync(account, password))
     .WithGroupName("Token")
+    .AddEndpointFilter<ResultFilter>()
     .WithDescription("Get token")
     .WithTags("Authorize")
     .WithOpenApi();
@@ -107,6 +124,7 @@ app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, string a
 
 var token = app.MapGroup("/api/v1/token")
     .WithGroupName("Token")
+    .AddEndpointFilter<ResultFilter>()
     .RequireAuthorization()
     .WithTags("Token");
 
@@ -120,8 +138,8 @@ token.MapGet("{id}", async (TokenService service, long id) =>
     .WithDescription("获取Token详情")
     .WithOpenApi();
 
-token.MapGet("list", async (TokenService service, int page, int size) =>
-        await service.GetListAsync(page, size))
+token.MapGet("list", async (TokenService service, int page, int pageSize, string? token, string? keyword) =>
+        await service.GetListAsync(page, pageSize, token, keyword))
     .WithDescription("获取Token列表")
     .WithOpenApi();
 
@@ -133,6 +151,10 @@ token.MapDelete("{id}", async (TokenService service, long id) =>
         await service.RemoveAsync(id))
     .WithDescription("删除Token");
 
+token.MapPut("Disable/{id}", async (TokenService service, long id) =>
+        await service.DisableAsync(id))
+    .WithDescription("禁用Token");
+
 #endregion
 
 #region Channel
@@ -140,6 +162,7 @@ token.MapDelete("{id}", async (TokenService service, long id) =>
 var channel = app.MapGroup("/api/v1/channel")
     .WithGroupName("Channel")
     .WithTags("Channel")
+    .AddEndpointFilter<ResultFilter>()
     .RequireAuthorization();
 
 channel.MapPost("", async (ChannelService service, ChatChannelInput input) =>
@@ -154,11 +177,30 @@ channel.MapDelete("{id}", async (ChannelService service, string id) =>
 channel.MapGet("{id}", async (ChannelService service, string id) =>
     await service.GetAsync(id));
 
-channel.MapPut(string.Empty, async (ChannelService service, ChatChannel input) =>
-    await service.UpdateAsync(input));
+channel.MapPut("{id}", async (ChannelService service, ChatChannelInput input, string id) =>
+    await service.UpdateAsync(id, input));
 
-channel.MapGet("/model-services", async (ChannelService services) =>
-    services.GetModelServices());
+channel.MapPut("/disable/{id}", async (ChannelService services,string id) =>
+    await services.DisableAsync(id));
+
+#endregion
+
+#region Model
+
+var model = app.MapGroup("/api/v1/model")
+    .WithGroupName("Model")
+    .WithTags("Model")
+    .AddEndpointFilter<ResultFilter>()
+    .RequireAuthorization();
+
+model.MapGet("/types", ModelService.GetTypes)
+    .WithDescription("获取模型类型")
+    .WithOpenApi();
+
+model.MapGet("/models",
+        ModelService.GetModels)
+    .WithDescription("获取模型")
+    .WithOpenApi();
 
 #endregion
 

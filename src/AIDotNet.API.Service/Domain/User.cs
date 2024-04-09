@@ -1,4 +1,5 @@
-﻿using AIDotNet.API.Service.Domina.Core;
+﻿using AIDotNet.API.Service.Domain.Core;
+using AIDotNet.API.Service.Domina.Core;
 using AIDotNet.API.Service.Infrastructure.Helper;
 
 namespace TokenApi.Contract.Domain;

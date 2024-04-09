@@ -1,6 +1,7 @@
-﻿using AIDotNet.API.Service.Domina.Core;
+﻿using AIDotNet.API.Service.Domain.Core;
+using AIDotNet.API.Service.Domina.Core;
 
-namespace TokenApi.Contract.Domain;
+namespace AIDotNet.API.Service.Domain;
 
 public sealed class ChatChannel : Entity<string>
 {
@@ -8,12 +9,12 @@ public sealed class ChatChannel : Entity<string>
     /// 优先级
     /// </summary>
     public int Order { get; set; }
-    
+
     /// <summary>
     /// AI类型
     /// </summary>
-    public string Type { get; set; } 
-    
+    public string Type { get; set; }
+
     public string Name { get; set; }
 
     /// <summary>
@@ -40,4 +41,24 @@ public sealed class ChatChannel : Entity<string>
     /// 
     /// </summary>
     public string Other { get; set; }
+
+    /// <summary>
+    /// 是否禁用
+    /// </summary>
+    public bool Disable { get; set; }
+
+    /// <summary>
+    /// 扩展字段
+    /// </summary>
+    public Dictionary<string, string> Extension { get; set; } = new();
+
+    /// <summary>
+    /// 消耗token
+    /// </summary>
+    public int Quota { get; set; }
+
+    /// <summary>
+    /// 额度
+    /// </summary>
+    public long RemainQuota { get; set; }
 }

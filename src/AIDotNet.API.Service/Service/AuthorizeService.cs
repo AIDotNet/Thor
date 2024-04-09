@@ -6,20 +6,20 @@ namespace AIDotNet.API.Service.Service;
 
 public sealed class AuthorizeService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
 {
-    public async Task<ResultDto> TokenAsync(string account, string pass)
+    public async Task<string> TokenAsync(string account, string pass)
     {
         var user = await DbContext.Users.FirstOrDefaultAsync(x => x.UserName == account);
 
         if (user == null)
         {
-            return ResultDto.CreateFail("Account does not exist");
+            throw new Exception("Account does not exist");
         }
 
         if (user.Password != StringHelper.HashPassword(pass, user.PasswordHas))
         {
-            return ResultDto.CreateFail("Password error");
+            throw new Exception("Password error");
         }
 
-        return ResultDto.CreateSuccess("Login successful", JwtHelper.GeneratorAccessToken(user));
+        return JwtHelper.GeneratorAccessToken(user);
     }
 }

@@ -13,11 +13,6 @@ public class OpenAiService : IADNChatCompletionService
 {
     private readonly OpenAIOptions openAiOptions;
 
-    static OpenAiService()
-    {
-        IADNChatCompletionService.ServiceNames.Add("OpenAI", OpenAIOptions.ServiceName);
-    }
-
     public OpenAiService(OpenAIOptions options)
     {
         openAiOptions = options;

@@ -1,4 +1,7 @@
-﻿using AIDotNet.API.Service.Domina;
+﻿using System.Text.Json;
+using AIDotNet.API.Service.Domain;
+using AIDotNet.API.Service.Domain.Core;
+using AIDotNet.API.Service.Domina;
 using AIDotNet.API.Service.Domina.Core;
 using AIDotNet.API.Service.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -60,6 +63,14 @@ public sealed class TokenApiDbContext(
             options.HasIndex(x => x.Creator);
 
             options.HasIndex(x => x.Name);
+
+            options.Property(x => x.Models)
+                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
+                    item => JsonSerializer.Deserialize<List<string>>(item, new JsonSerializerOptions()));
+
+            options.Property(x => x.Extension)
+                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
+                    item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, new JsonSerializerOptions()));
         });
 
         var user = new User(Guid.NewGuid().ToString(), "admin", "239573049@qq.com", "admin");
