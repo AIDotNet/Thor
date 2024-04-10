@@ -46,22 +46,22 @@ namespace AIDotNet.Abstractions.Dto
         
         [JsonPropertyName("description")]
         public string Description { get; set; }
+        //
+        // [JsonPropertyName("enum")]
+        // public string[] Enum { get; set; }
         
-        [JsonPropertyName("enum")]
-        public string[] Enum { get; set; }
-        
-        /// <summary>
-        ///     The number of properties on an object can be restricted using the minProperties and maxProperties keywords. Each of
-        ///     these must be a non-negative integer.
-        /// </summary>
-        [JsonPropertyName("minProperties")]
-        public int? MinProperties { get; set; }
+        // /// <summary>
+        // ///     The number of properties on an object can be restricted using the minProperties and maxProperties keywords. Each of
+        // ///     these must be a non-negative integer.
+        // /// </summary>
+        // [JsonPropertyName("minProperties")]
+        // public int? MinProperties { get; set; }
 
         /// <summary>
         ///     The number of properties on an object can be restricted using the minProperties and maxProperties keywords. Each of
         ///     these must be a non-negative integer.
         /// </summary>
-        [JsonPropertyName("maxProperties")]
-        public int? MaxProperties { get; set; }
+        // [JsonPropertyName("maxProperties")]
+        // public int? MaxProperties { get; set; }
     }
 }

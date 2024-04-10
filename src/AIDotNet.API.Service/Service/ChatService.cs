@@ -162,7 +162,7 @@ public sealed class ChatService(
             Address = channel.Address,
         };
 
-        var result = await openService.CompleteChatAsync(message, setting);
+        var result = await openService.FunctionCompleteChatAsync(message, setting);
 
         await context.Response.WriteAsJsonAsync(result);
 

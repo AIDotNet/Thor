@@ -8,6 +8,5 @@ namespace AIDotNet.Abstractions.Dto;
 /// <typeparam name="T"></typeparam>
 public class OpenAIChatCompletionInput<T> : OpenAICompletionInput
 {
-    [JsonPropertyName("messages")]
-    public List<T> Messages { get; set; }
+    [JsonPropertyName("messages")] public List<T> Messages { get; set; } = new List<T>();
 }

@@ -8,12 +8,6 @@ namespace AIDotNet.SparkDesk;
 
 public class SparkDeskService : IChatCompletionService
 {
-    private readonly SparkDeskOptions options;
-
-    public SparkDeskService(SparkDeskOptions options)
-    {
-        this.options = options;
-    }
 
     public IReadOnlyDictionary<string, object?> Attributes { get; set; }
 

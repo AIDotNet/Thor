@@ -103,12 +103,13 @@ public class OpenAiService : IChatCompletionService
         var openAiService = new OpenAIService(new OpenAiOptions()
         {
             ApiKey = options.Key,
-            BaseDomain = options.Address
+            BaseDomain = options.Address.TrimEnd('/')+"/"
         });
 
 
         var tools = input.Tools.Select(x => new ToolDefinition()
         {
+            Type = x.Type,
             Function = new FunctionDefinition()
             {
                 Name = x.Function.name,
@@ -116,15 +117,12 @@ public class OpenAiService : IChatCompletionService
                 Parameters = new PropertyDefinition()
                 {
                     Type = x.Function.parameters.type,
-                    Description = x.Function.parameters.description,
+                    Description = x.Function.parameters.description ?? "测试",
                     Required = x.Function.parameters.required,
                     Properties = x.Function.parameters.properties.ToDictionary(y => y.Key, y => new PropertyDefinition()
                     {
                         Type = y.Value.Type,
                         Description = y.Value.Description,
-                        Enum = y.Value.Enum,
-                        MinProperties = y.Value.MinProperties,
-                        MaxProperties = y.Value.MaxProperties
                     })
                 }
             }
@@ -143,6 +141,8 @@ public class OpenAiService : IChatCompletionService
             TopP = (float?)input.TopP,
             FrequencyPenalty = (float?)input.FrequencyPenalty,
             Tools = tools,
+            Stream = false,
+            ToolChoice = ToolChoice.FunctionChoice(input.ToolChoice)
         }, cancellationToken: cancellationToken);
 
         return new OpenAIResultDto()
@@ -154,9 +154,8 @@ public class OpenAiService : IChatCompletionService
                 {
                     Delta = new OpenAIMessageDto()
                     {
-                        Content = completionResult.Choices.FirstOrDefault()?.Message.Content,
                         Role = "assistant",
-                        ToolCalls = completionResult.Choices.FirstOrDefault()?.Message.ToolCalls.Select(x =>
+                        ToolCalls = completionResult?.Choices?.FirstOrDefault()?.Message?.ToolCalls?.Select(x =>
                             new OpenAIToolCalls()
                             {
                                 id = x.Id,
