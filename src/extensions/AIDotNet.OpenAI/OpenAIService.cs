@@ -1,17 +1,20 @@
-﻿using System.Runtime.CompilerServices;
-using AIDotNet.Abstractions;
+﻿using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using OpenAI;
 using OpenAI.Managers;
 using OpenAI.ObjectModels.RequestModels;
-using OpenAI.ObjectModels.SharedModels;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
 using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.OpenAI;
 
-public class OpenAiService : IChatCompletionService
+public sealed class OpenAiService : IChatCompletionService
 {
-    public IReadOnlyDictionary<string, object?> Attributes { get; }
+    private static readonly HttpClient HttpClient = new();
 
     public async Task<OpenAIResultDto> CompleteChatAsync(
         OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
@@ -65,70 +68,6 @@ public class OpenAiService : IChatCompletionService
         });
 
         await foreach (var item in openAiService.ChatCompletion.CreateCompletionAsStream(new ChatCompletionCreateRequest
-                       {
-                           Messages = input.Messages.Select(x => new ChatMessage()
-                           {
-                               Content = x.Content,
-                               Role = x.Role
-                           }).ToArray(),
-                           Model = input.Model,
-                           MaxTokens = input.MaxTokens,
-                           Temperature = (float?)input.Temperature,
-                           TopP = (float?)input.TopP,
-                           FrequencyPenalty = (float?)input.FrequencyPenalty
-                       }, cancellationToken: cancellationToken))
-        {
-            yield return new OpenAIResultDto()
-            {
-                Model = input.Model,
-                Choices = new[]
-                {
-                    new OpenAIChoiceDto()
-                    {
-                        Delta = new OpenAIMessageDto()
-                        {
-                            Content = item.Choices.FirstOrDefault()?.Message.Content,
-                            Role = "assistant"
-                        }
-                    }
-                }
-            };
-        }
-    }
-
-    public async Task<OpenAIResultDto> FunctionCompleteChatAsync(
-        OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
-        CancellationToken cancellationToken = default)
-    {
-        var openAiService = new OpenAIService(new OpenAiOptions()
-        {
-            ApiKey = options.Key,
-            BaseDomain = options.Address.TrimEnd('/')+"/"
-        });
-
-
-        var tools = input.Tools.Select(x => new ToolDefinition()
-        {
-            Type = x.Type,
-            Function = new FunctionDefinition()
-            {
-                Name = x.Function.name,
-                Description = x.Function.description,
-                Parameters = new PropertyDefinition()
-                {
-                    Type = x.Function.parameters.type,
-                    Description = x.Function.parameters.description ?? "测试",
-                    Required = x.Function.parameters.required,
-                    Properties = x.Function.parameters.properties.ToDictionary(y => y.Key, y => new PropertyDefinition()
-                    {
-                        Type = y.Value.Type,
-                        Description = y.Value.Description,
-                    })
-                }
-            }
-        }).ToList();
-
-        var completionResult = await openAiService.ChatCompletion.CreateCompletion(new ChatCompletionCreateRequest
         {
             Messages = input.Messages.Select(x => new ChatMessage()
             {
@@ -139,36 +78,126 @@ public class OpenAiService : IChatCompletionService
             MaxTokens = input.MaxTokens,
             Temperature = (float?)input.Temperature,
             TopP = (float?)input.TopP,
-            FrequencyPenalty = (float?)input.FrequencyPenalty,
-            Tools = tools,
-            Stream = false,
-            ToolChoice = ToolChoice.FunctionChoice(input.ToolChoice)
-        }, cancellationToken: cancellationToken);
-
-        return new OpenAIResultDto()
+            FrequencyPenalty = (float?)input.FrequencyPenalty
+        }, cancellationToken: cancellationToken))
         {
-            Model = input.Model,
-            Choices = new[]
+            yield return new OpenAIResultDto()
             {
-                new OpenAIChoiceDto()
-                {
-                    Delta = new OpenAIMessageDto()
+                Model = input.Model,
+                Choices =
+                [
+                    new OpenAIChoiceDto()
                     {
-                        Role = "assistant",
-                        ToolCalls = completionResult?.Choices?.FirstOrDefault()?.Message?.ToolCalls?.Select(x =>
-                            new OpenAIToolCalls()
-                            {
-                                id = x.Id,
-                                type = x.Type,
-                                function = new OpenAIToolFunction()
-                                {
-                                    name = x.FunctionCall.Name,
-                                    arguments = x.FunctionCall.Arguments
-                                }
-                            }).ToArray()
+                        Delta = new OpenAIMessageDto()
+                        {
+                            Content = item.Choices.FirstOrDefault()?.Message.Content,
+                            Role = "assistant"
+                        }
                     }
+                ]
+            };
+        }
+    }
+
+    public async Task<OpenAIResultDto> FunctionCompleteChatAsync(
+        OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        var str = JsonSerializer.Serialize(input, AIDtoNetJsonSerializer.DefaultOptions);
+
+        var content = new StringContent(str,
+            Encoding.UTF8, "application/json");
+        var requestMessage =
+            new HttpRequestMessage(HttpMethod.Post, options.Address.TrimEnd('/') + "/v1/chat/completions")
+            {
+                Content = content,
+                Headers =
+                {
+                    Authorization = new AuthenticationHeaderValue("Bearer", options.Key)
                 }
-            }
-        };
+            };
+
+        var response = await HttpClient.SendAsync(requestMessage, cancellationToken);
+
+
+        var result = await response.Content.ReadFromJsonAsync<OpenAIResultDto>(cancellationToken);
+
+        return result;
+    }
+
+    public async Task<OpenAIResultDto> ImageCompleteChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        var str = JsonSerializer.Serialize(input, AIDtoNetJsonSerializer.DefaultOptions);
+
+        var content = new StringContent(str,
+            Encoding.UTF8, "application/json");
+        var requestMessage =
+            new HttpRequestMessage(HttpMethod.Post, options.Address.TrimEnd('/') + "/v1/chat/completions")
+            {
+                Content = content,
+                Headers =
+                {
+                    Authorization = new AuthenticationHeaderValue("Bearer", options.Key)
+                }
+            };
+
+        var response = await HttpClient.SendAsync(requestMessage, cancellationToken);
+
+
+        var result = await response.Content.ReadFromJsonAsync<OpenAIResultDto>(cancellationToken);
+
+        return result;
+    }
+
+    public async IAsyncEnumerable<OpenAIResultDto> ImageStreamChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        var openAiService = new OpenAIService(new OpenAiOptions()
+        {
+            ApiKey = options.Key,
+            BaseDomain = options.Address
+        });
+
+        await foreach (var item in openAiService.ChatCompletion.CreateCompletionAsStream(new ChatCompletionCreateRequest
+        {
+            Messages = input.Messages.Select(x => new ChatMessage()
+            {
+                Contents = x.content.Select(x => new MessageContent()
+                {
+                    Text = x.text,
+                    Type = x.type,
+                    ImageUrl = new VisionImageUrl()
+                    {
+                        Url = x.ImageUrl.Url,
+                        Detail = x.ImageUrl.Detail
+
+                    }
+                }).ToArray()
+            }).ToArray(),
+            Model = input.Model,
+            MaxTokens = input.MaxTokens,
+            Temperature = (float?)input.Temperature,
+            TopP = (float?)input.TopP,
+            FrequencyPenalty = (float?)input.FrequencyPenalty
+        }, cancellationToken: cancellationToken))
+        {
+            yield return new OpenAIResultDto()
+            {
+                Model = input.Model,
+                Choices =
+                [
+                    new OpenAIChoiceDto()
+                    {
+                        Delta = new OpenAIMessageDto()
+                        {
+                            Content = item.Choices.FirstOrDefault()?.Message.Content,
+                            Role = "assistant"
+                        }
+                    }
+                ]
+            };
+        }
+
     }
 }

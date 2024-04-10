@@ -6,10 +6,8 @@ using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.SparkDesk;
 
-public class SparkDeskService : IChatCompletionService
+public sealed class SparkDeskService : IChatCompletionService
 {
-
-    public IReadOnlyDictionary<string, object?> Attributes { get; set; }
 
     public async Task<OpenAIResultDto> CompleteChatAsync(
         OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input,
@@ -51,7 +49,7 @@ public class SparkDeskService : IChatCompletionService
             throw new NotModelException(input?.Model);
         }
 
-        var topK = Convert.ToInt32(Math.Round(input.TopP + 1));
+        var topK = Convert.ToInt32(Math.Round((double)input.TopP + 1));
 
         var results = input.Messages.Select(x => new ChatMessage(x.Role.ToString(), x.Content)).ToArray();
 
@@ -91,7 +89,7 @@ public class SparkDeskService : IChatCompletionService
         SparkDeskClient client;
 
         // appId|appKey|appSecret
-        var parts = options.Key.ToString().Split('|');
+        var parts = options.Key.Split('|');
         if (parts.Length == 3)
         {
             client = new SparkDeskClient(parts[0], parts[1], parts[2]);
@@ -123,7 +121,7 @@ public class SparkDeskService : IChatCompletionService
             throw new NotModelException(input?.Model);
         }
 
-        var topK = Convert.ToInt32(Math.Round(input.TopP + 1));
+        var topK = Convert.ToInt32(Math.Round((double)input.TopP + 1));
 
         var results = input.Messages.Select(x => new ChatMessage(x.Role.ToString(), x.Content)).ToArray();
 
@@ -200,30 +198,21 @@ public class SparkDeskService : IChatCompletionService
             throw new NotModelException(input?.Model);
         }
 
-        var topK = Convert.ToInt32(Math.Round(input.TopP + 1));
-
         var results = input.Messages.Select(x => new ChatMessage(x.Role.ToString(), x.Content)).ToArray();
 
-        if (input.Temperature <= 0)
-        {
-            input.Temperature = 0.1;
-        }
 
         var function = input.Tools.Select(x =>
         {
-            return new FunctionDef(x.Function.name, x.Function.description,
-                x.Function.parameters.properties.Select(property => new FunctionParametersDef(property.Key,
+            return new FunctionDef(x.Function.Name, x.Function.Description,
+                x.Function.Parameters.Properties.Select(property => new FunctionParametersDef(property.Key,
                     property.Value.Type, property.Value.Description,
-                    x.Function.parameters.required.Contains(property.Key))).ToArray());
+                    x.Function.Parameters.Required.Contains(property.Key))).ToArray());
         }).ToArray();
 
         var msg = await client.ChatAsync(modelVersion,
             results, new ChatRequestParameters
             {
                 ChatId = Guid.NewGuid().ToString("N"),
-                MaxTokens = (int)input.MaxTokens,
-                Temperature = (float)input.Temperature,
-                TopK = topK,
             }, functions: function, cancellationToken: cancellationToken);
 
         var openAIResultDto = new OpenAIResultDto()
@@ -257,5 +246,17 @@ public class SparkDeskService : IChatCompletionService
         };
 
         return openAIResultDto;
+    }
+
+    public async Task<OpenAIResultDto> ImageCompleteChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IAsyncEnumerable<OpenAIResultDto> ImageStreamChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -76,7 +76,7 @@ public sealed class ChatService(
             {
                 (requestToken, responseToken) = await ToolChoice(context, body, channel, openService);
             }
-            else if (module.Stream)
+            else if ((bool)module.Stream)
             {
                 (requestToken, responseToken) = await StreamHandlerAsync(context, body, module, channel, openService);
             }
@@ -141,10 +141,10 @@ public sealed class ChatService(
     /// <summary>
     /// ToolChoice 处理
     /// </summary>
-    /// <param name="context"></param>
-    /// <param name="body"></param>
-    /// <param name="channel"></param>
-    /// <param name="openService"></param>
+    /// <param Name="context"></param>
+    /// <param Name="body"></param>
+    /// <param Name="channel"></param>
+    /// <param Name="openService"></param>
     /// <returns></returns>
     private static async ValueTask<(int, int)> ToolChoice(HttpContext context, MemoryStream body,
         ChatChannel channel, IChatCompletionService openService)
@@ -172,11 +172,11 @@ public sealed class ChatService(
     /// <summary>
     /// Stream 对话处理
     /// </summary>
-    /// <param name="context"></param>
-    /// <param name="body"></param>
-    /// <param name="module"></param>
-    /// <param name="channel"></param>
-    /// <param name="openService"></param>
+    /// <param Name="context"></param>
+    /// <param Name="body"></param>
+    /// <param Name="module"></param>
+    /// <param Name="channel"></param>
+    /// <param Name="openService"></param>
     /// <returns></returns>
     private static async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context, MemoryStream body,
         OpenAICompletionInput module, ChatChannel channel, IChatCompletionService openService)
@@ -184,9 +184,18 @@ public sealed class ChatService(
         int requestToken;
         int responseToken = 0;
 
-        if (module.Model == "gpt-4-vision-preview")
+        if (module.Model.Contains("vision"))
         {
             requestToken = 0;
+
+            var message =
+                JsonSerializer.Deserialize<OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput>>(
+                    body.ToArray());
+
+            requestToken = TokenHelper.GetTotalTokens(message?.Messages.SelectMany(x => x.content).Where(x => x.type == "text").Select(x => x.text).ToArray());
+
+
+
         }
         else
         {
@@ -207,7 +216,7 @@ public sealed class ChatService(
             await foreach (var item in openService.StreamChatAsync(message, setting))
             {
                 responseMessage.Append(item);
-                await WriteOpenAiResultAsync(context, item.Choices.FirstOrDefault()?.Delta.Content, module.Model,
+                await WriteOpenAiResultAsync(context, item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty, module.Model,
                     systemFingerprint, id);
             }
 
@@ -286,7 +295,7 @@ public sealed class ChatService(
     /// <summary>
     /// 权重算法
     /// </summary>
-    /// <param name="channel"></param>
+    /// <param Name="channel"></param>
     /// <returns></returns>
     private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel)
     {

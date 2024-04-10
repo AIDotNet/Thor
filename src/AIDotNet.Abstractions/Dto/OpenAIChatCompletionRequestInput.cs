@@ -21,6 +21,5 @@ public class OpenAIChatCompletionRequestInput
     [JsonPropertyName("content")]
     public string Content { get; set; }
 
-    [JsonPropertyName("name")]
-    public string? Name { get; set; }
+    [JsonPropertyName("Name")] public string? Name { get; set; }
 }

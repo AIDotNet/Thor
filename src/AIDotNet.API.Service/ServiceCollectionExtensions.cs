@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// 注册JWT Bearer认证服务的静态扩展方法
     /// </summary>
-    /// <param name="services"></param>
+    /// <param Name="services"></param>
     public static IServiceCollection AddJwtBearerAuthentication(this IServiceCollection services)
     {
         //使用应用密钥得到一个加密密钥字节数组

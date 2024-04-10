@@ -9,7 +9,7 @@ public class OpenAIMessageDto
     [JsonPropertyName("content")] public string Content { get; set; }
 
     [JsonPropertyName("tool_calls")]
-    public OpenAIToolCalls[] ToolCalls { get; set; }
+    public OpenAIToolCalls[]? ToolCalls { get; set; }
 }
 
 public class OpenAIToolCalls

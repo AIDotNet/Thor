@@ -1,6 +1,7 @@
 ﻿using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.MetaGLM.Models.RequestModels;
+using AIDotNet.MetaGLM.Models.RequestModels.FunctionModels;
 using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.MetaGLM;
@@ -29,8 +30,8 @@ public sealed class MetaGLMService : IChatCompletionService
             role = x.Role.ToString()
         }).ToArray());
         dto.SetModel(input.Model);
-        dto.SetTemperature(input.Temperature);
-        dto.SetTopP(input.TopP);
+        dto.SetTemperature((double)input.Temperature);
+        dto.SetTopP((double)input.TopP);
 
         var result = await _openAiOptions.Client?.Chat.Completion(dto, options.Key, options.Address);
 
@@ -63,8 +64,8 @@ public sealed class MetaGLMService : IChatCompletionService
             role = x.Role.ToString()
         }).Where(x => !string.IsNullOrEmpty(x.content)).ToArray());
         dto.SetModel(input.Model);
-        dto.SetTemperature(input.Temperature);
-        dto.SetTopP(input.TopP);
+        dto.SetTemperature((double)input.Temperature);
+        dto.SetTopP((double)input.TopP);
 
         await foreach (var item in _openAiOptions.Client?.Chat.Stream(dto, options.Key, options.Address))
         {
@@ -86,8 +87,20 @@ public sealed class MetaGLMService : IChatCompletionService
         }
     }
 
-    public Task<OpenAIResultDto> FunctionCompleteChatAsync(
+    public async Task<OpenAIResultDto> FunctionCompleteChatAsync(
         OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<OpenAIResultDto> ImageCompleteChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IAsyncEnumerable<OpenAIResultDto> ImageStreamChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();

@@ -3,5 +3,5 @@
 /// <summary>
 /// 未支持的功能异常
 /// </summary>
-/// <param name="message"></param>
+/// <param Name="message"></param>
 public sealed class ModelNotSupportedException(string? message) : Exception(message);

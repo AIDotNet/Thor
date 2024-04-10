@@ -13,7 +13,7 @@ public static class JwtHelper
     /// <summary>
     /// 生成token
     /// </summary>
-    /// <param name="claimsIdentity"></param>
+    /// <param Name="claimsIdentity"></param>
     /// <returns></returns>
     public static string GeneratorAccessToken(ClaimsIdentity claimsIdentity)
     {
@@ -33,7 +33,7 @@ public static class JwtHelper
     /// <summary>
     /// 生成token
     /// </summary>
-    /// <param name="claimsIdentity"></param>
+    /// <param Name="claimsIdentity"></param>
     /// <returns></returns>
     public static string GeneratorAccessToken(User user)
     {

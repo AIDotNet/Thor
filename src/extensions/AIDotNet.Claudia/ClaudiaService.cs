@@ -23,7 +23,7 @@ public sealed class ClaudiaService : IChatCompletionService
         var message = await anthropic.Messages.CreateAsync(new MessageRequest
         {
             Model = input.Model,
-            MaxTokens = input.MaxTokens,
+            MaxTokens = (int)input.MaxTokens,
             Messages = input.Messages.Select(x => new Message
             {
                 Content = x.Content,
@@ -66,7 +66,7 @@ public sealed class ClaudiaService : IChatCompletionService
         await foreach (var item in anthropic.Messages.CreateStreamAsync(new MessageRequest
                        {
                            Model = input.Model,
-                           MaxTokens = input.MaxTokens,
+                           MaxTokens = (int)input.MaxTokens,
                            Messages = input.Messages.Select(x => new Message
                            {
                                Content = x.Content,

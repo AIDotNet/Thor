@@ -7,19 +7,19 @@ namespace AIDotNet.MetaGLM.Models.RequestModels.FunctionModels
 
         public FunctionTool SetName(string name)
         {
-            this.function["name"] = name;
+            this.function["Name"] = name;
             return this;
         }
 
         public FunctionTool SetDescription(string desc)
         {
-            this.function["description"] = desc;
+            this.function["Description"] = desc;
             return this;
         }
 
         public FunctionTool SetParameters(FunctionParameters param)
         {
-            this.function["parameters"] = param;
+            this.function["Parameters"] = param;
             return this;
         }
     }

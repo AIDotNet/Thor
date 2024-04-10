@@ -13,8 +13,8 @@ public static class StringHelper
     /// <summary>
     /// 加密密码
     /// </summary>
-    /// <param name="password"></param>
-    /// <param name="salt"></param>
+    /// <param Name="password"></param>
+    /// <param Name="salt"></param>
     /// <returns></returns>
     public static string HashPassword(string password, string salt)
     {

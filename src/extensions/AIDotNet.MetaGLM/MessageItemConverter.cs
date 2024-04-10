@@ -17,7 +17,7 @@ namespace AIDotNet.MetaGLM
         {
             writer.WriteStartObject();
 
-            // Serialize all properties except 'content' for ImageToTextMessageItem
+            // Serialize all Properties except 'content' for ImageToTextMessageItem
             foreach (var prop in value.GetType().GetProperties())
             {
                 if (value is ImageToTextMessageItem && prop.Name.Equals("content", StringComparison.OrdinalIgnoreCase))

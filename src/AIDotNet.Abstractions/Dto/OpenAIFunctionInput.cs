@@ -23,19 +23,26 @@ namespace AIDotNet.Abstractions.Dto
 
     public class OpenAIFunctionFunction
     {
-        public string name { get; set; }
-        public string description { get; set; }
-        public OpenAIFunctionParameters parameters { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [JsonPropertyName("parameters")]
+        public OpenAIFunctionParameters Parameters { get; set; }
     }
 
     public class OpenAIFunctionParameters
     {
-        public string type { get; set; }
-        public Dictionary<string, OpenAIFunctionProperties> properties { get; set; }
+        [JsonPropertyName("type")]
+        public string Type { get; set; }
 
-        public string[] required { get; set; }
-        
-        public string description { get; set; }
+        [JsonPropertyName("properties")]
+        public Dictionary<string, OpenAIFunctionProperties> Properties { get; set; }
+
+        [JsonPropertyName("required")]
+        public string[] Required { get; set; }
     }
 
 
@@ -44,24 +51,24 @@ namespace AIDotNet.Abstractions.Dto
         [JsonPropertyName("type")]
         public string Type { get; set; }
         
-        [JsonPropertyName("description")]
-        public string Description { get; set; }
+        [JsonPropertyName("Description")]
+        public string? Description { get; set; }
         //
-        // [JsonPropertyName("enum")]
-        // public string[] Enum { get; set; }
-        
-        // /// <summary>
-        // ///     The number of properties on an object can be restricted using the minProperties and maxProperties keywords. Each of
-        // ///     these must be a non-negative integer.
-        // /// </summary>
-        // [JsonPropertyName("minProperties")]
-        // public int? MinProperties { get; set; }
+        [JsonPropertyName("enum")]
+        public string[]? Enum { get; set; }
 
         /// <summary>
-        ///     The number of properties on an object can be restricted using the minProperties and maxProperties keywords. Each of
+        ///     The number of Properties on an object can be restricted using the minProperties and maxProperties keywords. Each of
         ///     these must be a non-negative integer.
         /// </summary>
-        // [JsonPropertyName("maxProperties")]
-        // public int? MaxProperties { get; set; }
+        [JsonPropertyName("minProperties")]
+        public int? MinProperties { get; set; }
+
+        /// <summary>
+        ///     The number of Properties on an object can be restricted using the minProperties and maxProperties keywords. Each of
+        ///     these must be a non-negative integer.
+        /// </summary>
+        [JsonPropertyName("maxProperties")]
+        public int? MaxProperties { get; set; }
     }
 }
