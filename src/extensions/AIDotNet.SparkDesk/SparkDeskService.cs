@@ -49,7 +49,12 @@ public sealed class SparkDeskService : IChatCompletionService
             throw new NotModelException(input?.Model);
         }
 
-        var topK = Convert.ToInt32(Math.Round((double)input.TopP + 1));
+        int topK = 4;
+
+        if (input.TopP != null)
+        {
+            topK = Convert.ToInt32(Math.Round((double)input.TopP + 1));
+        }
 
         var results = input.Messages.Select(x => new ChatMessage(x.Role.ToString(), x.Content)).ToArray();
 
@@ -57,8 +62,8 @@ public sealed class SparkDeskService : IChatCompletionService
             results, new ChatRequestParameters
             {
                 ChatId = Guid.NewGuid().ToString("N"),
-                MaxTokens = (int)input.MaxTokens,
-                Temperature = (float)input.Temperature,
+                MaxTokens = input?.MaxTokens ?? 2048,
+                Temperature = (float)(input?.Temperature ?? 0.5f),
                 TopK = topK,
             }, cancellationToken: cancellationToken);
 

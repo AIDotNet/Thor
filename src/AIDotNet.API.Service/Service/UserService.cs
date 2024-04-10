@@ -54,7 +54,7 @@ public class UserService(IServiceProvider serviceProvider, IUserContext userCont
         return new PagingDto<User>(total, new List<User>());
     }
 
-    public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken)
+    public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string token)
     {
         var result = await DbContext
             .Users
@@ -63,6 +63,13 @@ public class UserService(IServiceProvider serviceProvider, IUserContext userCont
                 x.SetProperty(y => y.ResidualCredit, y => y.ResidualCredit - consume)
                     .SetProperty(y => y.RequestCount, y => y.RequestCount + 1)
                     .SetProperty(y => y.ConsumeToken, y => y.ConsumeToken + consumeToken));
+
+
+        await DbContext
+            .Tokens.Where(x => x.Key == token)
+            .ExecuteUpdateAsync(x =>
+                x.SetProperty(y => y.RemainQuota, y => y.RemainQuota - consume)
+                    .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
 
         return result > 0;
     }

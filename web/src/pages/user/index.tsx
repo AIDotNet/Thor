@@ -2,6 +2,7 @@ import { Button, Dropdown, Input, Notification, Table, Tag, Tooltip } from "@dou
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { getUsers, Remove } from "../../services/UserService";
+import { renderQuota } from "../../uitls/render";
 
 const Header = styled.header`
 
@@ -55,7 +56,7 @@ export default function Channel() {
                     <Tooltip content="剩余额度">
                         <Tag size='large' type='ghost' color='blue' style={{
                             marginRight: '0.5rem'
-                        }}>{item.residualCredit}</Tag>
+                        }}>{renderQuota(item.residualCredit, 6)}</Tag>
                     </Tooltip>
                 </>;
             }

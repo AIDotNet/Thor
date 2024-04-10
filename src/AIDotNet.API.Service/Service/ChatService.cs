@@ -5,6 +5,7 @@ using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Infrastructure.Helper;
+using Claudia;
 using TokenApi.Service.Exceptions;
 
 namespace AIDotNet.API.Service.Service;
@@ -29,6 +30,62 @@ public sealed class ChatService(
             PromptRate = JsonSerializer.Deserialize<Dictionary<string, decimal>>(File.ReadAllText("prompt-rate.json"));
 
             CompletionRate = new Dictionary<string, decimal>();
+        }
+    }
+
+    public async ValueTask EmbeddingAsync(HttpContext context)
+    {
+        var (token, user) = await tokenService.CheckTokenAsync(context);
+
+        using var body = new MemoryStream();
+        await context.Request.Body.CopyToAsync(body);
+
+        var module = JsonSerializer.Deserialize<EmbeddingInput>(body.ToArray());
+
+        if (module == null)
+        {
+            throw new Exception("模型校验异常");
+        }
+
+        // 获取渠道 通过算法计算权重
+        var channel = CalculateWeight((await channelService.GetChannelsAsync())
+            .Where(x => x.Models.Contains(module.Model)));
+
+        if (channel == null)
+        {
+            throw new NotModelException(module.Model);
+        }
+
+        // 获取渠道指定的实现类型的服务
+        var openService = GetKeyedService<IChatCompletionService>(channel.Type);
+
+        if (openService == null)
+        {
+            await WriteEndAsync(context, "渠道服务不存在");
+            return;
+        }
+
+
+        if (PromptRate.TryGetValue(module.Model, out var rate))
+        {
+            var requestToken = TokenHelper.GetTotalTokens(module.Input);
+
+
+            var quota = requestToken * rate;
+
+            var completionRatio = GetCompletionRatio(module.Model);
+            quota +=  (rate * completionRatio);
+
+            // 将quota 四舍五入
+            quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio), module.Model,
+                requestToken, 0, (int)quota, token.Name, user?.UserName, token.Creator, channel.Id,
+                channel.Name);
+
+            await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token.Key);
+
+            await DbContext.SaveChangesAsync();
         }
     }
 
@@ -76,7 +133,7 @@ public sealed class ChatService(
             {
                 (requestToken, responseToken) = await ToolChoice(context, body, channel, openService);
             }
-            else if ((bool)module.Stream)
+            else if (module.Stream == true)
             {
                 (requestToken, responseToken) = await StreamHandlerAsync(context, body, module, channel, openService);
             }
@@ -97,7 +154,7 @@ public sealed class ChatService(
                 requestToken, responseToken, (int)quota, token.Name, user?.UserName, token.Creator, channel.Id,
                 channel.Name);
 
-            await userService.ConsumeAsync(user!.Id, (long)quota, requestToken);
+            await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token.Key);
 
             await DbContext.SaveChangesAsync();
         }
@@ -108,10 +165,29 @@ public sealed class ChatService(
     {
         int requestToken;
         int responseToken = 0;
+        var responseMessage = new StringBuilder();
 
-        if (module.Model == "gpt-4-vision-preview")
+        var setting = new ChatOptions()
+        {
+            Key = channel.Key,
+            Address = channel.Address,
+        };
+
+        if (module.Model.Contains("vision"))
         {
             requestToken = 0;
+
+            var message =
+                JsonSerializer.Deserialize<OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput>>(
+                    body.ToArray());
+
+            requestToken = TokenHelper.GetTotalTokens(message?.Messages.SelectMany(x => x.content).Where(x => x.type == "text").Select(x => x.text).ToArray());
+
+            var result = await openService.ImageCompleteChatAsync(message, setting);
+
+            await context.Response.WriteAsJsonAsync(result);
+
+            responseToken = TokenHelper.GetTokens(responseMessage.ToString());
         }
         else
         {
@@ -120,13 +196,6 @@ public sealed class ChatService(
 
             requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
 
-            var responseMessage = new StringBuilder();
-
-            var setting = new ChatOptions()
-            {
-                Key = channel.Key,
-                Address = channel.Address,
-            };
 
             var result = await openService.CompleteChatAsync(message, setting);
 
@@ -184,6 +253,16 @@ public sealed class ChatService(
         int requestToken;
         int responseToken = 0;
 
+        var setting = new ChatOptions()
+        {
+            Key = channel.Key,
+            Address = channel.Address,
+        };
+
+        var id = "chatcmpl-" + StringHelper.GenerateRandomString(29);
+        var systemFingerprint = "fp_" + StringHelper.GenerateRandomString(10);
+        var responseMessage = new StringBuilder();
+
         if (module.Model.Contains("vision"))
         {
             requestToken = 0;
@@ -194,8 +273,14 @@ public sealed class ChatService(
 
             requestToken = TokenHelper.GetTotalTokens(message?.Messages.SelectMany(x => x.content).Where(x => x.type == "text").Select(x => x.text).ToArray());
 
+            await foreach (var item in openService.ImageStreamChatAsync(message, setting))
+            {
+                responseMessage.Append(item);
+                await WriteOpenAiResultAsync(context, item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty, module.Model,
+                    systemFingerprint, id);
+            }
 
-
+            await WriteEndAsync(context);
         }
         else
         {
@@ -204,15 +289,6 @@ public sealed class ChatService(
 
             requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
 
-            var id = "chatcmpl-" + StringHelper.GenerateRandomString(29);
-            var systemFingerprint = "fp_" + StringHelper.GenerateRandomString(10);
-            var responseMessage = new StringBuilder();
-
-            var setting = new ChatOptions()
-            {
-                Key = channel.Key,
-                Address = channel.Address,
-            };
             await foreach (var item in openService.StreamChatAsync(message, setting))
             {
                 responseMessage.Append(item);
@@ -222,8 +298,9 @@ public sealed class ChatService(
 
             await WriteEndAsync(context);
 
-            responseToken = TokenHelper.GetTokens(responseMessage.ToString());
         }
+
+        responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 
         return (requestToken, responseToken);
     }
@@ -349,7 +426,7 @@ public sealed class ChatService(
                 return 2;
             }
 
-            if (name == "gpt-3.5-turbo" || name == "gpt-3.5-turbo-16k")
+            if (name is "gpt-3.5-turbo" or "gpt-3.5-turbo-16k")
             {
                 // TODO: clear this after 2023-12-11
                 DateTime now = DateTime.UtcNow;

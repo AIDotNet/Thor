@@ -261,8 +261,16 @@ user.MapDelete("{id}", async (UserService service, string id) =>
 
 app.MapPost("/v1/chat/completions", async (ChatService service, HttpContext httpContext) =>
         await service.CompletionsAsync(httpContext))
+    .AddEndpointFilter<ChatFilter>()
     .WithGroupName("OpenAI")
     .WithDescription("Get completions from OpenAI")
+    .WithOpenApi();
+
+app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext context) =>
+    await embeddingService.EmbeddingAsync(context))
+    .AddEndpointFilter<ChatFilter>()
+    .WithDescription("OpenAI")
+    .WithDescription("Embedding")
     .WithOpenApi();
 
 await app.RunAsync();
