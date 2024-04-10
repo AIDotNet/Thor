@@ -1,6 +1,6 @@
 namespace AIDotNet.OpenAI;
 
-public class OpenAIOptions
+public class OpenAIServiceOptions
 {
     public const string ServiceName = "OpenAI";
 

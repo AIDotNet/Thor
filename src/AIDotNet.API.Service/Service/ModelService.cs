@@ -10,7 +10,7 @@ public static class ModelService
     /// </summary>
     /// <returns></returns>
     public static Dictionary<string, string> GetTypes()
-        => IADNChatCompletionService.ServiceNames;
+        => IChatCompletionService.ServiceNames;
 
     public static string[] GetModels()
     {

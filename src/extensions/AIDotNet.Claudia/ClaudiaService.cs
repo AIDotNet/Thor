@@ -1,35 +1,106 @@
 ﻿using AIDotNet.Abstractions;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
+using AIDotNet.Abstractions.Dto;
+using Claudia;
+using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.Claudia;
 
-public class ClaudiaService : IADNChatCompletionService
+public sealed class ClaudiaService : IChatCompletionService
 {
-    static ClaudiaService()
+    public async Task<OpenAIResultDto> CompleteChatAsync(
+        OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
-        IADNChatCompletionService.ServiceNames.Add("Claudia", ClaudiaOptions.ServiceName);
+        var anthropic = new Anthropic
+        {
+            ApiKey = options.Key,
+        };
+        if (!string.IsNullOrEmpty(options.Address))
+        {
+            anthropic.HttpClient.BaseAddress = new Uri(options.Address);
+        }
+
+        var message = await anthropic.Messages.CreateAsync(new MessageRequest
+        {
+            Model = input.Model,
+            MaxTokens = input.MaxTokens,
+            Messages = input.Messages.Select(x => new Message
+            {
+                Content = x.Content,
+                Role = x.Role
+            }).ToArray(),
+            TopP = input.TopP,
+            Temperature = input.Temperature,
+        }, cancellationToken: cancellationToken);
+
+        return new OpenAIResultDto
+        {
+            Model = input.Model,
+            Choices = new[]
+            {
+                new OpenAIChoiceDto
+                {
+                    Delta = new OpenAIMessageDto
+                    {
+                        Content = message.Content.FirstOrDefault()?.Text ?? string.Empty,
+                        Role = "assistant"
+                    }
+                }
+            }
+        };
     }
 
-    private readonly ClaudiaOptions _openAiOptions;
-
-    public ClaudiaService(ClaudiaOptions openAiOptions)
+    public async IAsyncEnumerable<OpenAIResultDto> StreamChatAsync(
+        OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
-        _openAiOptions = openAiOptions;
+        var anthropic = new Anthropic
+        {
+            ApiKey = options.Key,
+        };
+        if (!string.IsNullOrEmpty(options.Address))
+        {
+            anthropic.HttpClient.BaseAddress = new Uri(options.Address);
+        }
+
+        await foreach (var item in anthropic.Messages.CreateStreamAsync(new MessageRequest
+                       {
+                           Model = input.Model,
+                           MaxTokens = input.MaxTokens,
+                           Messages = input.Messages.Select(x => new Message
+                           {
+                               Content = x.Content,
+                               Role = x.Role
+                           }).ToArray(),
+                           TopP = input.TopP,
+                           Temperature = input.Temperature,
+                       }, cancellationToken: cancellationToken))
+        {
+            if (item is ContentBlockDelta content)
+            {
+                yield return new OpenAIResultDto
+                {
+                    Model = input.Model,
+                    Choices = new[]
+                    {
+                        new OpenAIChoiceDto
+                        {
+                            Delta = new OpenAIMessageDto
+                            {
+                                Content = content.Delta.Text,
+                                Role = "assistant"
+                            }
+                        }
+                    }
+                };
+                Console.WriteLine();
+            }
+        }
     }
 
-    public IReadOnlyDictionary<string, object?> Attributes { get; }
-
-    public Task<IReadOnlyList<ChatMessageContent>> GetChatMessageContentsAsync(ChatHistory chatHistory,
-        PromptExecutionSettings? executionSettings = null,
-        Kernel? kernel = null, CancellationToken cancellationToken = new())
-    {
-        throw new NotImplementedException();
-    }
-
-    public IAsyncEnumerable<StreamingChatMessageContent> GetStreamingChatMessageContentsAsync(ChatHistory chatHistory,
-        PromptExecutionSettings? executionSettings = null, Kernel? kernel = null,
-        CancellationToken cancellationToken = new CancellationToken())
+    public Task<OpenAIResultDto> FunctionCompleteChatAsync(
+        OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }

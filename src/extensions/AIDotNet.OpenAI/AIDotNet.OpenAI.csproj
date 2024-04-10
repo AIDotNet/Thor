@@ -11,4 +11,8 @@
       <ProjectReference Include="..\..\AIDotNet.Abstractions\AIDotNet.Abstractions.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Betalgo.OpenAI" Version="8.0.0" />
+    </ItemGroup>
+
 </Project>

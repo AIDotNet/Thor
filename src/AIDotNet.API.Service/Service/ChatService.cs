@@ -5,18 +5,14 @@ using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Infrastructure.Helper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 using TokenApi.Service.Exceptions;
-using AuthorRole = Microsoft.SemanticKernel.ChatCompletion.AuthorRole;
-using ChatHistory = Microsoft.SemanticKernel.ChatCompletion.ChatHistory;
 
 namespace AIDotNet.API.Service.Service;
 
 public sealed class ChatService(
     IServiceProvider serviceProvider,
     ChannelService channelService,
+    TokenService tokenService,
     UserService userService,
     LoggerService loggerService)
     : ApplicationService(serviceProvider)
@@ -38,49 +34,7 @@ public sealed class ChatService(
 
     public async Task CompletionsAsync(HttpContext context)
     {
-        #region 校验tokne
-
-        var key = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
-
-        var token = await DbContext.Tokens.AsNoTracking().FirstOrDefaultAsync(x => x.Key == key);
-
-        if (token == null)
-        {
-            context.Response.StatusCode = 401;
-            return;
-        }
-
-        // token过期
-        if (token.ExpiredTime < DateTimeOffset.Now)
-        {
-            context.Response.StatusCode = 401;
-            return;
-        }
-
-        // 余额不足
-        if (token is { UnlimitedQuota: false, RemainQuota: < 0 })
-        {
-            context.Response.StatusCode = 402;
-            return;
-        }
-
-
-        var user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == token.Creator);
-
-        if (user == null)
-        {
-            context.Response.StatusCode = 401;
-            return;
-        }
-
-        // 判断额度是否足够
-        if (user.ResidualCredit < 10000)
-        {
-            context.Response.StatusCode = 402;
-            return;
-        }
-
-        #endregion
+        var (token, user) = await tokenService.CheckTokenAsync(context);
 
         using var body = new MemoryStream();
         await context.Request.Body.CopyToAsync(body);
@@ -102,7 +56,7 @@ public sealed class ChatService(
         }
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IADNChatCompletionService>(channel.Type);
+        var openService = GetKeyedService<IChatCompletionService>(channel.Type);
 
         if (openService == null)
         {
@@ -118,80 +72,17 @@ public sealed class ChatService(
             var tools =
                 JsonSerializer.Deserialize<OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput>>(body.ToArray());
 
-            if (tools.ToolChoice == "auto")
+            if (tools != null && !string.IsNullOrEmpty(tools.ToolChoice))
             {
-                var message = JsonSerializer.Deserialize<OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput>>(
-                    body.ToArray());
-
-                requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
-
-                var id = "chatcmpl-" + StringHelper.GenerateRandomString(29);
-                var systemFingerprint = "fp_" + StringHelper.GenerateRandomString(10);
-                var responseMessage = new StringBuilder();
-
-                var chatHistory = new ChatHistory();
-                chatHistory.AddRange(message.Messages.Select(x => new ChatMessageContent(
-                    new AuthorRole(x.Role), x.Content)));
-
-                var setting = new PromptExecutionSettings
-                {
-                    ExtensionData = new Dictionary<string, object>(),
-                };
-                setting.ExtensionData.Add("API_KEY", channel.Key);
-                setting.ExtensionData.Add("API_URL", channel.Address);
-                setting.ExtensionData.Add("ToolChoice", message.Tools);
-
-                await foreach (var item in openService.GetStreamingChatMessageContentsAsync(chatHistory, setting))
-                {
-                    responseMessage.Append(item);
-                    await WriteOpenAiResultAsync(context, item.Content, module.Model, systemFingerprint, id);
-                }
-
-                await WriteEndAsync(context);
-
-                responseToken = TokenHelper.GetTokens(responseMessage.ToString());
+                (requestToken, responseToken) = await ToolChoice(context, body, channel, openService);
             }
-            else if (module.Model == "gpt-4-vision-preview")
+            else if (module.Stream)
             {
-                requestToken = 0;
+                (requestToken, responseToken) = await StreamHandlerAsync(context, body, module, channel, openService);
             }
             else
             {
-                var message = JsonSerializer.Deserialize<OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput>>(
-                    body.ToArray());
-
-                requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
-
-                var id = "chatcmpl-" + StringHelper.GenerateRandomString(29);
-                var systemFingerprint = "fp_" + StringHelper.GenerateRandomString(10);
-                var responseMessage = new StringBuilder();
-
-                var chatHistory = new ChatHistory();
-
-                chatHistory.AddRange(message.Messages.Select(x => new ChatMessageContent(
-                    new AuthorRole(x.Role), x.Content)));
-
-                var setting = new OpenAIPromptExecutionSettings
-                {
-                    ExtensionData = new Dictionary<string, object>(),
-                    ModelId = module.Model,
-                    Temperature = module.Temperature,
-                    MaxTokens = module.MaxTokens,
-                    FrequencyPenalty = module.FrequencyPenalty,
-                    TopP = module.TopP
-                };
-                setting.ExtensionData.Add("API_KEY", channel.Key);
-                setting.ExtensionData.Add("API_URL", channel.Address);
-
-                await foreach (var item in openService.GetStreamingChatMessageContentsAsync(chatHistory, setting))
-                {
-                    responseMessage.Append(item);
-                    await WriteOpenAiResultAsync(context, item.Content, module.Model, systemFingerprint, id);
-                }
-
-                await WriteEndAsync(context);
-
-                responseToken = TokenHelper.GetTokens(responseMessage.ToString());
+                (requestToken, responseToken) = await ChatHandlerAsync(context, body, module, channel, openService);
             }
 
             var quota = requestToken * rate;
@@ -202,15 +93,130 @@ public sealed class ChatService(
             // 将quota 四舍五入
             quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
-
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio), module.Model,
                 requestToken, responseToken, (int)quota, token.Name, user?.UserName, token.Creator, channel.Id,
                 channel.Name);
 
-            await userService.ConsumeAsync(token.Creator, (long)quota, requestToken);
+            await userService.ConsumeAsync(user!.Id, (long)quota, requestToken);
 
             await DbContext.SaveChangesAsync();
         }
+    }
+
+    private static async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, MemoryStream body,
+        OpenAICompletionInput module, ChatChannel channel, IChatCompletionService openService)
+    {
+        int requestToken;
+        int responseToken = 0;
+
+        if (module.Model == "gpt-4-vision-preview")
+        {
+            requestToken = 0;
+        }
+        else
+        {
+            var message = JsonSerializer.Deserialize<OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput>>(
+                body.ToArray());
+
+            requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
+
+            var responseMessage = new StringBuilder();
+
+            var setting = new ChatOptions()
+            {
+                Key = channel.Key,
+                Address = channel.Address,
+            };
+
+            var result = await openService.CompleteChatAsync(message, setting);
+
+            await context.Response.WriteAsJsonAsync(result);
+
+            responseToken = TokenHelper.GetTokens(responseMessage.ToString());
+        }
+
+        return (requestToken, responseToken);
+    }
+
+    /// <summary>
+    /// ToolChoice 处理
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="body"></param>
+    /// <param name="channel"></param>
+    /// <param name="openService"></param>
+    /// <returns></returns>
+    private static async ValueTask<(int, int)> ToolChoice(HttpContext context, MemoryStream body,
+        ChatChannel channel, IChatCompletionService openService)
+    {
+        int responseToken = 0;
+
+        var message = JsonSerializer.Deserialize<OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput>>(
+            body.ToArray());
+
+        var requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
+
+        var setting = new ChatOptions()
+        {
+            Key = channel.Key,
+            Address = channel.Address,
+        };
+
+        var result = await openService.CompleteChatAsync(message, setting);
+
+        await context.Response.WriteAsJsonAsync(result);
+
+        return (requestToken, responseToken);
+    }
+
+    /// <summary>
+    /// Stream 对话处理
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="body"></param>
+    /// <param name="module"></param>
+    /// <param name="channel"></param>
+    /// <param name="openService"></param>
+    /// <returns></returns>
+    private static async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context, MemoryStream body,
+        OpenAICompletionInput module, ChatChannel channel, IChatCompletionService openService)
+    {
+        int requestToken;
+        int responseToken = 0;
+
+        if (module.Model == "gpt-4-vision-preview")
+        {
+            requestToken = 0;
+        }
+        else
+        {
+            var message = JsonSerializer.Deserialize<OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput>>(
+                body.ToArray());
+
+            requestToken = TokenHelper.GetTotalTokens(message?.Messages.Select(x => x.Content).ToArray());
+
+            var id = "chatcmpl-" + StringHelper.GenerateRandomString(29);
+            var systemFingerprint = "fp_" + StringHelper.GenerateRandomString(10);
+            var responseMessage = new StringBuilder();
+
+            var setting = new ChatOptions()
+            {
+                Key = channel.Key,
+                Address = channel.Address,
+            };
+            await foreach (var item in openService.StreamChatAsync(message, setting))
+            {
+                responseMessage.Append(item);
+                await WriteOpenAiResultAsync(context, item.Choices.FirstOrDefault()?.Delta.Content, module.Model,
+                    systemFingerprint, id);
+            }
+
+            await WriteEndAsync(context);
+
+            responseToken = TokenHelper.GetTokens(responseMessage.ToString());
+        }
+
+        return (requestToken, responseToken);
     }
 
     private static async ValueTask WriteOpenAiResultAsync(HttpContext context, string content, string model,

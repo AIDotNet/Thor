@@ -11,4 +11,10 @@
     <ProjectReference Include="..\..\AIDotNet.Abstractions\AIDotNet.Abstractions.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <PackageReference Include="Claudia" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
+  </ItemGroup>
+
 </Project>

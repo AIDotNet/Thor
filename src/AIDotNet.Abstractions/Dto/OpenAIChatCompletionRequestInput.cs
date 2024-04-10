@@ -4,6 +4,17 @@ namespace AIDotNet.Abstractions.Dto;
 
 public class OpenAIChatCompletionRequestInput
 {
+    public OpenAIChatCompletionRequestInput(string role, string content)
+    {
+        Role = role;
+        Content = content;
+    }
+
+    public OpenAIChatCompletionRequestInput()
+    {
+        
+    }
+
     [JsonPropertyName("role")]
     public string Role { get; set; }
 

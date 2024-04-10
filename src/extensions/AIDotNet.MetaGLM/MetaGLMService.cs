@@ -1,101 +1,95 @@
 ﻿using AIDotNet.Abstractions;
+using AIDotNet.Abstractions.Dto;
 using AIDotNet.MetaGLM.Models.RequestModels;
-using AIDotNet.MetaGLM.Models.RequestModels.FunctionModels;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
+using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.MetaGLM;
 
-public class MetaGLMService : IADNChatCompletionService
+public sealed class MetaGLMService : IChatCompletionService
 {
-    static MetaGLMService()
-    {
-        IADNChatCompletionService.ServiceNames.Add("MetaGLM", MetaGLMOptions.ServiceName);
-    }
-
     private readonly MetaGLMOptions _openAiOptions;
 
-    public MetaGLMService(MetaGLMOptions openAiOptions)
+    public MetaGLMService()
     {
-        _openAiOptions = openAiOptions;
+        _openAiOptions = new MetaGLMOptions
+        {
+            Client = new MetaGLMClientV4()
+        };
     }
 
-    public IReadOnlyDictionary<string, object?> Attributes { get; }
-
-    public async Task<IReadOnlyList<ChatMessageContent>> GetChatMessageContentsAsync(ChatHistory chatHistory,
-        PromptExecutionSettings? executionSettings = null,
-        Kernel? kernel = null, CancellationToken cancellationToken = new CancellationToken())
+    public async Task<OpenAIResultDto> CompleteChatAsync(
+        OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
-        if (executionSettings is not OpenAIPromptExecutionSettings settings) throw new NotImplementedException();
-
-        var apiKey = string.Empty;
-        var apiUrl = string.Empty;
-
-        if (settings?.ExtensionData?.TryGetValue(Constant.API_KEY, out var key) == true)
-        {
-            apiKey = key.ToString();
-        }
-
-        if (executionSettings?.ExtensionData?.TryGetValue(Constant.API_URL, out var url) == true)
-        {
-            apiUrl = url.ToString();
-        }
-
         var dto = new TextRequestBase();
         dto.SetRequestId(Guid.NewGuid().ToString());
-        dto.SetMessages(chatHistory.Select(x => new MessageItem
+        dto.SetMessages(input.Messages.Select(x => new MessageItem
         {
             content = x.Content,
             role = x.Role.ToString()
         }).ToArray());
-        dto.SetModel(settings.ModelId);
-        dto.SetTemperature(settings.Temperature);
-        dto.SetTopP(settings.TopP);
+        dto.SetModel(input.Model);
+        dto.SetTemperature(input.Temperature);
+        dto.SetTopP(input.TopP);
 
-        var result = await _openAiOptions.Client?.Chat.Completion(dto, apiKey, apiUrl);
+        var result = await _openAiOptions.Client?.Chat.Completion(dto, options.Key, options.Address);
 
-        return new ChatMessageContent[]
+        return new OpenAIResultDto
         {
-            new(AuthorRole.Assistant, result.choices.FirstOrDefault()?.message.content)
+            Model = input.Model,
+            Choices = new[]
+            {
+                new OpenAIChoiceDto
+                {
+                    Delta = new OpenAIMessageDto
+                    {
+                        Content = result.choices.FirstOrDefault()?.message.content,
+                        Role = "assistant"
+                    }
+                }
+            }
         };
     }
 
-    public async IAsyncEnumerable<StreamingChatMessageContent> GetStreamingChatMessageContentsAsync(
-        ChatHistory chatHistory,
-        PromptExecutionSettings? executionSettings = null, Kernel? kernel = null,
-        CancellationToken cancellationToken = new())
+    public async IAsyncEnumerable<OpenAIResultDto> StreamChatAsync(
+        OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
-        if (executionSettings is not OpenAIPromptExecutionSettings settings) throw new NotImplementedException();
-
-        var apiKey = string.Empty;
-        var apiUrl = string.Empty;
-
-        if (settings?.ExtensionData?.TryGetValue(Constant.API_KEY, out var key) == true)
-        {
-            apiKey = key?.ToString();
-        }
-
-        if (executionSettings?.ExtensionData?.TryGetValue(Constant.API_URL, out var url) == true)
-        {
-            apiUrl = url.ToString();
-        }
-
         var dto = new TextRequestBase();
         dto.SetRequestId(Guid.NewGuid().ToString());
-        dto.SetMessages(chatHistory.Select(x => new MessageItem
+        dto.SetMessages(input.Messages.Select(x => new MessageItem
         {
             content = x.Content ?? string.Empty,
             role = x.Role.ToString()
         }).Where(x => !string.IsNullOrEmpty(x.content)).ToArray());
-        dto.SetModel(settings.ModelId);
-        dto.SetTemperature(settings.Temperature);
-        dto.SetTopP(settings.TopP);
+        dto.SetModel(input.Model);
+        dto.SetTemperature(input.Temperature);
+        dto.SetTopP(input.TopP);
 
-        await foreach (var item in _openAiOptions.Client?.Chat.Stream(dto, apiKey, apiUrl))
+        await foreach (var item in _openAiOptions.Client?.Chat.Stream(dto, options.Key, options.Address))
         {
-            yield return
-                new StreamingChatMessageContent(AuthorRole.Assistant, item.choices.FirstOrDefault()?.delta.content);
+            yield return new OpenAIResultDto
+            {
+                Model = input.Model,
+                Choices = new[]
+                {
+                    new OpenAIChoiceDto
+                    {
+                        Delta = new OpenAIMessageDto
+                        {
+                            Content = item.choices.FirstOrDefault()?.message.content,
+                            Role = "assistant"
+                        }
+                    }
+                }
+            };
         }
+    }
+
+    public Task<OpenAIResultDto> FunctionCompleteChatAsync(
+        OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 }

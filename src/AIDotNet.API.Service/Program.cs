@@ -6,6 +6,11 @@ using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
+using AIDotNet.Claudia;
+using AIDotNet.MetaGLM;
+using AIDotNet.OpenAI;
+using AIDotNet.Qiansail;
+using AIDotNet.SparkDesk;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -75,7 +80,12 @@ builder.Services.AddTransient<AuthorizeService>()
     .AddTransient<ChatService>()
     .AddTransient<LoggerService>()
     .AddTransient<UserService>()
-    .AddTransient<ChannelService>();
+    .AddTransient<ChannelService>()
+    .AddKeyedSingleton<IChatCompletionService, OpenAiService>(OpenAIServiceOptions.ServiceName)
+    .AddKeyedSingleton<IChatCompletionService, SparkDeskService>(SparkDeskOptions.ServiceName)
+    .AddKeyedSingleton<IChatCompletionService, QiansailService>(QiansailOptions.ServiceName)
+    .AddKeyedSingleton<IChatCompletionService, MetaGLMService>(MetaGLMOptions.ServiceName)
+    .AddKeyedSingleton<IChatCompletionService, ClaudiaService>(ClaudiaOptions.ServiceName);
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()

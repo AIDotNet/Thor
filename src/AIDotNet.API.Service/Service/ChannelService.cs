@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using AIDotNet.Abstractions;
+using AIDotNet.Abstractions.Dto;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.OpenAI;
@@ -7,9 +8,7 @@ using AIDotNet.SparkDesk;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using Sdcb.SparkDesk;
+using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.API.Service.Service;
 
@@ -22,7 +21,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     public async ValueTask<List<ChatChannel>> GetChannelsAsync()
     {
 #if DEBUG
-            return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToListAsync();
+        return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToListAsync();
 #endif
 
         var channels = await cache.GetOrCreateAsync("channels", async entry =>
@@ -113,41 +112,41 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         }
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IADNChatCompletionService>(channel.Type);
+        var openService = GetKeyedService<IChatCompletionService>(channel.Type);
 
         if (openService == null)
         {
             throw new Exception("渠道服务不存在");
         }
 
-        var chatHistory = new ChatHistory();
-        chatHistory.AddUserMessage("Return 1");
-
-        var setting = new OpenAIPromptExecutionSettings
+        var chatHistory = new OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput>();
+        chatHistory.Messages.Add(new OpenAIChatCompletionRequestInput()
         {
-            ExtensionData = new Dictionary<string, object>(),
-            ModelId = "gpt-3.5-turbo",
-            MaxTokens = 100,
+            Content = "Return 1",
+            Role = "user"
+        });
+
+        var setting = new ChatOptions()
+        {
+            Address = channel.Address,
+            Key = channel.Key
         };
-        setting.ExtensionData.Add("API_KEY", channel.Key);
-        setting.ExtensionData.Add("API_URL", channel.Address);
 
         switch (channel.Type)
         {
-            case OpenAIOptions.ServiceName:
-                setting.ModelId = "gpt-3.5-turbo";
+            case OpenAIServiceOptions.ServiceName:
+                chatHistory.Model = "gpt-3.5-turbo";
                 break;
             case SparkDeskOptions.ServiceName:
-                setting.ModelId = "SparkDesk-v3.5";
+                chatHistory.Model = "SparkDesk-v3.5";
                 break;
             default:
-                setting.ModelId = "gpt-3.5-turbo";
+                chatHistory.Model = "gpt-3.5-turbo";
                 break;
         }
-        
+
         var sw = Stopwatch.StartNew();
-        var response = await openService.GetChatMessageContentsAsync(chatHistory, setting);
-        Console.WriteLine(response.FirstOrDefault()?.Content);
+        var response = await openService.CompleteChatAsync(chatHistory, setting);
         sw.Stop();
 
         // 更新ResponseTime
@@ -157,6 +156,6 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         await DbContext.SaveChangesAsync();
 
-        return (response.Count > 0, (int)sw.ElapsedMilliseconds);
+        return (response.Choices.Length > 0, (int)sw.ElapsedMilliseconds);
     }
 }
