@@ -7,7 +7,6 @@ namespace AIDotNet.SparkDesk;
 
 public sealed class SparkDeskService : IApiChatCompletionService
 {
-
     public async Task<OpenAIResultDto> CompleteChatAsync(
         OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input,
         ChatOptions? options = null,
@@ -125,7 +124,14 @@ public sealed class SparkDeskService : IApiChatCompletionService
             throw new NotModelException(input?.Model);
         }
 
-        var topK = Convert.ToInt32(Math.Round((double)input.TopP + 1));
+        if (input.TopP == null)
+        {
+            input.TopP = 1;
+        }
+        else
+        {
+            input.TopP = Convert.ToInt32(Math.Round((double)+1));
+        }
 
         var results = input.Messages.Select(x => new ChatMessage(x.Role.ToString(), x.Content)).ToArray();
 
@@ -140,7 +146,7 @@ public sealed class SparkDeskService : IApiChatCompletionService
                 ChatId = Guid.NewGuid().ToString("N"),
                 MaxTokens = (int)input.MaxTokens,
                 Temperature = (float)input.Temperature,
-                TopK = topK,
+                TopK = (int)(input.TopP ?? 1),
             }, cancellationToken: cancellationToken);
 
         await foreach (var item in msg)
@@ -252,13 +258,15 @@ public sealed class SparkDeskService : IApiChatCompletionService
         return openAIResultDto;
     }
 
-    public async Task<OpenAIResultDto> ImageCompleteChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
+    public async Task<OpenAIResultDto> ImageCompleteChatAsync(
+        OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<OpenAIResultDto> ImageStreamChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
+    public IAsyncEnumerable<OpenAIResultDto> ImageStreamChatAsync(
+        OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
         CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
