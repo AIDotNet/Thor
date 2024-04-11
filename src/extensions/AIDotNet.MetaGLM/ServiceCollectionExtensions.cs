@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMetaGLMClientV4(this IServiceCollection services)
     {
 
-        IChatCompletionService.ServiceNames.Add("智谱 AI", MetaGLMOptions.ServiceName);
+        IApiChatCompletionService.ServiceNames.Add("智谱 AI", MetaGLMOptions.ServiceName);
         
         return services;
     }

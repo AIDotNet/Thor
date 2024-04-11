@@ -7,7 +7,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddOpenAIService(this IServiceCollection services)
     {
-        IChatCompletionService.ServiceNames.Add("OpenAI", OpenAIServiceOptions.ServiceName);
+        IApiChatCompletionService.ServiceNames.Add("OpenAI", OpenAIServiceOptions.ServiceName);
         return services;
     }
 }

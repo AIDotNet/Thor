@@ -2,7 +2,7 @@
 
 namespace AIDotNet.Abstractions;
 
-public interface IChatCompletionService
+public interface IApiChatCompletionService
 {
     /// <summary>
     ///  The service Name

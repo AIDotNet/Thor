@@ -57,7 +57,7 @@ public sealed class ChatService(
         }
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IChatCompletionService>(channel.Type);
+        var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
 
         if (openService == null)
         {
@@ -113,7 +113,7 @@ public sealed class ChatService(
         }
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IChatCompletionService>(channel.Type);
+        var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
 
         if (openService == null)
         {
@@ -161,7 +161,7 @@ public sealed class ChatService(
     }
 
     private static async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, MemoryStream body,
-        OpenAICompletionInput module, ChatChannel channel, IChatCompletionService openService)
+        OpenAICompletionInput module, ChatChannel channel, IApiChatCompletionService openService)
     {
         int requestToken;
         int responseToken = 0;
@@ -216,7 +216,7 @@ public sealed class ChatService(
     /// <param Name="openService"></param>
     /// <returns></returns>
     private static async ValueTask<(int, int)> ToolChoice(HttpContext context, MemoryStream body,
-        ChatChannel channel, IChatCompletionService openService)
+        ChatChannel channel, IApiChatCompletionService openService)
     {
         int responseToken = 0;
 
@@ -248,7 +248,7 @@ public sealed class ChatService(
     /// <param Name="openService"></param>
     /// <returns></returns>
     private static async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context, MemoryStream body,
-        OpenAICompletionInput module, ChatChannel channel, IChatCompletionService openService)
+        OpenAICompletionInput module, ChatChannel channel, IApiChatCompletionService openService)
     {
         int requestToken;
         int responseToken = 0;

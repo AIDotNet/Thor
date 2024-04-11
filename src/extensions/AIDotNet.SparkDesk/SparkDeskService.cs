@@ -2,11 +2,10 @@
 using AIDotNet.Abstractions.Dto;
 using Sdcb.SparkDesk;
 using TokenApi.Service.Exceptions;
-using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.SparkDesk;
 
-public sealed class SparkDeskService : IChatCompletionService
+public sealed class SparkDeskService : IApiChatCompletionService
 {
 
     public async Task<OpenAIResultDto> CompleteChatAsync(

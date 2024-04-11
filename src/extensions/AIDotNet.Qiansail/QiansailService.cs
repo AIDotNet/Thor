@@ -3,11 +3,10 @@ using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using Sdcb.DashScope;
 using Sdcb.DashScope.TextGeneration;
-using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.Qiansail
 {
-    public sealed class QiansailService : IChatCompletionService
+    public sealed class QiansailService : IApiChatCompletionService
     {
         public async Task<OpenAIResultDto> CompleteChatAsync(
             OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,

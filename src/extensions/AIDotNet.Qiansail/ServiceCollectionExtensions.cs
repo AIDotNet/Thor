@@ -7,7 +7,7 @@ namespace AIDotNet.Qiansail
     {
         public static IServiceCollection AddQiansail(this IServiceCollection services)
         {
-            IChatCompletionService.ServiceNames.Add("通义千问（阿里云）", QiansailOptions.ServiceName);
+            IApiChatCompletionService.ServiceNames.Add("通义千问（阿里云）", QiansailOptions.ServiceName);
 
             return services;
         }

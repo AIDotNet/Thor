@@ -1,11 +1,10 @@
 ﻿using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using Claudia;
-using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.Claudia;
 
-public sealed class ClaudiaService : IChatCompletionService
+public sealed class ClaudiaService : IApiChatCompletionService
 {
     public async Task<OpenAIResultDto> CompleteChatAsync(
         OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,

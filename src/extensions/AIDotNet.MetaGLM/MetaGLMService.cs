@@ -2,11 +2,10 @@
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.MetaGLM.Models.RequestModels;
 using AIDotNet.MetaGLM.Models.RequestModels.FunctionModels;
-using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.MetaGLM;
 
-public sealed class MetaGLMService : IChatCompletionService
+public sealed class MetaGLMService : IApiChatCompletionService
 {
     private readonly MetaGLMOptions _openAiOptions;
 

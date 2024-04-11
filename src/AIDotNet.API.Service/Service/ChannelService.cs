@@ -8,7 +8,6 @@ using AIDotNet.SparkDesk;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.API.Service.Service;
 
@@ -112,7 +111,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         }
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IChatCompletionService>(channel.Type);
+        var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
 
         if (openService == null)
         {

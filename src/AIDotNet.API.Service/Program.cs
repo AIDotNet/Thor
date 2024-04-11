@@ -81,11 +81,11 @@ builder.Services.AddTransient<AuthorizeService>()
     .AddTransient<LoggerService>()
     .AddTransient<UserService>()
     .AddTransient<ChannelService>()
-    .AddKeyedSingleton<IChatCompletionService, OpenAiService>(OpenAIServiceOptions.ServiceName)
-    .AddKeyedSingleton<IChatCompletionService, SparkDeskService>(SparkDeskOptions.ServiceName)
-    .AddKeyedSingleton<IChatCompletionService, QiansailService>(QiansailOptions.ServiceName)
-    .AddKeyedSingleton<IChatCompletionService, MetaGLMService>(MetaGLMOptions.ServiceName)
-    .AddKeyedSingleton<IChatCompletionService, ClaudiaService>(ClaudiaOptions.ServiceName);
+    .AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(OpenAIServiceOptions.ServiceName)
+    .AddKeyedSingleton<IApiChatCompletionService, SparkDeskService>(SparkDeskOptions.ServiceName)
+    .AddKeyedSingleton<IApiChatCompletionService, QiansailService>(QiansailOptions.ServiceName)
+    .AddKeyedSingleton<IApiChatCompletionService, MetaGLMService>(MetaGLMOptions.ServiceName)
+    .AddKeyedSingleton<IApiChatCompletionService, ClaudiaService>(ClaudiaOptions.ServiceName);
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()

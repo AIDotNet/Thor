@@ -8,11 +8,10 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
-using IChatCompletionService = AIDotNet.Abstractions.IChatCompletionService;
 
 namespace AIDotNet.OpenAI;
 
-public sealed class OpenAiService : IChatCompletionService
+public sealed class OpenAiService : IApiChatCompletionService
 {
     private static readonly HttpClient HttpClient = new();
 
