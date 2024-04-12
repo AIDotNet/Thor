@@ -102,10 +102,10 @@
   a{
     transition: all 0.3s;
     text-decoration: none;
-    cursor: pointer;
     color: var(--semi-color-text-1);
     margin: 0 5px;
     border-bottom: 1px solid var(--semi-color-text-1);
+    cursor: pointer;
   }
 
   // a标签的hover效果

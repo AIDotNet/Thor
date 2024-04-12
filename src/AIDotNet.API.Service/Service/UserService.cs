@@ -1,6 +1,7 @@
 ﻿using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.Service;
@@ -22,6 +23,16 @@ public class UserService(IServiceProvider serviceProvider, IUserContext userCont
         await DbContext.Users.AddAsync(user);
         await DbContext.SaveChangesAsync();
         return user;
+    }
+
+    public async Task<User?> GetAsync()
+    {
+        var info =  await DbContext.Users.FindAsync(UserContext.CurrentUserId);
+        
+        if(info == null)
+            throw new Exception("用户不存在");
+        
+        return info;
     }
 
     public async Task<bool> RemoveAsync(string id)
@@ -72,5 +83,23 @@ public class UserService(IServiceProvider serviceProvider, IUserContext userCont
                     .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
 
         return result > 0;
+    }
+
+    public async Task UpdateAsync(UpdateUserInput input)
+    {
+        if (await DbContext.Users.AnyAsync(x =>
+                x.Id != UserContext.CurrentUserId && x.Email == input.Email))
+            throw new Exception("用户名或邮箱已存在");
+
+        await DbContext.Users.Where(x => x.Id == UserContext.CurrentUserId)
+            .ExecuteUpdateAsync(x =>
+                x.SetProperty(y => y.Email, input.Email)
+                    .SetProperty(y => y.Avatar, input.Avatar));
+    }
+
+    public async Task EnableAsync(string id)
+    {
+        await DbContext.Users.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDisabled, x => !x.IsDisabled));
     }
 }

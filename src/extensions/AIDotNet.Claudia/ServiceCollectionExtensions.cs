@@ -8,6 +8,7 @@ namespace AIDotNet.Claudia
         public static IServiceCollection AddClaudia(this IServiceCollection services)
         {
             IApiChatCompletionService.ServiceNames.Add("Claudia", ClaudiaOptions.ServiceName);
+            services.AddKeyedSingleton<IApiChatCompletionService, ClaudiaService>(ClaudiaOptions.ServiceName);
             return services;
         }
     }

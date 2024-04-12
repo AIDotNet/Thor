@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
     {
 
         IApiChatCompletionService.ServiceNames.Add("智谱 AI", MetaGLMOptions.ServiceName);
-        
+        services.AddKeyedSingleton<IApiChatCompletionService, MetaGLMService>(MetaGLMOptions.ServiceName);
         return services;
     }
 }

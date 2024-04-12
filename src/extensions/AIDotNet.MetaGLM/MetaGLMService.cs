@@ -1,7 +1,9 @@
-﻿using AIDotNet.Abstractions;
+﻿using System.Runtime.CompilerServices;
+using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.MetaGLM.Models.RequestModels;
-using AIDotNet.MetaGLM.Models.RequestModels.FunctionModels;
+using OpenAI.ObjectModels.RequestModels;
+using OpenAI.ObjectModels.ResponseModels;
 
 namespace AIDotNet.MetaGLM;
 
@@ -86,22 +88,83 @@ public sealed class MetaGLMService : IApiChatCompletionService
         }
     }
 
-    public async Task<OpenAIResultDto> FunctionCompleteChatAsync(
-        OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput> input, ChatOptions? options = null,
+
+    public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest input,
+        ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var dto = new TextRequestBase();
+        dto.SetRequestId(Guid.NewGuid().ToString());
+        dto.SetMessages(input.Messages.Select(x => new MessageItem
+        {
+            content = x.Content,
+            role = x.Role.ToString()
+        }).ToArray());
+        dto.SetModel(input.Model);
+        if (input.Temperature != null)
+        {
+            dto.SetTemperature(input.Temperature.Value);
+        }
+
+        if (input.TopP != null)
+        {
+            dto.SetTopP((double)input.TopP);
+        }
+        
+        var result = await _openAiOptions.Client?.Chat.Completion(dto, options.Key, options.Address);
+
+        return new ChatCompletionCreateResponse()
+        {
+            Choices =
+            [
+                new()
+                {
+                    Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.delta.content),
+                    FinishReason = "stop",
+                    Index = 0,
+                }
+            ],
+            Model = input.Model
+        };
     }
 
-    public Task<OpenAIResultDto> ImageCompleteChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
-        CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(ChatCompletionCreateRequest input,
+        ChatOptions? options = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
-    }
+        var dto = new TextRequestBase();
+        dto.SetRequestId(Guid.NewGuid().ToString());
+        dto.SetMessages(input.Messages.Select(x => new MessageItem
+        {
+            content = x.Content!,
+            role = x.Role.ToString()
+        }).ToArray());
+        dto.SetModel(input.Model!);
+        if (input.Temperature != null)
+        {
+            dto.SetTemperature(input.Temperature.Value);
+        }
 
-    public IAsyncEnumerable<OpenAIResultDto> ImageStreamChatAsync(OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
-        CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
+        if (input.TopP != null)
+        {
+            dto.SetTopP((double)input.TopP);
+        }
+
+        await foreach (var result in _openAiOptions.Client?.Chat.Stream(dto, options.Key, options.Address))
+        {
+            yield return new ChatCompletionCreateResponse()
+            {
+                Choices =
+                [
+                    new()
+                    {
+                        Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.delta.content),
+                        FinishReason = "stop",
+                        Index = 0,
+                    }
+                ],
+                Model = input.Model
+            };
+        }
     }
 }

@@ -13,6 +13,7 @@ import Token from './pages/token'
 import User from './pages/user'
 import Login from './pages/login'
 import Home from './pages/home'
+import Register from './pages/register'
 
 
 const router = createBrowserRouter([{
@@ -32,7 +33,11 @@ const router = createBrowserRouter([{
 }, {
   path: '/',
   element: <Home />
-}])
+},
+{ 
+  path: '/register', element: <Register />
+}
+])
 
 
 export default function AppPage() {

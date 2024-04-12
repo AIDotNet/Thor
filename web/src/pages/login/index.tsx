@@ -1,4 +1,4 @@
-import { Nav, Avatar, Form, Checkbox, Button, Notification } from '@douyinfe/semi-ui';
+import { Avatar, Form, Button, Notification, Divider } from '@douyinfe/semi-ui';
 import styles from './index.module.scss';
 import { useState } from 'react';
 import { login } from '../../services/AuthorizeService';
@@ -72,6 +72,15 @@ export default function Login() {
                             登录
                         </Button>
                     </Form>
+                    <Divider></Divider>
+                    <div className={styles.footer}>
+                        <a onClick={() => {
+                            navigate('/register');
+                        }} className={styles.link}>注册</a>
+                        <a onClick={() => {
+                            navigate('/forget');
+                        }} className={styles.link}>忘记密码</a>
+                    </div>
                 </div>
             </div>
         </div>

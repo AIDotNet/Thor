@@ -11,6 +11,50 @@ export default function MainLayout() {
     const [key, setKey] = useState('Home');
     const { Header, Footer, Sider, Content } = Layout;
     const [dark, setDark] = useState(body.hasAttribute('theme-mode'));
+    const [items, setItems] = useState([
+        {
+            itemKey: 'Home',
+            text: '总览',
+            icon: <IconHistogram size="large" />,
+            role: 'user,admin'
+        },
+        {
+            itemKey: 'Channel',
+            text: '渠道',
+            icon: <IconBranch size="large" />,
+            role: 'admin'
+        },
+        {
+            itemKey: 'Token',
+            text: '令牌',
+            icon: <IconKey size="large" />,
+            role: 'user,admin'
+        },
+        {
+            itemKey: 'Logger',
+            text: '日志',
+            icon: <IconArticle size="large" />,
+            role: 'user,admin'
+        },
+        {
+            itemKey: 'User',
+            text: '用户',
+            icon: <IconUser size="large" />,
+            role: 'admin'
+        },
+        {
+            itemKey: 'Current',
+            text: '我的',
+            icon: <IconUserSetting size="large" />,
+            role: 'user,admin'
+        },
+        {
+            itemKey: 'Setting',
+            text: '设置',
+            icon: <IconSetting size="large" />,
+            role: 'admin'
+        },
+    ]);
 
     function SwitchTheme(dark: boolean) {
         const rect = document.documentElement.getBoundingClientRect();
@@ -31,6 +75,19 @@ export default function MainLayout() {
     }
 
     useEffect(() => {
+        // 获取当前用户token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigation('/login');
+            return;
+        }
+
+        // 解析token
+        const tokenData = JSON.parse(atob(token.split('.')[1]));
+
+        setItems(items.filter(item => item.role.includes(tokenData.role)));
+
+
         // 获取当前路由
         const path = window.location.pathname;
         // 绑定key
@@ -68,15 +125,7 @@ export default function MainLayout() {
                     defaultSelectedKeys={[key]}
                     key={key}
                     style={{ maxWidth: 220, height: '100%' }}
-                    items={[
-                        { itemKey: 'Home', text: '总览', icon: <IconHistogram size="large" />, },
-                        { itemKey: 'Channel', text: '渠道', icon: <IconBranch size="large" /> },
-                        { itemKey: 'Token', text: '令牌', icon: <IconKey size="large" /> },
-                        { itemKey: 'Logger', text: '日志', icon: <IconArticle size="large" /> },
-                        { itemKey: 'User', text: '用户', icon: <IconUser size="large" /> },
-                        { itemKey: 'Current', text: '我的', icon: <IconUserSetting size="large" /> },
-                        { itemKey: 'Setting', text: '设置', icon: <IconSetting size="large" /> },
-                    ]}
+                    items={items}
                     header={{
                         logo: <IconSemiLogo style={{ fontSize: 36 }} />,
                         text: 'AIDotNet API',
@@ -125,7 +174,7 @@ export default function MainLayout() {
                                     render={
                                         <Dropdown.Menu>
                                             <Dropdown.Item key="1">个人中心</Dropdown.Item>
-                                            <Dropdown.Item key="2"onClick={()=>{
+                                            <Dropdown.Item key="2" onClick={() => {
                                                 localStorage.removeItem('token');
                                                 navigation('/login');
                                             }}>退出登录</Dropdown.Item>

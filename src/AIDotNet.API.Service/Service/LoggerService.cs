@@ -81,6 +81,11 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
             query = query.Where(x => x.CreatedAt <= endTime);
         }
 
+        if (!UserContext.IsAdmin)
+        {
+            query = query.Where(x => x.UserId == UserContext.CurrentUserId);
+        }
+
         if (!string.IsNullOrWhiteSpace(keyword))
         {
             query = query.Where(x =>

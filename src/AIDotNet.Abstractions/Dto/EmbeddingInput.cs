@@ -8,8 +8,15 @@ public sealed class EmbeddingInput
     public string Model { get; set; }
 
     [JsonPropertyName("input")]
-    public string Input { get; set; }
+    public object Input { get; set; }
 
     [JsonPropertyName("encoding_format")] 
     public string EncodingFormat { get; set; }
+
+    [JsonPropertyName("dimensions")]
+    public int? Dimensions { get; set; }
+
+    [JsonPropertyName("user")]
+    public string? User { get; set; }
 }
+

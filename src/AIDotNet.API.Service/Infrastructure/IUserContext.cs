@@ -12,6 +12,8 @@ public interface IUserContext
     string CurrentUserName { get; }
 
     bool IsAuthenticated { get; }
+
+    bool IsAdmin { get; }
 }
 
 public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
@@ -60,6 +62,15 @@ public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor)
         {
             var user = httpContextAccessor.HttpContext?.User;
             return user?.Identity?.IsAuthenticated ?? false;
+        }
+    }
+
+    public bool IsAdmin
+    {
+        get
+        {
+            var user = httpContextAccessor.HttpContext?.User;
+            return user?.IsInRole(RoleConstant.Admin) ?? false;
         }
     }
 }

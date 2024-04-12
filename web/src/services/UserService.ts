@@ -1,4 +1,4 @@
-import { del, get, postJson } from "../uitls/fetch";
+import { del, get, post, postJson } from "../uitls/fetch";
 
 
 const prefix = '/api/v1/user';
@@ -18,4 +18,15 @@ export const Remove = (id: string) => {
  */
 export const create = (user: any) => {
     return postJson(prefix, user);
+}
+
+export const enable = (id: string) => {
+    return post(prefix + `/enable/${id}`);
+}
+
+/**
+ * 获取当前用户信息
+ */
+export const info = () => {
+    return get(prefix + `/info`);
 }

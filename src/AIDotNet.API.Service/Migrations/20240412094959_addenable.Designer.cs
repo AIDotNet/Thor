@@ -3,6 +3,7 @@ using System;
 using AIDotNet.API.Service.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AIDotNet.API.Service.Migrations
 {
     [DbContext(typeof(TokenApiDbContext))]
-    partial class TokenApiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240412094959_addenable")]
+    partial class addenable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
@@ -219,9 +222,6 @@ namespace AIDotNet.API.Service.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Avatar")
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("ConsumeToken")
                         .HasColumnType("INTEGER");
 
@@ -279,14 +279,14 @@ namespace AIDotNet.API.Service.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a32a2336-fedd-42f8-81b2-491f37f6616a",
+                            Id = "821dc9d4-2960-42c6-bc7d-c4c5d26b07f8",
                             ConsumeToken = 0L,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "239573049@qq.com",
                             IsDelete = false,
                             IsDisabled = false,
-                            Password = "60ca939c6a6d4e0b1e3135a615d25e00",
-                            PasswordHas = "9f3533e6c40c486fa8eabfded01763d9",
+                            Password = "8d87afa155120798358c28a67322f7c0",
+                            PasswordHas = "5b0e4a6e241641788e21b3b9e38ee076",
                             RequestCount = 0L,
                             ResidualCredit = 10000000L,
                             Role = "admin",

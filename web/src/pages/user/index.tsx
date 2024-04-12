@@ -1,8 +1,10 @@
-import { Button, Dropdown, Input, Notification, Table, Tag, Tooltip } from "@douyinfe/semi-ui";
+import { Button, Dropdown, Input, Notification, Switch, Table, Tag, Tooltip } from "@douyinfe/semi-ui";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { getUsers, Remove } from "../../services/UserService";
+import { enable, getUsers, Remove } from "../../services/UserService";
 import { renderQuota } from "../../uitls/render";
+import { IconClose, IconTick } from "@douyinfe/semi-icons";
+import CreateUser from "./features/CreateUser";
 
 const Header = styled.header`
 
@@ -38,6 +40,29 @@ export default function Channel() {
             key: 'role'
         },
         {
+            title: '状态',
+            dataIndex: 'isDisabled',
+            key: 'isDisabled',
+            render: (value: any,item:any) => {
+                return <Switch size='large'
+                    defaultChecked={!value} onChange={(v) => {
+                        enable(item.id)
+                            .then((item) => {
+                                item.success ? Notification.success({
+                                    title: '操作成功',
+                                }) : Notification.error({
+                                    title: '操作失败',
+                                });
+                                loadData();
+                            }), () => Notification.error({
+                                title: '操作失败',
+                            });
+                    }} checkedText={<IconTick />} uncheckedText={<IconClose />} style={{
+                        width: '50px',
+                    }} aria-label="a switch for semi demo"></Switch>
+            }
+        },
+        {
             title: '统计',
             dataIndex: 'statics',
             key: 'statics',
@@ -70,7 +95,6 @@ export default function Channel() {
             title: '操作',
             key: 'action',
             render: (text: any, item: any) => (
-
                 <Dropdown
                     render={
                         <Dropdown.Menu>
@@ -78,22 +102,6 @@ export default function Channel() {
                                 setUpdateValue(item);
                                 setUpdateVisible(true);
                             }}>编辑</Dropdown.Item>
-                            {/* <Dropdown.Item onClick={() => {
-                                // disable(item.id).then((item) => {
-                                //     item.success ? Notification.success({
-                                //         title: '操作成功',
-                                //     }) : Notification.error({
-                                //         title: '操作失败',
-                                //     });
-                                //     loadingData();
-                                // }), () => Notification.error({
-                                //     title: '操作失败',
-                                // });
-                            }}>
-                                {
-                                    item.disable ? '启用' : '禁用'
-                                }
-                            </Dropdown.Item> */}
                             <Dropdown.Item style={{
                                 color: 'red',
                             }} onClick={() => removeUser(item.id)}>删除</Dropdown.Item>
@@ -189,7 +197,14 @@ export default function Channel() {
                 },
 
             }} />
-
+            <CreateUser onSuccess={()=>{
+                setCreateVisible(false);
+                loadData();
+            }} visible={createVisible} onCancel={() => {
+                setCreateVisible(false);
+            }
+            } />
+            
         </>
     )
 }

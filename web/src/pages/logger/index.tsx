@@ -65,7 +65,7 @@ export default function Channel() {
             key: 'completionTokens'
         },
         {
-            title: 'Quota',
+            title: '额度',
             dataIndex: 'quota',
             key: 'quota',
             render: (value: any) => {

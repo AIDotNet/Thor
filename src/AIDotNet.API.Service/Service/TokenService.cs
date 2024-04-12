@@ -37,20 +37,21 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
 
     public async Task<PagingDto<Token>> GetListAsync(int page, int pageSize, string? token, string? keyword)
     {
-        var total = await DbContext.Tokens
+        var query = DbContext.Tokens
             .AsNoTracking()
             .Where(x => x.Creator == UserContext.CurrentUserId)
             .Where(x => string.IsNullOrEmpty(token) || x.Key == token)
-            .Where(x => string.IsNullOrEmpty(keyword) || x.Name.Contains(keyword))
+            .Where(x => string.IsNullOrEmpty(keyword) || x.Name.Contains(keyword));
+
+        var total = await query
             .CountAsync();
 
-        var items = await DbContext.Tokens
-            .Where(x => x.Creator == UserContext.CurrentUserId)
-            .AsNoTracking()
-            .OrderByDescending(x => x.Id)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+        var items =
+            await query
+                .OrderByDescending(x => x.Id)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
         return new PagingDto<Token>(total, items);
     }

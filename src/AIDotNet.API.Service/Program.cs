@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using AIDotNet.Abstractions;
 using AIDotNet.API.Service;
 using AIDotNet.API.Service.DataAccess;
@@ -12,8 +13,12 @@ using AIDotNet.OpenAI;
 using AIDotNet.Qiansail;
 using AIDotNet.SparkDesk;
 using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using OpenAI.Interfaces;
+using OpenAI.ObjectModels.RequestModels;
+using Sdcb.DashScope.TextEmbedding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +31,7 @@ builder.Configuration.GetSection(OpenAIOptions.Name)
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());
+    options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 
 builder.Services.AddHttpClient();
@@ -75,17 +81,13 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddTransient<AuthorizeService>()
+builder.Services
+    .AddTransient<AuthorizeService>()
     .AddTransient<TokenService>()
     .AddTransient<ChatService>()
     .AddTransient<LoggerService>()
     .AddTransient<UserService>()
-    .AddTransient<ChannelService>()
-    .AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(OpenAIServiceOptions.ServiceName)
-    .AddKeyedSingleton<IApiChatCompletionService, SparkDeskService>(SparkDeskOptions.ServiceName)
-    .AddKeyedSingleton<IApiChatCompletionService, QiansailService>(QiansailOptions.ServiceName)
-    .AddKeyedSingleton<IApiChatCompletionService, MetaGLMService>(MetaGLMOptions.ServiceName)
-    .AddKeyedSingleton<IApiChatCompletionService, ClaudiaService>(ClaudiaOptions.ServiceName);
+    .AddTransient<ChannelService>();
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
@@ -177,7 +179,10 @@ var channel = app.MapGroup("/api/v1/channel")
     .WithGroupName("Channel")
     .WithTags("Channel")
     .AddEndpointFilter<ResultFilter>()
-    .RequireAuthorization();
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 channel.MapPost("", async (ChannelService service, ChatChannelInput input) =>
     await service.CreateAsync(input));
@@ -245,17 +250,30 @@ var user = app.MapGroup("/api/v1/user")
     .WithGroupName("User")
     .WithTags("User")
     .AddEndpointFilter<ResultFilter>()
-    .RequireAuthorization();
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 user.MapPost(string.Empty, async (UserService service, CreateUserInput input) =>
-    await service.CreateAsync(input));
+        await service.CreateAsync(input))
+    .AllowAnonymous();
 
 user.MapGet(string.Empty, async (UserService service, int page, int pageSize, string? keyword) =>
     await service.GetAsync(page, pageSize, keyword));
 
+user.MapGet("info", async (UserService service) =>
+    await service.GetAsync());
+
 
 user.MapDelete("{id}", async (UserService service, string id) =>
     await service.RemoveAsync(id));
+
+user.MapPut(string.Empty, async (UserService service, UpdateUserInput input) =>
+    await service.UpdateAsync(input));
+
+user.MapPost("/enable/{id}", async (UserService service, string id) =>
+    await service.EnableAsync(id));
 
 #endregion
 
@@ -267,10 +285,17 @@ app.MapPost("/v1/chat/completions", async (ChatService service, HttpContext http
     .WithOpenApi();
 
 app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext context) =>
-    await embeddingService.EmbeddingAsync(context))
+        await embeddingService.EmbeddingAsync(context))
     .AddEndpointFilter<ChatFilter>()
     .WithDescription("OpenAI")
     .WithDescription("Embedding")
+    .WithOpenApi();
+
+app.MapPost("/v1/images/generations", async (ChatService imageService, HttpContext context) =>
+        await imageService.ImageAsync(context))
+    .AddEndpointFilter<ChatFilter>()
+    .WithDescription("OpenAI")
+    .WithDescription("Image")
     .WithOpenApi();
 
 await app.RunAsync();

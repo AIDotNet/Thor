@@ -1,4 +1,5 @@
-﻿using AIDotNet.Abstractions.Dto;
+﻿using OpenAI.ObjectModels.RequestModels;
+using OpenAI.ObjectModels.ResponseModels;
 
 namespace AIDotNet.Abstractions;
 
@@ -10,56 +11,24 @@ public interface IApiChatCompletionService
     public static Dictionary<string, string> ServiceNames { get; } = new();
 
     /// <summary>
-    /// 单次对话
+    /// 
     /// </summary>
-    /// <param Name="input"></param>
-    /// <param Name="options"></param>
-    /// <param Name="cancellationToken"></param>
+    /// <param name="chatCompletionCreate"></param>
+    /// <param name="options"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<OpenAIResultDto> CompleteChatAsync(OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input,
+    Task<ChatCompletionCreateResponse> CompleteChatAsync(
+        ChatCompletionCreateRequest chatCompletionCreate,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// stream式对话
+    /// 
     /// </summary>
-    /// <param Name="input"></param>
-    /// <param Name="options"></param>
-    /// <param Name="cancellationToken"></param>
+    /// <param name="chatCompletionCreate"></param>
+    /// <param name="options"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    IAsyncEnumerable<OpenAIResultDto> StreamChatAsync(OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput> input,
+    IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(ChatCompletionCreateRequest chatCompletionCreate,
         ChatOptions? options = null, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Function Complete Chat
-    /// </summary>
-    /// <param Name="input"></param>
-    /// <param Name="options"></param>
-    /// <param Name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<OpenAIResultDto> FunctionCompleteChatAsync(OpenAIToolsFunctionInput<OpenAIChatCompletionRequestInput> input,
-        ChatOptions? options = null,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 图片AI对话
-    /// </summary>
-    /// <param name="input"></param>
-    /// <param name="options"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    Task<OpenAIResultDto> ImageCompleteChatAsync(
-        OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// 图片AI对话
-    /// </summary>
-    /// <param name="input"></param>
-    /// <param name="options"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    IAsyncEnumerable<OpenAIResultDto> ImageStreamChatAsync(
-               OpenAIChatCompletionInput<OpenAIChatVisionCompletionRequestInput> input, ChatOptions options,
-                      CancellationToken cancellationToken = default);
 }

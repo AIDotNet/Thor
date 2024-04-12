@@ -15,9 +15,19 @@ public sealed class User : Entity<string>, ISoftDeletion
     public string PasswordHas { get; set; } = null!;
 
     /// <summary>
+    /// 头像
+    /// </summary>
+    public string? Avatar { get; set; }
+    
+    /// <summary>
     /// 角色
     /// </summary>
     public string Role { get; set; }
+
+    /// <summary>
+    /// 是否禁用
+    /// </summary>
+    public bool IsDisabled { get; set; }
 
     public bool IsDelete { get; set; }
 
@@ -37,7 +47,7 @@ public sealed class User : Entity<string>, ISoftDeletion
     /// 账号额度
     /// </summary>
     public long ResidualCredit { get; set; }
-    
+
     protected User()
     {
     }
@@ -49,6 +59,14 @@ public sealed class User : Entity<string>, ISoftDeletion
         Email = email;
         SetUser();
         SetPassword(password);
+        // TODO: 应该从系统配置中获取
+        SetResidualCredit(100000);
+        IsDisabled = false;
+        IsDelete = false;
+        DeletedAt = null;
+        ConsumeToken = 0;
+        RequestCount = 0;
+        
     }
 
     public void SetAdmin()
@@ -61,13 +79,12 @@ public sealed class User : Entity<string>, ISoftDeletion
         Role = RoleConstant.User;
     }
 
-
     public void SetPassword(string password)
     {
         PasswordHas = Guid.NewGuid().ToString("N");
         Password = StringHelper.HashPassword(password, PasswordHas);
     }
-    
+
     public void SetResidualCredit(long residualCredit)
     {
         ResidualCredit = residualCredit;

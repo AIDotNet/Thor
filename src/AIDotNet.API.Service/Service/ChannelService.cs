@@ -8,6 +8,7 @@ using AIDotNet.SparkDesk;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.API.Service.Service;
 
@@ -118,12 +119,17 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             throw new Exception("渠道服务不存在");
         }
 
-        var chatHistory = new OpenAIChatCompletionInput<OpenAIChatCompletionRequestInput>();
-        chatHistory.Messages.Add(new OpenAIChatCompletionRequestInput()
+        var chatHistory = new ChatCompletionCreateRequest()
         {
-            Content = "Return 1",
-            Role = "user"
-        });
+            Messages = new List<ChatMessage>()
+            {
+                new()
+                {
+                    Content = "Return 1",
+                    Role = "user"
+                }
+            }
+        };
 
         var setting = new ChatOptions()
         {
@@ -131,18 +137,8 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             Key = channel.Key
         };
 
-        switch (channel.Type)
-        {
-            case OpenAIServiceOptions.ServiceName:
-                chatHistory.Model = "gpt-3.5-turbo";
-                break;
-            case SparkDeskOptions.ServiceName:
-                chatHistory.Model = "SparkDesk-v3.5";
-                break;
-            default:
-                chatHistory.Model = "gpt-3.5-turbo";
-                break;
-        }
+        // 获取渠道是否支持gpt-3.5-turbo
+        chatHistory.Model = channel.Models.Contains("gpt-3.5-turbo-1106") ? "gpt-3.5-turbo-1106" : channel.Models.FirstOrDefault();
 
         var sw = Stopwatch.StartNew();
         var response = await openService.CompleteChatAsync(chatHistory, setting);
@@ -155,6 +151,6 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         await DbContext.SaveChangesAsync();
 
-        return (response.Choices.Length > 0, (int)sw.ElapsedMilliseconds);
+        return (response.Choices.Count > 0, (int)sw.ElapsedMilliseconds);
     }
 }
