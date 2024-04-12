@@ -1,12 +1,14 @@
-import { Layout, Nav, Button, Avatar, Switch, Dropdown } from '@douyinfe/semi-ui';
-import { IconMoon, IconSun, IconBytedanceLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
+import { Layout, Nav, Avatar, Switch, Dropdown, Button } from '@douyinfe/semi-ui';
+import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { info } from '../services/UserService';
 const body = document.body;
 
 localStorage.getItem('theme-mode') === 'dark' && body.setAttribute('theme-mode', 'dark');
 
 export default function MainLayout() {
+    const [user, setUser] = useState({} as any);
     const navigation = useNavigate();
     const [key, setKey] = useState('Home');
     const { Header, Footer, Sider, Content } = Layout;
@@ -37,14 +39,20 @@ export default function MainLayout() {
             role: 'user,admin'
         },
         {
+            itemKey: 'RedeemCode',
+            text: '兑换码',
+            icon: <IconCreditCard size="large" />,
+            role: 'admin'
+        },
+        {
             itemKey: 'User',
-            text: '用户',
+            text: '用户管理',
             icon: <IconUser size="large" />,
             role: 'admin'
         },
         {
             itemKey: 'Current',
-            text: '我的',
+            text: '钱包/个人信息',
             icon: <IconUserSetting size="large" />,
             role: 'user,admin'
         },
@@ -72,6 +80,13 @@ export default function MainLayout() {
                 localStorage.setItem('theme-mode', 'dark');
             }
         });
+    }
+
+    function loadUser() {
+        info()
+            .then((res) => {
+                setUser(res.data);
+            });
     }
 
     useEffect(() => {
@@ -113,7 +128,13 @@ export default function MainLayout() {
             case '/setting':
                 setKey('Setting');
                 break;
+            case '/redeemCode':
+                setKey('RedeemCode');
+                break;
         }
+
+        // 获取用户信息
+        loadUser();
     }, [])
 
     return (
@@ -153,6 +174,9 @@ export default function MainLayout() {
                             case 'Setting':
                                 navigation('/setting');
                                 break;
+                            case 'RedeemCode':
+                                navigation('/redeemCode');
+                                break;
                         }
                         setKey(data.itemKey as string);
                     }}
@@ -173,7 +197,9 @@ export default function MainLayout() {
                                 <Dropdown
                                     render={
                                         <Dropdown.Menu>
-                                            <Dropdown.Item key="1">个人中心</Dropdown.Item>
+                                            <Dropdown.Item key="1" onClick={() => {
+                                                navigation('/current');
+                                            }}>个人中心</Dropdown.Item>
                                             <Dropdown.Item key="2" onClick={() => {
                                                 localStorage.removeItem('token');
                                                 navigation('/login');
@@ -181,8 +207,7 @@ export default function MainLayout() {
                                         </Dropdown.Menu>
                                     }
                                 >
-                                    <Avatar color="orange" size="small">
-                                        Token
+                                    <Avatar color="orange" size="small" src={user.avatar ?? '/logo.png'}>
                                     </Avatar>
                                 </Dropdown>
                             </>
@@ -216,8 +241,14 @@ export default function MainLayout() {
                         <span>Token © 2024 </span>
                     </span>
                     <span>
-                        <span style={{ marginRight: '24px' }}>平台客服</span>
-                        <span>反馈建议</span>
+                        <Button 
+                            theme='borderless'
+                            onClick={() => {
+                                window.open('https://github.com/AIDotNet/AIDotNet.API','_blank')
+                            }}
+                        >
+                            <IconGithubLogo size="large" />
+                        </Button>
                     </span>
                 </Footer>
             </Layout>

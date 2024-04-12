@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Domain.Core;
-using AIDotNet.API.Service.Domina;
-using AIDotNet.API.Service.Domina.Core;
 using AIDotNet.API.Service.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,67 +18,21 @@ public sealed class TokenApiDbContext(
 
     public DbSet<ChatChannel> Channels { get; set; }
 
+    public DbSet<RedeemCode> RedeemCodes { get; set; }
+
+    public DbSet<Setting> Settings { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TokenApiDbContext).Assembly);
-
-        base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<User>(options =>
-        {
-            options.HasKey(x => x.Id);
-
-            options.Property(x => x.UserName).IsRequired();
-
-            options.Property(x => x.Email).IsRequired();
-        });
-
-        modelBuilder.Entity<Token>(options =>
-        {
-            options.HasKey(x => x.Id);
-
-            options.Property(x => x.Key).IsRequired();
-
-            options.HasIndex(x => x.Creator);
-
-            options.Property(x => x.Key).HasMaxLength(42);
-        });
-
-        modelBuilder.Entity<ChatLogger>(options =>
-        {
-            options.HasKey(x => x.Id);
-
-            options.HasIndex(x => x.Creator);
-
-            options.HasIndex(x => x.TokenName);
-
-            options.HasIndex(x => x.ModelName);
-
-            options.HasIndex(x => x.UserName);
-        });
-
-        modelBuilder.Entity<ChatChannel>(options =>
-        {
-            options.HasKey(x => x.Id);
-
-            options.HasIndex(x => x.Creator);
-
-            options.HasIndex(x => x.Name);
-
-            options.Property(x => x.Models)
-                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
-                    item => JsonSerializer.Deserialize<List<string>>(item, new JsonSerializerOptions()));
-
-            options.Property(x => x.Extension)
-                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
-                    item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, new JsonSerializerOptions()));
-        });
+        modelBuilder.ConfigureAIDotNet();
 
         var user = new User(Guid.NewGuid().ToString(), "admin", "239573049@qq.com", "admin");
         user.SetAdmin();
         user.SetResidualCredit(10000000);
 
         modelBuilder.Entity<User>().HasData(user);
+        
+        modelBuilder.InitSetting();
     }
 
 

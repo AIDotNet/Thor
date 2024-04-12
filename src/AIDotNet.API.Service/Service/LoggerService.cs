@@ -55,7 +55,7 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
     }
 
 
-    public async Task<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ChatLoggerType? type, string? model,
+    public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ChatLoggerType? type, string? model,
         DateTime? startTime, DateTime? endTime, string? keyword)
     {
         var query = DbContext.Loggers

@@ -242,7 +242,7 @@ public sealed class ChatService(
         await context.Response.WriteAsJsonAsync(stream);
     }
 
-    public async Task CompletionsAsync(HttpContext context)
+    public async ValueTask CompletionsAsync(HttpContext context)
     {
         var (token, user) = await tokenService.CheckTokenAsync(context);
 

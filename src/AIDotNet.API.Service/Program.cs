@@ -7,18 +7,11 @@ using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
-using AIDotNet.Claudia;
-using AIDotNet.MetaGLM;
-using AIDotNet.OpenAI;
-using AIDotNet.Qiansail;
-using AIDotNet.SparkDesk;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using OpenAI.Interfaces;
-using OpenAI.ObjectModels.RequestModels;
-using Sdcb.DashScope.TextEmbedding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,7 +80,8 @@ builder.Services
     .AddTransient<ChatService>()
     .AddTransient<LoggerService>()
     .AddTransient<UserService>()
-    .AddTransient<ChannelService>();
+    .AddTransient<ChannelService>()
+    .AddTransient<RedeemCodeService>();
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
@@ -112,6 +106,7 @@ builder.Services.AddDbContext<TokenApiDbContext>(options =>
 
 var app = builder.Build();
 
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -127,6 +122,8 @@ if (app.Environment.IsDevelopment())
     var dbContext = scope.ServiceProvider.GetRequiredService<TokenApiDbContext>();
     await dbContext.Database.MigrateAsync();
 }
+
+await SettingService.LoadingSettings(app);
 
 app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, string account, string password) =>
         await service.TokenAsync(account, password))
@@ -274,6 +271,60 @@ user.MapPut(string.Empty, async (UserService service, UpdateUserInput input) =>
 
 user.MapPost("/enable/{id}", async (UserService service, string id) =>
     await service.EnableAsync(id));
+
+#endregion
+
+
+#region Redeem CodeS
+
+var redeemCode = app.MapGroup("/api/v1/redeemCode")
+    .WithGroupName("RedeemCode")
+    .WithTags("RedeemCode")
+    .AddEndpointFilter<ResultFilter>()
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
+
+redeemCode.MapPost(string.Empty, async (RedeemCodeService service, RedeemCodeInput input, HttpContext context) =>
+    await service.CreateAsync(input, context));
+
+redeemCode.MapGet(string.Empty, async (RedeemCodeService service, int page, int pageSize, string? keyword) =>
+    await service.GetAsync(page, pageSize, keyword));
+
+redeemCode.MapPut("{id}", async (RedeemCodeService service, long id, RedeemCodeInput input) =>
+    await service.UpdateAsync(id, input));
+
+redeemCode.MapPut("/enable/{id}", async (RedeemCodeService service, long id) =>
+    await service.EnableAsync(id));
+
+redeemCode.MapDelete("{id}", async (RedeemCodeService service, long id) =>
+    await service.RemoveAsync(id));
+
+redeemCode.MapPost("/use/{code}", async (RedeemCodeService service, string code) =>
+    await service.UseAsync(code));
+
+#endregion
+
+#region Setting
+
+var setting = app.MapGroup("/api/v1/setting")
+    .WithGroupName("Setting")
+    .WithTags("Setting")
+    .AddEndpointFilter<ResultFilter>()
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
+
+setting.MapGet(string.Empty, SettingService.GetSettings)
+    .WithDescription("获取设置")
+    .AllowAnonymous()
+    .WithOpenApi();
+
+setting.MapPut(string.Empty, SettingService.UpdateSettingsAsync)
+    .WithDescription("更新设置")
+    .WithOpenApi();
 
 #endregion
 

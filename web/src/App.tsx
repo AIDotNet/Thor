@@ -14,6 +14,7 @@ import User from './pages/user'
 import Login from './pages/login'
 import Home from './pages/home'
 import Register from './pages/register'
+import RedeemCode from './pages/redeemCode'
 
 
 const router = createBrowserRouter([{
@@ -26,6 +27,7 @@ const router = createBrowserRouter([{
     { path: 'setting', element: <Setting /> },
     { path: 'token', element: <Token /> },
     { path: 'user', element: <User /> },
+    { path: 'redeemCode', element: <RedeemCode /> }
   ]
 }, {
   path: '/login',

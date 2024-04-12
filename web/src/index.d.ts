@@ -58,3 +58,10 @@ export interface ChatLogger extends Entity<number> {
     userName: string | null;
     userId: string | null;
 }
+
+export interface Setting {
+    key: string;
+    value: string;
+    description: string;
+    private: boolean;
+}

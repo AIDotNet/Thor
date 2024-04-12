@@ -33,7 +33,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         return channels;
     }
 
-    public async Task CreateAsync(ChatChannelInput chatChannel)
+    public async ValueTask CreateAsync(ChatChannelInput chatChannel)
     {
         var result = mapper.Map<ChatChannel>(chatChannel);
         result.Id = Guid.NewGuid().ToString();
@@ -42,7 +42,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         await DbContext.SaveChangesAsync();
     }
 
-    public async Task<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize)
+    public async ValueTask<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize)
     {
         var total = await DbContext.Channels.CountAsync();
 
@@ -69,7 +69,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         return result > 0;
     }
 
-    public async Task<ChatChannel> GetAsync(string id)
+    public async ValueTask<ChatChannel> GetAsync(string id)
     {
         var chatChannel = await DbContext.Channels.FindAsync(id);
         if (chatChannel == null)
@@ -80,7 +80,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         return chatChannel;
     }
 
-    public async Task<bool> UpdateAsync(string id, ChatChannelInput chatChannel)
+    public async ValueTask<bool> UpdateAsync(string id, ChatChannelInput chatChannel)
     {
         var result = await DbContext.Channels.Where(x => x.Id == id)
             .ExecuteUpdateAsync(item =>
@@ -94,7 +94,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         return result > 0;
     }
 
-    public async Task DisableAsync(string id)
+    public async ValueTask DisableAsync(string id)
     {
         // 更新状态
         await DbContext.Channels
@@ -102,7 +102,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Disable, a => !a.Disable));
     }
 
-    public async Task<(bool, int)> TestChannelAsync(string id)
+    public async ValueTask<(bool, int)> TestChannelAsync(string id)
     {
         var channel = await DbContext.Channels.FindAsync(id);
 

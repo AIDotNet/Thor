@@ -8,7 +8,7 @@ namespace AIDotNet.API.Service.Service;
 
 public sealed class TokenService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
 {
-    public async Task CreateAsync(TokenInput input)
+    public async ValueTask CreateAsync(TokenInput input)
     {
         if (input.ExpiredTime < DateTime.Now)
         {
@@ -35,7 +35,7 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
             .FindAsync(id);
     }
 
-    public async Task<PagingDto<Token>> GetListAsync(int page, int pageSize, string? token, string? keyword)
+    public async ValueTask<PagingDto<Token>> GetListAsync(int page, int pageSize, string? token, string? keyword)
     {
         var query = DbContext.Tokens
             .AsNoTracking()
@@ -56,7 +56,7 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
         return new PagingDto<Token>(total, items);
     }
 
-    public async Task<bool> UpdateAsync(Token input)
+    public async ValueTask<bool> UpdateAsync(Token input)
     {
         var result = await DbContext.Tokens.Where(x => x.Id == input.Id)
             .ExecuteUpdateAsync(item =>
@@ -70,7 +70,7 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
         return result > 0;
     }
 
-    public async Task<bool> RemoveAsync(long id)
+    public async ValueTask<bool> RemoveAsync(long id)
     {
         var result = await DbContext.Tokens.Where(x => x.Id == id)
             .ExecuteDeleteAsync();
@@ -78,7 +78,7 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
         return result > 0;
     }
 
-    public async Task DisableAsync(long id)
+    public async ValueTask DisableAsync(long id)
     {
         var token = await DbContext.Tokens.FindAsync(id);
         if (token == null)
@@ -99,7 +99,7 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
     /// <exception cref="InsufficientQuotaException"></exception>
-    public async Task<(Token, User)> CheckTokenAsync(HttpContext context)
+    public async ValueTask<(Token, User)> CheckTokenAsync(HttpContext context)
     {
         var key = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
 

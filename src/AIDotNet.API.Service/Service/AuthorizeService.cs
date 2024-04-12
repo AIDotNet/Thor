@@ -6,7 +6,7 @@ namespace AIDotNet.API.Service.Service;
 
 public sealed class AuthorizeService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
 {
-    public async Task<string> TokenAsync(string account, string pass)
+    public async ValueTask<string> TokenAsync(string account, string pass)
     {
         var user = await DbContext.Users.FirstOrDefaultAsync(x => x.UserName == account || x.Email == account);
 

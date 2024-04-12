@@ -1,15 +1,13 @@
 ﻿using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
-using AIDotNet.API.Service.Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.Service;
 
-public class UserService(IServiceProvider serviceProvider, IUserContext userContext)
+public class UserService(IServiceProvider serviceProvider)
     : ApplicationService(serviceProvider)
 {
-    public async Task<User> CreateAsync(CreateUserInput input)
+    public async ValueTask<User> CreateAsync(CreateUserInput input)
     {
         // 判断是否存在
         var exist = await DbContext.Users.AnyAsync(x => x.UserName == input.UserName || x.Email == input.Email);
@@ -25,26 +23,26 @@ public class UserService(IServiceProvider serviceProvider, IUserContext userCont
         return user;
     }
 
-    public async Task<User?> GetAsync()
+    public async ValueTask<User?> GetAsync()
     {
-        var info =  await DbContext.Users.FindAsync(UserContext.CurrentUserId);
-        
-        if(info == null)
-            throw new Exception("用户不存在");
-        
+        var info = await DbContext.Users.FindAsync(UserContext.CurrentUserId);
+
+        if (info == null)
+            throw new UnauthorizedAccessException();
+
         return info;
     }
 
-    public async Task<bool> RemoveAsync(string id)
+    public async ValueTask<bool> RemoveAsync(string id)
     {
-        if (userContext.CurrentUserId == id)
+        if (UserContext.CurrentUserId == id)
             throw new Exception("不能删除自己");
 
         var result = await DbContext.Users.Where(x => x.Id == id).ExecuteDeleteAsync();
         return result > 0;
     }
 
-    public async Task<PagingDto<User>> GetAsync(int page, int pageSize, string? keyword)
+    public async ValueTask<PagingDto<User>> GetAsync(int page, int pageSize, string? keyword)
     {
         var total = await DbContext.Users.CountAsync(x =>
             string.IsNullOrEmpty(keyword) || x.UserName.Contains(keyword) || x.Email.Contains(keyword));
@@ -85,7 +83,7 @@ public class UserService(IServiceProvider serviceProvider, IUserContext userCont
         return result > 0;
     }
 
-    public async Task UpdateAsync(UpdateUserInput input)
+    public async ValueTask UpdateAsync(UpdateUserInput input)
     {
         if (await DbContext.Users.AnyAsync(x =>
                 x.Id != UserContext.CurrentUserId && x.Email == input.Email))
@@ -97,9 +95,17 @@ public class UserService(IServiceProvider serviceProvider, IUserContext userCont
                     .SetProperty(y => y.Avatar, input.Avatar));
     }
 
-    public async Task EnableAsync(string id)
+    public async ValueTask EnableAsync(string id)
     {
         await DbContext.Users.Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDisabled, x => !x.IsDisabled));
+    }
+
+    public async ValueTask<bool> UpdateResidualCreditAsync(string id, long residualCredit)
+    {
+        var result = await DbContext.Users.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResidualCredit, y => y.ResidualCredit + residualCredit));
+
+        return result > 0;
     }
 }
