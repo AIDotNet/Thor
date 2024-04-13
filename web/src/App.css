@@ -18,3 +18,16 @@ body {
         clip-path: circle(100% at var(--x) var(--y));
     }
 }
+
+/* 滚动条样式，不要背景色 */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--semi-color-bg-0);
+    border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+    background: none;
+}

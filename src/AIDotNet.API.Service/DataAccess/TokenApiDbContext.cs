@@ -22,6 +22,10 @@ public sealed class TokenApiDbContext(
 
     public DbSet<Setting> Settings { get; set; }
 
+    public DbSet<StatisticsConsumesNumber> StatisticsConsumesNumbers { get; set; }
+    
+    public DbSet<ModelStatisticsNumber> ModelStatisticsNumbers { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ConfigureAIDotNet();
@@ -31,7 +35,7 @@ public sealed class TokenApiDbContext(
         user.SetResidualCredit(10000000);
 
         modelBuilder.Entity<User>().HasData(user);
-        
+
         modelBuilder.InitSetting();
     }
 
@@ -58,12 +62,13 @@ public sealed class TokenApiDbContext(
                 switch (entry)
                 {
                     case { State: EntityState.Added, Entity: ICreatable creatable }:
-                        creatable.CreatedAt = DateTime.UtcNow;
-                        creatable.Creator = userContext.CurrentUserId;
+                        creatable.Creator ??= userContext.CurrentUserId;
+                        if (creatable.CreatedAt == default)
+                            creatable.CreatedAt = DateTime.Now;
                         break;
                     case { State: EntityState.Modified, Entity: IUpdatable entity }:
-                        entity.UpdatedAt = DateTime.UtcNow;
-                        entity.Modifier = userContext.CurrentUserId;
+                        entity.UpdatedAt ??= DateTime.Now;
+                        entity.Modifier ??= userContext.CurrentUserId;
                         break;
                 }
             }
@@ -72,10 +77,10 @@ public sealed class TokenApiDbContext(
                 switch (entry.Entity)
                 {
                     case ICreatable creatable:
-                        creatable.CreatedAt = DateTime.UtcNow;
+                        creatable.CreatedAt = DateTime.Now;
                         break;
                     case IUpdatable entity:
-                        entity.UpdatedAt = DateTime.UtcNow;
+                        entity.UpdatedAt = DateTime.Now;
                         break;
                 }
             }

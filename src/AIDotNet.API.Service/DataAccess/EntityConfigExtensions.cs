@@ -77,7 +77,35 @@ public static class EntityConfigExtensions
 
             options.Property(x => x.Value).IsRequired();
         });
-        
+
+        modelBuilder.Entity<StatisticsConsumesNumber>(options =>
+        {
+            options.HasKey(x => x.Id);
+
+            options.HasIndex(x => x.Creator);
+
+            options.HasIndex(x => x.Year);
+
+            options.HasIndex(x => x.Month);
+
+            options.HasIndex(x => x.Day);
+        });
+
+        modelBuilder.Entity<ModelStatisticsNumber>(options =>
+        {
+            options.HasKey(x => x.Id);
+
+            options.HasIndex(x => x.Creator);
+
+            options.HasIndex(x => x.ModelName);
+
+            options.HasIndex(x => x.Year);
+
+            options.HasIndex(x => x.Month);
+
+            options.HasIndex(x => x.Day);
+        });
+
         return modelBuilder;
     }
 }

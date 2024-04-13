@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using AIDotNet.Abstractions;
 using AIDotNet.API.Service;
+using AIDotNet.API.Service.BackgroundTask;
 using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
@@ -9,6 +10,7 @@ using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -80,7 +82,8 @@ builder.Services
     .AddTransient<LoggerService>()
     .AddTransient<UserService>()
     .AddTransient<ChannelService>()
-    .AddTransient<RedeemCodeService>();
+    .AddTransient<RedeemCodeService>()
+    .AddHostedService<StatisticBackgroundTask>();
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
@@ -203,6 +206,9 @@ channel.MapPut("/test/{id}", async (ChannelService services, string id) =>
 
 channel.MapPut("/control-automatically/{id}", async (ChannelService services, string id) =>
     await services.ControlAutomaticallyAsync(id));
+
+channel.MapPut("/order/{id}", async (ChannelService services, string id, int order) =>
+    await services.UpdateOrderAsync(id, order));
 
 #endregion
 
@@ -327,6 +333,21 @@ setting.MapGet(string.Empty, SettingService.GetSettings)
 setting.MapPut(string.Empty, SettingService.UpdateSettingsAsync)
     .WithDescription("更新设置")
     .WithOpenApi();
+
+#endregion
+
+#region Statistics
+
+var statistics = app.MapGroup("/api/v1/statistics")
+    .WithGroupName("Statistics")
+    .WithTags("Statistics")
+    .AddEndpointFilter<ResultFilter>()
+    .RequireAuthorization();
+
+statistics.MapGet(string.Empty,
+    async ([FromServices] TokenApiDbContext dbContext,
+            [FromServices] IUserContext userContext) =>
+        await StatisticsService.GetStatisticsAsync(dbContext, userContext));
 
 #endregion
 

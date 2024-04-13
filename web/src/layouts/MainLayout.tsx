@@ -218,6 +218,7 @@ export default function MainLayout() {
                     style={{
                         padding: '24px',
                         backgroundColor: 'var(--semi-color-bg-0)',
+                        overflowY: 'auto'
                     }}
                 >
                     <Outlet />
@@ -241,10 +242,10 @@ export default function MainLayout() {
                         <span>Token © 2024 </span>
                     </span>
                     <span>
-                        <Button 
+                        <Button
                             theme='borderless'
                             onClick={() => {
-                                window.open('https://github.com/AIDotNet/AIDotNet.API','_blank')
+                                window.open('https://github.com/AIDotNet/AIDotNet.API', '_blank')
                             }}
                         >
                             <IconGithubLogo size="large" />

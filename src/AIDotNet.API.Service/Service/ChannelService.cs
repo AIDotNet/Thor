@@ -94,6 +94,13 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         return result > 0;
     }
 
+    public async ValueTask UpdateOrderAsync(string id, int order)
+    {
+        await DbContext.Channels
+            .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.Order, order));
+    }
+
     public async ValueTask ControlAutomaticallyAsync(string id)
     {
         await DbContext.Channels

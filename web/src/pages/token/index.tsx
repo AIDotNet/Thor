@@ -5,6 +5,7 @@ import CreateToken from "./features/CreateToken";
 import { disable, getTokens, Remove } from '../../services/TokenService'
 import UpdateToken from "./features/UpdateToken";
 import { IconClose, IconTick } from "@douyinfe/semi-icons";
+import { renderQuota } from "../../uitls/render";
 
 const Header = styled.header`
 
@@ -19,7 +20,7 @@ export default function Token() {
         {
             title: '是否禁用',
             dataIndex: 'disabled',
-            render: (value: any,item:any) => {
+            render: (value: any, item: any) => {
                 return <Switch size='large'
                     defaultChecked={!value} onChange={(v) => {
                         disable(item.id)
@@ -41,6 +42,9 @@ export default function Token() {
         {
             title: '已用额度',
             dataIndex: 'usedQuota',
+            render: (value: any) => {
+                return (renderQuota(value, 6))
+            }
         },
         {
             title: '剩余额度',
@@ -49,7 +53,7 @@ export default function Token() {
                 if (item.unlimitedQuota) {
                     return <span>不限制</span>
                 } else {
-                    return <span>{item.remainQuota - item.usedQuota}</span>
+                    return <span>{renderQuota(item.remainQuota - item.usedQuota, 6)}</span>
                 }
             }
         },

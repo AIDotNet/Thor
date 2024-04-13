@@ -36,3 +36,7 @@ export const test = (id: string) => {
 export const controlAutomatically = (id: string) => {
   return put(prefix + "/control-automatically/" + id);
 }
+
+export const UpdateOrder = (id: string, order: number) => {
+  return put(prefix + "/order/" + id + "?order=" + order);
+}

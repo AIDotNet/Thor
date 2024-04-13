@@ -1,7 +1,7 @@
-import { Button, Switch, Dropdown, Input, Notification, Table, Tag } from "@douyinfe/semi-ui"
+import { Button, Switch, Dropdown, Input, Notification, Table, Tag, InputNumber } from "@douyinfe/semi-ui"
 import { useMemo, useState } from "react";
 import styled from "styled-components"
-import { getChannels, disable, Remove, test, controlAutomatically } from "../../services/ChannelService";
+import { getChannels, disable, Remove, test, controlAutomatically, UpdateOrder } from "../../services/ChannelService";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
 import { IconTick, IconClose } from "@douyinfe/semi-icons";
@@ -108,6 +108,35 @@ export default function Channel() {
             dataIndex: 'remainQuota',
             render: (value: any) => {
                 return <span>{value}</span>
+            }
+        },
+        {
+            title: '权重',
+            dataIndex: 'order',
+            render: (value: any,item:any) => {
+                return <InputNumber 
+                hideButtons
+                onChange={(v) => {
+                    item.order = v;
+                    setData([...data]);
+                }}
+                onBlur={(v) => {
+                    UpdateOrder(item.id, item.order)
+                        .then((i) => {
+                            i.success ? Notification.success({
+                                title: '操作成功',
+                            }) : Notification.error({
+                                title: '操作失败',
+                            });
+                            loadingData();
+                        }), () => Notification.error({
+                            title: '操作失败',
+                        });
+                }}
+                
+                value={value} style={{
+                    width: '80px',
+                }}></InputNumber>
             }
         },
         {
