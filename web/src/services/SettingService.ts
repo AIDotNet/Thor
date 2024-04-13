@@ -1,3 +1,5 @@
+import { Setting } from '../index.d'
+
 import { get, putJson } from "../uitls/fetch";
 
 class SettingPrefix {
@@ -144,8 +146,20 @@ export const UpdateSetting = (data: any) => {
     return putJson(prefix, data);
 }
 
-export{
+let InitSetting: Setting[];
+
+InitSetting = (await GetSetting()).data;
+
+// 初始化title
+const title = InitSetting?.find(s => s.key === OtherSetting.WebTitle)?.value;
+
+if(title){
+    document.title = title;
+}
+
+export {
     GeneralSetting,
     SystemSetting,
-    OtherSetting
+    OtherSetting,
+    InitSetting
 }

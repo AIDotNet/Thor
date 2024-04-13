@@ -9,7 +9,6 @@ using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -201,6 +200,9 @@ channel.MapPut("/disable/{id}", async (ChannelService services, string id) =>
 
 channel.MapPut("/test/{id}", async (ChannelService services, string id) =>
     await services.TestChannelAsync(id));
+
+channel.MapPut("/control-automatically/{id}", async (ChannelService services, string id) =>
+    await services.ControlAutomaticallyAsync(id));
 
 #endregion
 

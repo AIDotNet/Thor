@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { IconSemiLogo, IconGithubLogo } from '@douyinfe/semi-icons';
 import { useNavigate } from 'react-router-dom'
 import { config } from '../../config';
+import { InitSetting, OtherSetting } from '../../services/SettingService';
+
 const { Text } = Typography;
 
 const Header = styled.header`
@@ -11,7 +13,6 @@ const Header = styled.header`
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    background-color: #ffffff;
 `
 
 const Logo = styled.div`
@@ -31,12 +32,10 @@ const Title = styled.div`
     margin-bottom: 1rem;
     font-size: 3rem;
     font-weight: bold;
-    color: #ffffff;;
 `
 
 const Paragraph = styled.div`
     font-size: 1.2rem;
-    color: #ffffff;
     margin-bottom: 1rem;
     line-height: 2rem;
 `;
@@ -52,7 +51,6 @@ const MainContent = styled.main`
 
 const Footer = styled.footer`
     padding: 1rem;
-    background-color: #ffffff;
     text-align: center;
 `;
 
@@ -69,6 +67,9 @@ export default function Home() {
     const openGithub = () => {
         window.open(config.VITE_GITHUB)
     }
+
+
+
     return (
         <Container>
             <Header >
@@ -81,13 +82,9 @@ export default function Home() {
                 </Nav>
             </Header>
             <MainContent>
-                <Title >AIDotNet API</Title>
+                <Title >{InitSetting?.find(s => s.key === OtherSetting.WebTitle)?.value}</Title>
                 <Paragraph>
-                    All in one 的 OpenAI 接口
-                    <br />
-                    提供全套 API 访问方式
-                    <br />
-                    一键部署，开箱即用
+                    {InitSetting?.find(s => s.key === OtherSetting.IndexContent)?.value}
                 </Paragraph>
                 <Button onClick={openGithub} size='large' icon={<IconGithubLogo />} theme="solid">
                     GitHub

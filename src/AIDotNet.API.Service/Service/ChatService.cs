@@ -23,10 +23,8 @@ public sealed class ChatService(
 {
     private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
 
-    private static readonly Dictionary<string, decimal> PromptRate = new();
-    private static readonly Dictionary<string, decimal> CompletionRate = new();
 
-    static Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
+    static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
     {
         {
             "dall-e-2", new Dictionary<string, double>
@@ -74,16 +72,6 @@ public sealed class ChatService(
         }
     };
 
-    static ChatService()
-    {
-        if (File.Exists("prompt-rate.json"))
-        {
-            PromptRate = JsonSerializer.Deserialize<Dictionary<string, decimal>>(File.ReadAllText("prompt-rate.json"));
-
-            CompletionRate = new Dictionary<string, decimal>();
-        }
-    }
-
     public async ValueTask ImageAsync(HttpContext context)
     {
         var (token, user) = await tokenService.CheckTokenAsync(context);
@@ -96,7 +84,7 @@ public sealed class ChatService(
 
         var imageCostRatio = GetImageCostRatio(module);
 
-        var rate = PromptRate[module.Model];
+        var rate = SettingService.PromptRate[module.Model];
 
         var quota = (int)(rate * imageCostRatio * 1000) * module.N;
 
@@ -220,7 +208,7 @@ public sealed class ChatService(
             Address = channel.Address,
         }, context.RequestAborted);
 
-        if (PromptRate.TryGetValue(module.Model, out var rate))
+        if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
         {
             var quota = requestToken * rate;
 
@@ -274,7 +262,7 @@ public sealed class ChatService(
             return;
         }
 
-        if (PromptRate.TryGetValue(module.Model, out var rate))
+        if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
         {
             int requestToken;
             int responseToken = 0;
@@ -435,9 +423,14 @@ public sealed class ChatService(
         return result;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
     private static decimal GetCompletionRatio(string name)
     {
-        if (CompletionRate.TryGetValue(name, out var ratio))
+        if (SettingService.CompletionRate.TryGetValue(name, out var ratio))
         {
             return ratio;
         }
@@ -446,8 +439,6 @@ public sealed class ChatService(
         {
             if (name.EndsWith("0125"))
             {
-                // https://openai.com/blog/new-embedding-models-and-api-updates
-                // Updated GPT-3.5 Turbo model and lower pricing
                 return 3;
             }
 
@@ -458,15 +449,7 @@ public sealed class ChatService(
 
             if (name is "gpt-3.5-turbo" or "gpt-3.5-turbo-16k")
             {
-                // TODO: clear this after 2023-12-11
-                DateTime now = DateTime.UtcNow;
-                DateTime cutOffDate = new DateTime(2023, 12, 11, 0, 0, 0, DateTimeKind.Utc);
-
-                // 如果当前日期在2023年12月11日之后，返回2
-                if (now > cutOffDate)
-                {
-                    return 2;
-                }
+                return 2;
             }
 
             return 1.333333m;

@@ -16,7 +16,6 @@ import Home from './pages/home'
 import Register from './pages/register'
 import RedeemCode from './pages/redeemCode'
 
-
 const router = createBrowserRouter([{
   element: <MainLayout />,
   children: [

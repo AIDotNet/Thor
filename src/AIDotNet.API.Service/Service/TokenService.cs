@@ -1,4 +1,5 @@
-﻿using AIDotNet.API.Service.Domain;
+﻿using AIDotNet.API.Service.DataAccess;
+using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Exceptions;
 using AIDotNet.API.Service.Infrastructure.Helper;
@@ -134,8 +135,10 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
             throw new UnauthorizedAccessException();
         }
 
+        var requestQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.RequestQuota);
+        
         // 判断额度是否足够
-        if (user.ResidualCredit < 10000)
+        if (user.ResidualCredit < requestQuota)
         {
             context.Response.StatusCode = 402;
             throw new InsufficientQuotaException("额度不足");

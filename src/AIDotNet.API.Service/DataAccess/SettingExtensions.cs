@@ -178,7 +178,7 @@ public static class SettingExtensions
         settings.Add(new Setting
         {
             Key = GeneralSetting.EnableClearLog,
-            Value = "false",
+            Value = "true",
             Description = "启用定时清理日志",
             Private = true
         });
@@ -186,7 +186,7 @@ public static class SettingExtensions
         settings.Add(new Setting
         {
             Key = GeneralSetting.IntervalDays,
-            Value = "7",
+            Value = "90",
             Description = "间隔天数",
             Private = true
         });

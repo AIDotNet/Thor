@@ -55,4 +55,9 @@ public sealed class GetChatChannelDto : Entity<string>
     /// 额度
     /// </summary>
     public long RemainQuota { get; set; }
+    
+    /// <summary>
+    /// 自动监控渠道
+    /// </summary>
+    public bool ControlAutomatically { get; set; }
 }

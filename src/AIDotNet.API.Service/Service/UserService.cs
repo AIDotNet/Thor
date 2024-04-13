@@ -1,4 +1,5 @@
-﻿using AIDotNet.API.Service.Domain;
+﻿using AIDotNet.API.Service.DataAccess;
+using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,11 @@ public class UserService(IServiceProvider serviceProvider)
         }
 
         var user = new User(Guid.NewGuid().ToString(), input.UserName, input.Email, input.Password);
-        user.SetPassword(input.Password);
+
+        // 初始用户额度
+        var userQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.NewUserQuota);
+        user.SetResidualCredit(userQuota);
+
         await DbContext.Users.AddAsync(user);
         await DbContext.SaveChangesAsync();
         return user;

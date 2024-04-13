@@ -1,7 +1,7 @@
 import { Button, Switch, Dropdown, Input, Notification, Table, Tag } from "@douyinfe/semi-ui"
 import { useMemo, useState } from "react";
 import styled from "styled-components"
-import { getChannels, disable, Remove, test } from "../../services/ChannelService";
+import { getChannels, disable, Remove, test, controlAutomatically } from "../../services/ChannelService";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
 import { IconTick, IconClose } from "@douyinfe/semi-icons";
@@ -23,6 +23,28 @@ export default function Channel() {
                 return <Switch size='large'
                     defaultChecked={!value} onChange={(v) => {
                         disable(value.id)
+                            .then((item) => {
+                                item.success ? Notification.success({
+                                    title: '操作成功',
+                                }) : Notification.error({
+                                    title: '操作失败',
+                                });
+                                loadingData();
+                            }), () => Notification.error({
+                                title: '操作失败',
+                            });
+                    }} checkedText={<IconTick />} uncheckedText={<IconClose />} style={{
+                        width: '50px',
+                    }} aria-label="a switch for semi demo"></Switch>
+            }
+        },
+        {
+            title: '是否自动监控',
+            dataIndex: 'controlAutomatically',
+            render: (value: any,i:any) => {
+                return <Switch size='large'
+                    defaultChecked={value} onChange={(v) => {
+                        controlAutomatically(i.id)
                             .then((item) => {
                                 item.success ? Notification.success({
                                     title: '操作成功',

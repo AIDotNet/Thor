@@ -32,3 +32,7 @@ export const disable = (id: string) => {
 export const test = (id: string) => {
   return put(prefix + "/test/" + id);
 }
+
+export const controlAutomatically = (id: string) => {
+  return put(prefix + "/control-automatically/" + id);
+}
