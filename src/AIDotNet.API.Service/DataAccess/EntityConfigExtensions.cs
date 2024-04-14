@@ -28,36 +28,6 @@ public static class EntityConfigExtensions
             options.Property(x => x.Key).HasMaxLength(42);
         });
 
-        modelBuilder.Entity<ChatLogger>(options =>
-        {
-            options.HasKey(x => x.Id);
-
-            options.HasIndex(x => x.Creator);
-
-            options.HasIndex(x => x.TokenName);
-
-            options.HasIndex(x => x.ModelName);
-
-            options.HasIndex(x => x.UserName);
-        });
-
-        modelBuilder.Entity<ChatChannel>(options =>
-        {
-            options.HasKey(x => x.Id);
-
-            options.HasIndex(x => x.Creator);
-
-            options.HasIndex(x => x.Name);
-
-            options.Property(x => x.Models)
-                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
-                    item => JsonSerializer.Deserialize<List<string>>(item, new JsonSerializerOptions()));
-
-            options.Property(x => x.Extension)
-                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
-                    item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, new JsonSerializerOptions()));
-        });
-
         modelBuilder.Entity<RedeemCode>(options =>
         {
             options.HasKey(x => x.Id);
@@ -77,6 +47,29 @@ public static class EntityConfigExtensions
 
             options.Property(x => x.Value).IsRequired();
         });
+
+        modelBuilder.Entity<ChatChannel>(options =>
+        {
+            options.HasKey(x => x.Id);
+
+            options.HasIndex(x => x.Creator);
+
+            options.HasIndex(x => x.Name);
+
+            options.Property(x => x.Models)
+                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
+                    item => JsonSerializer.Deserialize<List<string>>(item, new JsonSerializerOptions()));
+
+            options.Property(x => x.Extension)
+                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
+                    item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, new JsonSerializerOptions()));
+        });
+
+        return modelBuilder;
+    }
+
+    public static ModelBuilder ConfigureLogger(this ModelBuilder modelBuilder)
+    {
 
         modelBuilder.Entity<StatisticsConsumesNumber>(options =>
         {
@@ -105,6 +98,20 @@ public static class EntityConfigExtensions
 
             options.HasIndex(x => x.Day);
         });
+        
+        modelBuilder.Entity<ChatLogger>(options =>
+        {
+            options.HasKey(x => x.Id);
+
+            options.HasIndex(x => x.Creator);
+
+            options.HasIndex(x => x.TokenName);
+
+            options.HasIndex(x => x.ModelName);
+
+            options.HasIndex(x => x.UserName);
+        });
+
 
         return modelBuilder;
     }

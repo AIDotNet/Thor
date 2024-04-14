@@ -28,7 +28,7 @@ export default function Login() {
                     setLoading(false);
                 }
             })
-            .catch((err) => {
+            .catch(() => {
                 setLoading(false);
             });
     }

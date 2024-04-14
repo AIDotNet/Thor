@@ -1,0 +1,10 @@
+﻿version: '3.8'
+
+services:
+  ai-dotnet-api-service:
+    image: registry.cn-shenzhen.aliyuncs.com/ai-dotnet/ai-dotnet-api-service:latest
+    build:
+      context: .
+      dockerfile: src/AIDotNet.API.Service/Dockerfile
+    volumes:
+      - ./data:/data

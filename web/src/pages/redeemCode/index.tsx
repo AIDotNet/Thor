@@ -22,7 +22,7 @@ export default function RedeemCode() {
             dataIndex: 'disabled',
             render: (value: any, item: any) => {
                 return <Switch size='large'
-                    defaultChecked={!value} onChange={(v) => {
+                    defaultChecked={!value} onChange={() => {
                         Enable(item.id)
                             .then((item) => {
                                 item.success ? Notification.success({
@@ -42,7 +42,7 @@ export default function RedeemCode() {
         {
             title: '额度',
             dataIndex: 'quota',
-            render: (value: any, item: any) => {
+            render: (value: any) => {
                 return <span>{renderQuota(value, 2)}</span>
             }
         },

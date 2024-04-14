@@ -148,13 +148,19 @@ export const UpdateSetting = (data: any) => {
 
 let InitSetting: Setting[];
 
-InitSetting = (await GetSetting()).data;
+try {
 
-// 初始化title
-const title = InitSetting?.find(s => s.key === OtherSetting.WebTitle)?.value;
+    InitSetting = (await GetSetting()).data;
 
-if(title){
-    document.title = title;
+    // 初始化title
+    const title = InitSetting?.find(s => s.key === OtherSetting.WebTitle)?.value;
+
+    if (title) {
+        document.title = title;
+    }
+} catch (e) {
+    console.log(e);
+
 }
 
 export {

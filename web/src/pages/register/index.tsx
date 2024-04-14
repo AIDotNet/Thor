@@ -50,7 +50,7 @@ export default function Register() {
                                     setLoading(false);
                                 }
                             })
-                            .catch((err) => {
+                            .catch(() => {
                                 setLoading(false);
                             });
                     }, 200);
@@ -62,7 +62,7 @@ export default function Register() {
                     setLoading(false);
                 }
             })
-            .catch((err) => {
+            .catch(() => {
                 setLoading(false);
             });
     }

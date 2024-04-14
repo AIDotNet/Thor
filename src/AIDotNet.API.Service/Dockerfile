@@ -1,24 +1,38 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
+﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
+EXPOSE 8081
+
+
+FROM node as builder
+WORKDIR /src
+COPY web .
+RUN yarn config set strict-ssl false
+RUN yarn
+RUN yarn run build
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["src/TokenApi.Service/TokenApi.Service.csproj", "src/TokenApi.Service/"]
-RUN dotnet restore "./src/TokenApi.Service/TokenApi.Service.csproj"
+COPY ["src/AIDotNet.API.Service/AIDotNet.API.Service.csproj", "src/AIDotNet.API.Service/"]
+COPY ["src/extensions/AIDotNet.Qiansail/AIDotNet.Qiansail.csproj", "src/extensions/AIDotNet.Qiansail/"]
+COPY ["src/AIDotNet.Abstractions/AIDotNet.Abstractions.csproj", "src/AIDotNet.Abstractions/"]
+COPY ["src/extensions/AIDotNet.MetaGLM/AIDotNet.MetaGLM.csproj", "src/extensions/AIDotNet.MetaGLM/"]
+COPY ["src/extensions/AIDotNet.OpenAI/AIDotNet.OpenAI.csproj", "src/extensions/AIDotNet.OpenAI/"]
+COPY ["src/extensions/AIDotNet.SparkDesk/AIDotNet.SparkDesk.csproj", "src/extensions/AIDotNet.SparkDesk/"]
+COPY ["src/extensions/AIDotNet.Claudia/AIDotNet.Claudia.csproj", "src/extensions/AIDotNet.Claudia/"]
+RUN dotnet restore "src/AIDotNet.API.Service/AIDotNet.API.Service.csproj"
 COPY . .
-WORKDIR "/src/src/TokenApi.Service"
-RUN dotnet build "./TokenApi.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/src/AIDotNet.API.Service"
+RUN dotnet build "AIDotNet.API.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./TokenApi.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "AIDotNet.API.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TokenApi.Service.dll"]
+COPY --from=builder /src/dist ./wwwroot
+ENTRYPOINT ["dotnet", "AIDotNet.API.Service.dll"]

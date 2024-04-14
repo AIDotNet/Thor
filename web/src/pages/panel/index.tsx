@@ -210,35 +210,34 @@ export default function Panel() {
             },
         };
 
-        // 获取data.data.consumes中的最后一个元素
         const lastTokens = data?.tokens?.slice(-1)[0];
         setCurrentDayToken(lastTokens?.value);
 
         tokensOption && tokensChart.setOption(tokensOption);
 
-        // 获取model-consumption-distribution 显示一个柱状的图表，并且每一天有多个模型的消耗，data.models中的moduleName是模型的名字，value是消耗的值, 每一天的数据是一个对象，对象中有一个数组，数组中有多个对象，每个对象是一个模型的消耗
         const modelConsumptionDistributionChart = echarts.init(document.getElementById('model-consumption-distribution') as HTMLDivElement);
-
-        data.models = data?.models?.map((item: any) => {
-            return ({
-                name: item.name,
-                type: 'bar',
-                data: item.data,
-                stack: 'Ad',
-                emphasis: {
-                    focus: 'series'
-                },
-            })
-        });
-
         var modelConsumptionDistributionOption = {
             tooltip: {
-                trigger: 'axis',
-                axisPointer: {
-                    type: 'shadow'
+                trigger: 'item',
+                formatter: function (params: any) {
+                    return params.name + ': ' + renderQuota(params.value, 6);
                 }
             },
-            legend: {},
+            legend: {
+                orient: 'vertical',
+                left: 10,
+                data: data?.models?.map((item: any) => item.name)
+            },
+            toolbox: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'line',
+                    lineStyle: {
+                        color: '#999999',
+                        type: 'dashed'
+                    }
+                },
+            },
             grid: {
                 left: '3%',
                 right: '4%',
@@ -248,60 +247,84 @@ export default function Panel() {
             xAxis: [
                 {
                     type: 'category',
-                    data: data.modelDate
+                    data: data.modelDate,
+                    axisTick: {
+                        alignWithLabel: true
+                    }
                 }
             ],
             yAxis: [
                 {
-                    type: 'value'
+                    type: 'value',
+                    axisLabel: {
+                        formatter: function (value: number) {
+                            return renderQuota(value, 6);
+                        }
+                    }
                 }
             ],
-            series: data.models
+            series: data?.models?.map((item: any) => {
+                return ({
+                    name: item.name,
+                    type: 'bar',
+                    data: item.data,
+                    stack: 'Ad',
+                    emphasis: {
+                        focus: 'series'
+                    },
+                    label: {
+                        show: true,
+                        position: 'top',
+                        formatter: function (params: any) {
+                            return renderQuota(params.value, 6);
+                        }
+                    }
+                })
+            })
         };
 
         modelConsumptionDistributionOption && modelConsumptionDistributionChart.setOption(modelConsumptionDistributionOption);
 
         // 获取proportion-of-model-calls 显示一个饼图，data.models中的moduleName是模型的名字，value是消耗的值
         const proportionOfModelCallsChart = echarts.init(document.getElementById('proportion-of-model-calls') as HTMLDivElement);
+
+        const proportionOfModel = data?.models?.map((item: any) => {
+            return ({
+                value: item.tokenUsed,
+                name: item.name
+            })
+        })
+
         var proportionOfModelCallsOption = {
             tooltip: {
-                trigger: 'item'
+                trigger: 'item',
+                formatter: '{a} <br/>{b}: {c} ({d}%)'
             },
             legend: {
-                top: '5%',
-                left: 'center'
+                orient: 'vertical',
+                left: 10,
+                data: proportionOfModel?.map((item: { name: any; }) => item.name)
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: { show: true },
+                    dataView: { show: true, readOnly: false },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
             },
             series: [
                 {
-                    name: 'Access From',
+                    name: 'Token模型消耗占比',
                     type: 'pie',
-                    radius: ['40%', '70%'],
-                    avoidLabelOverlap: false,
-                    padAngle: 5,
+                    radius: [50, 250],
+                    center: ['50%', '50%'],
+                    roseType: 'area',
                     itemStyle: {
-                        borderRadius: 10
+                        borderRadius: 8
                     },
-                    label: {
-                        show: false,
-                        position: 'center'
-                    },
-                    emphasis: {
-                        label: {
-                            show: true,
-                            fontSize: 40,
-                            fontWeight: 'bold'
-                        }
-                    },
-                    labelLine: {
-                        show: false
-                    },
-                    data: [
-                        { value: 1048, name: 'Search Engine' },
-                        { value: 735, name: 'Direct' },
-                        { value: 580, name: 'Email' },
-                        { value: 484, name: 'Union Ads' },
-                        { value: 300, name: 'Video Ads' }
-                    ]
+                    data: proportionOfModel
                 }
             ]
         };
@@ -390,7 +413,10 @@ export default function Panel() {
                 height: 600,
             }}>
 
-                <Tabs type="line">
+                <Tabs type="line" style={{
+                    height: '100%',
+                    width: '100%',
+                }}>
                     <TabPane tab="模型消耗分布" itemKey="1">
                         <div style={{
                             height: '500px',
@@ -399,12 +425,14 @@ export default function Panel() {
 
                         </div>
                     </TabPane>
-                    <TabPane tab="模型调用占比" itemKey="2">
+                    <TabPane tab="模型调用占比" style={{
+                        height: '100%',
+                        width: '100%',
+                    }} itemKey="2">
                         <div style={{
-                            height: '500px',
-                            width: '100%',
+                            height: '450px',
+                            width: '690px',
                         }} id='proportion-of-model-calls'>
-
                         </div>
                     </TabPane>
                 </Tabs>

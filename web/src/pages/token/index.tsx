@@ -22,7 +22,7 @@ export default function Token() {
             dataIndex: 'disabled',
             render: (value: any, item: any) => {
                 return <Switch size='large'
-                    defaultChecked={!value} onChange={(v) => {
+                    defaultChecked={!value} onChange={() => {
                         disable(item.id)
                             .then((item) => {
                                 item.success ? Notification.success({

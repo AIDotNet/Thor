@@ -191,7 +191,7 @@ export default function MainLayout() {
                         mode="horizontal"
                         footer={
                             <>
-                                <Switch onChange={(v, e) => {
+                                <Switch onChange={(v) => {
                                     SwitchTheme(v);
                                 }} checked={dark} checkedText={<IconSun />} uncheckedText={<IconMoon />} size="large" style={{ marginRight: 5 }} />
                                 <Dropdown

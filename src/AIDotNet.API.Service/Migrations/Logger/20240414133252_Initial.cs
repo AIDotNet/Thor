@@ -3,18 +3,40 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace AIDotNet.API.Service.Migrations
+namespace AIDotNet.API.Service.Migrations.Logger
 {
     /// <inheritdoc />
-    public partial class AddStatistic : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: "f4910916-d4df-4c39-beed-6e7deb1f5166");
+            migrationBuilder.CreateTable(
+                name: "Loggers",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Content = table.Column<string>(type: "TEXT", nullable: false),
+                    PromptTokens = table.Column<int>(type: "INTEGER", nullable: false),
+                    CompletionTokens = table.Column<int>(type: "INTEGER", nullable: false),
+                    Quota = table.Column<int>(type: "INTEGER", nullable: false),
+                    ModelName = table.Column<string>(type: "TEXT", nullable: false),
+                    TokenName = table.Column<string>(type: "TEXT", nullable: false),
+                    UserName = table.Column<string>(type: "TEXT", nullable: true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    ChannelId = table.Column<string>(type: "TEXT", nullable: true),
+                    ChannelName = table.Column<string>(type: "TEXT", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    Modifier = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Creator = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Loggers", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "ModelStatisticsNumbers",
@@ -61,24 +83,25 @@ namespace AIDotNet.API.Service.Migrations
                     table.PrimaryKey("PK_StatisticsConsumesNumbers", x => x.Id);
                 });
 
-            migrationBuilder.UpdateData(
-                table: "Settings",
-                keyColumn: "Key",
-                keyValue: "Setting:GeneralSetting:EnableClearLog",
-                column: "Value",
-                value: "true");
+            migrationBuilder.CreateIndex(
+                name: "IX_Loggers_Creator",
+                table: "Loggers",
+                column: "Creator");
 
-            migrationBuilder.UpdateData(
-                table: "Settings",
-                keyColumn: "Key",
-                keyValue: "Setting:GeneralSetting:IntervalDays",
-                column: "Value",
-                value: "90");
+            migrationBuilder.CreateIndex(
+                name: "IX_Loggers_ModelName",
+                table: "Loggers",
+                column: "ModelName");
 
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "Avatar", "ConsumeToken", "CreatedAt", "Creator", "DeletedAt", "Email", "IsDelete", "IsDisabled", "Modifier", "Password", "PasswordHas", "RequestCount", "ResidualCredit", "Role", "UpdatedAt", "UserName" },
-                values: new object[] { "5c5fa814-d56b-4a6b-ab4e-92af426f1881", null, 0L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "239573049@qq.com", false, false, null, "18506eb13b7691d38913aa6af135d395", "aa6f2db494724b82b9f8076a6c696a56", 0L, 10000000L, "admin", null, "admin" });
+            migrationBuilder.CreateIndex(
+                name: "IX_Loggers_TokenName",
+                table: "Loggers",
+                column: "TokenName");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Loggers_UserName",
+                table: "Loggers",
+                column: "UserName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ModelStatisticsNumbers_Creator",
@@ -130,34 +153,13 @@ namespace AIDotNet.API.Service.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Loggers");
+
+            migrationBuilder.DropTable(
                 name: "ModelStatisticsNumbers");
 
             migrationBuilder.DropTable(
                 name: "StatisticsConsumesNumbers");
-
-            migrationBuilder.DeleteData(
-                table: "Users",
-                keyColumn: "Id",
-                keyValue: "5c5fa814-d56b-4a6b-ab4e-92af426f1881");
-
-            migrationBuilder.UpdateData(
-                table: "Settings",
-                keyColumn: "Key",
-                keyValue: "Setting:GeneralSetting:EnableClearLog",
-                column: "Value",
-                value: "false");
-
-            migrationBuilder.UpdateData(
-                table: "Settings",
-                keyColumn: "Key",
-                keyValue: "Setting:GeneralSetting:IntervalDays",
-                column: "Value",
-                value: "7");
-
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "Avatar", "ConsumeToken", "CreatedAt", "Creator", "DeletedAt", "Email", "IsDelete", "IsDisabled", "Modifier", "Password", "PasswordHas", "RequestCount", "ResidualCredit", "Role", "UpdatedAt", "UserName" },
-                values: new object[] { "f4910916-d4df-4c39-beed-6e7deb1f5166", null, 0L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "239573049@qq.com", false, false, null, "13e11eb515bcfb009ca59f3f54efcdf9", "d285e92b00e74014b533b12dabb93227", 0L, 10000000L, "admin", null, "admin" });
         }
     }
 }

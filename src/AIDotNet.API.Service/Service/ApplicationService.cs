@@ -21,7 +21,9 @@ public abstract class ApplicationService(IServiceProvider serviceProvider)
 
     protected IUserContext UserContext => GetService<IUserContext>();
 
-    protected TokenApiDbContext DbContext => GetService<TokenApiDbContext>();
+    protected AIDotNetDbContext DbContext => GetService<AIDotNetDbContext>();
 
     protected IMapper Mapper => GetService<IMapper>();
+    
+    protected LoggerDbContext LoggerDbContext => GetService<LoggerDbContext>();
 }

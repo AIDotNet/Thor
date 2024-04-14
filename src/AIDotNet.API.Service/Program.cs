@@ -8,6 +8,8 @@ using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
+using AIDotNet.Claudia;
+using AIDotNet.Qiansail;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -83,11 +85,15 @@ builder.Services
     .AddTransient<UserService>()
     .AddTransient<ChannelService>()
     .AddTransient<RedeemCodeService>()
-    .AddHostedService<StatisticBackgroundTask>();
+    .AddHostedService<StatisticBackgroundTask>()
+    .AddHostedService<LoggerBackgroundTask>();
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
-    .AddSparkDeskService();
+    .AddSparkDeskService()
+    .AddQiansail()
+    .AddMetaGLMClientV4()
+    .AddClaudia();
 
 builder.Services
     .AddCors(options =>
@@ -100,9 +106,15 @@ builder.Services
                 .AllowCredentials());
     });
 
-builder.Services.AddDbContext<TokenApiDbContext>(options =>
+builder.Services.AddDbContext<AIDotNetDbContext>(options =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+});
+
+builder.Services.AddDbContext<LoggerDbContext>(options =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("LoggerConnection"))
         .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
 });
 
@@ -111,6 +123,8 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseStaticFiles();
 
 app.UseCors("AllowAll");
 
@@ -121,8 +135,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 
     using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<TokenApiDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
     await dbContext.Database.MigrateAsync();
+    var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
+    await loggerDbContext.Database.MigrateAsync();
 }
 
 await SettingService.LoadingSettings(app);
@@ -280,10 +296,13 @@ user.MapPut(string.Empty, async (UserService service, UpdateUserInput input) =>
 user.MapPost("/enable/{id}", async (UserService service, string id) =>
     await service.EnableAsync(id));
 
+user.MapPut("/update-password", async (UserService service, UpdatePasswordInput input) =>
+        await service.UpdatePasswordAsync(input))
+    .RequireAuthorization();
+
 #endregion
 
-
-#region Redeem CodeS
+#region Redeem Code
 
 var redeemCode = app.MapGroup("/api/v1/redeemCode")
     .WithGroupName("RedeemCode")
@@ -345,9 +364,10 @@ var statistics = app.MapGroup("/api/v1/statistics")
     .RequireAuthorization();
 
 statistics.MapGet(string.Empty,
-    async ([FromServices] TokenApiDbContext dbContext,
+    async ([FromServices] AIDotNetDbContext dbContext,
+            [FromServices] LoggerDbContext loggerDbContext,
             [FromServices] IUserContext userContext) =>
-        await StatisticsService.GetStatisticsAsync(dbContext, userContext));
+        await StatisticsService.GetStatisticsAsync(loggerDbContext, dbContext, userContext));
 
 #endregion
 

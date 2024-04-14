@@ -9,7 +9,9 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
-        await DbContext.Loggers.AddAsync(logger);
+        await LoggerDbContext.Loggers.AddAsync(logger);
+        
+        await LoggerDbContext.SaveChangesAsync();
     }
 
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
@@ -58,7 +60,7 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
     public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ChatLoggerType? type, string? model,
         DateTime? startTime, DateTime? endTime, string? keyword)
     {
-        var query = DbContext.Loggers
+        var query = LoggerDbContext.Loggers
             .AsNoTracking();
 
         if (type.HasValue)

@@ -20,17 +20,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     /// </summary>
     public async ValueTask<List<ChatChannel>> GetChannelsAsync()
     {
-#if DEBUG
         return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToListAsync();
-#endif
-
-        var channels = await cache.GetOrCreateAsync("channels", async entry =>
-        {
-            entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1);
-            return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToListAsync();
-        });
-
-        return channels;
     }
 
     public async ValueTask CreateAsync(ChatChannelInput chatChannel)

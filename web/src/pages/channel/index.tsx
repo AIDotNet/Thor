@@ -21,7 +21,7 @@ export default function Channel() {
             dataIndex: 'disable',
             render: (value: any) => {
                 return <Switch size='large'
-                    defaultChecked={!value} onChange={(v) => {
+                    defaultChecked={!value} onChange={() => {
                         disable(value.id)
                             .then((item) => {
                                 item.success ? Notification.success({
@@ -43,7 +43,7 @@ export default function Channel() {
             dataIndex: 'controlAutomatically',
             render: (value: any,i:any) => {
                 return <Switch size='large'
-                    defaultChecked={value} onChange={(v) => {
+                    defaultChecked={value} onChange={() => {
                         controlAutomatically(i.id)
                             .then((item) => {
                                 item.success ? Notification.success({
@@ -120,7 +120,7 @@ export default function Channel() {
                     item.order = v;
                     setData([...data]);
                 }}
-                onBlur={(v) => {
+                onBlur={() => {
                     UpdateOrder(item.id, item.order)
                         .then((i) => {
                             i.success ? Notification.success({

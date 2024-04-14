@@ -1,20 +1,17 @@
-﻿using System.Text.Json;
-using AIDotNet.API.Service.Domain;
+﻿using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Domain.Core;
 using AIDotNet.API.Service.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.DataAccess;
 
-public sealed class TokenApiDbContext(
-    DbContextOptions<TokenApiDbContext> options,
+public sealed class AIDotNetDbContext(
+    DbContextOptions<AIDotNetDbContext> options,
     IUserContext userContext) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
 
     public DbSet<Token> Tokens { get; set; }
-
-    public DbSet<ChatLogger> Loggers { get; set; }
 
     public DbSet<ChatChannel> Channels { get; set; }
 
@@ -22,10 +19,6 @@ public sealed class TokenApiDbContext(
 
     public DbSet<Setting> Settings { get; set; }
 
-    public DbSet<StatisticsConsumesNumber> StatisticsConsumesNumbers { get; set; }
-    
-    public DbSet<ModelStatisticsNumber> ModelStatisticsNumbers { get; set; }
-    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ConfigureAIDotNet();

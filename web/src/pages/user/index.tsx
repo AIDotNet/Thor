@@ -14,9 +14,6 @@ export default function Channel() {
     const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
     const [createVisible, setCreateVisible] = useState<boolean>(false);
-    const [updateVisible, setUpdateVisible] = useState<boolean>(false);
-    const [updateValue, setUpdateValue] = useState<any>();
-
     const [input, setInput] = useState({
         page: 1,
         pageSize: 10,
@@ -43,9 +40,9 @@ export default function Channel() {
             title: '状态',
             dataIndex: 'isDisabled',
             key: 'isDisabled',
-            render: (value: any,item:any) => {
+            render: (value: any, item: any) => {
                 return <Switch size='large'
-                    defaultChecked={!value} onChange={(v) => {
+                    defaultChecked={!value} onChange={() => {
                         enable(item.id)
                             .then((item) => {
                                 item.success ? Notification.success({
@@ -94,14 +91,10 @@ export default function Channel() {
         {
             title: '操作',
             key: 'action',
-            render: (text: any, item: any) => (
+            render: (_text: any, item: any) => (
                 <Dropdown
                     render={
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => {
-                                setUpdateValue(item);
-                                setUpdateVisible(true);
-                            }}>编辑</Dropdown.Item>
                             <Dropdown.Item style={{
                                 color: 'red',
                             }} onClick={() => removeUser(item.id)}>删除</Dropdown.Item>
@@ -182,7 +175,7 @@ export default function Channel() {
                     marginRight: '1rem',
                 }} placeholder='搜索关键字'></Input>
             </Header>
-            <Table style={{
+            <Table loading={loading} style={{
                 marginTop: '1rem',
             }} columns={columns} dataSource={data} pagination={{
                 total: total,
@@ -197,14 +190,14 @@ export default function Channel() {
                 },
 
             }} />
-            <CreateUser onSuccess={()=>{
+            <CreateUser onSuccess={() => {
                 setCreateVisible(false);
                 loadData();
             }} visible={createVisible} onCancel={() => {
                 setCreateVisible(false);
             }
             } />
-            
+
         </>
     )
 }

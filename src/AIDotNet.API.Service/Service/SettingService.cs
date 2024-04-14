@@ -19,7 +19,7 @@ public static class SettingService
     public static async Task LoadingSettings(WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<TokenApiDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
         var settings = await dbContext.Settings.ToListAsync();
         Settings = settings.ToImmutableList();
 
@@ -72,7 +72,7 @@ public static class SettingService
     /// <param name="settings"></param>
     /// <param name="dbContext"></param>
     public static async ValueTask UpdateSettingsAsync([FromBody] List<Setting> settings,
-        TokenApiDbContext dbContext)
+        AIDotNetDbContext dbContext)
     {
         var dbSettings = await dbContext.Settings.ToListAsync();
         foreach (var setting in dbSettings)

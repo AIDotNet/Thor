@@ -28,7 +28,7 @@ export default function UpdateToken({
     return <SideSheet title="创建Token" visible={visible} onCancel={onCancel}>
         <Divider></Divider>
         <Form initValues={value} onSubmit={values => handleSubmit(values)} style={{ width: 400 }}>
-            {({ formState, values, formApi }: any) => (
+            {({ values }: any) => (
                 <>
                     <Form.Input rules={[{
                         required: true,

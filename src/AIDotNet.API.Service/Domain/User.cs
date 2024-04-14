@@ -18,7 +18,7 @@ public sealed class User : Entity<string>, ISoftDeletion
     /// 头像
     /// </summary>
     public string? Avatar { get; set; }
-    
+
     /// <summary>
     /// 角色
     /// </summary>
@@ -66,7 +66,6 @@ public sealed class User : Entity<string>, ISoftDeletion
         DeletedAt = null;
         ConsumeToken = 0;
         RequestCount = 0;
-        
     }
 
     public void SetAdmin()
@@ -88,5 +87,10 @@ public sealed class User : Entity<string>, ISoftDeletion
     public void SetResidualCredit(long residualCredit)
     {
         ResidualCredit = residualCredit;
+    }
+
+    public bool VerifyPassword(string password)
+    {
+        return StringHelper.HashPassword(password, PasswordHas) == Password;
     }
 }

@@ -13,7 +13,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
         {
             using var scope = serviceProvider.CreateScope();
 
-            var dbContext = scope.ServiceProvider.GetRequiredService<TokenApiDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
             // 获取今天的日期范围
             var today = DateTime.Now.Date;
             var tomorrow = today.AddDays(1);

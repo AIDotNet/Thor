@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AIDotNet.API.Service.Migrations
+namespace AIDotNet.API.Service.Migrations.Master
 {
-    [DbContext(typeof(TokenApiDbContext))]
-    partial class TokenApiDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(AIDotNetDbContext))]
+    partial class AIDotNetDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -87,128 +87,6 @@ namespace AIDotNet.API.Service.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Channels");
-                });
-
-            modelBuilder.Entity("AIDotNet.API.Service.Domain.ChatLogger", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ChannelId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CompletionTokens")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Creator")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ModelName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Modifier")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PromptTokens")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Quota")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("TokenName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Creator");
-
-                    b.HasIndex("ModelName");
-
-                    b.HasIndex("TokenName");
-
-                    b.HasIndex("UserName");
-
-                    b.ToTable("Loggers");
-                });
-
-            modelBuilder.Entity("AIDotNet.API.Service.Domain.ModelStatisticsNumber", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Creator")
-                        .HasColumnType("TEXT");
-
-                    b.Property<ushort>("Day")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ModelName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Modifier")
-                        .HasColumnType("TEXT");
-
-                    b.Property<ushort>("Month")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Quota")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TokenUsed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<ushort>("Year")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Creator");
-
-                    b.HasIndex("Day");
-
-                    b.HasIndex("ModelName");
-
-                    b.HasIndex("Month");
-
-                    b.HasIndex("Year");
-
-                    b.ToTable("ModelStatisticsNumbers");
                 });
 
             modelBuilder.Entity("AIDotNet.API.Service.Domain.RedeemCode", b =>
@@ -425,55 +303,6 @@ namespace AIDotNet.API.Service.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AIDotNet.API.Service.Domain.StatisticsConsumesNumber", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Creator")
-                        .HasColumnType("TEXT");
-
-                    b.Property<ushort>("Day")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Modifier")
-                        .HasColumnType("TEXT");
-
-                    b.Property<ushort>("Month")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("Number")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("Value")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ushort>("Year")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Creator");
-
-                    b.HasIndex("Day");
-
-                    b.HasIndex("Month");
-
-                    b.HasIndex("Year");
-
-                    b.ToTable("StatisticsConsumesNumbers");
-                });
-
             modelBuilder.Entity("AIDotNet.API.Service.Domain.Token", b =>
                 {
                     b.Property<long>("Id")
@@ -600,14 +429,14 @@ namespace AIDotNet.API.Service.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "5c5fa814-d56b-4a6b-ab4e-92af426f1881",
+                            Id = "4cde8057-c272-4e2a-91b7-878032e4a2d0",
                             ConsumeToken = 0L,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "239573049@qq.com",
                             IsDelete = false,
                             IsDisabled = false,
-                            Password = "18506eb13b7691d38913aa6af135d395",
-                            PasswordHas = "aa6f2db494724b82b9f8076a6c696a56",
+                            Password = "b73f077db2980fe2765fc3b136babedb",
+                            PasswordHas = "e9a07d959d174ee6953b7777833dd23b",
                             RequestCount = 0L,
                             ResidualCredit = 10000000L,
                             Role = "admin",

@@ -8,7 +8,8 @@ namespace AIDotNet.API.Service.Service;
 
 public static class StatisticsService
 {
-    public static async ValueTask<StatisticsDto> GetStatisticsAsync(TokenApiDbContext dbContext,
+    public static async ValueTask<StatisticsDto> GetStatisticsAsync(LoggerDbContext dbContext,
+        AIDotNetDbContext aiDotNetDbContext,
         IUserContext userContext)
     {
         var statisticsDto = new StatisticsDto
@@ -136,7 +137,7 @@ public static class StatisticsService
                 x.Type == StatisticsConsumesNumberType.Consumes)
             .SumAsync(log => log.Value);
 
-        statisticsDto.CurrentResidualCredit = (await dbContext.Users
+        statisticsDto.CurrentResidualCredit = (await aiDotNetDbContext.Users
             .Where(x => x.Id == userContext.CurrentUserId)
             .FirstOrDefaultAsync())?.ResidualCredit ?? 0;
 

@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AIDotNet.API.Service.Migrations
+namespace AIDotNet.API.Service.Migrations.Master
 {
-    [DbContext(typeof(TokenApiDbContext))]
-    [Migration("20240412201451_Initial")]
+    [DbContext(typeof(AIDotNetDbContext))]
+    [Migration("20240414133304_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -28,6 +28,9 @@ namespace AIDotNet.API.Service.Migrations
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("ControlAutomatically")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -87,73 +90,6 @@ namespace AIDotNet.API.Service.Migrations
                     b.HasIndex("Name");
 
                     b.ToTable("Channels");
-                });
-
-            modelBuilder.Entity("AIDotNet.API.Service.Domain.ChatLogger", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ChannelId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ChannelName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CompletionTokens")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Creator")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ModelName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Modifier")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PromptTokens")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Quota")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("TokenName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Creator");
-
-                    b.HasIndex("ModelName");
-
-                    b.HasIndex("TokenName");
-
-                    b.HasIndex("UserName");
-
-                    b.ToTable("Loggers");
                 });
 
             modelBuilder.Entity("AIDotNet.API.Service.Domain.RedeemCode", b =>
@@ -268,14 +204,14 @@ namespace AIDotNet.API.Service.Migrations
                             Key = "Setting:GeneralSetting:EnableClearLog",
                             Description = "启用定时清理日志",
                             Private = true,
-                            Value = "false"
+                            Value = "true"
                         },
                         new
                         {
                             Key = "Setting:GeneralSetting:IntervalDays",
                             Description = "间隔天数",
                             Private = true,
-                            Value = "7"
+                            Value = "90"
                         },
                         new
                         {
@@ -496,14 +432,14 @@ namespace AIDotNet.API.Service.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "f9c067cf-7afa-4712-be30-5024cc47aa67",
+                            Id = "4cde8057-c272-4e2a-91b7-878032e4a2d0",
                             ConsumeToken = 0L,
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "239573049@qq.com",
                             IsDelete = false,
                             IsDisabled = false,
-                            Password = "7d7e935de87264488810a310c85f9cf3",
-                            PasswordHas = "f33e061c46fb4175b1dd929f677dae27",
+                            Password = "b73f077db2980fe2765fc3b136babedb",
+                            PasswordHas = "e9a07d959d174ee6953b7777833dd23b",
                             RequestCount = 0L,
                             ResidualCredit = 10000000L,
                             Role = "admin",

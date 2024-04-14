@@ -113,4 +113,23 @@ public class UserService(IServiceProvider serviceProvider)
 
         return result > 0;
     }
+
+    /// <summary>
+    /// 修改密码
+    /// </summary>
+    public async ValueTask UpdatePasswordAsync(UpdatePasswordInput input)
+    {
+        var user = await DbContext.Users.FindAsync(UserContext.CurrentUserId);
+        if (user == null)
+            throw new UnauthorizedAccessException();
+
+        if (!user.VerifyPassword(input.OldPassword))
+            throw new Exception("旧密码错误");
+
+        user.SetPassword(input.NewPassword);
+
+        await DbContext.Users.Where(x => x.Id == UserContext.CurrentUserId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.Password, user.Password)
+                .SetProperty(y => y.PasswordHas, user.PasswordHas));
+    }
 }
