@@ -8,3 +8,5 @@ services:
       dockerfile: src/AIDotNet.API.Service/Dockerfile
     volumes:
       - ./data:/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
