@@ -12,7 +12,7 @@ public static class SparkDeskHelper
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
 
-    public static XFSparkDeskChatAPI GetSparkDeskClient(string key, string? model)
+    public static XFSparkDeskChatAPI GetSparkDeskChatClient(string key, string? model)
     {
         XFSparkDeskChatAPI client;
         // appId|appKey|appSecret
@@ -54,6 +54,29 @@ public static class SparkDeskHelper
                 ModeType = modelVersion,
                 HostURL = hostURL
             });
+        }
+        else
+        {
+            throw new ArgumentException("Invalid API Key format, expected appId|appKey|appSecret");
+        }
+
+        return client;
+    }
+
+    public static XFSparkDeskImageGenerationAPI GetSparkDeskImageGenerationClient(string key, HttpClient httpClient)
+    {
+        XFSparkDeskImageGenerationAPI client;
+        // appId|appKey|appSecret
+        var parts = key.Split('|');
+        if (parts.Length == 3)
+        {
+            client = new XFSparkDeskImageGenerationAPI(new XFSparkDeskAPIConfig()
+            {
+                AppId = parts[0],
+                ApiKey = parts[1],
+                ApiSecret = parts[2],
+                HostURL = XFSparkDeskHostURL.ImageGeneration_V2_1
+            }, httpClient);
         }
         else
         {

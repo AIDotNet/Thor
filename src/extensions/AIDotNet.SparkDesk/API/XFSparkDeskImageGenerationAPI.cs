@@ -29,7 +29,7 @@ namespace AIDotNet.SparkDesk.API
 
         public async Task<XFSparkDeskImageGenerationAPIResponse> GenerationAsync(XFSparkDeskImageGenerationAPIRequest request, CancellationToken cancellationToken = default)
         {
-            var url = XFSparkDeskUtils.GetAuth(_config.HostURL, _config.ApiKey, _config.ApiSecret);
+            var url = XFSparkDeskUtils.GetPostAuth(_config.HostURL, _config.ApiKey, _config.ApiSecret);
 
             var response = await _httpClient.PostAsJsonAsync(url, new
             {
@@ -65,7 +65,8 @@ namespace AIDotNet.SparkDesk.API
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
             }, cancellationToken);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<XFSparkDeskImageGenerationAPIResponse>(cancellationToken) ?? throw new Exception("XFSparkDesk Image Generation Error");
+            var rawContent = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<XFSparkDeskImageGenerationAPIResponse>(rawContent) ?? throw new Exception("XFSparkDesk Image Generation Error");
         }
     }
 

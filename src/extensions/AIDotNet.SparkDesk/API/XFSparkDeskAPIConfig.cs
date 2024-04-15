@@ -70,5 +70,25 @@ namespace AIDotNet.SparkDesk.API
 
             return new UriBuilder(url) { Scheme = url.Scheme, Query = query }.ToString();
         }
+
+        public static string GetPostAuth(string hostUrl, string apiKey, string apiSecret)
+        {
+            var url = new Uri(hostUrl);
+
+            string dateString = DateTime.UtcNow.ToString("r");
+
+            byte[] signatureBytes = Encoding.ASCII.GetBytes($"host: {url.Host}\ndate: {dateString}\nPOST {url.AbsolutePath} HTTP/1.1");
+
+            using HMACSHA256 hmacsha256 = new(Encoding.ASCII.GetBytes(apiSecret));
+            byte[] computedHash = hmacsha256.ComputeHash(signatureBytes);
+            string signature = Convert.ToBase64String(computedHash);
+
+            string authorizationString = $"api_key=\"{apiKey}\",algorithm=\"hmac-sha256\",headers=\"host date request-line\",signature=\"{signature}\"";
+            string authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes(authorizationString));
+
+            string query = $"authorization={authorization}&date={dateString}&host={url.Host}";
+
+            return new UriBuilder(url) { Scheme = url.Scheme, Query = query }.ToString();
+        }
     }
 }
