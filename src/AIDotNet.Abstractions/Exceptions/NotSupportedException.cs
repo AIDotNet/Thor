@@ -1,4 +1,4 @@
-﻿namespace TokenApi.Service.Exceptions;
+﻿namespace AIDotNet.Abstractions.Exceptions;
 
 /// <summary>
 /// 未支持的功能异常

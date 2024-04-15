@@ -123,6 +123,7 @@ ipch/
 *.vsp
 *.vspx
 *.sap
+*.db
 
 # Visual Studio Trace Files
 *.e2e

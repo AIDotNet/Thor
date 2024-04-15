@@ -2,13 +2,13 @@
 using System.Text.Json;
 using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
+using AIDotNet.Abstractions.Exceptions;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Exceptions;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using MapsterMapper;
 using OpenAI.ObjectModels.RequestModels;
-using TokenApi.Service.Exceptions;
 
 namespace AIDotNet.API.Service.Service;
 

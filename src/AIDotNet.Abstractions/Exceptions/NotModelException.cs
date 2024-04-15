@@ -1,4 +1,4 @@
-﻿namespace TokenApi.Service.Exceptions;
+﻿namespace AIDotNet.Abstractions.Exceptions;
 
 /// <summary>
 /// 没有模型异常

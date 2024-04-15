@@ -307,29 +307,46 @@ user.MapPut("/update-password", async (UserService service, UpdatePasswordInput 
 var redeemCode = app.MapGroup("/api/v1/redeemCode")
     .WithGroupName("RedeemCode")
     .WithTags("RedeemCode")
-    .AddEndpointFilter<ResultFilter>()
+    .AddEndpointFilter<ResultFilter>();
+
+redeemCode.MapPost(string.Empty, async (RedeemCodeService service, RedeemCodeInput input, HttpContext context) =>
+        await service.CreateAsync(input, context))
     .RequireAuthorization(new AuthorizeAttribute()
     {
         Roles = RoleConstant.Admin
     });
 
-redeemCode.MapPost(string.Empty, async (RedeemCodeService service, RedeemCodeInput input, HttpContext context) =>
-    await service.CreateAsync(input, context));
-
 redeemCode.MapGet(string.Empty, async (RedeemCodeService service, int page, int pageSize, string? keyword) =>
-    await service.GetAsync(page, pageSize, keyword));
+        await service.GetAsync(page, pageSize, keyword))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 redeemCode.MapPut("{id}", async (RedeemCodeService service, long id, RedeemCodeInput input) =>
-    await service.UpdateAsync(id, input));
+        await service.UpdateAsync(id, input))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 redeemCode.MapPut("/enable/{id}", async (RedeemCodeService service, long id) =>
-    await service.EnableAsync(id));
+        await service.EnableAsync(id))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 redeemCode.MapDelete("{id}", async (RedeemCodeService service, long id) =>
-    await service.RemoveAsync(id));
+        await service.RemoveAsync(id))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 redeemCode.MapPost("/use/{code}", async (RedeemCodeService service, string code) =>
-    await service.UseAsync(code));
+        await service.UseAsync(code))
+    .RequireAuthorization(new AuthorizeAttribute());
 
 #endregion
 

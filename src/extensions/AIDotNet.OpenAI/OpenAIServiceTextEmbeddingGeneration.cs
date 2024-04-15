@@ -8,7 +8,7 @@ namespace AIDotNet.OpenAI;
 
 public sealed class OpenAIServiceTextEmbeddingGeneration : IApiTextEmbeddingGeneration
 {
-    public Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
+    public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -17,7 +17,7 @@ public sealed class OpenAIServiceTextEmbeddingGeneration : IApiTextEmbeddingGene
             ApiKey = options.Key,
             BaseDomain = options.Address
         });
-        
-        return openAiService.Embeddings.CreateEmbedding(createEmbeddingModel, cancellationToken);
+
+        return await openAiService.Embeddings.CreateEmbedding(createEmbeddingModel, cancellationToken);
     }
 }

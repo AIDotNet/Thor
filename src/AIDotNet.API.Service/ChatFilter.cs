@@ -1,5 +1,5 @@
 ﻿using AIDotNet.Abstractions.Dto;
-using TokenApi.Service.Exceptions;
+using AIDotNet.Abstractions.Exceptions;
 
 namespace AIDotNet.API.Service;
 
