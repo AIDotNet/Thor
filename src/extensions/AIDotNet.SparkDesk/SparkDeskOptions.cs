@@ -1,6 +1,4 @@
-﻿using Sdcb.SparkDesk;
-
-namespace AIDotNet.SparkDesk;
+﻿namespace AIDotNet.SparkDesk;
 
 public sealed class SparkDeskOptions
 {
