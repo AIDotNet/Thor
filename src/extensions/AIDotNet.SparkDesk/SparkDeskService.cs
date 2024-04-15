@@ -1,8 +1,9 @@
 ﻿using System.Runtime.CompilerServices;
 using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Exceptions;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using OpenAI.ObjectModels.RequestModels;
-using OpenAI.ObjectModels.ResponseModels;
 using Sdcb.SparkDesk;
 using ChatMessage = Sdcb.SparkDesk.ChatMessage;
 

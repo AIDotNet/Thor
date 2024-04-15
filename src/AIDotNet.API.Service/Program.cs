@@ -124,6 +124,22 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.Use((async (context, next) =>
+{
+    if (context.Request.Path == "/")
+    {
+        context.Request.Path = "/index.html";
+    }
+
+    await next(context);
+
+    if (context.Response.StatusCode == 404)
+    {
+        context.Request.Path = "/index.html";
+        await next(context);
+    }
+}));
+
 app.UseStaticFiles();
 
 app.UseCors("AllowAll");

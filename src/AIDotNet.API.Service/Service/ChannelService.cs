@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.OpenAI;

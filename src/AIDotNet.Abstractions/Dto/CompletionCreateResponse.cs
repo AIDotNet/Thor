@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
-using OpenAI.ObjectModels.ResponseModels;
-using OpenAI.ObjectModels.SharedModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace AIDotNet.Abstractions.Dto;
 

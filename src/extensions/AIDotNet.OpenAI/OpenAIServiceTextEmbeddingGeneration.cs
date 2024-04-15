@@ -1,23 +1,29 @@
-﻿using AIDotNet.Abstractions;
-using OpenAI;
-using OpenAI.Managers;
-using OpenAI.ObjectModels.RequestModels;
-using OpenAI.ObjectModels.ResponseModels;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using AIDotNet.Abstractions;
+using AIDotNet.Abstractions.Extensions;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace AIDotNet.OpenAI;
 
-public sealed class OpenAIServiceTextEmbeddingGeneration : IApiTextEmbeddingGeneration
+public sealed class OpenAIServiceTextEmbeddingGeneration(IHttpClientFactory httpClientFactory)
+    : IApiTextEmbeddingGeneration
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var openAiService = new OpenAIService(new OpenAiOptions()
-        {
-            ApiKey = options.Key,
-            BaseDomain = options.Address
-        });
+        var client = httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
 
-        return await openAiService.Embeddings.CreateEmbedding(createEmbeddingModel, cancellationToken);
+        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
+            createEmbeddingModel, options!.Key);
+
+        var result =
+            await response.Content.ReadFromJsonAsync<EmbeddingCreateResponse>(cancellationToken: cancellationToken);
+
+        return result;
     }
 }

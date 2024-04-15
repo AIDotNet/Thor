@@ -1,7 +1,8 @@
 ﻿using AIDotNet.Abstractions;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.MetaGLM.Models.RequestModels;
 using OpenAI.ObjectModels.RequestModels;
-using OpenAI.ObjectModels.ResponseModels;
 
 namespace AIDotNet.MetaGLM;
 

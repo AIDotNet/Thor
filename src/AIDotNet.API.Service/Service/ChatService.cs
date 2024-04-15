@@ -3,6 +3,7 @@ using System.Text.Json;
 using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.Exceptions;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Exceptions;
 using AIDotNet.API.Service.Infrastructure;
@@ -341,8 +342,10 @@ public sealed class ChatService(
     /// <param Name="module"></param>
     /// <param Name="channel"></param>
     /// <param Name="openService"></param>
+    /// <param name="context"></param>
     /// <param name="input">输入</param>
     /// <param name="channel">渠道</param>
+    /// <param name="openService"></param>
     /// <returns></returns>
     private static async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context,
         ChatCompletionCreateRequest input, ChatChannel channel, IApiChatCompletionService openService)
@@ -359,6 +362,8 @@ public sealed class ChatService(
         var id = "chatcmpl-" + StringHelper.GenerateRandomString(29);
         var systemFingerprint = "fp_" + StringHelper.GenerateRandomString(10);
         var responseMessage = new StringBuilder();
+        
+        context.Response.Headers.ContentType = "text/event-stream";
 
         if (input.Model?.Contains("vision") == true)
         {
@@ -410,6 +415,11 @@ public sealed class ChatService(
         var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
         var total = chatChannels.Sum(x => x.Order);
 
+        if(chatChannels.Length == 0)
+        {
+            throw new NotModelException("没有可用的模型");
+        }
+        
         var random = new Random();
 
         var value = random.Next(0, total);

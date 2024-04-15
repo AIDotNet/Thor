@@ -1,48 +1,104 @@
 ﻿using AIDotNet.Abstractions;
-using OpenAI;
-using OpenAI.Managers;
-using OpenAI.ObjectModels.RequestModels;
-using OpenAI.ObjectModels.ResponseModels.ImageResponseModel;
+using AIDotNet.Abstractions.Extensions;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 
 namespace AIDotNet.OpenAI;
 
-public class OpenAIServiceImageService : IApiImageService
+public class OpenAIServiceImageService(IHttpClientFactory httpClientFactory) : IApiImageService
 {
-    public Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
+    private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
+
+    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
-        var openAiService = new OpenAIService(new OpenAiOptions()
-        {
-            ApiKey = options.Key,
-            BaseDomain = options.Address
-        });
+        var client = httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
 
-        return openAiService.Image.CreateImage(imageCreate, cancellationToken);
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.Key}");
+
+        return await HttpClient.PostAndReadAsAsync<ImageCreateResponse>(options.Address + "/v1/images/generations",
+            imageCreate, cancellationToken);
     }
 
-    public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
+    public async Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
-        var openAiService = new OpenAIService(new OpenAiOptions()
+        var multipartContent = new MultipartFormDataContent();
+        if (imageEditCreateRequest.User != null)
         {
-            ApiKey = options.Key,
-            BaseDomain = options.Address
-        });
+            multipartContent.Add(new StringContent(imageEditCreateRequest.User), "user");
+        }
 
-        return openAiService.Image.CreateImageEdit(imageEditCreateRequest, cancellationToken);
+        if (imageEditCreateRequest.ResponseFormat != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.ResponseFormat), "response_format");
+        }
+
+        if (imageEditCreateRequest.Size != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.Size), "size");
+        }
+
+        if (imageEditCreateRequest.N != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.N.ToString()!), "n");
+        }
+
+        if (imageEditCreateRequest.Model != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.Model!), "model");
+        }
+
+        if (imageEditCreateRequest.Mask != null)
+        {
+            multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Mask), "mask",
+                imageEditCreateRequest.MaskName);
+        }
+
+        multipartContent.Add(new StringContent(imageEditCreateRequest.Prompt), "prompt");
+        multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image",
+            imageEditCreateRequest.ImageName);
+
+        return await HttpClient.PostFileAndReadAsAsync<ImageCreateResponse>(
+            options.Address.TrimEnd('/') + "/v1/images/edits",
+            multipartContent, cancellationToken);
     }
 
-    public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,
+    public async Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var openAiService = new OpenAIService(new OpenAiOptions()
+        var multipartContent = new MultipartFormDataContent();
+        if (imageEditCreateRequest.User != null)
         {
-            ApiKey = options.Key,
-            BaseDomain = options.Address
-        });
+            multipartContent.Add(new StringContent(imageEditCreateRequest.User), "user");
+        }
 
-        return openAiService.Image.CreateImageVariation(imageEditCreateRequest, cancellationToken);
+        if (imageEditCreateRequest.ResponseFormat != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.ResponseFormat), "response_format");
+        }
+
+        if (imageEditCreateRequest.Size != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.Size), "size");
+        }
+
+        if (imageEditCreateRequest.N != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.N.ToString()!), "n");
+        }
+
+        if (imageEditCreateRequest.Model != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.Model!), "model");
+        }
+
+        multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image",
+            imageEditCreateRequest.ImageName);
+
+        return await HttpClient.PostFileAndReadAsAsync<ImageCreateResponse>(
+            options!.Address!.TrimEnd('/') + "/v1//images/variations", multipartContent, cancellationToken);
     }
 }
