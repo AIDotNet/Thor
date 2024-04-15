@@ -351,7 +351,6 @@ public sealed class ChatService(
         ChatCompletionCreateRequest input, ChatChannel channel, IApiChatCompletionService openService)
     {
         int requestToken;
-        int responseToken = 0;
 
         var setting = new ChatOptions()
         {
@@ -367,8 +366,6 @@ public sealed class ChatService(
 
         if (input.Model?.Contains("vision") == true)
         {
-            requestToken = 0;
-
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.SelectMany(x => x.Contents)
                 .Where(x => x.Type == "text")
                 .Select(x => x.Text).ToArray());
@@ -398,7 +395,7 @@ public sealed class ChatService(
             await context.WriteEndAsync();
         }
 
-        responseToken = TokenHelper.GetTokens(responseMessage.ToString());
+        var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 
         return (requestToken, responseToken);
     }
