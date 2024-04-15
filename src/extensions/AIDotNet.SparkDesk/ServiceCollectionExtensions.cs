@@ -1,6 +1,5 @@
 ﻿using AIDotNet.Abstractions;
 using AIDotNet.SparkDesk;
-using Sdcb.SparkDesk;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
