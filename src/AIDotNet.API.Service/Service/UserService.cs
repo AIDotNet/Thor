@@ -65,7 +65,7 @@ public class UserService(IServiceProvider serviceProvider)
             return new PagingDto<User>(total, result);
         }
 
-        return new PagingDto<User>(total, new List<User>());
+        return new PagingDto<User>(total, []);
     }
 
     public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string token)
@@ -83,6 +83,7 @@ public class UserService(IServiceProvider serviceProvider)
             .Tokens.Where(x => x.Key == token)
             .ExecuteUpdateAsync(x =>
                 x.SetProperty(y => y.RemainQuota, y => y.RemainQuota - consume)
+                    .SetProperty(y => y.AccessedTime, DateTime.Now)
                     .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
 
         return result > 0;

@@ -89,5 +89,12 @@ public static class SettingService
         await dbContext.SaveChangesAsync();
 
         Settings = dbSettings.ToImmutableList();
+        
+        PromptRate.Clear();
+        CompletionRate.Clear();
+
+        PromptRate = GetSetting<Dictionary<string, decimal>>(SettingExtensions.GeneralSetting.ModelPromptRate);
+
+        CompletionRate = GetSetting<Dictionary<string, decimal>>(SettingExtensions.GeneralSetting.ModelCompletionRate);
     }
 }
