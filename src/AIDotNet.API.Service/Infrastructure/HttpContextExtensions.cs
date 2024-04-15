@@ -7,6 +7,25 @@ namespace AIDotNet.API.Service.Infrastructure;
 
 public static class HttpContextExtensions
 {
+    public static async ValueTask WriteResultAsync(this HttpContext context, object value)
+    {
+        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(value, new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        }) + "\n\n", Encoding.UTF8);
+    }
+
+    public static async ValueTask WriteResultEndAsync(this HttpContext context, object value)
+    {
+        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(value, new JsonSerializerOptions
+        {
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        }) + "\n\n", Encoding.UTF8);
+        await context.WriteEndAsync();
+    }
+
     public static async ValueTask WriteOpenAiResultAsync(this HttpContext context, string content, string model,
         string systemFingerprint, string id)
     {

@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.Service;
 
-public class UserService(IServiceProvider serviceProvider)
+public class UserService(IServiceProvider serviceProvider,
+    TokenService tokenService)
     : ApplicationService(serviceProvider)
 {
     public async ValueTask<User> CreateAsync(CreateUserInput input)
@@ -24,7 +25,14 @@ public class UserService(IServiceProvider serviceProvider)
         user.SetResidualCredit(userQuota);
 
         await DbContext.Users.AddAsync(user);
-        await DbContext.SaveChangesAsync();
+
+       await tokenService.CreateAsync(new TokenInput()
+        {
+            Name = "默认Token",
+            UnlimitedQuota = true,
+            UnlimitedExpired = true,
+        });
+        
         return user;
     }
 

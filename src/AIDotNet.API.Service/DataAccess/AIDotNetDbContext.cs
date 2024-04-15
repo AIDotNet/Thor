@@ -1,6 +1,7 @@
 ﻿using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Domain.Core;
 using AIDotNet.API.Service.Infrastructure;
+using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.DataAccess;
@@ -28,6 +29,18 @@ public sealed class AIDotNetDbContext(
         user.SetResidualCredit(10000000);
 
         modelBuilder.Entity<User>().HasData(user);
+
+        var token = new Token
+        {
+            Id = 9999,
+            Key = "sk-" + StringHelper.GenerateRandomString(38),
+            Creator = user.Id,
+            Name = "默认Token",
+            UnlimitedQuota = true,
+            UnlimitedExpired = true,
+        };
+
+        modelBuilder.Entity<Token>().HasData(token);
 
         modelBuilder.InitSetting();
     }

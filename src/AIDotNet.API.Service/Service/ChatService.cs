@@ -268,7 +268,7 @@ public sealed class ChatService(
             int requestToken;
             int responseToken = 0;
 
-            if (module.Stream == true)
+            if (module.Stream == true )
             {
                 (requestToken, responseToken) = await StreamHandlerAsync(context, module, channel, openService);
             }
@@ -358,8 +358,6 @@ public sealed class ChatService(
             Address = channel.Address,
         };
 
-        var id = "chatcmpl-" + StringHelper.GenerateRandomString(29);
-        var systemFingerprint = "fp_" + StringHelper.GenerateRandomString(10);
         var responseMessage = new StringBuilder();
         
         context.Response.Headers.ContentType = "text/event-stream";
@@ -373,9 +371,7 @@ public sealed class ChatService(
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
                 responseMessage.Append(item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
-                await context.WriteOpenAiResultAsync(item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty,
-                    input.Model,
-                    systemFingerprint, id);
+                await context.WriteResultAsync(item);
             }
 
             await context.WriteEndAsync();
@@ -386,10 +382,8 @@ public sealed class ChatService(
 
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
-                responseMessage.Append(item);
-                await context.WriteOpenAiResultAsync(item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty,
-                    input.Model,
-                    systemFingerprint, id);
+                responseMessage.Append(item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
+                await context.WriteResultAsync(item);
             }
 
             await context.WriteEndAsync();

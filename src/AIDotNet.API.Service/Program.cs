@@ -123,6 +123,21 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.Use((async (context, next) =>
+{
+    if (context.Request.Path == "/")
+    {
+        context.Request.Path = "/index.html";
+    }
+    
+    await next(context);
+
+    if (context.Response.StatusCode == 404)
+    {
+        context.Request.Path = "/index.html";
+        await next(context);
+    }
+}));
 
 app.Use((async (context, next) =>
 {
@@ -149,13 +164,18 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
-    await dbContext.Database.MigrateAsync();
-    var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
-    await loggerDbContext.Database.MigrateAsync();
 }
+
+if (!Directory.Exists("/data"))
+{
+    Directory.CreateDirectory("/data");
+}
+
+using var scope = app.Services.CreateScope();
+var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+await dbContext.Database.MigrateAsync();
+var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
+await loggerDbContext.Database.MigrateAsync();
 
 await SettingService.LoadingSettings(app);
 
@@ -286,31 +306,44 @@ logger.MapGet(string.Empty,
 var user = app.MapGroup("/api/v1/user")
     .WithGroupName("User")
     .WithTags("User")
-    .AddEndpointFilter<ResultFilter>()
-    .RequireAuthorization(new AuthorizeAttribute()
-    {
-        Roles = RoleConstant.Admin
-    });
+    .AddEndpointFilter<ResultFilter>();
 
 user.MapPost(string.Empty, async (UserService service, CreateUserInput input) =>
         await service.CreateAsync(input))
     .AllowAnonymous();
 
 user.MapGet(string.Empty, async (UserService service, int page, int pageSize, string? keyword) =>
-    await service.GetAsync(page, pageSize, keyword));
+    await service.GetAsync(page, pageSize, keyword))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 user.MapGet("info", async (UserService service) =>
-    await service.GetAsync());
+    await service.GetAsync())
+    .RequireAuthorization();
 
 
 user.MapDelete("{id}", async (UserService service, string id) =>
-    await service.RemoveAsync(id));
+    await service.RemoveAsync(id))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 user.MapPut(string.Empty, async (UserService service, UpdateUserInput input) =>
-    await service.UpdateAsync(input));
+    await service.UpdateAsync(input))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 user.MapPost("/enable/{id}", async (UserService service, string id) =>
-    await service.EnableAsync(id));
+    await service.EnableAsync(id))
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
 
 user.MapPut("/update-password", async (UserService service, UpdatePasswordInput input) =>
         await service.UpdatePasswordAsync(input))
