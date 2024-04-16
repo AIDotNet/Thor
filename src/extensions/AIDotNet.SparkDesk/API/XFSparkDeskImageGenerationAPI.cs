@@ -65,7 +65,7 @@ namespace AIDotNet.SparkDesk.API
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
             }, cancellationToken);
             response.EnsureSuccessStatusCode();
-            var rawContent = await response.Content.ReadAsStringAsync();
+            var rawContent = await response.Content.ReadAsStringAsync(cancellationToken);
             return JsonSerializer.Deserialize<XFSparkDeskImageGenerationAPIResponse>(rawContent) ?? throw new Exception("XFSparkDesk Image Generation Error");
         }
     }

@@ -16,7 +16,10 @@ public sealed class SparkDeskService : IApiChatCompletionService
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = SparkDeskHelper.GetSparkDeskChatClient(options!.Key!, input?.Model);
+        if (string.IsNullOrWhiteSpace(input.Model))
+            throw new NotModelException(input.Model);
+
+        var client = SparkDeskHelper.GetSparkDeskChatClient(options!.Key!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
 
         if (input.TopP == null)
         {
@@ -131,7 +134,10 @@ public sealed class SparkDeskService : IApiChatCompletionService
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var client = SparkDeskHelper.GetSparkDeskChatClient(options!.Key!, input?.Model);
+        if (string.IsNullOrWhiteSpace(input.Model))
+            throw new NotModelException(input.Model);
+
+        var client = SparkDeskHelper.GetSparkDeskChatClient(options!.Key!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
 
         if (input.TopP == null)
         {

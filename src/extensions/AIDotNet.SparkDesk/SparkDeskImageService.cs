@@ -16,8 +16,19 @@ namespace AIDotNet.SparkDesk
 
         public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var client = SparkDeskHelper.GetSparkDeskImageGenerationClient(options?.Key ?? "", HttpClient);
-            var sizeInfo = imageCreate.Size?.Split("x") ?? ["512", "512"];
+            var client = SparkDeskHelper.GetSparkDeskImageGenerationClient(options?.Key ?? "", HttpClient, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
+            var width = 512;
+            var height = 512;
+            try
+            {
+                var sizeInfo = imageCreate.Size?.Split("x") ?? ["512", "512"];
+                width = Convert.ToInt32(sizeInfo[0]);
+                height = Convert.ToInt32(sizeInfo[1]);
+            }
+            catch (Exception)
+            {
+                throw new Exception("create image size error");
+            }
             var ret = new ImageCreateResponse()
             {
                 HttpStatusCode = System.Net.HttpStatusCode.OK,
@@ -31,8 +42,8 @@ namespace AIDotNet.SparkDesk
 
                 var response = await client.GenerationAsync(new XFSparkDeskImageGenerationAPIRequest()
                 {
-                    Width = Convert.ToInt32(sizeInfo[0]),
-                    Height = Convert.ToInt32(sizeInfo[1]),
+                    Width = width,
+                    Height = height,
                     Content = imageCreate.Prompt
                 }, cancellationToken);
 
