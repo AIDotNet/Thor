@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Text;
@@ -52,7 +53,15 @@ namespace AIDotNet.SparkDesk.API
                         compress = request.MessageFeature.Compress,
                         format = request.MessageFeature.Format,
                         status = 3,
-                        text = request.Text
+                        text = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new
+                        {
+                            messages = new List<object>(){
+                                new {
+                                    content = request.Text,
+                                    role = "user"
+                                }
+                            }
+                        })))
                     }
                 }
             }, new JsonSerializerOptions
@@ -73,7 +82,10 @@ namespace AIDotNet.SparkDesk.API
         /// </summary>
         public string Domain { get; set; } = null!;
 
-        public XFSparkDeskEmbeddingAPIFeatureRequest MessageFeature { get; set; } = new XFSparkDeskEmbeddingAPIFeatureRequest();
+        public XFSparkDeskEmbeddingAPIFeatureRequest MessageFeature { get; set; } = new XFSparkDeskEmbeddingAPIFeatureRequest()
+        {
+            Format = "json"
+        };
 
         public XFSparkDeskEmbeddingAPIFeatureRequest ResultFeature { get; set; } = new XFSparkDeskEmbeddingAPIFeatureRequest();
 

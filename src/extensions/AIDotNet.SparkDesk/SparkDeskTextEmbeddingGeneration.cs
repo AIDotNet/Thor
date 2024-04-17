@@ -19,7 +19,7 @@ public sealed class SparkDeskTextEmbeddingGeneration(IHttpClientFactory httpClie
         var data = await client.GenerationAsync(new XFSparkDeskEmbeddingAPIRequest()
         {
             Domain = "para",
-            Text = Convert.ToBase64String(Encoding.UTF8.GetBytes(createEmbeddingModel.InputCalculated.First()))
+            Text = createEmbeddingModel.InputCalculated.First()
         }, cancellationToken);
         if (data.Header == null || data.Header.Code != 0 || data.Payload == null)
             throw new Exception(data.Header?.Message);
