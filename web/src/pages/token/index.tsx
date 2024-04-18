@@ -176,7 +176,9 @@ export default function Token() {
     };
 
     return (
-        <>
+        <div  style={{
+            margin: '20px'
+        }}>
             <Header>
                 <span style={{
                     fontSize: '1.5rem',
@@ -250,6 +252,6 @@ export default function Token() {
                 setUpdateTokenValue({} as any);
                 loadingData();
             }} />
-        </>
+        </div>
     )
 }

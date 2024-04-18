@@ -218,10 +218,31 @@ export default function Panel() {
         const modelConsumptionDistributionChart = echarts.init(document.getElementById('model-consumption-distribution') as HTMLDivElement);
         var modelConsumptionDistributionOption = {
             tooltip: {
-                trigger: 'item',
+                trigger: 'axis',
+                axisPointer: {
+                    type: "cross",
+                    label: {
+                        formatter: function (params: any) {
+                            if (params.seriesData.length === 0) {
+                                // @ts-ignore
+                                window.mouseCurValue = params.value;
+                            }
+                        }
+                    }
+                },
                 formatter: function (params: any) {
-                    return params.name + ': ' + renderQuota(params.value, 6);
-                }
+                    let res = "", sum = 0;
+                    for (let i = 0; i < params.length; i++) {
+                        let series = params[i];
+                        sum += Number(series.data);
+                        // @ts-ignore
+                        if (sum >= window.mouseCurValue) {
+                            res = series.axisValue + "<br/>" + series.marker + series.seriesName + ":" + renderQuota(series.data, 6) + "<br/>";
+                            break;
+                        }
+                    }
+                    return res;
+                },
             },
             legend: {
                 orient: 'vertical',
@@ -295,41 +316,48 @@ export default function Panel() {
             })
         })
 
-        var proportionOfModelCallsOption = {
+        let option = {
             tooltip: {
                 trigger: 'item',
-                formatter: '{a} <br/>{b}: {c} ({d}%)'
+                formatter: (params: any) => {
+                    return `${params.name}：${renderQuota(params.value, 6)}(${params.percent}%)`
+                }
             },
             legend: {
-                orient: 'vertical',
-                left: 10,
-                data: proportionOfModel?.map((item: { name: any; }) => item.name)
-            },
-            toolbox: {
-                show: true,
-                feature: {
-                    mark: { show: true },
-                    dataView: { show: true, readOnly: false },
-                    restore: { show: true },
-                    saveAsImage: { show: true }
-                }
+                top: '90%',
+                left: 'center'
             },
             series: [
                 {
-                    name: 'Token模型消耗占比',
+                    name: 'Access From',
                     type: 'pie',
-                    radius: [50, 250],
-                    center: ['50%', '50%'],
-                    roseType: 'area',
+                    radius: ['30%', '50%'],
+                    avoidLabelOverlap: false,
                     itemStyle: {
-                        borderRadius: 8
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: '{b}：{d}%', // 用来换行
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 40,
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
                     },
                     data: proportionOfModel
                 }
             ]
         };
 
-        proportionOfModelCallsOption && proportionOfModelCallsChart.setOption(proportionOfModelCallsOption);
+        option && proportionOfModelCallsChart.setOption(option);
 
     }, [data]);
 
@@ -430,8 +458,8 @@ export default function Panel() {
                         width: '100%',
                     }} itemKey="2">
                         <div style={{
-                            height: '450px',
-                            width: '690px',
+                            height: 'calc(100vh - 400px)',
+                            width: 'calc(100vw - 100px)',
                         }} id='proportion-of-model-calls'>
                         </div>
                     </TabPane>

@@ -158,7 +158,9 @@ export default function RedeemCode() {
     };
 
     return (
-        <>
+        <div  style={{
+            margin: '20px'
+        }}>
             <Header>
                 <span style={{
                     fontSize: '1.5rem',
@@ -221,6 +223,6 @@ export default function RedeemCode() {
                 setUpdateTokenValue({} as any);
                 loadingData();
             }} />
-        </>
+        </div>
     )
 }

@@ -21,7 +21,9 @@ export default function Channel() {
     }, []);
 
     return (
-        <Tabs type="line">
+        <Tabs type="line" style={{
+            margin: '20px'
+        }}>
             <TabPane tab="业务设置" itemKey="1">
                 <ServiceSetup setSettings={(v:any)=>{
                     setSettings(v);

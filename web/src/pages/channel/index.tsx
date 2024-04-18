@@ -246,7 +246,9 @@ export default function Channel() {
     };
 
     return (
-        <>
+        <div  style={{
+            margin: '20px'
+        }}>
             <Header>
                 <span style={{
                     fontSize: '1.5rem',
@@ -311,6 +313,6 @@ export default function Channel() {
                 visible={updateVisible}
                 onCancel={() => setUpdateVisible(false)} />
 
-        </>
+        </div>
     )
 }

@@ -101,10 +101,12 @@ export default function Channel() {
 
     useEffect(() => {
         loadData()
-    }, [input.page,input.pageSize]);
+    }, [input.page, input.pageSize]);
 
     return (
-        <>
+        <div style={{
+            margin: '20px'
+        }}>
             <Header>
                 <span style={{
                     fontSize: '1.5rem',
@@ -124,7 +126,7 @@ export default function Channel() {
                         float: 'right',
                     }}>操作</Button>
                 </Dropdown>
-                <Button onClick={()=>loadData()} style={{
+                <Button onClick={() => loadData()} style={{
                     marginRight: '0.5rem',
                     float: 'right',
                 }}>搜索</Button>
@@ -198,6 +200,6 @@ export default function Channel() {
                 },
 
             }} />
-        </>
+        </div>
     )
 }

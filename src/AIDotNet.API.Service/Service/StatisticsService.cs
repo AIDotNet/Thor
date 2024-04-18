@@ -46,39 +46,65 @@ public static class StatisticsService
                     Type = group.Key.Type,
                     Value = group.Sum(log => log.Value), // 请求次数
                 });
+        // 获取过去七天的日期列表
+        var dateList = Enumerable.Range(0, 7).Select(days => DateTime.Now.Date.AddDays(-days)).ToList();
 
         // 统计用户请求 消费额度 Token总数
-        foreach (var userStatistic in (await userStatistics.ToListAsync()))
+        foreach (var date in dateList)
         {
-            switch (userStatistic.Type)
+            var userStatistic = (await userStatistics.ToListAsync())
+                .FirstOrDefault(stat => new DateTime(stat.Year, stat.Month, stat.Day) == date);
+
+            if (userStatistic != null)
             {
-                case StatisticsConsumesNumberType.Consumes:
-                    statisticsDto.Consumes.Add(new StatisticsNumberDto
-                    {
-                        DateTime =
-                            new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                "yyyy-MM-dd"),
-                        Value = userStatistic.Value
-                    });
-                    break;
-                case StatisticsConsumesNumberType.Requests:
-                    statisticsDto.Requests.Add(new StatisticsNumberDto
-                    {
-                        DateTime =
-                            new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                "yyyy-MM-dd"),
-                        Value = userStatistic.Value
-                    });
-                    break;
-                case StatisticsConsumesNumberType.Tokens:
-                    statisticsDto.Tokens.Add(new StatisticsNumberDto
-                    {
-                        DateTime =
-                            new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                "yyyy-MM-dd"),
-                        Value = userStatistic.Value
-                    });
-                    break;
+                switch (userStatistic.Type)
+                {
+                    case StatisticsConsumesNumberType.Consumes:
+                        statisticsDto.Consumes.Add(new StatisticsNumberDto
+                        {
+                            DateTime =
+                                new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
+                                    "yyyy-MM-dd"),
+                            Value = userStatistic.Value
+                        });
+                        break;
+                    case StatisticsConsumesNumberType.Requests:
+                        statisticsDto.Requests.Add(new StatisticsNumberDto
+                        {
+                            DateTime =
+                                new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
+                                    "yyyy-MM-dd"),
+                            Value = userStatistic.Value
+                        });
+                        break;
+                    case StatisticsConsumesNumberType.Tokens:
+                        statisticsDto.Tokens.Add(new StatisticsNumberDto
+                        {
+                            DateTime =
+                                new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
+                                    "yyyy-MM-dd"),
+                            Value = userStatistic.Value
+                        });
+                        break;
+                }
+            }
+            else
+            {
+                statisticsDto.Consumes.Add(new StatisticsNumberDto
+                {
+                    DateTime = date.ToString("yyyy-MM-dd"),
+                    Value = 0
+                });
+                statisticsDto.Requests.Add(new StatisticsNumberDto
+                {
+                    DateTime = date.ToString("yyyy-MM-dd"),
+                    Value = 0
+                });
+                statisticsDto.Tokens.Add(new StatisticsNumberDto
+                {
+                    DateTime = date.ToString("yyyy-MM-dd"),
+                    Value = 0
+                });
             }
         }
 
@@ -103,9 +129,11 @@ public static class StatisticsService
                     TokenUsed = group.Sum(log => log.TokenUsed), // Token使用量
                     Quota = group.Sum(log => log.Quota) // 消耗额度
                 }).ToListAsync();
-
-
-        statisticsDto.ModelDate = modelStatistics.Select(x => x.CreateAt.ToString("MM-dd")).Distinct().ToList();
+        
+        
+        var allDates = dateList.Select(x => x.ToString("MM-dd")).Distinct().ToList();
+        
+        statisticsDto.ModelDate = allDates;
 
         foreach (var modelStatistic in modelStatistics.GroupBy(x => new
                  {
@@ -115,17 +143,29 @@ public static class StatisticsService
         {
             if (statisticsDto.Models.All(x => x.Name != modelStatistic.Key.ModelName))
             {
+                var dataForAllDates = new List<int>();
+
+                // Initialize the data list with 0 for all dates
+                foreach (var date in allDates)
+                {
+                    dataForAllDates.Add(0);
+                }
+
                 statisticsDto.Models.Add(new ModelStatisticsDto
                 {
                     CreatedAt = modelStatistic.Key.CreateAt,
                     Name = modelStatistic.Key.ModelName,
-                    Data = new List<int>()
+                    Data = dataForAllDates
                 });
             }
 
             var model = statisticsDto.Models.FirstOrDefault(x => x.Name == modelStatistic.Key.ModelName);
 
-            model!.Data.Add(modelStatistic.Sum(x => x.Quota));
+            // Find the index of the current date in the allDates list
+            var dateIndex = allDates.IndexOf(modelStatistic.Key.CreateAt.ToString("MM-dd"));
+
+            // Update the data for the current date
+            model!.Data[dateIndex] = modelStatistic.Sum(x => x.Quota);
             model.TokenUsed = modelStatistic.Sum(x => x.TokenUsed);
         }
 

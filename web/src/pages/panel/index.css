@@ -1,5 +1,6 @@
 .dashboard {
     display: grid;
+    margin: 20px;
     grid-gap: 20px;
     overflow: auto;
     height: max-content;

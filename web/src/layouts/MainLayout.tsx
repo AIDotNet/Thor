@@ -1,8 +1,9 @@
 import { Layout, Nav, Avatar, Switch, Dropdown, Button } from '@douyinfe/semi-ui';
-import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
+import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { info } from '../services/UserService';
+import { GeneralSetting, InitSetting } from '../services/SettingService';
 const body = document.body;
 
 localStorage.getItem('theme-mode') === 'dark' && body.setAttribute('theme-mode', 'dark');
@@ -18,48 +19,63 @@ export default function MainLayout() {
             itemKey: 'Home',
             text: '总览',
             icon: <IconHistogram size="large" />,
+            enable: true,
             role: 'user,admin'
         },
         {
             itemKey: 'Channel',
             text: '渠道',
             icon: <IconBranch size="large" />,
+            enable: true,
             role: 'admin'
+        },
+        {
+            itemKey: 'Chat',
+            text: '对话',
+            icon: <IconComment size="large" />,
+            enable: false,
+            role: 'user,admin'
         },
         {
             itemKey: 'Token',
             text: '令牌',
             icon: <IconKey size="large" />,
+            enable: true,
             role: 'user,admin'
         },
         {
             itemKey: 'Logger',
             text: '日志',
             icon: <IconArticle size="large" />,
+            enable: true,
             role: 'user,admin'
         },
         {
             itemKey: 'RedeemCode',
             text: '兑换码',
             icon: <IconCreditCard size="large" />,
+            enable: true,
             role: 'admin'
         },
         {
             itemKey: 'User',
             text: '用户管理',
             icon: <IconUser size="large" />,
+            enable: true,
             role: 'admin'
         },
         {
             itemKey: 'Current',
             text: '钱包/个人信息',
             icon: <IconUserSetting size="large" />,
+            enable: true,
             role: 'user,admin'
         },
         {
             itemKey: 'Setting',
             text: '设置',
             icon: <IconSetting size="large" />,
+            enable: true,
             role: 'admin'
         },
     ]);
@@ -100,7 +116,18 @@ export default function MainLayout() {
         // 解析token
         const tokenData = JSON.parse(atob(token.split('.')[1]));
 
-        setItems(items.filter(item => item.role.includes(tokenData.role)));
+        const chatLink = InitSetting?.find(x => x.key === GeneralSetting.ChatLink)?.value
+
+        if (chatLink) {
+            // 修改 Chat 
+            items.forEach(item => {
+                if (item.itemKey === 'Chat') {
+                    item.enable = true;
+                }
+            })
+        }
+
+        setItems(items.filter(item => item.enable && item.role.includes(tokenData.role)));
 
 
         // 获取当前路由
@@ -130,6 +157,9 @@ export default function MainLayout() {
                 break;
             case '/redeemCode':
                 setKey('RedeemCode');
+                break;
+            case '/chat':
+                setKey('Chat');
                 break;
         }
 
@@ -177,6 +207,9 @@ export default function MainLayout() {
                             case 'RedeemCode':
                                 navigation('/redeemCode');
                                 break;
+                            case 'Chat':
+                                navigation('/chat');
+                                break;
                         }
                         setKey(data.itemKey as string);
                     }}
@@ -216,7 +249,6 @@ export default function MainLayout() {
                 </Header>
                 <Content
                     style={{
-                        padding: '24px',
                         backgroundColor: 'var(--semi-color-bg-0)',
                         overflowY: 'auto'
                     }}

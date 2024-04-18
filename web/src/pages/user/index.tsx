@@ -140,7 +140,9 @@ export default function Channel() {
     }, [input]);
 
     return (
-        <>
+        <div style={{
+            margin: '20px'
+        }}>
             <Header>
                 <span style={{
                     fontSize: '1.5rem',
@@ -198,6 +200,6 @@ export default function Channel() {
             }
             } />
 
-        </>
+        </div>
     )
 }
