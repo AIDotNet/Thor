@@ -12,47 +12,6 @@ public record BaseResponse
     public HttpStatusCode HttpStatusCode { get; set; }
 }
 
-public record RateLimitInfo
-{
-    public string? LimitRequests { get; set; }
-    public string? LimitTokens { get; set; }
-    public string? LimitTokensUsageBased { get; set; }
-    public string? RemainingRequests { get; set; }
-    public string? RemainingTokens { get; set; }
-    public string? RemainingTokensUsageBased { get; set; }
-    public string? ResetRequests { get; set; }
-    public string? ResetTokens { get; set; }
-    public string? ResetTokensUsageBased { get; set; }
-}
-
-public record OpenAIInfo
-{
-    public string? Model { get; set; }
-    public string? Organization { get; set; }
-    public string? ProcessingMs { get; set; }
-    public string? Version { get; set; }
-}
-
-public record ResponseHeaderValues
-{
-    public DateTimeOffset? Date { get; set; }
-    public string? Connection { get; set; }
-    public string? AccessControlAllowOrigin { get; set; }
-    public string? CacheControl { get; set; }
-    public string? Vary { get; set; }
-    public string? XRequestId { get; set; }
-    public string? StrictTransportSecurity { get; set; }
-    public string? CFCacheStatus { get; set; }
-    public List<string>? SetCookie { get; set; }
-    public string? Server { get; set; }
-    public string? CF_RAY { get; set; }
-    public string? AltSvc { get; set; }
-    public Dictionary<string, IEnumerable<string>>? All { get; set; }
-
-    public RateLimitInfo? RateLimits { get; set; }
-    public OpenAIInfo? OpenAI { get; set; }
-}
-
 public record DataBaseResponse<T> : BaseResponse
 {
     [JsonPropertyName("data")] public T? Data { get; set; }

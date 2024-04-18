@@ -43,8 +43,17 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         {
             line += Environment.NewLine;
 
+            if (line.StartsWith("{"))
+            {
+                // 如果是json数据则直接返回
+                yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
+                    AIDtoNetJsonSerializer.DefaultOptions);
+                
+                break;
+            }
+            
             if (line.StartsWith("data:"))
-                line = line.Substring("data:".Length);
+                line = line["data:".Length..];
 
             line = line.Trim();
 
@@ -57,13 +66,12 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
             {
                 continue;
             }
+            
 
             if (string.IsNullOrWhiteSpace(line)) continue;
-            
-            var result =
-                JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
-                    AIDtoNetJsonSerializer.DefaultOptions);
-            yield return result;
+
+            yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
+                AIDtoNetJsonSerializer.DefaultOptions);
         }
     }
 }

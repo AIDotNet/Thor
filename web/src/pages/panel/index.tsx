@@ -148,7 +148,7 @@ export default function Panel() {
         };
 
         // 获取data.data.consumes中的最后一个元素
-        const lastRequest = data?.consumes?.slice(-1)[0];
+        const lastRequest = data?.requests?.slice(-1)[0];
         setCurrentDayRequest(lastRequest?.value);
 
         requestOption && requestsChart.setOption(requestOption);

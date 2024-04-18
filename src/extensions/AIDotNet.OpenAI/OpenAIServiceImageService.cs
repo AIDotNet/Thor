@@ -1,4 +1,5 @@
-﻿using AIDotNet.Abstractions;
+﻿using System.Net.Http.Json;
+using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Extensions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
@@ -12,12 +13,13 @@ public class OpenAIServiceImageService(IHttpClientFactory httpClientFactory) : I
     public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
-        var client = httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
-
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {options.Key}");
-
-        return await HttpClient.PostAndReadAsAsync<ImageCreateResponse>(options.Address + "/v1/images/generations",
-            imageCreate, cancellationToken);
+        var response = await HttpClient.PostJsonAsync(
+            options.Address?.TrimEnd('/') + "/v1/images/generations",
+            imageCreate, options.Key);
+        
+        var result = await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
+        
+        return result;
     }
 
     public async Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
