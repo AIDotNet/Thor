@@ -114,7 +114,7 @@ export default function MainLayout() {
         }
 
         // 解析token
-        const tokenData = JSON.parse(atob(token.split('.')[1]));
+        const role = localStorage.getItem('role') as string;
 
         const chatLink = InitSetting?.find(x => x.key === GeneralSetting.ChatLink)?.value
 
@@ -127,7 +127,7 @@ export default function MainLayout() {
             })
         }
 
-        setItems(items.filter(item => item.enable && item.role.includes(tokenData.role)));
+        setItems(items.filter(item => item.enable && item.role.includes(role)));
 
 
         // 获取当前路由

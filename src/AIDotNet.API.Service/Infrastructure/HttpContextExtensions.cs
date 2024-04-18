@@ -1,7 +1,10 @@
 ﻿using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace AIDotNet.API.Service.Infrastructure;
 
@@ -16,89 +19,77 @@ public static class HttpContextExtensions
         }) + "\n\n", Encoding.UTF8);
     }
 
-    public static async ValueTask WriteResultEndAsync(this HttpContext context, object value)
-    {
-        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(value, new JsonSerializerOptions
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        }) + "\n\n", Encoding.UTF8);
-        await context.WriteEndAsync();
-    }
-
-    public static async ValueTask WriteOpenAiResultAsync(this HttpContext context, string content, string model,
-        string systemFingerprint, string id)
-    {
-        var openAiResult = new OpenAIResultDto()
-        {
-            Id = id,
-            _object = "chat.completion.chunk",
-            Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
-            Model = model,
-            SystemFingerprint = systemFingerprint,
-            Choices =
-            [
-                new OpenAIChoiceDto()
-                {
-                    Index = 0,
-                    Delta = new()
-                    {
-                        Content = content,
-                        Role = "assistant"
-                    },
-                    FinishReason = null
-                }
-            ]
-        };
-
-        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(openAiResult, new JsonSerializerOptions
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        }) + "\n\n", Encoding.UTF8);
-        await context.Response.Body.FlushAsync();
-    }
-
-    public static async ValueTask WriteOpenAiResultAsync(this HttpContext context, string content)
-    {
-        var openAiResult = new OpenAIResultDto()
-        {
-            Id = Guid.NewGuid().ToString("N"),
-            _object = "chat.completion.chunk",
-            Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
-            SystemFingerprint = Guid.NewGuid().ToString("N"),
-            Choices =
-            [
-                new OpenAIChoiceDto()
-                {
-                    Index = 0,
-                    Delta = new()
-                    {
-                        Content = content,
-                        Role = "assistant"
-                    },
-                    FinishReason = null
-                }
-            ]
-        };
-
-        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(openAiResult, new JsonSerializerOptions
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        }) + "\n\n", Encoding.UTF8);
-        await context.Response.Body.FlushAsync();
-    }
-
     public static async Task WriteEndAsync(this HttpContext context)
     {
         await context.Response.WriteAsync("data: [DONE]\n\n");
         await context.Response.Body.FlushAsync();
     }
 
-    public static async ValueTask WriteEndAsync(this HttpContext context, string content)
+    public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message)
     {
-        await WriteOpenAiResultAsync(context, content);
-        await WriteEndAsync(context);
+        var error = new ChatCompletionCreateResponse
+        {
+            Choices = new List<ChatChoiceResponse>()
+            {
+                new()
+                {
+                    Message = new()
+                    {
+                        ContentCalculated = message,
+                        Role = "assistant",
+                    },
+                    Delta =
+                    {
+                        ContentCalculated = message,
+                        Role = "assistant",
+                    },
+                    FinishReason = "error",
+                    FinishDetails = new()
+                    {
+                        Type = "error",
+                        Stop = "error",
+                    },
+                    Index = 0
+                }
+            }
+        };
+        await context.Response.WriteAsync(
+            "data: " + JsonSerializer.Serialize(error, new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            }) + "\n\n", Encoding.UTF8);
+        await context.WriteEndAsync();
+    }
+
+    public static async ValueTask WriteErrorAsync(this HttpContext context, string message)
+    {
+        var error = new ChatCompletionCreateResponse
+        {
+            Choices = new List<ChatChoiceResponse>()
+            {
+                new()
+                {
+                    Message = new()
+                    {
+                        ContentCalculated = message,
+                        Role = "assistant",
+                    },
+                    Delta =
+                    {
+                        ContentCalculated = message,
+                        Role = "assistant",
+                    },
+                    FinishReason = "error",
+                    FinishDetails = new()
+                    {
+                        Type = "error",
+                        Stop = "error",
+                    },
+                    Index = 0
+                }
+            }
+        };
+        await context.Response.WriteAsJsonAsync(error);
     }
 }

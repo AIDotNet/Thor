@@ -306,7 +306,6 @@ export default function Panel() {
 
         modelConsumptionDistributionOption && modelConsumptionDistributionChart.setOption(modelConsumptionDistributionOption);
 
-        // 获取proportion-of-model-calls 显示一个饼图，data.models中的moduleName是模型的名字，value是消耗的值
         const proportionOfModelCallsChart = echarts.init(document.getElementById('proportion-of-model-calls') as HTMLDivElement);
 
         const proportionOfModel = data?.models?.map((item: any) => {
@@ -320,7 +319,7 @@ export default function Panel() {
             tooltip: {
                 trigger: 'item',
                 formatter: (params: any) => {
-                    return `${params.name}：${renderQuota(params.value, 6)}(${params.percent}%)`
+                    return `${params.name}：消耗${params.value}token(${params.percent}%)`
                 }
             },
             legend: {
@@ -358,6 +357,25 @@ export default function Panel() {
         };
 
         option && proportionOfModelCallsChart.setOption(option);
+
+        // 监听窗口变化
+        window.addEventListener('resize', () => {
+            consumesChart.resize();
+            requestsChart.resize();
+            tokensChart.resize();
+            modelConsumptionDistributionChart.resize();
+            proportionOfModelCallsChart.resize();
+        });
+
+        return () => {
+            window.removeEventListener('resize', () => {
+                consumesChart.resize();
+                requestsChart.resize();
+                tokensChart.resize();
+                modelConsumptionDistributionChart.resize();
+                proportionOfModelCallsChart.resize();
+            });
+        }
 
     }, [data]);
 

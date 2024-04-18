@@ -2,12 +2,15 @@
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Exceptions;
+using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AIDotNet.API.Service.Service;
 
-public sealed class TokenService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
+public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache memoryCache)
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask CreateAsync(TokenInput input)
     {
@@ -100,34 +103,53 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
     /// <exception cref="InsufficientQuotaException"></exception>
-    public async ValueTask<(Token, User)> CheckTokenAsync(HttpContext context)
+    public async ValueTask<(Token?, User)> CheckTokenAsync(HttpContext context)
     {
         var key = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
 
-        var token = await DbContext.Tokens.AsNoTracking().FirstOrDefaultAsync(x => x.Key == key);
-
-        if (token == null)
+        User? user;
+        Token? token;
+        // su-则是用户token
+        if (key.StartsWith("su-"))
         {
-            context.Response.StatusCode = 401;
-            throw new UnauthorizedAccessException();
-        }
+            memoryCache.TryGetValue(key, out user);
 
-        // token过期
-        if (token.ExpiredTime < DateTimeOffset.Now)
+            if(user == null)
+            {
+                context.Response.StatusCode = 401;
+                throw new UnauthorizedAccessException();
+            }
+            
+            user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == user.Id);
+            token = null;
+        }
+        else
         {
-            context.Response.StatusCode = 401;
-            throw new UnauthorizedAccessException();
+            token = await DbContext.Tokens.AsNoTracking().FirstOrDefaultAsync(x => x.Key == key);
+
+            if (token == null)
+            {
+                context.Response.StatusCode = 401;
+                throw new UnauthorizedAccessException();
+            }
+
+            // token过期
+            if (token.ExpiredTime < DateTimeOffset.Now)
+            {
+                context.Response.StatusCode = 401;
+                throw new UnauthorizedAccessException();
+            }
+
+            // 余额不足
+            if (token is { UnlimitedQuota: false, RemainQuota: < 0 })
+            {
+                context.Response.StatusCode = 402;
+                throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
+            }
+
+
+            user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == token.Creator);
         }
-
-        // 余额不足
-        if (token is { UnlimitedQuota: false, RemainQuota: < 0 })
-        {
-            context.Response.StatusCode = 402;
-            throw new InsufficientQuotaException("额度不足");
-        }
-
-
-        var user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == token.Creator);
 
         if (user == null)
         {
@@ -135,8 +157,14 @@ public sealed class TokenService(IServiceProvider serviceProvider) : Application
             throw new UnauthorizedAccessException();
         }
 
+        if (user.IsDisabled)
+        {
+            context.Response.StatusCode = 401;
+            throw new UnauthorizedAccessException("账号已禁用");
+        }
+
         var requestQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.RequestQuota);
-        
+
         // 判断额度是否足够
         if (user.ResidualCredit < requestQuota)
         {

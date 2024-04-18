@@ -143,9 +143,12 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         };
 
         // 获取渠道是否支持gpt-3.5-turbo
-        chatHistory.Model = channel.Models.Contains("gpt-3.5-turbo-1106")
-            ? "gpt-3.5-turbo-1106"
-            : channel.Models.FirstOrDefault();
+        chatHistory.Model = channel.Models.Order().FirstOrDefault(x => x.StartsWith("gpt-"));
+        
+        if(chatHistory.Model == null)
+        {
+            chatHistory.Model = channel.Models.FirstOrDefault();
+        }
 
         var sw = Stopwatch.StartNew();
         var response = await openService.CompleteChatAsync(chatHistory, setting);

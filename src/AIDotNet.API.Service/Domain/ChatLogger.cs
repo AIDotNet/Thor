@@ -32,7 +32,7 @@ public sealed class ChatLogger : Entity<long>
     /// <summary>
     /// token名称
     /// </summary>
-    public string TokenName { get; set; }
+    public string? TokenName { get; set; }
 
     public string? UserName { get; set; }
 

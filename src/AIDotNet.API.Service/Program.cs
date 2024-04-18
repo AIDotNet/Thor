@@ -73,9 +73,10 @@ builder.Services.AddSwaggerGen(options =>
         foreach (var item in Directory.GetFiles(Directory.GetCurrentDirectory(), "*.xml"))
             options.IncludeXmlComments(item, true);
         options.DocInclusionPredicate((docName, action) => true);
-    }).AddJwtBearerAuthentication()
+    }).AddCustomAuthentication()
     .AddMemoryCache()
     .AddHttpContextAccessor()
+    .AddTransient<ImageService>()
     .AddTransient<AuthorizeService>()
     .AddTransient<TokenService>()
     .AddTransient<ChatService>()
@@ -118,6 +119,8 @@ builder.Services.AddDbContext<LoggerDbContext>(options =>
 
 var app = builder.Build();
 
+app.UseCors("AllowAll");
+
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -155,9 +158,6 @@ app.Use((async (context, next) =>
 
 app.UseStaticFiles();
 
-app.UseCors("AllowAll");
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -437,21 +437,18 @@ statistics.MapGet(string.Empty,
 
 app.MapPost("/v1/chat/completions", async (ChatService service, HttpContext httpContext) =>
         await service.CompletionsAsync(httpContext))
-    .AddEndpointFilter<ChatFilter>()
     .WithGroupName("OpenAI")
     .WithDescription("Get completions from OpenAI")
     .WithOpenApi();
 
 app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext context) =>
         await embeddingService.EmbeddingAsync(context))
-    .AddEndpointFilter<ChatFilter>()
     .WithDescription("OpenAI")
     .WithDescription("Embedding")
     .WithOpenApi();
 
 app.MapPost("/v1/images/generations", async (ChatService imageService, HttpContext context) =>
         await imageService.ImageAsync(context))
-    .AddEndpointFilter<ChatFilter>()
     .WithDescription("OpenAI")
     .WithDescription("Image")
     .WithOpenApi();

@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.Service;
 
-public class UserService(IServiceProvider serviceProvider,
+public class UserService(
+    IServiceProvider serviceProvider,
+    LoggerService loggerService,
     TokenService tokenService)
     : ApplicationService(serviceProvider)
 {
@@ -26,13 +28,15 @@ public class UserService(IServiceProvider serviceProvider,
 
         await DbContext.Users.AddAsync(user);
 
-       await tokenService.CreateAsync(new TokenInput()
+        await tokenService.CreateAsync(new TokenInput()
         {
             Name = "默认Token",
             UnlimitedQuota = true,
             UnlimitedExpired = true,
         });
-        
+
+        await loggerService.CreateSystemAsync("创建用户：" + user.UserName);
+
         return user;
     }
 
@@ -76,7 +80,7 @@ public class UserService(IServiceProvider serviceProvider,
         return new PagingDto<User>(total, []);
     }
 
-    public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string token)
+    public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string? token)
     {
         var result = await DbContext
             .Users
@@ -86,13 +90,15 @@ public class UserService(IServiceProvider serviceProvider,
                     .SetProperty(y => y.RequestCount, y => y.RequestCount + 1)
                     .SetProperty(y => y.ConsumeToken, y => y.ConsumeToken + consumeToken));
 
-
-        await DbContext
-            .Tokens.Where(x => x.Key == token)
-            .ExecuteUpdateAsync(x =>
-                x.SetProperty(y => y.RemainQuota, y => y.RemainQuota - consume)
-                    .SetProperty(y => y.AccessedTime, DateTime.Now)
-                    .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
+        if (!string.IsNullOrEmpty(token))
+        {
+            await DbContext
+                .Tokens.Where(x => x.Key == token)
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(y => y.RemainQuota, y => y.RemainQuota - consume)
+                        .SetProperty(y => y.AccessedTime, DateTime.Now)
+                        .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
+        }
 
         return result > 0;
     }

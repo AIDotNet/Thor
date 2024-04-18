@@ -1,12 +1,14 @@
-﻿using AIDotNet.API.Service.Infrastructure.Helper;
-using AIDotNet.API.Service.Model;
+﻿using AIDotNet.API.Service.Infrastructure;
+using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace AIDotNet.API.Service.Service;
 
-public sealed class AuthorizeService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
+public sealed class AuthorizeService(IServiceProvider serviceProvider, IMemoryCache memoryCache)
+    : ApplicationService(serviceProvider)
 {
-    public async ValueTask<string> TokenAsync(string account, string pass)
+    public async ValueTask<object> TokenAsync(string account, string pass)
     {
         var user = await DbContext.Users.FirstOrDefaultAsync(x => x.UserName == account || x.Email == account);
 
@@ -14,7 +16,7 @@ public sealed class AuthorizeService(IServiceProvider serviceProvider) : Applica
         {
             throw new Exception("Account does not exist");
         }
-        
+
         if (user.IsDisabled)
         {
             throw new Exception("Account is disabled");
@@ -25,6 +27,14 @@ public sealed class AuthorizeService(IServiceProvider serviceProvider) : Applica
             throw new Exception("Password error");
         }
 
-        return JwtHelper.GeneratorAccessToken(user);
+        var key = "su-" + StringHelper.GenerateRandomString(38);
+
+        memoryCache.Set(key, user, TimeSpan.FromDays(3));
+
+        return new
+        {
+            token = key,
+            role = user.Role
+        };
     }
 }

@@ -4,12 +4,16 @@ using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.Exceptions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Exceptions;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Helper;
+using Claudia;
 using MapsterMapper;
-using OpenAI.ObjectModels.RequestModels;
+using Microsoft.IdentityModel.Tokens;
+using SkiaSharp;
+using CompletionCreateResponse = AIDotNet.Abstractions.Dto.CompletionCreateResponse;
 
 namespace AIDotNet.API.Service.Service;
 
@@ -17,7 +21,9 @@ public sealed class ChatService(
     IServiceProvider serviceProvider,
     ChannelService channelService,
     TokenService tokenService,
+    ImageService imageService,
     UserService userService,
+    IHttpClientFactory httpClientFactory,
     IMapper mapper,
     LoggerService loggerService)
     : ApplicationService(serviceProvider)
@@ -75,166 +81,184 @@ public sealed class ChatService(
 
     public async ValueTask ImageAsync(HttpContext context)
     {
-        var (token, user) = await tokenService.CheckTokenAsync(context);
-
-        using var body = new MemoryStream();
-        await context.Request.Body.CopyToAsync(body);
-
-        var module = JsonSerializer.Deserialize<ImageCreateRequest>(body.ToArray());
-
-
-        var imageCostRatio = GetImageCostRatio(module);
-
-        var rate = SettingService.PromptRate[module.Model];
-
-        var quota = (int)(rate * imageCostRatio * 1000) * module.N;
-
-        if (module == null)
+        try
         {
-            throw new Exception("模型校验异常");
+            var (token, user) = await tokenService.CheckTokenAsync(context);
+
+            using var body = new MemoryStream();
+            await context.Request.Body.CopyToAsync(body);
+
+            var module = JsonSerializer.Deserialize<ImageCreateRequest>(body.ToArray());
+
+            var imageCostRatio = GetImageCostRatio(module);
+
+            var rate = SettingService.PromptRate[module.Model];
+
+            var quota = (int)(rate * imageCostRatio * 1000) * module.N;
+
+            if (module == null)
+            {
+                throw new Exception("模型校验异常");
+            }
+
+            if (quota > user.ResidualCredit)
+            {
+                throw new InsufficientQuotaException("额度不足");
+            }
+
+            // 获取渠道 通过算法计算权重
+            var channel = CalculateWeight((await channelService.GetChannelsAsync())
+                .Where(x => x.Models.Contains(module.Model)));
+
+            if (channel == null)
+            {
+                throw new NotModelException(module.Model);
+            }
+
+
+            // 获取渠道指定的实现类型的服务
+            var openService = GetKeyedService<IApiImageService>(channel.Type);
+
+            if (openService == null)
+            {
+                throw new Exception("渠道服务不存在");
+            }
+
+            var response = await openService.CreateImage(module, new ChatOptions()
+            {
+                Key = channel.Key,
+                Address = channel.Address,
+            }, context.RequestAborted);
+
+            await context.Response.WriteAsJsonAsync(new AIDotNetImageCreateResponse()
+            {
+                data = response.Results,
+                created = response.CreatedAt,
+                successful = response.Successful
+            });
+
+
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), module.Model,
+                0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
+                channel.Name);
+
+            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key);
+
+            await DbContext.SaveChangesAsync();
         }
-
-        if (quota > user.ResidualCredit)
+        catch (UnauthorizedAccessException e)
         {
-            throw new InsufficientQuotaException("额度不足");
         }
-
-        // 获取渠道 通过算法计算权重
-        var channel = CalculateWeight((await channelService.GetChannelsAsync())
-            .Where(x => x.Models.Contains(module.Model)));
-
-        if (channel == null)
+        catch (Exception e)
         {
-            throw new NotModelException(module.Model);
+            GetLogger<ChatService>().LogError(e.Message);
+            await context.WriteErrorAsync(e.Message);
         }
-
-
-        // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IApiImageService>(channel.Type);
-
-        if (openService == null)
-        {
-            await context.WriteEndAsync("渠道服务不存在");
-            return;
-        }
-
-        var response = await openService.CreateImage(module, new ChatOptions()
-        {
-            Key = channel.Key,
-            Address = channel.Address,
-        }, context.RequestAborted);
-
-        await context.Response.WriteAsJsonAsync(new AIDotNetImageCreateResponse()
-        {
-            data = response.Results,
-            created = response.CreatedAt,
-            successful = response.Successful
-        });
-
-
-        await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), module.Model,
-            0, 0, (int)quota, token.Name, user?.UserName, token.Creator, channel.Id,
-            channel.Name);
-
-        await userService.ConsumeAsync(user!.Id, (long)quota, 0, token.Key);
-
-        await DbContext.SaveChangesAsync();
     }
 
     public async ValueTask EmbeddingAsync(HttpContext context)
     {
-        var (token, user) = await tokenService.CheckTokenAsync(context);
-
-        using var body = new MemoryStream();
-        await context.Request.Body.CopyToAsync(body);
-
-        var module = JsonSerializer.Deserialize<EmbeddingInput>(body.ToArray());
-
-        if (module == null)
+        try
         {
-            throw new Exception("模型校验异常");
-        }
+            var (token, user) = await tokenService.CheckTokenAsync(context);
 
-        // 获取渠道 通过算法计算权重
-        var channel = CalculateWeight((await channelService.GetChannelsAsync())
-            .Where(x => x.Models.Contains(module.Model)));
+            using var body = new MemoryStream();
+            await context.Request.Body.CopyToAsync(body);
 
-        if (channel == null)
-        {
-            throw new NotModelException(module.Model);
-        }
+            var module = JsonSerializer.Deserialize<EmbeddingInput>(body.ToArray());
 
-        // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IApiTextEmbeddingGeneration>(channel.Type);
-
-        if (openService == null)
-        {
-            await context.WriteEndAsync("渠道服务不存在");
-            return;
-        }
-
-        var embeddingCreateRequest = new EmbeddingCreateRequest()
-        {
-            Model = module.Model,
-            EncodingFormat = module.EncodingFormat,
-        };
-
-        int requestToken;
-        if (module.Input is JsonElement str)
-        {
-            if (str.ValueKind == JsonValueKind.String)
+            if (module == null)
             {
-                embeddingCreateRequest.Input = str.ToString();
-                requestToken = TokenHelper.GetTotalTokens(str.ToString());
+                throw new Exception("模型校验异常");
             }
-            else if (str.ValueKind == JsonValueKind.Array)
+
+            // 获取渠道 通过算法计算权重
+            var channel = CalculateWeight((await channelService.GetChannelsAsync())
+                .Where(x => x.Models.Contains(module.Model)));
+
+            if (channel == null)
             {
-                var inputString = str.EnumerateArray().Select(x => x.ToString()).ToArray();
-                embeddingCreateRequest.InputAsList = inputString.ToList();
-                requestToken = TokenHelper.GetTotalTokens(inputString);
+                throw new NotModelException(module.Model);
+            }
+
+            // 获取渠道指定的实现类型的服务
+            var openService = GetKeyedService<IApiTextEmbeddingGeneration>(channel.Type);
+
+            if (openService == null)
+            {
+                throw new Exception("渠道服务不存在");
+            }
+
+            var embeddingCreateRequest = new EmbeddingCreateRequest()
+            {
+                Model = module.Model,
+                EncodingFormat = module.EncodingFormat,
+            };
+
+            int requestToken;
+            if (module.Input is JsonElement str)
+            {
+                if (str.ValueKind == JsonValueKind.String)
+                {
+                    embeddingCreateRequest.Input = str.ToString();
+                    requestToken = TokenHelper.GetTotalTokens(str.ToString());
+                }
+                else if (str.ValueKind == JsonValueKind.Array)
+                {
+                    var inputString = str.EnumerateArray().Select(x => x.ToString()).ToArray();
+                    embeddingCreateRequest.InputAsList = inputString.ToList();
+                    requestToken = TokenHelper.GetTotalTokens(inputString);
+                }
+                else
+                {
+                    throw new Exception("输入格式错误");
+                }
             }
             else
             {
                 throw new Exception("输入格式错误");
             }
+
+            var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ChatOptions()
+            {
+                Key = channel.Key,
+                Address = channel.Address,
+            }, context.RequestAborted);
+
+            if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
+            {
+                var quota = requestToken * rate;
+
+                var completionRatio = GetCompletionRatio(module.Model);
+                quota += (rate * completionRatio);
+
+                // 将quota 四舍五入
+                quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
+                    module.Model,
+                    requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
+                    channel.Name);
+
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
+
+                await DbContext.SaveChangesAsync();
+            }
+
+            await context.Response.WriteAsJsonAsync(stream);
         }
-        else
+        catch (UnauthorizedAccessException e)
         {
-            throw new Exception("输入格式错误");
         }
-
-        var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ChatOptions()
+        catch (Exception e)
         {
-            Key = channel.Key,
-            Address = channel.Address,
-        }, context.RequestAborted);
-
-        if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
-        {
-            var quota = requestToken * rate;
-
-            var completionRatio = GetCompletionRatio(module.Model);
-            quota += (rate * completionRatio);
-
-            // 将quota 四舍五入
-            quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
-
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio), module.Model,
-                requestToken, 0, (int)quota, token.Name, user?.UserName, token.Creator, channel.Id,
-                channel.Name);
-
-            await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token.Key);
-
-            await DbContext.SaveChangesAsync();
+            GetLogger<ChatService>().LogError(e.Message);
+            await context.WriteErrorAsync(e.Message);
         }
-
-        await context.Response.WriteAsJsonAsync(stream);
     }
 
     public async ValueTask CompletionsAsync(HttpContext context)
     {
-        var (token, user) = await tokenService.CheckTokenAsync(context);
-
         using var body = new MemoryStream();
         await context.Request.Body.CopyToAsync(body);
 
@@ -245,53 +269,74 @@ public sealed class ChatService(
             throw new Exception("模型校验异常");
         }
 
-        // 获取渠道 通过算法计算权重
-        var channel = CalculateWeight((await channelService.GetChannelsAsync())
-            .Where(x => x.Models.Contains(module.Model)));
-
-        if (channel == null)
+        try
         {
-            throw new NotModelException(module.Model);
-        }
+            var (token, user) = await tokenService.CheckTokenAsync(context);
 
-        // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
+            // 获取渠道 通过算法计算权重
+            var channel = CalculateWeight((await channelService.GetChannelsAsync())
+                .Where(x => x.Models.Contains(module.Model)));
 
-        if (openService == null)
-        {
-            await context.WriteEndAsync("渠道服务不存在");
-            return;
-        }
-
-        if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
-        {
-            int requestToken;
-            int responseToken = 0;
-
-            if (module.Stream == true )
+            if (channel == null)
             {
-                (requestToken, responseToken) = await StreamHandlerAsync(context, module, channel, openService);
+                throw new NotModelException(module.Model);
+            }
+
+            // 获取渠道指定的实现类型的服务
+            var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
+
+            if (openService == null)
+            {
+                throw new Exception("渠道服务不存在");
+            }
+
+            if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
+            {
+                int requestToken;
+                int responseToken = 0;
+
+                if (module.Stream == true)
+                {
+                    (requestToken, responseToken) = await StreamHandlerAsync(context, module, channel, openService);
+                }
+                else
+                {
+                    (requestToken, responseToken) = await ChatHandlerAsync(context, module, channel, openService);
+                }
+
+                var quota = requestToken * rate;
+
+                var completionRatio = GetCompletionRatio(module.Model);
+                quota += responseToken * (rate * completionRatio);
+
+                // 将quota 四舍五入
+                quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
+                    module.Model,
+                    requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
+                    channel.Name);
+
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
+
+                await DbContext.SaveChangesAsync();
+            }
+        }
+        catch (UnauthorizedAccessException e)
+        {
+        }
+        catch (Exception e)
+        {
+            GetLogger<ChatService>().LogError(e.Message);
+            context.Response.StatusCode = 200;
+            if (module.Stream == true)
+            {
+                await context.WriteStreamErrorAsync(e.Message);
             }
             else
             {
-                (requestToken, responseToken) = await ChatHandlerAsync(context, module, channel, openService);
+                await context.WriteErrorAsync(e.Message);
             }
-
-            var quota = requestToken * rate;
-
-            var completionRatio = GetCompletionRatio(module.Model);
-            quota += responseToken * (rate * completionRatio);
-
-            // 将quota 四舍五入
-            quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
-
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio), module.Model,
-                requestToken, responseToken, (int)quota, token.Name, user?.UserName, token.Creator, channel.Id,
-                channel.Name);
-
-            await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token.Key);
-
-            await DbContext.SaveChangesAsync();
         }
     }
 
@@ -299,8 +344,7 @@ public sealed class ChatService(
         ChatChannel channel, IApiChatCompletionService openService)
     {
         int requestToken;
-        int responseToken = 0;
-        var responseMessage = new StringBuilder();
+        int responseToken;
 
         var setting = new ChatOptions()
         {
@@ -308,10 +352,39 @@ public sealed class ChatService(
             Address = channel.Address,
         };
 
+        // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
         if (input.Model?.Contains("vision") == true)
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.SelectMany(x => x.Contents)
                 .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
+
+            // 解析图片
+            foreach (var message in input.Messages.SelectMany(x => x.Contents).Where(x => x.Type == "image"))
+            {
+                if (message.Type == "image_url")
+                {
+                    var imageUrl = message.ImageUrl;
+                    if (imageUrl != null)
+                    {
+                        var url = imageUrl.Url;
+                        var detail = "";
+                        if (!imageUrl.Detail.IsNullOrEmpty())
+                        {
+                            detail = imageUrl.Detail;
+                        }
+
+                        try
+                        {
+                            var imageTokens = await CountImageTokens(url, detail);
+                            requestToken += imageTokens.Item1;
+                        }
+                        catch (Exception ex)
+                        {
+                            GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
+                        }
+                    }
+                }
+            }
 
             var result = await openService.CompleteChatAsync(input, setting);
 
@@ -347,7 +420,7 @@ public sealed class ChatService(
     /// <param name="channel">渠道</param>
     /// <param name="openService"></param>
     /// <returns></returns>
-    private static async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context,
+    private async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context,
         ChatCompletionCreateRequest input, ChatChannel channel, IApiChatCompletionService openService)
     {
         int requestToken;
@@ -359,18 +432,58 @@ public sealed class ChatService(
         };
 
         var responseMessage = new StringBuilder();
-        
+
         context.Response.Headers.ContentType = "text/event-stream";
 
         if (input.Model?.Contains("vision") == true)
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.SelectMany(x => x.Contents)
+            foreach (var message in input.Messages)
+            {
+                if (message.Content?.StartsWith('[') == true && message.Content?.EndsWith(']') == true)
+                {
+                    message.Contents = JsonSerializer.Deserialize<List<MessageContent>>(message.Content);
+                    // 俩个不能同时存在
+                    message.Content = null;
+                }
+            }
+
+            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x is { Contents: not null })
+                .SelectMany(x => x!.Contents)
                 .Where(x => x.Type == "text")
                 .Select(x => x.Text).ToArray());
 
+            // 解析图片
+            foreach (var message in input.Messages.Where(x => x is { Contents: not null }).SelectMany(x => x.Contents)
+                         .Where(x => x.Type == "image_url"))
+            {
+                if (message.Type == "image_url")
+                {
+                    var imageUrl = message.ImageUrl;
+                    if (imageUrl != null)
+                    {
+                        var url = imageUrl.Url;
+                        var detail = "";
+                        if (!imageUrl.Detail.IsNullOrEmpty())
+                        {
+                            detail = imageUrl.Detail;
+                        }
+
+                        try
+                        {
+                            var imageTokens = await CountImageTokens(url, detail);
+                            requestToken += imageTokens.Item1;
+                        }
+                        catch (Exception ex)
+                        {
+                            GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
+                        }
+                    }
+                }
+            }
+
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
-                responseMessage.Append(item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
+                responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                 await context.WriteResultAsync(item);
             }
 
@@ -382,7 +495,7 @@ public sealed class ChatService(
 
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
-                responseMessage.Append(item.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
+                responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                 await context.WriteResultAsync(item);
             }
 
@@ -393,7 +506,6 @@ public sealed class ChatService(
 
         return (requestToken, responseToken);
     }
-
 
     /// <summary>
     /// 权重算法
@@ -406,11 +518,11 @@ public sealed class ChatService(
         var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
         var total = chatChannels.Sum(x => x.Order);
 
-        if(chatChannels.Length == 0)
+        if (chatChannels.Length == 0)
         {
             throw new NotModelException("没有可用的模型");
         }
-        
+
         var random = new Random();
 
         var value = random.Next(0, total);
@@ -425,7 +537,7 @@ public sealed class ChatService(
     }
 
     /// <summary>
-    /// 
+    /// 对话模型补全倍率
     /// </summary>
     /// <param name="name"></param>
     /// <returns></returns>
@@ -438,7 +550,7 @@ public sealed class ChatService(
 
         if (name.StartsWith("gpt-3.5"))
         {
-            if (name.EndsWith("0125"))
+            if (name == "gpt-3.5-turbo" || name.EndsWith("0125"))
             {
                 return 3;
             }
@@ -448,43 +560,37 @@ public sealed class ChatService(
                 return 2;
             }
 
-            if (name is "gpt-3.5-turbo" or "gpt-3.5-turbo-16k")
-            {
-                return 2;
-            }
-
-            return 1.333333m;
+            return (decimal)(4.0 / 3.0);
         }
 
         if (name.StartsWith("gpt-4"))
         {
-            if (name.EndsWith("preview"))
-            {
-                return 3;
-            }
-
-            return 2;
+            return name.StartsWith("gpt-4-turbo") ? 3 : 2;
         }
 
-        if (name.StartsWith("claude-instant-1"))
+        if (name.StartsWith("claude-"))
         {
-            return 3.38m;
+            return name.StartsWith("claude-3") ? 5 : 3;
         }
 
-        if (name.StartsWith("claude-2"))
-        {
-            return 2.965517m;
-        }
-
-        if (name.StartsWith("mistral-"))
+        if (name.StartsWith("mistral-") || name.StartsWith("gemini-"))
         {
             return 3;
         }
 
-        return 1;
+        return name switch
+        {
+            "llama2-70b-4096" => new decimal(0.8 / 0.7),
+            _ => 1
+        };
     }
 
-    public static decimal GetImageCostRatio(ImageCreateRequest module)
+    /// <summary>
+    /// 计算图片倍率
+    /// </summary>
+    /// <param name="module"></param>
+    /// <returns></returns>
+    private static decimal GetImageCostRatio(ImageCreateRequest module)
     {
         var imageCostRatio = GetImageSizeRatio(module.Model, module.Size);
         if (module is { Quality: "hd", Model: "dall-e-3" })
@@ -502,6 +608,12 @@ public sealed class ChatService(
         return imageCostRatio;
     }
 
+    /// <summary>
+    /// 计算图片倍率
+    /// </summary>
+    /// <param name="model"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
     public static decimal GetImageSizeRatio(string model, string size)
     {
         if (!ImageSizeRatios.TryGetValue(model, out var ratios)) return 1;
@@ -512,5 +624,63 @@ public sealed class ChatService(
         }
 
         return 1;
+    }
+
+    /// <summary>
+    /// 计算图片token
+    /// </summary>
+    /// <param name="url"></param>
+    /// <param name="detail"></param>
+    /// <returns></returns>
+    public async ValueTask<Tuple<int, Exception>> CountImageTokens(string url, string detail)
+    {
+        bool fetchSize = true;
+        int width = 0, height = 0;
+        int lowDetailCost = 20; // Assuming lowDetailCost is 20
+        int highDetailCostPerTile = 100; // Assuming highDetailCostPerTile is 100
+        int additionalCost = 50; // Assuming additionalCost is 50
+
+        if (string.IsNullOrEmpty(detail) || detail == "auto")
+        {
+            detail = "high";
+        }
+
+        switch (detail)
+        {
+            case "low":
+                return new Tuple<int, Exception>(lowDetailCost, null);
+            case "high":
+                if (fetchSize)
+                {
+                    try
+                    {
+                        (width, height) = await imageService.GetImageSize(url);
+                    }
+                    catch (Exception e)
+                    {
+                        return new Tuple<int, Exception>(0, e);
+                    }
+                }
+
+                if (width > 2048 || height > 2048)
+                {
+                    double ratio = 2048.0 / Math.Max(width, height);
+                    width = (int)(width * ratio);
+                    height = (int)(height * ratio);
+                }
+
+                if (width > 768 && height > 768)
+                {
+                    double ratio = 768.0 / Math.Min(width, height);
+                    width = (int)(width * ratio);
+                    height = (int)(height * ratio);
+                }
+
+                int numSquares = (int)Math.Ceiling((double)width / 512) * (int)Math.Ceiling((double)height / 512);
+                int result = numSquares * highDetailCostPerTile + additionalCost;
+                return new Tuple<int, Exception>(result, null);
+            default:
+                return new Tuple<int, Exception>(0, new Exception("Invalid detail option"));
+        }
     }
 }

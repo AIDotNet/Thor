@@ -15,7 +15,7 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
     }
 
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
-        int quota, string tokenName, string? userName, string? userId, string? channelId, string? channelName)
+        int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName)
     {
         var logger = new ChatLogger
         {

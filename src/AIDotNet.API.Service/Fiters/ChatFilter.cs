@@ -1,5 +1,6 @@
 ﻿using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.Exceptions;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace AIDotNet.API.Service;
 
@@ -13,27 +14,31 @@ public sealed class ChatFilter : IEndpointFilter
         }
         catch (NotModelException notModel)
         {
-            return new OpenAIResultDto()
+            return new ChatCompletionCreateResponse()
             {
-                _object = Guid.NewGuid().ToString("N"),
-                Error = new OpenAIErrorDto()
+                Error = new Error()
                 {
-                    code = "500",
-                    message = $"未找到模型：{notModel.Message}",
-                    type = "500"
+                    Code = "400",
+                    Messages =
+                    {
+                        notModel.Message
+                    },
+                    Type = "not_model"
                 }
             };
         }
         catch (Exception e)
         {
-            return new OpenAIResultDto()
+            return new ChatCompletionCreateResponse()
             {
-                _object = Guid.NewGuid().ToString("N"),
-                Error = new OpenAIErrorDto()
+                Error = new Error()
                 {
-                    code = "500",
-                    message = e.Message,
-                    type = "500"
+                    Code = "400",
+                    Messages =
+                    {
+                        e.Message
+                    },
+                    Type = "error"
                 }
             };
         }

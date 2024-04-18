@@ -12,7 +12,8 @@ export default function Login() {
         login(value.account, value.password)
             .then((res) => {
                 if (res.success) {
-                    localStorage.setItem('token', res.data);
+                    localStorage.setItem('token', res.data.token);
+                    localStorage.setItem('role', res.data.role);
                     Notification.success({
                         title: '登录成功',
                         content: '即将跳转到首页'
