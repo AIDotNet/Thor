@@ -12,7 +12,7 @@ public static class SparkDeskHelper
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
 
-    public static XFSparkDeskChatAPI GetSparkDeskChatClient(string key, string? model)
+    public static XFSparkDeskChatAPI GetSparkDeskChatClient(string key, string model, string? url = null)
     {
         XFSparkDeskChatAPI client;
         // appId|appKey|appSecret
@@ -24,22 +24,22 @@ public static class SparkDeskHelper
             if (model == "SparkDesk-v3.5")
             {
                 modelVersion = XFSparkDeskModelType.V3_5;
-                hostURL = XFSparkDeskHostURL.Chat_V3_5;
+                hostURL = url ?? XFSparkDeskHostURL.Chat_V3_5;
             }
             else if (model == "SparkDesk-v3.1")
             {
                 modelVersion = XFSparkDeskModelType.V3_0;
-                hostURL = XFSparkDeskHostURL.Chat_V3_0;
+                hostURL = url ?? XFSparkDeskHostURL.Chat_V3_0;
             }
             else if (model == "SparkDesk-v1.5")
             {
                 modelVersion = XFSparkDeskModelType.V1_5;
-                hostURL = XFSparkDeskHostURL.Chat_V1_5;
+                hostURL = url ?? XFSparkDeskHostURL.Chat_V1_5;
             }
             else if (model == "SparkDesk-v2.1")
             {
                 modelVersion = XFSparkDeskModelType.V2_0;
-                hostURL = XFSparkDeskHostURL.Chat_V2_0;
+                hostURL = url ?? XFSparkDeskHostURL.Chat_V2_0;
             }
             else
             {
@@ -63,7 +63,7 @@ public static class SparkDeskHelper
         return client;
     }
 
-    public static XFSparkDeskImageGenerationAPI GetSparkDeskImageGenerationClient(string key, HttpClient httpClient)
+    public static XFSparkDeskImageGenerationAPI GetSparkDeskImageGenerationClient(string key, HttpClient httpClient, string? url = null)
     {
         XFSparkDeskImageGenerationAPI client;
         // appId|appKey|appSecret
@@ -75,7 +75,30 @@ public static class SparkDeskHelper
                 AppId = parts[0],
                 ApiKey = parts[1],
                 ApiSecret = parts[2],
-                HostURL = XFSparkDeskHostURL.ImageGeneration_V2_1
+                HostURL = url ?? XFSparkDeskHostURL.ImageGeneration_V2_1
+            }, httpClient);
+        }
+        else
+        {
+            throw new ArgumentException("Invalid API Key format, expected appId|appKey|appSecret");
+        }
+
+        return client;
+    }
+
+    public static XFSparkDeskEmbeddingAPI GetSparkDeskEmbeddingClient(string key, HttpClient httpClient, string? url = null)
+    {
+        XFSparkDeskEmbeddingAPI client;
+        // appId|appKey|appSecret
+        var parts = key.Split('|');
+        if (parts.Length == 3)
+        {
+            client = new XFSparkDeskEmbeddingAPI(new XFSparkDeskAPIConfig()
+            {
+                AppId = parts[0],
+                ApiKey = parts[1],
+                ApiSecret = parts[2],
+                HostURL = url ?? XFSparkDeskHostURL.Embedding
             }, httpClient);
         }
         else

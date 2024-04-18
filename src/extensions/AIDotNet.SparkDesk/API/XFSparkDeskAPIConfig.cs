@@ -34,6 +34,7 @@ namespace AIDotNet.SparkDesk.API
         public const string Chat_V3_5 = "wss://spark-api.xf-yun.com/v3.5/chat";
         public const string ImageGeneration_V2_1 = "https://spark-api.cn-huabei-1.xf-yun.com/v2.1/tti";
         public const string ImageAnalysis_V2_1 = "wss://spark-api.cn-huabei-1.xf-yun.com/v2.1/image";
+        public const string Embedding = "https://emb-cn-huabei-1.xf-yun.com";
     }
 
     public class XFSparkDeskAPIConfig
@@ -51,13 +52,13 @@ namespace AIDotNet.SparkDesk.API
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        public static string GetAuth(string hostUrl, string apiKey, string apiSecret)
+        public static string GetAuth(string hostUrl, string apiKey, string apiSecret, string type = "GET")
         {
             var url = new Uri(hostUrl);
 
             string dateString = DateTime.UtcNow.ToString("r");
 
-            byte[] signatureBytes = Encoding.ASCII.GetBytes($"host: {url.Host}\ndate: {dateString}\nGET {url.AbsolutePath} HTTP/1.1");
+            byte[] signatureBytes = Encoding.ASCII.GetBytes($"host: {url.Host}\ndate: {dateString}\n{type} {url.AbsolutePath} HTTP/1.1");
 
             using HMACSHA256 hmacsha256 = new(Encoding.ASCII.GetBytes(apiSecret));
             byte[] computedHash = hmacsha256.ComputeHash(signatureBytes);
@@ -73,22 +74,7 @@ namespace AIDotNet.SparkDesk.API
 
         public static string GetPostAuth(string hostUrl, string apiKey, string apiSecret)
         {
-            var url = new Uri(hostUrl);
-
-            string dateString = DateTime.UtcNow.ToString("r");
-
-            byte[] signatureBytes = Encoding.ASCII.GetBytes($"host: {url.Host}\ndate: {dateString}\nPOST {url.AbsolutePath} HTTP/1.1");
-
-            using HMACSHA256 hmacsha256 = new(Encoding.ASCII.GetBytes(apiSecret));
-            byte[] computedHash = hmacsha256.ComputeHash(signatureBytes);
-            string signature = Convert.ToBase64String(computedHash);
-
-            string authorizationString = $"api_key=\"{apiKey}\",algorithm=\"hmac-sha256\",headers=\"host date request-line\",signature=\"{signature}\"";
-            string authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes(authorizationString));
-
-            string query = $"authorization={authorization}&date={dateString}&host={url.Host}";
-
-            return new UriBuilder(url) { Scheme = url.Scheme, Query = query }.ToString();
+            return GetAuth(hostUrl, apiKey, apiSecret, "POST");
         }
     }
 }
