@@ -2,7 +2,7 @@
 
 services:
   ai-dotnet-api-service:
-    image: registry.cn-shenzhen.aliyuncs.com/ai-dotnet/ai-dotnet-api-service:latest
+    image: hejiale010426/ai-dotnet-api-service:latest
     build:
       context: .
       dockerfile: src/AIDotNet.API.Service/Dockerfile
