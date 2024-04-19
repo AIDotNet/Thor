@@ -3,6 +3,7 @@ using AIDotNet.API.Service.Domain.Core;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AIDotNet.API.Service.DataAccess;
 
@@ -19,6 +20,10 @@ public sealed class AIDotNetDbContext(
     public DbSet<RedeemCode> RedeemCodes { get; set; }
 
     public DbSet<Setting> Settings { get; set; }
+
+    public DbSet<Product> Products { get; set; }
+
+    public DbSet<ProductPurchaseRecord> ProductPurchaseRecords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

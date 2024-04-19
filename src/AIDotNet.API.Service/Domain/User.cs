@@ -59,8 +59,6 @@ public sealed class User : Entity<string>, ISoftDeletion
         Email = email;
         SetUser();
         SetPassword(password);
-        // TODO: 应该从系统配置中获取
-        SetResidualCredit(100000);
         IsDisabled = false;
         IsDelete = false;
         DeletedAt = null;

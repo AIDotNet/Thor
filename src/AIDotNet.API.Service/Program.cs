@@ -76,6 +76,7 @@ builder.Services.AddSwaggerGen(options =>
     }).AddCustomAuthentication()
     .AddMemoryCache()
     .AddHttpContextAccessor()
+    .AddTransient<ProductService>()
     .AddTransient<ImageService>()
     .AddTransient<AuthorizeService>()
     .AddTransient<TokenService>()
@@ -432,6 +433,61 @@ statistics.MapGet(string.Empty,
             [FromServices] LoggerDbContext loggerDbContext,
             [FromServices] IUserContext userContext) =>
         await StatisticsService.GetStatisticsAsync(loggerDbContext, dbContext, userContext));
+
+#endregion
+
+#region Product
+
+var product = app.MapGroup("/api/v1/product")
+    .WithGroupName("Product")
+    .WithTags("Product")
+    .AddEndpointFilter<ResultFilter>();
+
+product.MapGet(string.Empty, async (ProductService service) =>
+        await service.GetProductsAsync())
+    .WithDescription("获取产品列表")
+    .WithOpenApi()
+    .RequireAuthorization();
+
+product.MapPost(string.Empty, async (ProductService service, Product product) =>
+        await service.CreateAsync(product))
+    .WithDescription("创建产品")
+    .WithOpenApi()
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
+
+product.MapPut(string.Empty, async ([FromServices] ProductService service, [FromBody] Product product) =>
+    await service.UpdateAsync(product))
+    .WithDescription("更新产品")
+    .WithOpenApi()
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
+
+product.MapDelete("{id}", async ([FromServices] ProductService service, string id) =>
+    await service.DeleteAsync(id))
+    .WithDescription("删除产品")
+    .WithOpenApi()
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
+
+product.MapPost("start-pay-payload/{id}", async ([FromServices] ProductService service, string id) =>
+    await service.StartPayPayloadAsync(id))
+    .WithDescription("发起支付")
+    .WithOpenApi()
+    .RequireAuthorization();
+
+product.MapPost("pay-complete-callback",
+        async ([FromServices] ProductService service, [FromServices] HttpContext context) =>
+        await service.PayCompleteCallbackAsync(context))
+    .WithDescription("支付回调处理")
+    .WithOpenApi()
+    .AllowAnonymous();
 
 #endregion
 

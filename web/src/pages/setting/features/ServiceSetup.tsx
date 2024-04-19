@@ -295,6 +295,108 @@ export default function ServiceSetup({
                             />
                         </Collapse.Panel>
                     </Collapse>
+                    <Collapse >
+                        <Collapse.Panel itemKey="1" header="支付宝设置">
+                            <Form.Input
+                                field={GeneralSetting.AlipayNotifyUrl}
+                                label="支付宝回调地址"
+                                initValue={settings?.find(s => s.key === GeneralSetting.AlipayNotifyUrl)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let result = settings?.find(s => s.key === GeneralSetting.AlipayNotifyUrl);
+                                    if (result) {
+                                        result.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                placeholder='请输入支付宝回调地址'
+                            />
+                            <Form.Input
+                                field={GeneralSetting.AlipayAppId}
+                                label="支付宝AppId"
+                                initValue={settings?.find(s => s.key === GeneralSetting.AlipayAppId)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let result = settings?.find(s => s.key === GeneralSetting.AlipayAppId);
+                                    if (result) {
+                                        result.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                placeholder='请输入支付宝AppId'
+                            />
+                            <Form.Input
+                                field={GeneralSetting.AlipayPrivateKey}
+                                initValue={settings?.find(s => s.key === GeneralSetting.AlipayPrivateKey)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let result = settings?.find(s => s.key === GeneralSetting.AlipayPrivateKey);
+                                    if (result) {
+                                        result.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                placeholder='请输入支付宝应用私钥'
+                                label='支付宝应用私钥'
+                            />
+                            <Form.Input
+                                field={GeneralSetting.AlipayPublicKey}
+                                initValue={settings?.find(s => s.key === GeneralSetting.AlipayPublicKey)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let result = settings?.find(s => s.key === GeneralSetting.AlipayPublicKey);
+                                    if (result) {
+                                        result.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                placeholder='请输入支付宝公钥'
+                                label='支付宝公钥'
+                            />
+                            <Form.Input
+                                field={GeneralSetting.AlipayAppCertPath}
+                                initValue={settings?.find(s => s.key === GeneralSetting.AlipayAppCertPath)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let result = settings?.find(s => s.key === GeneralSetting.AlipayAppCertPath);
+                                    if (result) {
+                                        result.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                placeholder='请输入支付宝应用公钥证书路径'
+                                label='支付宝应用公钥证书路径'
+                            />
+                            <Form.Input
+                                field={GeneralSetting.AlipayRootCertPath}
+                                initValue={settings?.find(s => s.key === GeneralSetting.AlipayRootCertPath)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let result = settings?.find(s => s.key === GeneralSetting.AlipayRootCertPath);
+                                    if (result) {
+                                        result.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                placeholder='请输入支付宝根证书路径'
+                                label='支付宝根证书路径'
+                            />
+                            <Form.Input
+                                field={GeneralSetting.AlipayPublicCertPath}
+                                initValue={settings?.find(s => s.key === GeneralSetting.AlipayPublicCertPath)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let result = settings?.find(s => s.key === GeneralSetting.AlipayPublicCertPath);
+                                    if (result) {
+                                        result.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                placeholder='请输入支付宝公钥证书路径'
+                                label='支付宝公钥证书路径'
+                            />
+                        </Collapse.Panel>
+                    </Collapse>
                     <Button block onClick={() => { handleSubmit() }} type="primary">保存设置</Button>
                 </Form>
             </Card>

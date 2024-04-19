@@ -16,6 +16,7 @@ import Home from './pages/home'
 import Register from './pages/register'
 import RedeemCode from './pages/redeemCode'
 import Chat from './pages/chat'
+import Product from './pages/product'
 
 const router = createBrowserRouter([{
   element: <MainLayout />,
@@ -26,6 +27,7 @@ const router = createBrowserRouter([{
     { path: 'logger', element: <Logger /> },
     { path: 'setting', element: <Setting /> },
     { path: 'chat', element: <Chat /> },
+    { path: 'product', element: <Product /> },
     { path: 'token', element: <Token /> },
     { path: 'user', element: <User /> },
     { path: 'redeemCode', element: <RedeemCode /> }

@@ -2,9 +2,18 @@
 
 public enum StatisticsConsumesNumberType
 {
+    /// <summary>
+    /// 消费
+    /// </summary>
     Consumes,
     
+    /// <summary>
+    /// 请求
+    /// </summary>
     Requests,
     
+    /// <summary>
+    /// token
+    /// </summary>
     Tokens
 }

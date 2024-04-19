@@ -73,6 +73,41 @@ public static class SettingExtensions
         /// 模型倍率Completion
         /// </summary>
         public const string ModelCompletionRate = Default + ":ModelCompletionRate";
+
+        /// <summary>
+        /// 支付宝支付回调地址
+        /// </summary>
+        public const string AlipayNotifyUrl = Default + ":AlipayNotifyUrl";
+
+        /// <summary>
+        /// 支付宝应用APPID
+        /// </summary>
+        public const string AlipayAppId = Default + ":AlipayAppId";
+
+        /// <summary>
+        /// 支付宝应用私钥
+        /// </summary>
+        public const string AlipayPrivateKey = Default + ":AlipayPrivateKey";
+
+        /// <summary>
+        /// 支付宝公钥
+        /// </summary>
+        public const string AlipayPublicKey = Default + ":AlipayPublicKey";
+
+        /// <summary>
+        /// 支付宝AppCertPath
+        /// </summary>
+        public const string AlipayAppCertPath = Default + ":AlipayAppCertPath";
+
+        /// <summary>
+        /// 支付宝根证书路径
+        /// </summary>
+        public const string AlipayRootCertPath = Default + ":AlipayRootCertPath";
+
+        /// <summary>
+        /// 支付宝公钥证书路径
+        /// </summary>
+        public const string AlipayPublicCertPath = Default + ":AlipayPublicCertPath";
     }
 
     /// <summary>
@@ -229,6 +264,61 @@ public static class SettingExtensions
             Key = GeneralSetting.ModelCompletionRate,
             Value = "{}",
             Description = "模型倍率Completion",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.AlipayNotifyUrl,
+            Value = "https://您的服务器地址/",
+            Description = "支付宝支付回调地址"
+        });
+
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.AlipayAppId,
+            Value = "",
+            Description = "支付宝应用APPID",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.AlipayPrivateKey,
+            Value = "",
+            Description = "支付宝应用私钥",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.AlipayPublicKey,
+            Value = "",
+            Description = "支付宝公钥",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.AlipayAppCertPath,
+            Value = "",
+            Description = "支付宝AppCertPath",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.AlipayRootCertPath,
+            Value = "",
+            Description = "支付宝AlipayRootCertPath",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.AlipayPublicCertPath,
+            Value = "",
+            Description = "支付宝公钥证书路径",
             Private = true
         });
 

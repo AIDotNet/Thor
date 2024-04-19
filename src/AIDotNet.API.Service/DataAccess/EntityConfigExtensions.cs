@@ -64,7 +64,24 @@ public static class EntityConfigExtensions
                 .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
                     item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, new JsonSerializerOptions()));
         });
+        
+        modelBuilder.Entity<ProductPurchaseRecord>(options =>
+        {
+            options.HasKey(x => x.Id);
 
+            options.HasIndex(x => x.Creator);
+
+            options.HasIndex(x => x.UserId);
+        });
+
+        modelBuilder.Entity<Product>(options =>
+        {
+            options.HasKey(x => x.Id);
+
+            options.Property(x => x.Name).IsRequired();
+
+        });
+        
         return modelBuilder;
     }
 

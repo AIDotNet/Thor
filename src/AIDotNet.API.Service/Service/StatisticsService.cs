@@ -40,14 +40,16 @@ public static class StatisticsService
                 .GroupBy(log => new { log.Year, log.Month, log.Day, log.Type }) // 按用户ID和模型名称分组
                 .Select(group => new
                 {
-                    Year = group.Key.Year,
-                    Month = group.Key.Month,
-                    Day = group.Key.Day,
-                    Type = group.Key.Type,
+                    group.Key.Year,
+                    group.Key.Month,
+                    group.Key.Day,
+                    group.Key.Type,
                     Value = group.Sum(log => log.Value), // 请求次数
                 });
         // 获取过去七天的日期列表
-        var dateList = Enumerable.Range(0, 7).Select(days => DateTime.Now.Date.AddDays(-days)).ToList();
+        var dateList = Enumerable.Range(0, 7).Select(days => DateTime.Now.Date.AddDays(-days))
+            .Order()
+            .ToList();
 
         // 统计用户请求 消费额度 Token总数
         foreach (var date in dateList)
@@ -171,21 +173,24 @@ public static class StatisticsService
 
         #endregion
 
-        // 统计用户请求 消费额度 Token总数
+        // 消费总额
         statisticsDto.CurrentConsumedCredit = await dbContext.StatisticsConsumesNumbers
             .Where(x => userContext.IsAdmin || x.Creator == userContext.CurrentUserId &&
                 x.Type == StatisticsConsumesNumberType.Consumes)
             .SumAsync(log => log.Value);
 
+        // 当前剩余额度
         statisticsDto.CurrentResidualCredit = (await aiDotNetDbContext.Users
             .Where(x => x.Id == userContext.CurrentUserId)
             .FirstOrDefaultAsync())?.ResidualCredit ?? 0;
 
+        // 总请求次数
         statisticsDto.TotalRequestCount = await dbContext.StatisticsConsumesNumbers
             .Where(x => userContext.IsAdmin || x.Creator == userContext.CurrentUserId &&
                 x.Type == StatisticsConsumesNumberType.Requests)
-            .SumAsync(log => log.Value);
+            .CountAsync();
 
+        // 总Token数
         statisticsDto.TotalTokenCount = await dbContext.StatisticsConsumesNumbers
             .Where(x => userContext.IsAdmin || x.Creator == userContext.CurrentUserId &&
                 x.Type == StatisticsConsumesNumberType.Tokens)

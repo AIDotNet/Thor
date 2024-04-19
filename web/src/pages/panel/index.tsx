@@ -4,7 +4,7 @@ import './index.css'
 import { GetStatistics } from '../../services/StatisticsService';
 import * as echarts from 'echarts';
 import { Card, Col, Divider, Row, TabPane, Tabs } from '@douyinfe/semi-ui';
-import { renderQuota } from '../../uitls/render';
+import { renderNumber, renderQuota } from '../../uitls/render';
 
 export default function Panel() {
     const [data, setData] = useState<any>({});
@@ -54,13 +54,10 @@ export default function Panel() {
                 }
             },
             tooltip: {
+                show: true,
                 trigger: 'axis',
                 axisPointer: {
-                    type: 'line',
-                    lineStyle: {
-                        color: '#999999',
-                        type: 'dashed'
-                    }
+                    type: "shadow"
                 },
                 formatter: function (params: any) {
                     return renderQuota(params[0].value, 6); // Format the value to two decimal places
@@ -120,14 +117,11 @@ export default function Panel() {
                 }
             },
             tooltip: {
+                show: true,
                 trigger: 'axis',
                 axisPointer: {
-                    type: 'line',
-                    lineStyle: {
-                        color: '#999999',
-                        type: 'dashed'
-                    }
-                }
+                    type: "shadow"
+                },
             },
             series: [
                 {
@@ -182,14 +176,11 @@ export default function Panel() {
                 }
             },
             tooltip: {
+                show: true,
                 trigger: 'axis',
                 axisPointer: {
-                    type: 'line',
-                    lineStyle: {
-                        color: '#999999',
-                        type: 'dashed'
-                    }
-                }
+                    type: "shadow"
+                },
             },
             series: [
                 {
@@ -218,51 +209,34 @@ export default function Panel() {
         const modelConsumptionDistributionChart = echarts.init(document.getElementById('model-consumption-distribution') as HTMLDivElement);
         var modelConsumptionDistributionOption = {
             tooltip: {
+                show: true,
                 trigger: 'axis',
                 axisPointer: {
-                    type: "cross",
-                    label: {
-                        formatter: function (params: any) {
-                            if (params.seriesData.length === 0) {
-                                // @ts-ignore
-                                window.mouseCurValue = params.value;
-                            }
-                        }
-                    }
+                    type: "shadow"
                 },
                 formatter: function (params: any) {
-                    let res = "", sum = 0;
+                    let res = `${params[0].name}<br/>`;
+
+                    // total params.map((x: any) => x.value)
+                    const total = params.map((x: any) => x.value).reduce((a: number, b: number) => a + b, 0);
+
+                    // 第一个是总计
+                    res += `${params[0].marker} 总计：${renderQuota(total, 6)}<br/>`;
+
                     for (let i = 0; i < params.length; i++) {
-                        let series = params[i];
-                        sum += Number(series.data);
-                        // @ts-ignore
-                        if (sum >= window.mouseCurValue) {
-                            res = series.axisValue + "<br/>" + series.marker + series.seriesName + ":" + renderQuota(series.data, 6) + "<br/>";
-                            break;
-                        }
+                        res += `${params[i].marker} ${params[i].seriesName}：${renderQuota(params[i].value, 6)}<br/>`;
                     }
                     return res;
                 },
             },
             legend: {
-                orient: 'vertical',
-                left: 10,
+                show: true,
+                bottom: 0,
+                orient: 'horizontal',
                 data: data?.models?.map((item: any) => item.name)
             },
-            toolbox: {
-                trigger: 'axis',
-                axisPointer: {
-                    type: 'line',
-                    lineStyle: {
-                        color: '#999999',
-                        type: 'dashed'
-                    }
-                },
-            },
             grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
+                bottom: '10%',
                 containLabel: true
             },
             xAxis: [
@@ -284,22 +258,12 @@ export default function Panel() {
                     }
                 }
             ],
-            series: data?.models?.map((item: any) => {
+            series: data?.models?.map((item: any, index: number) => {
                 return ({
                     name: item.name,
                     type: 'bar',
                     data: item.data,
-                    stack: 'Ad',
-                    emphasis: {
-                        focus: 'series'
-                    },
-                    label: {
-                        show: true,
-                        position: 'top',
-                        formatter: function (params: any) {
-                            return renderQuota(params.value, 6);
-                        }
-                    }
+                    stack: 'account',
                 })
             })
         };
@@ -323,33 +287,29 @@ export default function Panel() {
                 }
             },
             legend: {
-                top: '90%',
-                left: 'center'
+                show: true,
+                // 靠左边居中
+                top: 'middle',
+                left: 0,
+                orient: 'vertical',
+                data: data?.models?.map((item: any) => item.name)
             },
             series: [
                 {
-                    name: 'Access From',
+                    name: '模型Token消耗占比',
                     type: 'pie',
-                    radius: ['30%', '50%'],
-                    avoidLabelOverlap: false,
+                    radius: ['35%', '55%'],
+                    avoidLabelOverlap: true,
                     itemStyle: {
                         borderRadius: 10,
                         borderColor: '#fff',
-                        borderWidth: 2
-                    },
-                    label: {
-                        show: true,
-                        formatter: '{b}：{d}%', // 用来换行
+                        borderWidth: 2,
                     },
                     emphasis: {
                         label: {
                             show: true,
-                            fontSize: 40,
-                            fontWeight: 'bold'
+                            fontSize: 20,
                         }
-                    },
-                    labelLine: {
-                        show: false
                     },
                     data: proportionOfModel
                 }
@@ -385,7 +345,49 @@ export default function Panel() {
             <Row>
                 <Col style={{
                     padding: '0 16px'
-                }} span={8}>
+                }} span={6}>
+                    <Card
+                        style={{
+                            height: 180,
+                            backgroundColor: 'var(--semi-color-fill-0)',
+                            userSelect:'none'
+                        }}
+                    >
+                        <div style={{
+                            fontSize:'18px',
+                            marginBottom:10
+                        }}>
+                            当前余额：{renderQuota(data?.currentResidualCredit, 6)}
+                        </div>
+                        <Divider/>
+                        <div style={{
+                            fontSize:'18px',
+                            marginBottom:10,
+                            marginTop:10
+                        }}>
+                            消费累计：{renderQuota(data.currentConsumedCredit, 2)}
+                        </div>
+                        <Divider/>
+                        <div style={{
+                            fontSize:'18px',
+                            marginBottom:10,
+                            marginTop:10
+                        }}>
+                            总请求数：{data.totalRequestCount}
+                        </div>
+                        <Divider/>
+                        <div style={{
+                            fontSize:'18px',
+                            marginBottom:10,
+                            marginTop:10
+                        }}>
+                            token消耗数：{renderNumber(data.totalTokenCount)}
+                        </div>
+                    </Card>
+                </Col>
+                <Col style={{
+                    padding: '0 16px'
+                }} span={6}>
                     <Card
                         style={{
                             maxWidth: 360,
@@ -395,7 +397,7 @@ export default function Panel() {
                         <div style={{
                             marginBottom: 16
                         }}>
-                            今日消费：{renderQuota(currentDayConsume, 6)}
+                            今日消费：{renderQuota(currentDayConsume, 2)}
                         </div>
                         <Divider />
                         <div style={{
@@ -408,7 +410,7 @@ export default function Panel() {
                 </Col>
                 <Col style={{
                     padding: '0 16px'
-                }} span={8}>
+                }} span={6}>
                     <Card
                         style={{
                             maxWidth: 360,
@@ -431,7 +433,7 @@ export default function Panel() {
                 </Col>
                 <Col style={{
                     padding: '0 16px'
-                }} span={8}>
+                }} span={6}>
 
                     <Card
                         style={{
@@ -439,11 +441,10 @@ export default function Panel() {
                             backgroundColor: 'var(--semi-color-fill-0)'
                         }}
                     >
-
                         <div style={{
                             marginBottom: 16
                         }}>
-                            今日消耗token数：{currentDayToken}
+                            今日消耗token数：{renderNumber(currentDayToken)}
                         </div>
                         <Divider />
                         <div style={{
@@ -471,7 +472,7 @@ export default function Panel() {
 
                         </div>
                     </TabPane>
-                    <TabPane tab="模型调用占比" style={{
+                    <TabPane tab="模型Token消耗占比" style={{
                         height: '100%',
                         width: '100%',
                     }} itemKey="2">

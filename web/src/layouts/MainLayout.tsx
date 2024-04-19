@@ -1,5 +1,5 @@
 import { Layout, Nav, Avatar, Switch, Dropdown, Button } from '@douyinfe/semi-ui';
-import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
+import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconCart, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { info } from '../services/UserService';
@@ -42,6 +42,13 @@ export default function MainLayout() {
             icon: <IconKey size="large" />,
             enable: true,
             role: 'user,admin'
+        },
+        {
+            itemKey: 'Product',
+            text: '产品管理',
+            icon: <IconCart size="large" />,
+            enable: true,
+            role: 'admin'
         },
         {
             itemKey: 'Logger',
@@ -161,6 +168,9 @@ export default function MainLayout() {
             case '/chat':
                 setKey('Chat');
                 break;
+            case '/product':
+                setKey('Product');
+                break;
         }
 
         // 获取用户信息
@@ -210,6 +220,9 @@ export default function MainLayout() {
                             case 'Chat':
                                 navigation('/chat');
                                 break;
+                            case 'Product':
+                                navigation('/product');
+                                break;
                         }
                         setKey(data.itemKey as string);
                     }}
@@ -227,6 +240,7 @@ export default function MainLayout() {
                                 <Switch onChange={(v) => {
                                     SwitchTheme(v);
                                 }} checked={dark} checkedText={<IconSun />} uncheckedText={<IconMoon />} size="large" style={{ marginRight: 5 }} />
+
                                 <Dropdown
                                     render={
                                         <Dropdown.Menu>
@@ -242,6 +256,12 @@ export default function MainLayout() {
                                 >
                                     <Avatar color="orange" size="small" src={user.avatar ?? '/logo.png'}>
                                     </Avatar>
+                                    <span style={{
+                                        marginLeft: 10,
+                                        marginRight: 10
+                                    }}>
+                                        {user.userName}
+                                    </span>
                                 </Dropdown>
                             </>
                         }
