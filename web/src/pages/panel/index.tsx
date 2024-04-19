@@ -51,7 +51,7 @@ export default function Panel() {
                 },
                 splitLine: {
                     show: false
-                }
+                },
             },
             tooltip: {
                 show: true,
@@ -74,10 +74,10 @@ export default function Panel() {
                 }
             ],
             grid: {
-                left: 0,
+                left: 5,
                 top: 5,
-                right: 0,
-                bottom: 0
+                right: 5,
+                bottom: 5
             },
         };
 
@@ -134,10 +134,10 @@ export default function Panel() {
                 }
             ],
             grid: {
-                left: 0,
+                left: 5,
                 top: 5,
-                right: 0,
-                bottom: 0
+                right: 5,
+                bottom: 5
             },
         };
 
@@ -194,10 +194,10 @@ export default function Panel() {
                 }
             ],
             grid: {
-                left: 0,
+                left: 5,
                 top: 5,
-                right: 0,
-                bottom: 0
+                right: 5,
+                bottom: 5
             },
         };
 

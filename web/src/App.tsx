@@ -26,7 +26,6 @@ const router = createBrowserRouter([{
     { path: 'current', element: <Current /> },
     { path: 'logger', element: <Logger /> },
     { path: 'setting', element: <Setting /> },
-    { path: 'chat', element: <Chat /> },
     { path: 'product', element: <Product /> },
     { path: 'token', element: <Token /> },
     { path: 'user', element: <User /> },
@@ -39,9 +38,10 @@ const router = createBrowserRouter([{
   path: '/',
   element: <Home />
 },
-{ 
+{
   path: '/register', element: <Register />
-}
+},
+{ path: '/chat', element: <Chat /> },
 ])
 
 

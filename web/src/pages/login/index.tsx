@@ -19,7 +19,7 @@ export default function Login() {
                         content: '即将跳转到首页'
                     } as any);
                     setTimeout(() => {
-                        navigate('/');
+                        navigate('/panel');
                     }, 1000);
                 } else {
                     Notification.error({

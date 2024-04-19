@@ -24,7 +24,7 @@ export default function Chat() {
             src={chatLink}
             style={{
                 width: '100%',
-                height: '100%',
+                height: '100vh',
                 border: 'none'
             }}
         >

@@ -74,11 +74,17 @@ export default function Home() {
         <Container>
             <Header >
                 <Logo>
-                    <IconSemiLogo style={{ fontSize: 36 }} />
+                    
                 </Logo>
                 <Nav>
-                    <Button size='large' onClick={() => navigate('/')} theme="borderless">首页</Button>
-                    <Button size='large' onClick={() => navigate('/panel')} theme='solid'>控制台</Button>
+                    <Button size='large'
+                        onClick={() => navigate('/panel')}
+                        style={{
+                            marginRight: '1rem',
+                            
+                        }}
+                        theme='solid'>控制台
+                    </Button>
                 </Nav>
             </Header>
             <MainContent>
