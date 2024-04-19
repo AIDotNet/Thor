@@ -258,7 +258,7 @@ export default function Panel() {
                     }
                 }
             ],
-            series: data?.models?.map((item: any, index: number) => {
+            series: data?.models?.map((item: any) => {
                 return ({
                     name: item.name,
                     type: 'bar',

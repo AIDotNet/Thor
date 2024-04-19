@@ -2,7 +2,7 @@
 
 namespace AIDotNet.API.Service;
 
-public sealed class ResultFilter : IEndpointFilter
+public sealed class ResultFilter(ILogger<ResultFilter> logger) : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
@@ -24,6 +24,7 @@ public sealed class ResultFilter : IEndpointFilter
         }
         catch (Exception e)
         {
+            logger.LogError("An error occurred while processing the request. {e}", e);
             return ResultDto.CreateFail(e.Message);
         }
     }

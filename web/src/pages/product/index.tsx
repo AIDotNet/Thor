@@ -1,4 +1,4 @@
-import { Button, Dropdown, Input, Notification, Switch, Table } from "@douyinfe/semi-ui"
+import { Button, Dropdown,  Notification, Table } from "@douyinfe/semi-ui"
 import { useMemo, useState } from "react";
 import styled from "styled-components"
 import { renderQuota } from "../../uitls/render";
