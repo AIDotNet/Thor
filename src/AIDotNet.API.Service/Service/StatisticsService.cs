@@ -27,7 +27,7 @@ public static class StatisticsService
         var today = DateTime.Now.Date;
 
         var userQuery = dbContext.StatisticsConsumesNumbers
-            .Where(log => log.Year == today.Year && log.Month == today.Month && log.Day >= today.Day - 7); // 七天的日志
+            .Where(log => log.Year == today.Year && log.Month == today.Month && log.Day > today.Day - 7); // 七天的日志
 
         if (!userContext.IsAdmin)
         {
@@ -54,66 +54,67 @@ public static class StatisticsService
         // 统计用户请求 消费额度 Token总数
         foreach (var date in dateList)
         {
-            var userStatistic = (await userStatistics.ToListAsync())
-                .FirstOrDefault(stat => new DateTime(stat.Year, stat.Month, stat.Day) == date);
-
-            if (userStatistic != null)
+            foreach (var userStatistic in (await userStatistics.ToListAsync())
+                     .Where(stat => new DateTime(stat.Year, stat.Month, stat.Day) == date))
             {
-                switch (userStatistic.Type)
+                if (userStatistic != null)
                 {
-                    case StatisticsConsumesNumberType.Consumes:
-                        statisticsDto.Consumes.Add(new StatisticsNumberDto
-                        {
-                            DateTime =
-                                new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                    "yyyy-MM-dd"),
-                            Value = userStatistic.Value
-                        });
-                        break;
-                    case StatisticsConsumesNumberType.Requests:
-                        statisticsDto.Requests.Add(new StatisticsNumberDto
-                        {
-                            DateTime =
-                                new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                    "yyyy-MM-dd"),
-                            Value = userStatistic.Value
-                        });
-                        break;
-                    case StatisticsConsumesNumberType.Tokens:
-                        statisticsDto.Tokens.Add(new StatisticsNumberDto
-                        {
-                            DateTime =
-                                new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                    "yyyy-MM-dd"),
-                            Value = userStatistic.Value
-                        });
-                        break;
+                    switch (userStatistic.Type)
+                    {
+                        case StatisticsConsumesNumberType.Consumes:
+                            statisticsDto.Consumes.Add(new StatisticsNumberDto
+                            {
+                                DateTime =
+                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
+                                        "yyyy-MM-dd"),
+                                Value = userStatistic.Value
+                            });
+                            break;
+                        case StatisticsConsumesNumberType.Requests:
+                            statisticsDto.Requests.Add(new StatisticsNumberDto
+                            {
+                                DateTime =
+                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
+                                        "yyyy-MM-dd"),
+                                Value = userStatistic.Value
+                            });
+                            break;
+                        case StatisticsConsumesNumberType.Tokens:
+                            statisticsDto.Tokens.Add(new StatisticsNumberDto
+                            {
+                                DateTime =
+                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
+                                        "yyyy-MM-dd"),
+                                Value = userStatistic.Value
+                            });
+                            break;
+                    }
                 }
-            }
-            else
-            {
-                statisticsDto.Consumes.Add(new StatisticsNumberDto
+                else
                 {
-                    DateTime = date.ToString("yyyy-MM-dd"),
-                    Value = 0
-                });
-                statisticsDto.Requests.Add(new StatisticsNumberDto
-                {
-                    DateTime = date.ToString("yyyy-MM-dd"),
-                    Value = 0
-                });
-                statisticsDto.Tokens.Add(new StatisticsNumberDto
-                {
-                    DateTime = date.ToString("yyyy-MM-dd"),
-                    Value = 0
-                });
+                    statisticsDto.Consumes.Add(new StatisticsNumberDto
+                    {
+                        DateTime = date.ToString("yyyy-MM-dd"),
+                        Value = 0
+                    });
+                    statisticsDto.Requests.Add(new StatisticsNumberDto
+                    {
+                        DateTime = date.ToString("yyyy-MM-dd"),
+                        Value = 0
+                    });
+                    statisticsDto.Tokens.Add(new StatisticsNumberDto
+                    {
+                        DateTime = date.ToString("yyyy-MM-dd"),
+                        Value = 0
+                    });
+                }
             }
         }
 
         // 统计用户的模型数据
 
         var query = dbContext.ModelStatisticsNumbers
-            .Where(log => log.Year == today.Year && log.Month == today.Month && log.Day >= today.Day - 7); // 七天的日志
+            .Where(log => log.Year == today.Year && log.Month == today.Month && log.Day > today.Day - 7); // 七天的日志
 
         if (!userContext.IsAdmin)
         {
@@ -131,10 +132,10 @@ public static class StatisticsService
                     TokenUsed = group.Sum(log => log.TokenUsed), // Token使用量
                     Quota = group.Sum(log => log.Quota) // 消耗额度
                 }).ToListAsync();
-        
-        
+
+
         var allDates = dateList.Select(x => x.ToString("MM-dd")).Distinct().ToList();
-        
+
         statisticsDto.ModelDate = allDates;
 
         foreach (var modelStatistic in modelStatistics.GroupBy(x => new

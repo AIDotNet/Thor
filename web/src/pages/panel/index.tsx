@@ -242,7 +242,7 @@ export default function Panel() {
             xAxis: [
                 {
                     type: 'category',
-                    data: data.modelDate,
+                    data: data?.modelDate,
                     axisTick: {
                         alignWithLabel: true
                     }
