@@ -16,7 +16,7 @@ public record ChatChoiceResponse
 
     [JsonPropertyName("index")] public int? Index { get; set; }
 
-    [JsonPropertyName("finish_reason")] public string FinishReason { get; set; }
+    [JsonPropertyName("finish_reason")] public string FinishReason { get; set; } = string.Empty;
 
     [JsonPropertyName("finish_details")] public FinishDetailsResponse? FinishDetails { get; set; }
     public class FinishDetailsResponse

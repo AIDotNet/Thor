@@ -60,7 +60,7 @@ public class ChatMessage
     [JsonPropertyName("role")]
     public string Role { get; set; }
 
-    [JsonIgnore] public string? Content { get; set; }
+    [JsonIgnore] public string Content { get; set; } = string.Empty;
 
     [JsonIgnore] public IList<MessageContent>? Contents { get; set; }
 
