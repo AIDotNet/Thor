@@ -4,6 +4,7 @@ using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -21,7 +22,7 @@ namespace AIDotNet.Ollama
         {
             var client = HttpClient;
 
-            var response = await client.PostJsonAsync(options?.Address?.TrimEnd('/') ?? "" + "/api/chat", new OllamaChatRequest()
+            var response = await client.PostJsonAsync((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatRequest()
             {
                 stream = false,
                 model = chatCompletionCreate.Model ?? "",
@@ -38,9 +39,19 @@ namespace AIDotNet.Ollama
                 }
             }, options?.Key ?? "");
 
-            var result = await response.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken: cancellationToken);
-            if (result == null)
-                throw new Exception("ollama chat result null");
+            OllamaChatResponse? result;
+            var data = await response.Content.ReadAsStringAsync(cancellationToken);
+            try
+            {
+                result = JsonSerializer.Deserialize<OllamaChatResponse>(data);
+                if (result == null)
+                    throw new Exception("ollama chat result null");
+            }
+            catch (Exception)
+            {
+                Debug.WriteLine($"ollama chat result error: {data}");
+                throw;
+            }
 
             return new ChatCompletionCreateResponse()
             {
@@ -92,7 +103,17 @@ namespace AIDotNet.Ollama
             string? line = string.Empty;
             while ((line = await reader.ReadLineAsync()) != null)
             {
-                var result = JsonSerializer.Deserialize<OllamaChatResponse>(line);
+                OllamaChatResponse? result;
+                try
+                {
+                    result = JsonSerializer.Deserialize<OllamaChatResponse>(line);
+                }
+                catch (Exception)
+                {
+                    Debug.WriteLine($"ollama chat result error: {line}");
+                    throw;
+                }
+
                 if (result == null)
                     continue;
 
