@@ -33,6 +33,7 @@
   <ItemGroup>
     <ProjectReference Include="..\extensions\AIDotNet.Claudia\AIDotNet.Claudia.csproj" />
     <ProjectReference Include="..\extensions\AIDotNet.MetaGLM\AIDotNet.MetaGLM.csproj" />
+    <ProjectReference Include="..\extensions\AIDotNet.Ollama\AIDotNet.Ollama.csproj" />
     <ProjectReference Include="..\extensions\AIDotNet.OpenAI\AIDotNet.OpenAI.csproj" />
     <ProjectReference Include="..\extensions\AIDotNet.Qiansail\AIDotNet.Qiansail.csproj" />
     <ProjectReference Include="..\extensions\AIDotNet.SparkDesk\AIDotNet.SparkDesk.csproj" />
