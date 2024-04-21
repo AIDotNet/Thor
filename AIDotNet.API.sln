@@ -15,18 +15,20 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIDotNet.SparkDesk", "src\e
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution items", "{EEBDD217-8C26-4A0D-9412-59DE84FD16DF}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		docker-compose.yml = docker-compose.yml
-		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIDotNet.OpenAI", "src\extensions\AIDotNet.OpenAI\AIDotNet.OpenAI.csproj", "{F0FB17C9-8355-44C6-8340-066BE93694D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.MetaGLM", "src\extensions\AIDotNet.MetaGLM\AIDotNet.MetaGLM.csproj", "{77CB4305-7EB2-4CD9-BB97-00A5FC29B97F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIDotNet.MetaGLM", "src\extensions\AIDotNet.MetaGLM\AIDotNet.MetaGLM.csproj", "{77CB4305-7EB2-4CD9-BB97-00A5FC29B97F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.Claudia", "src\extensions\AIDotNet.Claudia\AIDotNet.Claudia.csproj", "{9D365565-CDA2-4D27-87D6-439E106A64B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIDotNet.Claudia", "src\extensions\AIDotNet.Claudia\AIDotNet.Claudia.csproj", "{9D365565-CDA2-4D27-87D6-439E106A64B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.Qiansail", "src\extensions\AIDotNet.Qiansail\AIDotNet.Qiansail.csproj", "{48FD7CDD-A777-42F8-9A14-33DA28469819}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIDotNet.Qiansail", "src\extensions\AIDotNet.Qiansail\AIDotNet.Qiansail.csproj", "{48FD7CDD-A777-42F8-9A14-33DA28469819}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.Ollama", "src\extensions\AIDotNet.Ollama\AIDotNet.Ollama.csproj", "{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,6 +64,10 @@ Global
 		{48FD7CDD-A777-42F8-9A14-33DA28469819}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48FD7CDD-A777-42F8-9A14-33DA28469819}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48FD7CDD-A777-42F8-9A14-33DA28469819}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,6 +81,7 @@ Global
 		{77CB4305-7EB2-4CD9-BB97-00A5FC29B97F} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{9D365565-CDA2-4D27-87D6-439E106A64B8} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{48FD7CDD-A777-42F8-9A14-33DA28469819} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

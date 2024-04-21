@@ -93,7 +93,8 @@ builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddSparkDeskService()
     .AddQiansail()
     .AddMetaGLMClientV4()
-    .AddClaudia();
+    .AddClaudia()
+    .AddOllamaService();
 
 builder.Services
     .AddCors(options =>
