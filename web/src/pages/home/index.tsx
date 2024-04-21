@@ -1,7 +1,7 @@
 
 import { Button, Typography } from '@douyinfe/semi-ui';
 import styled from 'styled-components';
-import { IconSemiLogo, IconGithubLogo } from '@douyinfe/semi-icons';
+import { IconGithubLogo } from '@douyinfe/semi-icons';
 import { useNavigate } from 'react-router-dom'
 import { config } from '../../config';
 import { InitSetting, OtherSetting } from '../../services/SettingService';

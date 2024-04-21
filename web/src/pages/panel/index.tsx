@@ -365,7 +365,7 @@ export default function Panel() {
                             marginBottom:10,
                             marginTop:10
                         }}>
-                            消费累计：{renderQuota(data.currentConsumedCredit, 2)}
+                            消费累计：{renderQuota(data?.currentConsumedCredit, 2)}
                         </div>
                         <Divider/>
                         <div style={{
@@ -373,7 +373,7 @@ export default function Panel() {
                             marginBottom:10,
                             marginTop:10
                         }}>
-                            总请求数：{data.totalRequestCount}
+                            总请求数：{data?.totalRequestCount}
                         </div>
                         <Divider/>
                         <div style={{
@@ -381,7 +381,7 @@ export default function Panel() {
                             marginBottom:10,
                             marginTop:10
                         }}>
-                            token消耗数：{renderNumber(data.totalTokenCount)}
+                            token消耗数：{renderNumber(data?.totalTokenCount)}
                         </div>
                     </Card>
                 </Col>
