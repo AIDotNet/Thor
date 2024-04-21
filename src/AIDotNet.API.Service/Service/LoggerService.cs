@@ -10,8 +10,6 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
     public async ValueTask CreateAsync(ChatLogger logger)
     {
         await LoggerDbContext.Loggers.AddAsync(logger);
-        
-        await LoggerDbContext.SaveChangesAsync();
     }
 
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
@@ -51,7 +49,8 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
         var logger = new ChatLogger
         {
             Type = ChatLoggerType.System,
-            Content = content
+            Content = content,
+            ModelName = string.Empty,
         };
         await CreateAsync(logger);
     }

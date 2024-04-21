@@ -2,7 +2,6 @@
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Exceptions;
-using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -29,8 +28,6 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         token.Key = "sk-" + StringHelper.GenerateRandomString(38);
 
         await DbContext.Tokens.AddAsync(token);
-
-        await DbContext.SaveChangesAsync();
     }
 
     public async Task<Token?> GetAsync(long id)
@@ -91,8 +88,6 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         }
 
         token.Disabled = true;
-
-        await DbContext.SaveChangesAsync();
     }
 
     /// <summary>

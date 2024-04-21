@@ -6,6 +6,7 @@ using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure;
+using AIDotNet.API.Service.Infrastructure.Middlewares;
 using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
 using AIDotNet.Claudia;
@@ -86,7 +87,8 @@ builder.Services.AddSwaggerGen(options =>
     .AddTransient<ChannelService>()
     .AddTransient<RedeemCodeService>()
     .AddHostedService<StatisticBackgroundTask>()
-    .AddHostedService<LoggerBackgroundTask>();
+    .AddHostedService<LoggerBackgroundTask>()
+    .AddSingleton<UnitOfWorkMiddleware>();
 
 builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
@@ -158,6 +160,8 @@ app.Use((async (context, next) =>
 }));
 
 app.UseStaticFiles();
+
+app.UseMiddleware<UnitOfWorkMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -450,7 +454,7 @@ product.MapGet(string.Empty, async (ProductService service) =>
     .RequireAuthorization();
 
 product.MapPost(string.Empty, async (ProductService service, Product product) =>
-        await service.CreateAsync(product))
+        service.Create(product))
     .WithDescription("创建产品")
     .WithOpenApi()
     .RequireAuthorization(new AuthorizeAttribute()
@@ -459,7 +463,7 @@ product.MapPost(string.Empty, async (ProductService service, Product product) =>
     });
 
 product.MapPut(string.Empty, async ([FromServices] ProductService service, [FromBody] Product product) =>
-    await service.UpdateAsync(product))
+    service.Update(product))
     .WithDescription("更新产品")
     .WithOpenApi()
     .RequireAuthorization(new AuthorizeAttribute()

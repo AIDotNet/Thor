@@ -35,7 +35,7 @@ export default function Channel() {
             dataIndex: 'channelName',
             key: 'channelName',
             render: (value: any) => {
-                return <Tag size='large' type='ghost' color='blue'>{value}</Tag>
+                return value && <Tag size='large' type='ghost' color='blue'>{value}</Tag>
             }
         },
         {
@@ -43,7 +43,7 @@ export default function Channel() {
             dataIndex: 'userName',
             key: 'userName',
             render: (value: any) => {
-                return <Tag size='large' type='ghost' color='blue'>{value}</Tag>
+                return value && <Tag size='large' type='ghost' color='blue'>{value}</Tag>
             }
         },
         {
@@ -51,7 +51,7 @@ export default function Channel() {
             dataIndex: 'modelName',
             key: 'modelName',
             render: (value: any) => {
-                return <Tag size='large' >{value}</Tag>
+                return value && <Tag size='large' >{value}</Tag>
             }
         },
         {
@@ -69,7 +69,7 @@ export default function Channel() {
             dataIndex: 'quota',
             key: 'quota',
             render: (value: any) => {
-                return <Tag size='large' type='ghost' color='green'>{renderQuota(value, 6)}</Tag>
+                return value && <Tag size='large' type='ghost' color='green'>{renderQuota(value, 6)}</Tag>
             }
         },
         {

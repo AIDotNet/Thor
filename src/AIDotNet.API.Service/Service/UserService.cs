@@ -33,10 +33,10 @@ public class UserService(
             Name = "默认Token",
             UnlimitedQuota = true,
             UnlimitedExpired = true,
-        });
+        }); 
 
         await loggerService.CreateSystemAsync("创建用户：" + user.UserName);
-
+        
         return user;
     }
 
@@ -69,7 +69,7 @@ public class UserService(
             var result = await DbContext.Users
                 .AsNoTracking()
                 .Where(x => string.IsNullOrEmpty(keyword) || x.UserName.Contains(keyword) || x.Email.Contains(keyword))
-                .OrderByDescending(x => x.Id)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

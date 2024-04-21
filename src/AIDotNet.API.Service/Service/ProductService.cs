@@ -17,23 +17,19 @@ public class ProductService(IServiceProvider serviceProvider) : ApplicationServi
         return await DbContext.Products.ToListAsync();
     }
 
-    public async Task CreateAsync(Product product)
+    public void Create(Product product)
     {
         product.Id = Guid.NewGuid().ToString();
         product.Price = Math.Round(product.Price, 2);
 
         DbContext.Products.Add(product);
-
-        await DbContext.SaveChangesAsync();
     }
 
-    public async Task UpdateAsync(Product product)
+    public void Update(Product product)
     {
         product.Price = Math.Round(product.Price, 2);
 
         DbContext.Products.Update(product);
-
-        await DbContext.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(string id)
@@ -86,8 +82,6 @@ public class ProductService(IServiceProvider serviceProvider) : ApplicationServi
 
 
         var body = JsonSerializer.Deserialize<AliPayResponseDto>(response.Body);
-
-        await DbContext.SaveChangesAsync();
 
         return new StartPayPayloadResult()
         {

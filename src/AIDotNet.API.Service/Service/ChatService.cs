@@ -144,7 +144,6 @@ public sealed class ChatService(
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key);
 
-            await DbContext.SaveChangesAsync();
         }
         catch (UnauthorizedAccessException e)
         {
@@ -242,7 +241,6 @@ public sealed class ChatService(
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
 
-                await DbContext.SaveChangesAsync();
             }
 
             await context.Response.WriteAsJsonAsync(stream);
@@ -318,8 +316,6 @@ public sealed class ChatService(
                     channel.Name);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
-
-                await DbContext.SaveChangesAsync();
             }
         }
         catch (UnauthorizedAccessException e)
