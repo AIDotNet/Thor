@@ -116,7 +116,8 @@ public class ProductService(IServiceProvider serviceProvider) : ApplicationServi
         {
             string outTradeNo = dictionary["out_trade_no"]; //获取ali传过来的参数的值
 
-            var product = await DbContext.ProductPurchaseRecords.FirstOrDefaultAsync(x => x.Id == outTradeNo);
+            var product = await DbContext.ProductPurchaseRecords.FirstOrDefaultAsync(x =>
+                x.Id == outTradeNo && x.Status != ProductPurchaseStatus.Paid);
 
             if (product == null)
             {
@@ -124,7 +125,8 @@ public class ProductService(IServiceProvider serviceProvider) : ApplicationServi
                 return;
             }
 
-            await DbContext.ProductPurchaseRecords.Where(x => x.Id == outTradeNo)
+            var result = await DbContext.ProductPurchaseRecords
+                .Where(x => x.Id == outTradeNo && x.Status != ProductPurchaseStatus.Paid)
                 .ExecuteUpdateAsync(x =>
                     x.SetProperty(x => x.Status, ProductPurchaseStatus.Paid));
 

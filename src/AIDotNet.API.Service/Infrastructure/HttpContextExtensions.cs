@@ -50,11 +50,7 @@ public static class HttpContextExtensions
             }
         };
         await context.Response.WriteAsync(
-            "data: " + JsonSerializer.Serialize(error, new JsonSerializerOptions()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            }) + "\n\n", Encoding.UTF8);
+            "data: " + JsonSerializer.Serialize(error, AIDtoNetJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
         await context.WriteEndAsync();
     }
 
