@@ -70,8 +70,9 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
 
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
+            var result = JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
                 AIDtoNetJsonSerializer.DefaultOptions);
+            yield return result;
         }
     }
 }

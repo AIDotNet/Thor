@@ -143,7 +143,6 @@ public sealed class ChatService(
                 channel.Name);
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key);
-
         }
         catch (UnauthorizedAccessException e)
         {
@@ -240,7 +239,6 @@ public sealed class ChatService(
                     channel.Name);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
-
             }
 
             await context.Response.WriteAsJsonAsync(stream);
@@ -479,6 +477,7 @@ public sealed class ChatService(
 
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
+                Console.WriteLine(JsonSerializer.Serialize(item,AIDtoNetJsonSerializer.DefaultOptions));
                 responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                 await context.WriteResultAsync(item);
             }
@@ -491,6 +490,20 @@ public sealed class ChatService(
 
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
+                foreach (var response in item.Choices)
+                {
+                    if (response.Delta.Role.IsNullOrEmpty())
+                    {
+                        response.Delta.Role = "assistant";
+                    }
+
+                    if (response.Message.Role.IsNullOrEmpty())
+                    {
+                        response.Message.Role = "assistant";
+                    }
+                }
+
+                Console.WriteLine(JsonSerializer.Serialize(item,AIDtoNetJsonSerializer.DefaultOptions));
                 responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                 await context.WriteResultAsync(item);
             }
