@@ -12,5 +12,13 @@ AIDotNet API 提供了大部分的AI模型兼容OpenAI的接口格式，并且�
 - [x] 支持日志查看
 - [x] 支持系统设置
 - [x] 支持接入外部Chat链接
-- [ ] 支持支付宝购买兑换码
+- [x] 支持支付宝购买兑换码
 
+# AI大模型支持列表
+
+- [x] OpenAI （支持function）
+- [x] 星火大模型（支持function）
+- [x] Claudia
+- [x] 智谱AI
+- [x] Ollama
+- [x] 通义千问（阿里云）   
