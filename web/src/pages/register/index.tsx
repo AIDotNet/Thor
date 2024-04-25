@@ -118,7 +118,7 @@ export default function Register() {
                             field="password1"
                             size='large'
                             required
-                            type='password1'
+                            type='password'
                             placeholder="输入密码"
                             style={{ width: "100%" }}
                             fieldStyle={{ alignSelf: "stretch", padding: 0 }}
