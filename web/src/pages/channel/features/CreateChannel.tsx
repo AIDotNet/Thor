@@ -101,7 +101,10 @@ export default function CreateChannel({
                     <Form.Select
                         field="models"
                         label="模型"
-                        multiple
+                        allowCreate={true}
+                        multiple={true}
+                        filter={true}
+                        defaultActiveFirstOption
                         style={{ width: '100%' }}
                         placeholder="请选择模型"
                     >
