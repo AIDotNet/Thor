@@ -1,16 +1,11 @@
-﻿using AIDotNet.Abstractions;
+﻿using System.Diagnostics;
+using System.Text.Json;
+using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Extensions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;
+using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.Ollama
 {
@@ -58,9 +53,9 @@ namespace AIDotNet.Ollama
                 Model = result.model,
                 Choices = result.message == null ? [] :
                 [
-                    new Abstractions.ObjectModels.ObjectModels.SharedModels.ChatChoiceResponse()
+                    new ChatChoiceResponse()
                     {
-                        Delta = new OpenAI.ObjectModels.RequestModels.ChatMessage()
+                        Delta = new ChatMessage()
                         {
                             Role = result.message.role,
                             Content = result.message.content
@@ -139,9 +134,9 @@ namespace AIDotNet.Ollama
                         Model = result.model,
                         Choices = result.message == null ? [] :
                         [
-                            new Abstractions.ObjectModels.ObjectModels.SharedModels.ChatChoiceResponse()
+                            new ChatChoiceResponse()
                             {
-                                Delta = new OpenAI.ObjectModels.RequestModels.ChatMessage()
+                                Delta = new ChatMessage()
                                 {
                                     Role = result.message.role,
                                     Content = result.message.content
