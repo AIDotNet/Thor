@@ -42,6 +42,11 @@ public static class ServiceCollectionExtensions
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
             OpenAIServiceOptions.ServiceName);
         services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>(OpenAIServiceOptions.ServiceName);
+
+        services.AddHttpClient(OpenAIServiceOptions.ServiceName, options =>
+        {
+            options.Timeout = TimeSpan.FromMinutes(6);
+        });
         return services;
     }
 }

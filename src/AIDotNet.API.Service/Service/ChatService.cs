@@ -23,7 +23,6 @@ public sealed class ChatService(
     TokenService tokenService,
     ImageService imageService,
     UserService userService,
-    IHttpClientFactory httpClientFactory,
     IMapper mapper,
     LoggerService loggerService)
     : ApplicationService(serviceProvider)
@@ -315,9 +314,18 @@ public sealed class ChatService(
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
             }
-        }
-        catch (UnauthorizedAccessException e)
-        {
+            else
+            {
+                context.Response.StatusCode = 200;
+                if (module.Stream == true)
+                {
+                    await context.WriteStreamErrorAsync("当前模型未设置倍率");
+                }
+                else
+                {
+                    await context.WriteErrorAsync("当前模型未设置倍率");
+                }
+            }
         }
         catch (Exception e)
         {
@@ -477,7 +485,6 @@ public sealed class ChatService(
 
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
-                Console.WriteLine(JsonSerializer.Serialize(item,AIDtoNetJsonSerializer.DefaultOptions));
                 responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                 await context.WriteResultAsync(item);
             }
@@ -503,7 +510,6 @@ public sealed class ChatService(
                     }
                 }
 
-                Console.WriteLine(JsonSerializer.Serialize(item,AIDtoNetJsonSerializer.DefaultOptions));
                 responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                 await context.WriteResultAsync(item);
             }
@@ -523,7 +529,6 @@ public sealed class ChatService(
     /// <returns></returns>
     private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel)
     {
-        // order越大，权重越大，order越小，权重越小，然后随机一个
         var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
         var total = chatChannels.Sum(x => x.Order);
 
@@ -533,8 +538,7 @@ public sealed class ChatService(
         }
 
         var random = new Random();
-
-        var value = random.Next(0, total);
+        var value = random.NextDouble() * total;
 
         var result = chatChannels.First(x =>
         {

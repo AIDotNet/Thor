@@ -109,12 +109,12 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         {
             memoryCache.TryGetValue(key, out user);
 
-            if(user == null)
+            if (user == null)
             {
                 context.Response.StatusCode = 401;
                 throw new UnauthorizedAccessException();
             }
-            
+
             user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == user.Id);
             token = null;
         }
@@ -136,12 +136,11 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
             }
 
             // 余额不足
-            if (token is { UnlimitedQuota: false, RemainQuota: < 0 })
+            if (token is { UnlimitedQuota: false, RemainQuota: < 5000 })
             {
                 context.Response.StatusCode = 402;
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
             }
-
 
             user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == token.Creator);
         }
@@ -160,6 +159,11 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
 
         var requestQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.RequestQuota);
 
+        if(requestQuota <= 0)
+        {
+            requestQuota = 5000;
+        }
+        
         // 判断额度是否足够
         if (user.ResidualCredit < requestQuota)
         {
