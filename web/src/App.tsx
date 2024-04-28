@@ -17,6 +17,7 @@ import Register from './pages/register'
 import RedeemCode from './pages/redeemCode'
 import Chat from './pages/chat'
 import Product from './pages/product'
+import Vidol from './pages/vidol'
 
 const router = createBrowserRouter([{
   element: <MainLayout />,
@@ -42,6 +43,7 @@ const router = createBrowserRouter([{
   path: '/register', element: <Register />
 },
 { path: '/chat', element: <Chat /> },
+{ path: '/vidol', element: <Vidol /> },
 ])
 
 

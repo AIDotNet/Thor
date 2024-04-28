@@ -1,5 +1,5 @@
 import { Layout, Nav, Avatar, Switch, Dropdown, Button } from '@douyinfe/semi-ui';
-import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconCart, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
+import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconCart, IconUserCardVideo,IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { info } from '../services/UserService';
@@ -33,6 +33,13 @@ export default function MainLayout() {
             itemKey: 'Chat',
             text: '对话',
             icon: <IconComment size="large" />,
+            enable: false,
+            role: 'user,admin'
+        },
+        {
+            itemKey: 'Vidol',
+            text: '数字人',
+            icon: <IconUserCardVideo size="large" />,
             enable: false,
             role: 'user,admin'
         },
@@ -134,6 +141,18 @@ export default function MainLayout() {
             })
         }
 
+        const vidolLink = InitSetting?.find(x => x.key === GeneralSetting.VidolLink)?.value
+
+        if (vidolLink) {
+            // 修改 Vidol 
+            items.forEach(item => {
+                if (item.itemKey === 'Vidol') {
+                    item.enable = true;
+                }
+            })
+        }
+
+
         setItems(items.filter(item => item.enable && item.role.includes(role)));
 
 
@@ -170,6 +189,9 @@ export default function MainLayout() {
                 break;
             case '/product':
                 setKey('Product');
+                break;
+            case '/vidol':
+                setKey('Vidol');
                 break;
         }
 
@@ -222,6 +244,9 @@ export default function MainLayout() {
                                 break;
                             case 'Product':
                                 navigation('/product');
+                                break;
+                            case 'Vidol':
+                                navigation('/vidol');
                                 break;
                         }
                         setKey(data.itemKey as string);

@@ -102,7 +102,7 @@ public sealed class ChatService(
 
             if (quota > user.ResidualCredit)
             {
-                throw new InsufficientQuotaException("额度不足");
+                throw new InsufficientQuotaException("账号余额不足请充值");
             }
 
             // 获取渠道 通过算法计算权重
@@ -292,11 +292,11 @@ public sealed class ChatService(
 
                 if (module.Stream == true)
                 {
-                    (requestToken, responseToken) = await StreamHandlerAsync(context, module, channel, openService);
+                    (requestToken, responseToken) = await StreamHandlerAsync(context, module, channel, openService,user,rate);
                 }
                 else
                 {
-                    (requestToken, responseToken) = await ChatHandlerAsync(context, module, channel, openService);
+                    (requestToken, responseToken) = await ChatHandlerAsync(context, module, channel, openService,user,rate);
                 }
 
                 var quota = requestToken * rate;
@@ -343,7 +343,7 @@ public sealed class ChatService(
     }
 
     private async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, ChatCompletionCreateRequest input,
-        ChatChannel channel, IApiChatCompletionService openService)
+        ChatChannel channel, IApiChatCompletionService openService, User user, decimal rate)
     {
         int requestToken;
         int responseToken;
@@ -387,6 +387,15 @@ public sealed class ChatService(
                     }
                 }
             }
+            
+            var quota = requestToken * rate;
+            
+            // 判断请求token数量是否超过额度
+            if (quota > user.ResidualCredit)
+            {
+                throw new InsufficientQuotaException("账号余额不足请充值");
+            }
+            
 
             var result = await openService.CompleteChatAsync(input, setting);
 
@@ -398,6 +407,13 @@ public sealed class ChatService(
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Select(x => x.Content).ToArray());
 
+            var quota = requestToken * rate;
+            
+            // 判断请求token数量是否超过额度
+            if (quota > user.ResidualCredit)
+            {
+                throw new InsufficientQuotaException("账号余额不足请充值");
+            }
 
             var result = await openService.CompleteChatAsync(input, setting);
 
@@ -412,18 +428,21 @@ public sealed class ChatService(
     /// <summary>
     /// Stream 对话处理
     /// </summary>
+    /// <param name="context"></param>
+    /// <param name="input">输入</param>
+    /// <param name="channel">渠道</param>
+    /// <param name="openService"></param>
+    /// <param name="user"></param>
     /// <param Name="context"></param>
     /// <param Name="body"></param>
     /// <param Name="module"></param>
     /// <param Name="channel"></param>
     /// <param Name="openService"></param>
-    /// <param name="context"></param>
-    /// <param name="input">输入</param>
-    /// <param name="channel">渠道</param>
-    /// <param name="openService"></param>
+    /// <param name="rate"></param>
     /// <returns></returns>
     private async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context,
-        ChatCompletionCreateRequest input, ChatChannel channel, IApiChatCompletionService openService)
+        ChatCompletionCreateRequest input, ChatChannel channel, IApiChatCompletionService openService, User user,
+        decimal rate)
     {
         int requestToken;
 
@@ -482,6 +501,13 @@ public sealed class ChatService(
                     }
                 }
             }
+            
+            var quota = requestToken * rate;
+            // 判断请求token数量是否超过额度
+            if (quota > user.ResidualCredit)
+            {
+                throw new InsufficientQuotaException("账号余额不足请充值");
+            }
 
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
@@ -495,6 +521,15 @@ public sealed class ChatService(
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Select(x => x.Content).ToArray());
 
+            
+            var quota = requestToken * rate;
+            
+            // 判断请求token数量是否超过额度
+            if (quota > user.ResidualCredit)
+            {
+                throw new InsufficientQuotaException("账号余额不足请充值");
+            }
+            
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
                 foreach (var response in item.Choices)

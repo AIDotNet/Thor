@@ -94,6 +94,24 @@ export default function ServiceSetup({
                                 }}
                                 placeholder='请输入对话链接'
                             />
+                            <Form.Input
+                                field={GeneralSetting.VidolLink}
+                                label='Vidol链接'
+                                initValue={settings?.find(s => s.key === GeneralSetting.VidolLink)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let vidol = settings?.find(s => s.key === GeneralSetting.VidolLink);
+                                    if (vidol) {
+                                        vidol.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                style={{
+                                    marginBottom: 16,
+                                    width: '100%',
+                                }}
+                                placeholder='请输入Vidol链接'
+                            />
                         </Collapse.Panel>
                     </Collapse>
 

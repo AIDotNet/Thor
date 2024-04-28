@@ -25,6 +25,12 @@ class GeneralSetting {
     static readonly ChatLink: string = GeneralSetting.Default + ":ChatLink";
 
     /**
+     * Vidol链接
+     * @type {string}
+     */
+    static readonly VidolLink: string = GeneralSetting.Default + ":VidolLink";
+
+    /**
      * 新用户初始额度
      * @type {string}
      */

@@ -23,7 +23,12 @@ public static class SettingExtensions
         /// 对话链接
         /// </summary>
         public const string ChatLink = Default + ":ChatLink";
-
+        
+        /// <summary>
+        /// Vidol 链接
+        /// </summary>
+        public const string VidolLink = Default + ":VidolLink";
+        
         /// <summary>
         /// 新用户初始额度
         /// </summary>
@@ -184,6 +189,13 @@ public static class SettingExtensions
             Key = GeneralSetting.ChatLink,
             Value = "",
             Description = "对话链接"
+        });
+        
+        settings.Add(new Setting
+        {
+            Key = GeneralSetting.VidolLink,
+            Value = "",
+            Description = "Vidol 链接"
         });
 
         settings.Add(new Setting
