@@ -1,4 +1,4 @@
-﻿using AIDotNet.API.Service.Infrastructure;
+﻿using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -8,9 +8,10 @@ namespace AIDotNet.API.Service.Service;
 public sealed class AuthorizeService(IServiceProvider serviceProvider, IMemoryCache memoryCache)
     : ApplicationService(serviceProvider)
 {
-    public async ValueTask<object> TokenAsync(string account, string pass)
+    public async Task<object> TokenAsync(LoginInput input)
     {
-        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.UserName == account || x.Email == account);
+        var user = await DbContext.Users.FirstOrDefaultAsync(x =>
+            x.UserName == input.account || x.Email == input.account);
 
         if (user == null)
         {
@@ -22,7 +23,7 @@ public sealed class AuthorizeService(IServiceProvider serviceProvider, IMemoryCa
             throw new Exception("Account is disabled");
         }
 
-        if (user.Password != StringHelper.HashPassword(pass, user.PasswordHas))
+        if (user.Password != StringHelper.HashPassword(input.pass, user.PasswordHas))
         {
             throw new Exception("Password error");
         }

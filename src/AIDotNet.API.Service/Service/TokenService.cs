@@ -102,6 +102,13 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
     {
         var key = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
 
+        var requestQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.RequestQuota);
+
+        if (requestQuota <= 0)
+        {
+            requestQuota = 5000;
+        }
+
         User? user;
         Token? token;
         // su-则是用户token
@@ -136,7 +143,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
             }
 
             // 余额不足
-            if (token is { UnlimitedQuota: false, RemainQuota: < 5000 })
+            if (token is { UnlimitedQuota: false } && token.RemainQuota < requestQuota)
             {
                 context.Response.StatusCode = 402;
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
@@ -157,13 +164,6 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
             throw new UnauthorizedAccessException("账号已禁用");
         }
 
-        var requestQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.RequestQuota);
-
-        if(requestQuota <= 0)
-        {
-            requestQuota = 5000;
-        }
-        
         // 判断额度是否足够
         if (user.ResidualCredit < requestQuota)
         {

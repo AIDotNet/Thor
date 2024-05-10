@@ -15,5 +15,10 @@ public enum StatisticsConsumesNumberType
     /// <summary>
     /// token
     /// </summary>
-    Tokens
+    Tokens,
+    
+    /// <summary>
+    /// 系统信息
+    /// </summary>
+    SystemInfo
 }

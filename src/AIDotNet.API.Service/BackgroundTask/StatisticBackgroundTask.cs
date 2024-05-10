@@ -1,4 +1,5 @@
-﻿using AIDotNet.API.Service.DataAccess;
+﻿using AIDotNet.Abstractions;
+using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Domain.Core;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,8 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
 
             // 查询统计数据
             var userStatistics = await dbContext.Loggers
-                .Where(log => log.CreatedAt >= today && log.CreatedAt < tomorrow) // 今天的日志
+                .Where(log =>
+                    log.Type == ChatLoggerType.Consume && log.CreatedAt >= today && log.CreatedAt < tomorrow) // 今天的日志
                 .GroupBy(log => new { log.UserId }) // 按用户ID和模型名称分组
                 .Select(group => new
                 {
@@ -40,11 +42,11 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                         x => x.Creator == userStatistic.UserId && x.Year == today.Year && x.Month == today.Month &&
                              x.Day == today.Day)
                     .ExecuteDeleteAsync(cancellationToken: stoppingToken);
-                
+
                 // 创建新的统计数据
                 var statistics = new List<StatisticsConsumesNumber>()
                 {
-                    new ()
+                    new()
                     {
                         Creator = userStatistic.UserId,
                         Year = (ushort)today.Year,
@@ -53,7 +55,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                         Type = StatisticsConsumesNumberType.Consumes,
                         Value = userStatistic.TotalQuota,
                     },
-                    new ()
+                    new()
                     {
                         Creator = userStatistic.UserId,
                         Year = (ushort)today.Year,
@@ -62,7 +64,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                         Type = StatisticsConsumesNumberType.Requests,
                         Value = userStatistic.RequestCount,
                     },
-                    new ()
+                    new()
                     {
                         Creator = userStatistic.UserId,
                         Year = (ushort)today.Year,
@@ -74,10 +76,11 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                 };
                 await dbContext.StatisticsConsumesNumbers.AddRangeAsync(statistics, stoppingToken);
             }
-            
-            
+
+
             var models = await dbContext.Loggers
-                .Where(log => log.CreatedAt >= today && log.CreatedAt < tomorrow) // 今天的日志
+                .Where(log =>
+                    log.Type == ChatLoggerType.Consume && log.CreatedAt >= today && log.CreatedAt < tomorrow) // 今天的日志
                 .GroupBy(log => new { log.UserId, log.ModelName }) // 按用户ID和模型名称分组
                 .Select(group => new
                 {
@@ -98,11 +101,11 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                         x => x.Creator == model.UserId && x.ModelName == model.ModelName && x.Year == today.Year &&
                              x.Month == today.Month && x.Day == today.Day)
                     .ExecuteDeleteAsync(cancellationToken: stoppingToken);
-                
+
                 // 创建新的统计数据
                 var statistics = new List<ModelStatisticsNumber>()
                 {
-                    new ()
+                    new()
                     {
                         Creator = model.UserId,
                         ModelName = model.ModelName,
@@ -118,7 +121,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
             }
 
             await dbContext.SaveChangesAsync(stoppingToken);
-            
+
             // 休眠一定时间或直到下一次执行周期
             await Task.Delay(TimeSpan.FromMinutes(20), stoppingToken);
         }

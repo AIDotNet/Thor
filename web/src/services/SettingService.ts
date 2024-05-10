@@ -235,7 +235,7 @@ try {
  * 是否启用了支付宝支付
  */
 function IsEnableAlipay() {
-    const v = InitSetting?.find(s => s.key === GeneralSetting.AlipayAppId);
+    const v = InitSetting?.find(s => s.key === GeneralSetting.AlipayNotifyUrl);
     return v?.value !== undefined && v?.value !== "";
 }
 

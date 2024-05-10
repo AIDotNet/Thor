@@ -37,44 +37,8 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddMapster();
 
-builder.Services.AddSwaggerGen(options =>
-    {
-        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-        {
-            Name = "Authorization",
-            Type = SecuritySchemeType.ApiKey,
-            Scheme = "Bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description =
-                "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer xxxxxxxxxxxxxxx\"",
-        });
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                new string[] { }
-            }
-        });
-
-        options.SwaggerDoc("v1",
-            new OpenApiInfo
-            {
-                Title = "FastWiki.ServiceApp",
-                Version = "v1",
-                Contact = new OpenApiContact { Name = "FastWiki.ServiceApp", }
-            });
-        foreach (var item in Directory.GetFiles(Directory.GetCurrentDirectory(), "*.xml"))
-            options.IncludeXmlComments(item, true);
-        options.DocInclusionPredicate((docName, action) => true);
-    }).AddCustomAuthentication()
+builder.Services
+    .AddCustomAuthentication()
     .AddMemoryCache()
     .AddHttpContextAccessor()
     .AddTransient<ProductService>()
@@ -164,12 +128,6 @@ app.UseStaticFiles();
 
 app.UseMiddleware<UnitOfWorkMiddleware>();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 if (!Directory.Exists("/data"))
 {
     Directory.CreateDirectory("/data");
@@ -183,8 +141,8 @@ await loggerDbContext.Database.MigrateAsync();
 
 await SettingService.LoadingSettings(app);
 
-app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, string account, string password) =>
-        await service.TokenAsync(account, password))
+app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBody] LoginInput input) =>
+    await service.TokenAsync(input))
     .WithGroupName("Token")
     .AddEndpointFilter<ResultFilter>()
     .WithDescription("Get token")

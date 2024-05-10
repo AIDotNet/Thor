@@ -1,12 +1,7 @@
-import { fetch } from "../uitls/fetch";
+import {  postJson } from "../uitls/fetch";
 
 const prefix = "/api/v1/authorize";
 
-export const login = (account: string, password: string) => {
-  return fetch(prefix + "/token?account="+account+"&password="+password, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    }
-  });
+export const login = (value:any) => {
+  return postJson(prefix + "/token", value);
 };

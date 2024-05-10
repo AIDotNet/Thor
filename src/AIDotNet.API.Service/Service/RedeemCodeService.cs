@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.Service;
 
-public class RedeemCodeService(IServiceProvider serviceProvider, 
+public class RedeemCodeService(
+    IServiceProvider serviceProvider,
     LoggerService loggerService,
     UserService userService)
     : ApplicationService(serviceProvider)
@@ -85,7 +86,7 @@ public class RedeemCodeService(IServiceProvider serviceProvider,
     public async ValueTask UseAsync(string code)
     {
         var redeemCode = await DbContext.RedeemCodes
-            .FirstOrDefaultAsync(x => x.Code == code && !x.Disabled);
+            .FirstOrDefaultAsync(x => x.Code == code);
 
         if (redeemCode == null)
         {
@@ -97,6 +98,11 @@ public class RedeemCodeService(IServiceProvider serviceProvider,
             throw new Exception("兑换码已使用");
         }
 
+        if (redeemCode.Disabled)
+        {
+            throw new Exception("兑换码已禁用");
+        }
+
         await DbContext.RedeemCodes
             .Where(x => x.Code == code && x.State == RedeemedState.NotRedeemed && !x.Disabled)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.State, RedeemedState.Redeemed)
@@ -105,10 +111,11 @@ public class RedeemCodeService(IServiceProvider serviceProvider,
                 .SetProperty(x => x.RedeemedUserName, UserContext.CurrentUserName));
 
         await userService.UpdateResidualCreditAsync(UserContext.CurrentUserId, redeemCode.Quota);
-        
+
         await loggerService.CreateAsync(new ChatLogger
         {
             Type = ChatLoggerType.System,
+            ModelName = string.Empty,
             Content = $"用户 {UserContext.CurrentUserName} 使用了兑换码 {redeemCode.Code}，额度 {redeemCode.Quota}"
         });
     }

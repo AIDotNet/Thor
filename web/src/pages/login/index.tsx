@@ -9,7 +9,9 @@ export default function Login() {
     const navigate = useNavigate();
     function handleLogin(value: any) {
         setLoading(true);
-        login(value.account, value.password)
+        login({
+            account: value.account, pass: value.password
+        })
             .then((res) => {
                 if (res.success) {
                     localStorage.setItem('token', res.data.token);
