@@ -52,6 +52,7 @@ public class ProductService(IServiceProvider serviceProvider) : ApplicationServi
         var record = new ProductPurchaseRecord()
         {
             ProductId = id,
+            Id = Guid.NewGuid().ToString("N"),
             UserId = UserContext.CurrentUserId,
             Description = $"{UserContext.CurrentUserName} 创建订单：{product.Name} 订单金额：{product.Price}元",
             Status = ProductPurchaseStatus.Unpaid,

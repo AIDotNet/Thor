@@ -30,7 +30,7 @@ public sealed class AuthorizeService(IServiceProvider serviceProvider, IMemoryCa
 
         var key = "su-" + StringHelper.GenerateRandomString(38);
 
-        memoryCache.Set(key, user, TimeSpan.FromDays(3));
+        memoryCache.Set(key, user, TimeSpan.FromDays(7));
 
         return new
         {

@@ -59,7 +59,7 @@ public class UserService(
         return result > 0;
     }
 
-    public async ValueTask<PagingDto<User>> GetAsync(int page, int pageSize, string? keyword)
+    public async ValueTask<PagingDto<User>> GetListAsync(int page, int pageSize, string? keyword)
     {
         var total = await DbContext.Users.CountAsync(x =>
             string.IsNullOrEmpty(keyword) || x.UserName.Contains(keyword) || x.Email.Contains(keyword));

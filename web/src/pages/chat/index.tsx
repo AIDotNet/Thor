@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react"
 import { GeneralSetting, InitSetting } from "../../services/SettingService"
+import IFrameUI from "../../components/iframe-ui"
 
 export default function Chat() {
     const [chatLink, setChatLink] = useState('' as string)
 
     useEffect(() => {
         const chatLink = InitSetting?.find(x => x.key === GeneralSetting.ChatLink)?.value ?? ''
-        
+
         // TODO: 定义规则，嵌入Chat外部链接的时候会自动带上token。这里需要根据规则进行处理
         const token = localStorage.getItem('token')
         if (token && chatLink) {
@@ -20,15 +21,17 @@ export default function Chat() {
     }, [])
 
     return (
-        <iframe
-            src={chatLink}
-            style={{
-                width: '100%',
-                height: '100vh',
-                border: 'none'
-            }}
-        >
+        <IFrameUI>
+            <iframe
+                src={chatLink}
+                style={{
+                    width: '100%',
+                    height: '100vh',
+                    border: 'none'
+                }}
+            >
 
-        </iframe>
+            </iframe>
+        </IFrameUI>
     )
 }

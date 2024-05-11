@@ -85,6 +85,7 @@ builder.Services.AddDbContext<LoggerDbContext>(options =>
         .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
 });
 
+
 var app = builder.Build();
 
 app.UseCors("AllowAll");
@@ -275,7 +276,7 @@ user.MapPost(string.Empty, async (UserService service, CreateUserInput input) =>
     .AllowAnonymous();
 
 user.MapGet(string.Empty, async (UserService service, int page, int pageSize, string? keyword) =>
-        await service.GetAsync(page, pageSize, keyword))
+        await service.GetListAsync(page, pageSize, keyword))
     .RequireAuthorization(new AuthorizeAttribute()
     {
         Roles = RoleConstant.Admin
@@ -446,7 +447,7 @@ product.MapPost("start-pay-payload/{id}", async ([FromServices] ProductService s
     .RequireAuthorization();
 
 product.MapPost("pay-complete-callback",
-        async ([FromServices] ProductService service, [FromServices] HttpContext context) =>
+        async ([FromServices] ProductService service, HttpContext context) =>
         await service.PayCompleteCallbackAsync(context))
     .WithDescription("支付回调处理")
     .WithOpenApi()

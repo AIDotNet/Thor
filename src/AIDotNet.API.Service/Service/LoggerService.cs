@@ -62,6 +62,11 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
         var query = LoggerDbContext.Loggers
             .AsNoTracking();
 
+        if ((int)type == -1)
+        {
+            type = null;
+        }
+
         if (type.HasValue)
         {
             query = query.Where(x => x.Type == type);

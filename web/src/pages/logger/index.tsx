@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChatLogger } from "../..";
 import styled from "styled-components"
-import { Button, DatePicker, Dropdown, Input, Notification, Table, Tag } from "@douyinfe/semi-ui";
+import { Button, DatePicker, Dropdown, Input, Notification, Select, Table, Tag } from "@douyinfe/semi-ui";
 import { getLoggers } from "../../services/LoggerService";
 import { renderQuota } from "../../uitls/render";
 
@@ -10,14 +10,14 @@ const Header = styled.header`
 
 `
 
-export default function Channel() {
+export default function Logger() {
     const [data, setData] = useState<ChatLogger[]>([]);
     const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
     const [input, setInput] = useState({
         page: 1,
         pageSize: 10,
-        type: '',
+        type: -1 | 1 | 2 | 3,
         model: '',
         startTime: '',
         endTime: '',
@@ -112,7 +112,7 @@ export default function Channel() {
                     fontSize: '1.5rem',
                     fontWeight: 'bold',
                 }}>
-                    Token管理
+                    日志
                 </span>
 
                 <Dropdown
@@ -141,8 +141,26 @@ export default function Channel() {
                     style={{
                         marginRight: '0.5rem',
                         float: 'right',
-                        width: '10rem',
-                    }} placeholder='Token名称' />
+                        width: '5rem',
+                    }} placeholder='模型名称' />
+                <Select
+                    style={{
+                        marginRight: '0.5rem',
+                        float: 'right',
+                        width: '5rem',
+                    }} value={input.type}
+                    onChange={(e: any) => {
+                        setInput({
+                            ...input,
+                            type: e,
+                        });
+                    }}
+                >
+                    <Select.Option value={-1}>全部</Select.Option>
+                    <Select.Option value={1}>消费</Select.Option>
+                    <Select.Option value={2}>充值</Select.Option>
+                    <Select.Option value={3}>系统</Select.Option>
+                </Select>
                 <Input
                     value={input.keyword}
                     onChange={(e) => {
@@ -154,7 +172,7 @@ export default function Channel() {
                     style={{
                         marginRight: '0.5rem',
                         float: 'right',
-                        width: '10rem',
+                        width: '5rem',
                     }} placeholder='关键字' />
 
                 <DatePicker
@@ -168,6 +186,7 @@ export default function Channel() {
 
                     style={{
                         marginRight: '0.5rem',
+                        width: '10rem',
                         float: 'right',
                     }} placeholder='开始时间' />
                 <DatePicker
@@ -180,6 +199,7 @@ export default function Channel() {
                     }}
                     style={{
                         marginRight: '0.5rem',
+                        width: '10rem',
                         float: 'right',
                     }} placeholder='结束时间' />
 
