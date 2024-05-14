@@ -107,7 +107,7 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
         if (total <= 0) return new PagingDto<ChatLogger>(total, []);
 
         var result = await query
-            .OrderByDescending(x => x.Id)
+            .OrderByDescending(x => x.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
