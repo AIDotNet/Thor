@@ -74,7 +74,14 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                         Value = userStatistic.TotalTokens,
                     }
                 };
-                await dbContext.StatisticsConsumesNumbers.AddRangeAsync(statistics, stoppingToken);
+
+                foreach (var statistic in statistics)
+                {
+                    
+                    await dbContext.StatisticsConsumesNumbers.AddAsync(statistic, stoppingToken);
+                    await dbContext.SaveChangesAsync(stoppingToken);
+                }
+
             }
 
 
@@ -107,6 +114,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                 {
                     new()
                     {
+                        
                         Creator = model.UserId,
                         ModelName = model.ModelName,
                         Year = (ushort)today.Year,
@@ -117,6 +125,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                         TokenUsed = model.TotalTokens
                     }
                 };
+                
                 await dbContext.ModelStatisticsNumbers.AddRangeAsync(statistics, stoppingToken);
             }
 

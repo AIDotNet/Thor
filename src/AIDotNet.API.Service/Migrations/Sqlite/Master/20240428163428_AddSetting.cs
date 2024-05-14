@@ -38,7 +38,7 @@ namespace AIDotNet.API.Service.Migrations.Master
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Avatar", "ConsumeToken", "CreatedAt", "Creator", "DeletedAt", "Email", "IsDelete", "IsDisabled", "Modifier", "Password", "PasswordHas", "RequestCount", "ResidualCredit", "Role", "UpdatedAt", "UserName" },
-                values: new object[] { "82ea4ca6-3bc8-4881-b64e-d33fab18aa39", null, 0L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "239573049@qq.com", false, false, null, "645203af27210c85c0ba0133f54e931b", "87874ef6916842a6988ddcf45a702550", 0L, 10000000L, "admin", null, "admin" });
+                values: new object[] { "82ea4ca6-3bc8-4881-b64e-d33fab18aa39", null, 0L, DateTime.Now, null, null, "239573049@qq.com", false, false, null, "645203af27210c85c0ba0133f54e931b", "87874ef6916842a6988ddcf45a702550", 0L, 10000000L, "admin", null, "admin" });
         }
 
         /// <inheritdoc />
@@ -71,7 +71,7 @@ namespace AIDotNet.API.Service.Migrations.Master
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Avatar", "ConsumeToken", "CreatedAt", "Creator", "DeletedAt", "Email", "IsDelete", "IsDisabled", "Modifier", "Password", "PasswordHas", "RequestCount", "ResidualCredit", "Role", "UpdatedAt", "UserName" },
-                values: new object[] { "72e8703c-6dea-466c-82aa-7e0b85d04618", null, 0L, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, null, "239573049@qq.com", false, false, null, "654b09708742ad11ad1eee4e43fd84f1", "9d80d1d43cf14a17bcf052a2da79e5cf", 0L, 10000000L, "admin", null, "admin" });
+                values: new object[] { "72e8703c-6dea-466c-82aa-7e0b85d04618", null, 0L, DateTime.Now, null, null, "239573049@qq.com", false, false, null, "654b09708742ad11ad1eee4e43fd84f1", "9d80d1d43cf14a17bcf052a2da79e5cf", 0L, 10000000L, "admin", null, "admin" });
         }
     }
 }

@@ -1,5 +1,6 @@
-import { Button, Divider, Form, Notification, SideSheet } from "@douyinfe/semi-ui";
+import { Button, Divider, Form, Notification, SideSheet, Tag } from "@douyinfe/semi-ui";
 import { Add } from '../../../services/TokenService'
+import { renderQuota } from "../../../uitls/render";
 
 interface CreateTokenProps {
     onSuccess: () => void;
@@ -47,7 +48,9 @@ export default function CreateToken({
                         values.unlimitedQuota ? null : <Form.Input type="number" rules={[{
                             min: 0,
                             message: 'Token额度不能小于0'
-                        }]} field='remainQuota' label='额度' style={{ width: '100%' }} placeholder='请输入token额度'></Form.Input>
+                        }]} field='remainQuota' label='额度' style={{ width: '100%' }} placeholder='请输入token额度' suffix={
+                            <Tag>{renderQuota(values.remainQuota ?? 0, 6)}</Tag>
+                        } ></Form.Input> 
                     }
                     <Form.Checkbox field='unlimitedQuota' label='无限额度'></Form.Checkbox>
                     {

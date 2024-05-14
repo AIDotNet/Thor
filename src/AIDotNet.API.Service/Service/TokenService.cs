@@ -5,13 +5,14 @@ using AIDotNet.API.Service.Exceptions;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AIDotNet.API.Service.Service;
 
 public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache memoryCache)
     : ApplicationService(serviceProvider)
 {
-    public async ValueTask CreateAsync(TokenInput input)
+    public async ValueTask CreateAsync(TokenInput input, string? createId = null)
     {
         if (input.ExpiredTime < DateTime.Now)
         {
@@ -24,6 +25,11 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         }
 
         var token = Mapper.Map<Token>(input);
+
+        if (!createId.IsNullOrEmpty())
+        {
+            token.Creator = createId;
+        }
 
         token.Key = "sk-" + StringHelper.GenerateRandomString(38);
 

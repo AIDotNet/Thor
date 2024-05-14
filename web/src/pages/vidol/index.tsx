@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react"
 import { GeneralSetting, InitSetting } from "../../services/SettingService"
+import IFrameUI from "../../components/iframe-ui"
 
 export default function Vidol() {
     const [vidol, setVidol] = useState('' as string)
 
     useEffect(() => {
         const vidol = InitSetting?.find(x => x.key === GeneralSetting.VidolLink)?.value ?? ''
-        
+
         // TODO: 定义规则，嵌入Chat外部链接的时候会自动带上token。这里需要根据规则进行处理
         const token = localStorage.getItem('token')
         if (token && vidol) {
@@ -20,15 +21,17 @@ export default function Vidol() {
     }, [])
 
     return (
-        <iframe
-            src={vidol}
-            style={{
-                width: '100%',
-                height: '100vh',
-                border: 'none'
-            }}
-        >
+        <IFrameUI>
+            <iframe
+                src={vidol}
+                style={{
+                    width: '100%',
+                    height: '100vh',
+                    border: 'none'
+                }}
+            >
 
-        </iframe>
+            </iframe>
+        </IFrameUI>
     )
 }

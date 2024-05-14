@@ -30,7 +30,10 @@ public class AIDotNetDbContext(
     {
         modelBuilder.ConfigureAIDotNet();
 
-        var user = new User(Guid.NewGuid().ToString(), "admin", "239573049@qq.com", "admin");
+        var user = new User(Guid.NewGuid().ToString(), "admin", "239573049@qq.com", "admin")
+        {
+            CreatedAt = DateTime.Now
+        };
         user.SetAdmin();
         user.SetResidualCredit(10000000);
 
@@ -44,6 +47,7 @@ public class AIDotNetDbContext(
             Name = "默认Token",
             UnlimitedQuota = true,
             UnlimitedExpired = true,
+            CreatedAt = DateTime.Now
         };
 
         modelBuilder.Entity<Token>().HasData(token);

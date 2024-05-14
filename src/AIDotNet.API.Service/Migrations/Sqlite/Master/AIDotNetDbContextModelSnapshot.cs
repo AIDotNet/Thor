@@ -512,7 +512,7 @@ namespace AIDotNet.API.Service.Migrations.Master
                         new
                         {
                             Id = 9999L,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = DateTime.Now,
                             Creator = "82ea4ca6-3bc8-4881-b64e-d33fab18aa39",
                             Disabled = false,
                             IsDelete = false,
@@ -592,7 +592,7 @@ namespace AIDotNet.API.Service.Migrations.Master
                         {
                             Id = "82ea4ca6-3bc8-4881-b64e-d33fab18aa39",
                             ConsumeToken = 0L,
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = DateTime.Now,
                             Email = "239573049@qq.com",
                             IsDelete = false,
                             IsDisabled = false,

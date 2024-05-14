@@ -5,6 +5,7 @@ import { renderQuota } from "../../uitls/render";
 import { useNavigate } from "react-router-dom";
 import Pay from "../pay";
 import Logger from "../../pages/logger";
+import './index.css'
 
 interface IFrameUIProps {
     children: React.ReactNode;
@@ -67,6 +68,11 @@ export default function IFrameUI({
                             <Dropdown.Item style={{
                                 borderRadius: '12px',
                             }} onClick={() => {
+                                navigate('/panel')
+                            }}>面板</Dropdown.Item>
+                            <Dropdown.Item style={{
+                                borderRadius: '12px',
+                            }} onClick={() => {
                                 setPayVisible(true)
                             }}>充值</Dropdown.Item>
                             <Dropdown.Item style={{
@@ -85,13 +91,14 @@ export default function IFrameUI({
                 }
             >
                 <Avatar
+                    id='dropdown'
                     onClick={() => {
                         setDropdownVisible(!dropdownVisible)
                     }}
                     style={{
                         position: 'fixed',
-                        top: 0,
-                        right: 0,
+                        bottom: '0',
+                        right: '0',
                         height: '40px',
                         backgroundColor: '#282828',
                         color: 'white',

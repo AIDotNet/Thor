@@ -25,7 +25,7 @@ public partial class UserService(
         {
             throw new Exception("用户名只能由英文和数字组成");
         }
-        
+
         // 判断是否存在
         var exist = await DbContext.Users.AnyAsync(x => x.UserName == input.UserName || x.Email == input.Email);
         if (exist)
@@ -46,7 +46,7 @@ public partial class UserService(
             Name = "默认Token",
             UnlimitedQuota = true,
             UnlimitedExpired = true,
-        });
+        }, user.Id);
 
         await loggerService.CreateSystemAsync("创建用户：" + user.UserName);
 
@@ -122,7 +122,7 @@ public partial class UserService(
                         .SetProperty(y => y.AccessedTime, DateTime.Now)
                         .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
         }
-        
+
         await DbContext
             .Channels
             .Where(x => x.Id == channelId)

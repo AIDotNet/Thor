@@ -1,5 +1,6 @@
-import { Button, Divider, Form, Notification, SideSheet } from "@douyinfe/semi-ui";
+import { Button, Divider, Form, Notification, SideSheet, Tag } from "@douyinfe/semi-ui";
 import { Update } from '../../../services/TokenService'
+import { renderQuota } from "../../../uitls/render";
 
 interface UpdateTokenProps {
     onSuccess: () => void;
@@ -38,7 +39,9 @@ export default function UpdateToken({
                         message: 'Token名称长度不能小于3'
                     }]} field='name' label='Token名称' style={{ width: '100%' }} placeholder='请输入token名称'></Form.Input>
                     {
-                        values.unlimitedQuota ? null : <Form.Input  type="number" field='remainQuota' label='额度' style={{ width: '100%' }} placeholder='请输入token额度'></Form.Input>
+                        values.unlimitedQuota ? null : <Form.Input  type="number" field='remainQuota' label='额度' style={{ width: '100%' }} suffix={
+                            <Tag>{renderQuota(values.remainQuota ?? 0, 6)}</Tag>
+                        }  placeholder='请输入token额度'></Form.Input>
                     }
                     <Form.Checkbox field='unlimitedQuota' label='无限额度'></Form.Checkbox>
                     {

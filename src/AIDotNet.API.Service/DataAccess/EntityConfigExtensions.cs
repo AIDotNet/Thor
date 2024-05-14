@@ -21,6 +21,9 @@ public static class EntityConfigExtensions
         {
             options.HasKey(x => x.Id);
 
+            options
+                .Property(e => e.Id).ValueGeneratedOnAdd();
+            
             options.Property(x => x.Key).IsRequired();
 
             options.HasIndex(x => x.Creator);
@@ -32,6 +35,9 @@ public static class EntityConfigExtensions
         {
             options.HasKey(x => x.Id);
 
+            options
+                .Property(e => e.Id).ValueGeneratedOnAdd();
+            
             options.Property(x => x.Name).IsRequired();
 
             options.Property(x => x.Code).IsRequired();
@@ -92,6 +98,9 @@ public static class EntityConfigExtensions
         {
             options.HasKey(x => x.Id);
 
+            options
+                .Property(e => e.Id).ValueGeneratedOnAdd();
+
             options.HasIndex(x => x.Creator);
 
             options.HasIndex(x => x.Year);
@@ -104,6 +113,8 @@ public static class EntityConfigExtensions
         modelBuilder.Entity<ModelStatisticsNumber>(options =>
         {
             options.HasKey(x => x.Id);
+            options
+                .Property(e => e.Id).ValueGeneratedOnAdd();
 
             options.HasIndex(x => x.Creator);
 
@@ -119,6 +130,8 @@ public static class EntityConfigExtensions
         modelBuilder.Entity<ChatLogger>(options =>
         {
             options.HasKey(x => x.Id);
+            options
+                .Property(e => e.Id).ValueGeneratedOnAdd();
 
             options.HasIndex(x => x.Creator);
 
