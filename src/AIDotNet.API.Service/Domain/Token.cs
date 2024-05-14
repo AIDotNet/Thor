@@ -3,7 +3,7 @@ using AIDotNet.API.Service.Domina.Core;
 
 namespace AIDotNet.API.Service.Domain;
 
-public sealed class Token : Entity<long>, ISoftDeletion
+public sealed class Token : Entity<string>, ISoftDeletion
 {
     /// <summary>
     /// Api Key

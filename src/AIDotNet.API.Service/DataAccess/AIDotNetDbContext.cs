@@ -10,7 +10,6 @@ public class AIDotNetDbContext(
     DbContextOptions<AIDotNetDbContext> options,
     IUserContext userContext) : DbContext(options)
 {
-    private readonly IUserContext _userContext = userContext;
 
     public DbSet<User> Users { get; set; }
 
@@ -41,7 +40,7 @@ public class AIDotNetDbContext(
 
         var token = new Token
         {
-            Id = 9999,
+            Id = Guid.NewGuid().ToString(),
             Key = "sk-" + StringHelper.GenerateRandomString(38),
             Creator = user.Id,
             Name = "默认Token",
@@ -73,18 +72,18 @@ public class AIDotNetDbContext(
         var entries = ChangeTracker.Entries();
         foreach (var entry in entries)
         {
-            if (_userContext.IsAuthenticated)
+            if (userContext.IsAuthenticated)
             {
                 switch (entry)
                 {
                     case { State: EntityState.Added, Entity: ICreatable creatable }:
-                        creatable.Creator ??= _userContext.CurrentUserId;
+                        creatable.Creator ??= userContext.CurrentUserId;
                         if (creatable.CreatedAt == default)
                             creatable.CreatedAt = DateTime.Now;
                         break;
                     case { State: EntityState.Modified, Entity: IUpdatable entity }:
                         entity.UpdatedAt ??= DateTime.Now;
-                        entity.Modifier ??= _userContext.CurrentUserId;
+                        entity.Modifier ??= userContext.CurrentUserId;
                         break;
                 }
             }

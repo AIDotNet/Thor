@@ -48,6 +48,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                 {
                     new()
                     {
+                        Id = Guid.NewGuid().ToString("N"),
                         Creator = userStatistic.UserId,
                         Year = (ushort)today.Year,
                         Month = (ushort)today.Month,
@@ -57,6 +58,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                     },
                     new()
                     {
+                        Id = Guid.NewGuid().ToString("N"),
                         Creator = userStatistic.UserId,
                         Year = (ushort)today.Year,
                         Month = (ushort)today.Month,
@@ -66,6 +68,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                     },
                     new()
                     {
+                        Id = Guid.NewGuid().ToString("N"),
                         Creator = userStatistic.UserId,
                         Year = (ushort)today.Year,
                         Month = (ushort)today.Month,
@@ -107,6 +110,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                 {
                     new()
                     {
+                        Id = Guid.NewGuid().ToString("N"),
                         Creator = model.UserId,
                         ModelName = model.ModelName,
                         Year = (ushort)today.Year,

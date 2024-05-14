@@ -30,6 +30,8 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         {
             token.Creator = createId;
         }
+        
+        token.Id = Guid.NewGuid().ToString("N");
 
         token.Key = "sk-" + StringHelper.GenerateRandomString(38);
 
@@ -77,7 +79,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         return result > 0;
     }
 
-    public async ValueTask<bool> RemoveAsync(long id)
+    public async ValueTask<bool> RemoveAsync(string id)
     {
         var result = await DbContext.Tokens.Where(x => x.Id == id)
             .ExecuteDeleteAsync();
@@ -85,7 +87,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         return result > 0;
     }
 
-    public async ValueTask DisableAsync(long id)
+    public async ValueTask DisableAsync(string id)
     {
         var token = await DbContext.Tokens.FindAsync(id);
         if (token == null)

@@ -3,7 +3,7 @@ using AIDotNet.API.Service.Domain.Core;
 
 namespace AIDotNet.API.Service.Domain;
 
-public sealed class ChatLogger : Entity<long>
+public sealed class ChatLogger : Entity<string>
 {
     public ChatLoggerType Type { get; set; }
 

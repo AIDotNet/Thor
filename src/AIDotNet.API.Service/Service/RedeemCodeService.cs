@@ -28,7 +28,10 @@ public class RedeemCodeService(
         var codes = new List<RedeemCode>();
         for (var i = 0; i < input.Count; i++)
         {
-            var code = new RedeemCode(input.Name, input.Quota);
+            var code = new RedeemCode(input.Name, input.Quota)
+            {
+                Id = Guid.NewGuid().ToString("N"),
+            };
             codes.Add(code);
         }
 
@@ -60,21 +63,21 @@ public class RedeemCodeService(
         return new PagingDto<RedeemCode>(0, new List<RedeemCode>());
     }
 
-    public async ValueTask EnableAsync(long id)
+    public async ValueTask EnableAsync(string id)
     {
         await DbContext.RedeemCodes
             .Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Disabled, x => !x.Disabled));
     }
 
-    public async ValueTask RemoveAsync(long id)
+    public async ValueTask RemoveAsync(string id)
     {
         await DbContext.RedeemCodes
             .Where(x => x.Id == id)
             .ExecuteDeleteAsync();
     }
 
-    public async ValueTask UpdateAsync(long id, RedeemCodeInput input)
+    public async ValueTask UpdateAsync(string id, RedeemCodeInput input)
     {
         await DbContext.RedeemCodes
             .Where(x => x.Id == id)

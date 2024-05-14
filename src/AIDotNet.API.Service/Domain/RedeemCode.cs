@@ -2,7 +2,7 @@
 
 namespace AIDotNet.API.Service.Domain;
 
-public sealed class RedeemCode: Entity<long>
+public sealed class RedeemCode: Entity<string>
 {
     /// <summary>
     /// 兑换名称

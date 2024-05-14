@@ -228,11 +228,11 @@ token.MapPut(string.Empty, async (TokenService service, Token input) =>
         await service.UpdateAsync(input))
     .WithDescription("更新Token");
 
-token.MapDelete("{id}", async (TokenService service, long id) =>
+token.MapDelete("{id}", async (TokenService service, string id) =>
         await service.RemoveAsync(id))
     .WithDescription("删除Token");
 
-token.MapPut("Disable/{id}", async (TokenService service, long id) =>
+token.MapPut("Disable/{id}", async (TokenService service, string id) =>
         await service.DisableAsync(id))
     .WithDescription("禁用Token");
 
@@ -386,21 +386,21 @@ redeemCode.MapGet(string.Empty, async (RedeemCodeService service, int page, int 
         Roles = RoleConstant.Admin
     });
 
-redeemCode.MapPut("{id}", async (RedeemCodeService service, long id, RedeemCodeInput input) =>
+redeemCode.MapPut("{id}", async (RedeemCodeService service, string id, RedeemCodeInput input) =>
         await service.UpdateAsync(id, input))
     .RequireAuthorization(new AuthorizeAttribute()
     {
         Roles = RoleConstant.Admin
     });
 
-redeemCode.MapPut("/enable/{id}", async (RedeemCodeService service, long id) =>
+redeemCode.MapPut("/enable/{id}", async (RedeemCodeService service, string id) =>
         await service.EnableAsync(id))
     .RequireAuthorization(new AuthorizeAttribute()
     {
         Roles = RoleConstant.Admin
     });
 
-redeemCode.MapDelete("{id}", async (RedeemCodeService service, long id) =>
+redeemCode.MapDelete("{id}", async (RedeemCodeService service, string id) =>
         await service.RemoveAsync(id))
     .RequireAuthorization(new AuthorizeAttribute()
     {

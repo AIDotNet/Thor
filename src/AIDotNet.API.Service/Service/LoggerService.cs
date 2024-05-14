@@ -9,6 +9,7 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
+        logger.Id = Guid.NewGuid().ToString("N");
         await LoggerDbContext.Loggers.AddAsync(logger);
     }
 
