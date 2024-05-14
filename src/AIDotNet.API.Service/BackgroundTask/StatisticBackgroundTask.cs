@@ -123,7 +123,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
             await dbContext.SaveChangesAsync(stoppingToken);
 
             // 休眠一定时间或直到下一次执行周期
-            await Task.Delay(TimeSpan.FromMinutes(20), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
         }
     }
 }

@@ -38,7 +38,7 @@ public sealed class ChatChannel : Entity<string>
     public List<string> Models { get; set; }
 
     /// <summary>
-    /// 
+    /// 其他
     /// </summary>
     public string Other { get; set; }
 
@@ -53,7 +53,7 @@ public sealed class ChatChannel : Entity<string>
     public Dictionary<string, string> Extension { get; set; } = new();
 
     /// <summary>
-    /// 消耗token
+    /// 使用额度
     /// </summary>
     public int Quota { get; set; }
 

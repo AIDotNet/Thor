@@ -161,6 +161,6 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         await DbContext.SaveChangesAsync();
 
-        return (response.Choices.Count > 0, (int)sw.ElapsedMilliseconds);
+        return (response.Choices?.Count > 0, (int)sw.ElapsedMilliseconds);
     }
 }

@@ -93,7 +93,17 @@ public partial class UserService(
         return new PagingDto<User>(total, []);
     }
 
-    public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string? token)
+    /// <summary>
+    /// 对于用户进行消费
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="consume"></param>
+    /// <param name="consumeToken"></param>
+    /// <param name="token"></param>
+    /// <param name="channelId"></param>
+    /// <returns></returns>
+    public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string? token,
+        string channelId)
     {
         var result = await DbContext
             .Users
@@ -112,6 +122,11 @@ public partial class UserService(
                         .SetProperty(y => y.AccessedTime, DateTime.Now)
                         .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
         }
+        
+        await DbContext
+            .Channels
+            .Where(x => x.Id == channelId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.Quota, y => y.Quota + consume));
 
         return result > 0;
     }

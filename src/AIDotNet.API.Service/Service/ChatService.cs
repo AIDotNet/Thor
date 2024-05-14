@@ -114,13 +114,12 @@ public sealed class ChatService(
                 throw new NotModelException(module.Model);
             }
 
-
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IApiImageService>(channel.Type);
 
             if (openService == null)
             {
-                throw new Exception("渠道服务不存在");
+                throw new Exception($"并未实现：{channel.Type} 的服务");
             }
 
             var response = await openService.CreateImage(module, new ChatOptions()
@@ -141,7 +140,7 @@ public sealed class ChatService(
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
                 channel.Name);
 
-            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key);
+            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key,channel.Id);
         }
         catch (UnauthorizedAccessException e)
         {
@@ -183,7 +182,7 @@ public sealed class ChatService(
 
             if (openService == null)
             {
-                throw new Exception("渠道服务不存在");
+                throw new Exception($"并未实现：{channel.Type} 的服务");
             }
 
             var embeddingCreateRequest = new EmbeddingCreateRequest()
@@ -237,7 +236,7 @@ public sealed class ChatService(
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key,channel.Id);
             }
 
             await context.Response.WriteAsJsonAsync(stream);
@@ -282,7 +281,7 @@ public sealed class ChatService(
 
             if (openService == null)
             {
-                throw new Exception("渠道服务不存在");
+                throw new Exception($"并未实现：{channel.Type} 的服务");
             }
 
             if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
@@ -312,7 +311,7 @@ public sealed class ChatService(
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key,channel.Id);
             }
             else
             {
@@ -569,19 +568,21 @@ public sealed class ChatService(
 
         if (chatChannels.Length == 0)
         {
-            throw new NotModelException("没有可用的模型");
+            throw new NotModelException($"没有可用的渠道。");
         }
 
-        var random = new Random();
-        var value = random.NextDouble() * total;
+        var value = Random.Shared.NextDouble() * total;
 
-        var result = chatChannels.First(x =>
+        foreach (var chatChannel in chatChannels)
         {
-            value -= x.Order;
-            return value <= 0;
-        });
+            value -= chatChannel.Order;
+            if (value <= 0)
+            {
+                return chatChannel;
+            }
+        }
 
-        return result;
+        return chatChannels.Last();
     }
 
     /// <summary>
