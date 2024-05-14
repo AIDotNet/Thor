@@ -16,23 +16,25 @@ public sealed class LoggerBackgroundTask(IServiceProvider serviceProvider) : Bac
                 return;
             }
 
-            using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
-
-            var today = DateTime.Now.Date;
-
-            var day = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.IntervalDays);
-
-            if (day <= 0)
+            using (var scope = serviceProvider.CreateScope())
             {
-                day = 30;
+                var dbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
+
+                var today = DateTime.Now.Date;
+
+                var day = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.IntervalDays);
+
+                if (day <= 0)
+                {
+                    day = 30;
+                }
+
+                var deleteDate = today.AddDays(-day);
+
+                await dbContext.Loggers
+                    .Where(log => log.CreatedAt < deleteDate)
+                    .ExecuteDeleteAsync(cancellationToken: stoppingToken);
             }
-
-            var deleteDate = today.AddDays(-day);
-
-            await dbContext.Loggers
-                .Where(log => log.CreatedAt < deleteDate)
-                .ExecuteDeleteAsync(cancellationToken: stoppingToken);
 
             // TODO: 每小时执行一次
             await Task.Delay(1000 * 60 * 60, stoppingToken);
