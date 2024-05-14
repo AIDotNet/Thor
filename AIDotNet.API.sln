@@ -18,6 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution 
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		docker-compose.yml = docker-compose.yml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIDotNet.OpenAI", "src\extensions\AIDotNet.OpenAI\AIDotNet.OpenAI.csproj", "{F0FB17C9-8355-44C6-8340-066BE93694D8}"

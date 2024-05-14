@@ -15,15 +15,11 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.GetSection(JwtOptions.Name)
     .Get<JwtOptions>();
-
-builder.Configuration.GetSection(OpenAIOptions.Name)
-    .Get<OpenAIOptions>();
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -73,41 +69,81 @@ builder.Services
                 .AllowCredentials());
     });
 
-builder.Services.AddDbContext<AIDotNetDbContext>(options =>
-{
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
-        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
-});
+var dbType = builder.Configuration["ConnectionStrings:DBType"];
 
-builder.Services.AddDbContext<LoggerDbContext>(options =>
+if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("LoggerConnection"))
-        .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
-});
+    builder.Services.AddDbContext<AIDotNetDbContext>(options =>
+    {
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+
+    builder.Services.AddDbContext<LoggerDbContext>(options =>
+    {
+        options.UseSqlite(builder.Configuration.GetConnectionString("LoggerConnection"))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+}
+else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql"))
+{
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+    AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+
+    builder.Services.AddDbContext<AIDotNetDbContext>(options =>
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+
+    builder.Services.AddDbContext<LoggerDbContext>(options =>
+    {
+        options.UseNpgsql(builder.Configuration.GetConnectionString("LoggerConnection"))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+}
+else if (string.Equals(dbType, "sqlserver") || string.Equals(dbType, "mssql"))
+{
+    builder.Services.AddDbContext<AIDotNetDbContext>(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+
+    builder.Services.AddDbContext<LoggerDbContext>(options =>
+    {
+        options.UseSqlServer(builder.Configuration.GetConnectionString("LoggerConnection"))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+}
+else if (string.Equals(dbType, "mysql"))
+{
+    builder.Services.AddDbContext<AIDotNetDbContext>(options =>
+    {
+        options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
+                ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+
+    builder.Services.AddDbContext<LoggerDbContext>(options =>
+    {
+        options.UseMySql(builder.Configuration.GetConnectionString("LoggerConnection"),
+                ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("LoggerConnection")))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
+    });
+}
+else
+{
+    throw new Exception("不支持的数据库类型");
+}
 
 
 var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-
 app.UseAuthentication();
 app.UseAuthorization();
-app.Use((async (context, next) =>
-{
-    if (context.Request.Path == "/")
-    {
-        context.Request.Path = "/index.html";
-    }
-
-    await next(context);
-
-    if (context.Response.StatusCode == 404)
-    {
-        context.Request.Path = "/index.html";
-        await next(context);
-    }
-}));
 
 app.Use((async (context, next) =>
 {
@@ -135,10 +171,25 @@ if (!Directory.Exists("/data"))
 }
 
 using var scope = app.Services.CreateScope();
-var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
-await dbContext.Database.MigrateAsync();
-var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
-await loggerDbContext.Database.MigrateAsync();
+
+if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+    await dbContext.Database.MigrateAsync();
+    var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
+    await loggerDbContext.Database.MigrateAsync();
+}
+// 由于没有生成迁移记录，所以使用EnsureCreated
+else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") || string.Equals(dbType, "sqlserver") ||
+         string.Equals(dbType, "mssql"))
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+    // 不使用迁移记录生成
+    await dbContext.Database.EnsureCreatedAsync();
+
+    var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
+    await loggerDbContext.Database.EnsureCreatedAsync();
+}
 
 await SettingService.LoadingSettings(app);
 

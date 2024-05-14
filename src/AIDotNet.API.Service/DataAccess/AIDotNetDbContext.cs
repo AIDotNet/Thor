@@ -1,5 +1,4 @@
-﻿using System.Transactions;
-using AIDotNet.API.Service.Domain;
+﻿using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Domain.Core;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Helper;
@@ -7,10 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.DataAccess;
 
-public sealed class AIDotNetDbContext(
+public class AIDotNetDbContext(
     DbContextOptions<AIDotNetDbContext> options,
     IUserContext userContext) : DbContext(options)
 {
+    private readonly IUserContext _userContext = userContext;
+
     public DbSet<User> Users { get; set; }
 
     public DbSet<Token> Tokens { get; set; }
@@ -68,18 +69,18 @@ public sealed class AIDotNetDbContext(
         var entries = ChangeTracker.Entries();
         foreach (var entry in entries)
         {
-            if (userContext.IsAuthenticated)
+            if (_userContext.IsAuthenticated)
             {
                 switch (entry)
                 {
                     case { State: EntityState.Added, Entity: ICreatable creatable }:
-                        creatable.Creator ??= userContext.CurrentUserId;
+                        creatable.Creator ??= _userContext.CurrentUserId;
                         if (creatable.CreatedAt == default)
                             creatable.CreatedAt = DateTime.Now;
                         break;
                     case { State: EntityState.Modified, Entity: IUpdatable entity }:
                         entity.UpdatedAt ??= DateTime.Now;
-                        entity.Modifier ??= userContext.CurrentUserId;
+                        entity.Modifier ??= _userContext.CurrentUserId;
                         break;
                 }
             }

@@ -1,11 +1,12 @@
-﻿using AIDotNet.API.Service.DataAccess;
+﻿using System.Text.RegularExpressions;
+using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.Service;
 
-public class UserService(
+public partial class UserService(
     IServiceProvider serviceProvider,
     LoggerService loggerService,
     TokenService tokenService)
@@ -13,6 +14,18 @@ public class UserService(
 {
     public async ValueTask<User> CreateAsync(CreateUserInput input)
     {
+        // 判断账号和密码长度是否满足5位
+        if (input.UserName.Length < 5 || input.Password.Length < 5)
+        {
+            throw new Exception("用户名和密码长度不能小于5位");
+        }
+
+        // 使用正则表达式检测账号是否由英文和数字组成
+        if (!CheckUserName().IsMatch(input.UserName))
+        {
+            throw new Exception("用户名只能由英文和数字组成");
+        }
+        
         // 判断是否存在
         var exist = await DbContext.Users.AnyAsync(x => x.UserName == input.UserName || x.Email == input.Email);
         if (exist)
@@ -33,10 +46,10 @@ public class UserService(
             Name = "默认Token",
             UnlimitedQuota = true,
             UnlimitedExpired = true,
-        }); 
+        });
 
         await loggerService.CreateSystemAsync("创建用户：" + user.UserName);
-        
+
         return user;
     }
 
@@ -147,4 +160,7 @@ public class UserService(
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Password, user.Password)
                 .SetProperty(y => y.PasswordHas, user.PasswordHas));
     }
+
+    [GeneratedRegex("^[a-zA-Z0-9]+$")]
+    private static partial Regex CheckUserName();
 }

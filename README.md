@@ -22,3 +22,13 @@ AIDotNet API 提供了大部分的AI模型兼容OpenAI的接口格式，并且�
 - [x] 智谱AI
 - [x] Ollama
 - [x] 通义千问（阿里云）   
+
+# 支持数据库
+
+- [x] SqlServer 配置类型[sqlserver,mssql]
+- [x] PostgreSql 配置类型[postgresql,pgsql]
+- [x] Sqlite 配置类型[sqlite,默认]
+- [x] MySql 配置类型[mysql]
+
+修改`appsettings.json`的`ConnectionStrings:DBType`配置项即可切换数据库类型。请注意切换数据库不会迁移数据。
+
