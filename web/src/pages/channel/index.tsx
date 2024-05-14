@@ -5,6 +5,7 @@ import { getChannels, disable, Remove, test, controlAutomatically, UpdateOrder }
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
 import { IconTick, IconClose } from "@douyinfe/semi-icons";
+import { renderQuota } from "../../uitls/render";
 
 const Header = styled.header`
 
@@ -97,10 +98,10 @@ export default function Channel() {
             dataIndex: 'createdAt',
         },
         {
-            title: '消费Token',
+            title: '消耗总额',
             dataIndex: 'quota',
             render: (value: any) => {
-                return <span>{value}</span>
+                return <Tag>{renderQuota(value,2)}</Tag>
             }
         },
         {

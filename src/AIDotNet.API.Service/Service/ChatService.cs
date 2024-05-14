@@ -394,7 +394,6 @@ public sealed class ChatService(
             {
                 throw new InsufficientQuotaException("账号余额不足请充值");
             }
-            
 
             var result = await openService.CompleteChatAsync(input, setting);
 

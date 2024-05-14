@@ -10,7 +10,8 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace AIDotNet.API.Service.Service;
 
-public class ProductService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
+public class ProductService(IServiceProvider serviceProvider, LoggerService loggerService)
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask<List<Product>> GetProductsAsync()
     {
@@ -136,6 +137,10 @@ public class ProductService(IServiceProvider serviceProvider) : ApplicationServi
                     x.SetProperty(x => x.ResidualCredit, y => y.ResidualCredit + product!.RemainQuota));
 
             logger.LogWarning("支付成功回调订单状态更新成功：{Data}", JsonSerializer.Serialize(dictionary));
+
+            await loggerService.CreateRechargeAsync(
+                $"订单：{product.Id} 支付成功，充值{product.RemainQuota}额度，用户：{product.UserId}",
+                (int)product.RemainQuota);
         }
         else
         {
