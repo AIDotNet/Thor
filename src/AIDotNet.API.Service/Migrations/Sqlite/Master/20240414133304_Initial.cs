@@ -146,7 +146,7 @@ namespace AIDotNet.API.Service.Migrations.Master
                     { "Setting:OtherSetting:WebTitle", "网站标题", false, "AIDtoNet API" },
                     { "Setting:SystemSetting:EnableGithubLogin", "允许Github登录", false, "true" },
                     { "Setting:SystemSetting:EnableRegister", "启用账号注册", false, "true" },
-                    { "Setting:SystemSetting:GithubClientId", "Github Client Id", true, "" },
+                    { "Setting:SystemSetting:GithubClientId", "Github Client Id", false, "" },
                     { "Setting:SystemSetting:GithubClientSecret", "Github Client Secret", true, "" },
                     { "Setting:SystemSetting:ServerAddress", "服务器地址", false, "" }
                 });

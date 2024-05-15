@@ -415,7 +415,7 @@ namespace AIDotNet.API.Service.Migrations.Master
                         {
                             Key = "Setting:SystemSetting:GithubClientId",
                             Description = "Github Client Id",
-                            Private = true,
+                            Private = false,
                             Value = ""
                         },
                         new

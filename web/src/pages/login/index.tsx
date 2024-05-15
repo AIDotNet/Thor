@@ -1,8 +1,10 @@
-import { Avatar, Form, Button, Notification, Divider } from '@douyinfe/semi-ui';
+import { Avatar, Form, Button, Notification, Divider, Icon, Space } from '@douyinfe/semi-ui';
 import styles from './index.module.scss';
 import { useState } from 'react';
 import { login } from '../../services/AuthorizeService';
 import { useNavigate } from 'react-router-dom';
+import { IconGithubLogo } from '@douyinfe/semi-icons'
+import { InitSetting, SystemSetting } from '../../services/SettingService';
 
 export default function Login() {
     const [loading, setLoading] = useState(false);
@@ -34,6 +36,22 @@ export default function Login() {
             .catch(() => {
                 setLoading(false);
             });
+    }
+
+    function handleGithub() {
+
+        const clientId = InitSetting.find(s => s.key === SystemSetting.GithubClientId)?.value;
+
+        if(!clientId){
+            Notification.error({
+                title: '错误',
+                content: '未配置 Github ClientId'
+            });
+            return;
+        }
+
+        // 跳转 Github 授权页面
+        window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${location.origin}/auth&response_type=code`;
     }
 
     return (
@@ -83,6 +101,9 @@ export default function Login() {
                         <a onClick={() => {
                             navigate('/forget');
                         }} className={styles.link}>忘记密码</a>
+                        <Divider layout="vertical" margin='12px' />
+                        <Button size='large' className={styles.github} theme='borderless' icon={<IconGithubLogo size='large' />} onClick={() => handleGithub()} >
+                        </Button>
                     </div>
                 </div>
             </div>

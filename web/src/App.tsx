@@ -18,6 +18,7 @@ import RedeemCode from './pages/redeemCode'
 import Chat from './pages/chat'
 import Product from './pages/product'
 import Vidol from './pages/vidol'
+import Auth from './pages/github'
 
 const router = createBrowserRouter([{
   element: <MainLayout />,
@@ -38,6 +39,9 @@ const router = createBrowserRouter([{
 }, {
   path: '/',
   element: <Home />
+}, {
+  path: '/auth',
+  element: <Auth />
 },
 {
   path: '/register', element: <Register />

@@ -20,10 +20,10 @@ export default function Channel() {
         {
             title: '是否禁用',
             dataIndex: 'disable',
-            render: (value: any) => {
+            render: (value: any,item:any) => {
                 return <Switch size='large'
                     defaultChecked={!value} onChange={() => {
-                        disable(value.id)
+                        disable(item.id)
                             .then((item) => {
                                 item.success ? Notification.success({
                                     title: '操作成功',
@@ -202,7 +202,7 @@ export default function Channel() {
                     loadingData();
                 } else {
                     Notification.error({
-                        title: '测试失败',
+                        title: v.message,
                     })
                 }
             })

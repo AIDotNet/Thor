@@ -364,7 +364,7 @@ public static class SettingExtensions
             Key = SystemSetting.GithubClientId,
             Value = "",
             Description = "Github Client Id",
-            Private = true
+            Private = false
         });
 
         settings.Add(new Setting

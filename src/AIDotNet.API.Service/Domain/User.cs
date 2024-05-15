@@ -47,7 +47,7 @@ public sealed class User : Entity<string>, ISoftDeletion
     /// 账号额度
     /// </summary>
     public long ResidualCredit { get; set; }
-
+    
     protected User()
     {
     }
