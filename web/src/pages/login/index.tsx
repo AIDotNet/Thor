@@ -1,4 +1,4 @@
-import { Avatar, Form, Button, Notification, Divider, Icon, Space } from '@douyinfe/semi-ui';
+import { Avatar, Form, Button, Notification, Divider } from '@douyinfe/semi-ui';
 import styles from './index.module.scss';
 import { useState } from 'react';
 import { login } from '../../services/AuthorizeService';

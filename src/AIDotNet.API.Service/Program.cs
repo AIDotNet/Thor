@@ -33,12 +33,6 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddMapster();
 
-builder.Services.AddHttpClient("GitHubAuthApi", (options) =>
-{
-    options.DefaultRequestHeaders.Add("User-Agent", "Chat");
-    options.DefaultRequestHeaders.Add("Accept", "application/json");
-});
-
 builder.Services
     .AddCustomAuthentication()
     .AddMemoryCache()
@@ -208,7 +202,7 @@ app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBod
     .WithOpenApi();
 
 app.MapPost("/api/v1/authorize/github", async (AuthorizeService service, string code) =>
-    await service.GithubAsync(code))
+        await service.GithubAsync(code))
     .WithGroupName("Token")
     .AddEndpointFilter<ResultFilter>()
     .WithDescription("Github login")

@@ -12,10 +12,24 @@ public sealed class AuthorizeService(
     IServiceProvider serviceProvider,
     LoggerService loggerService,
     TokenService tokenService,
-    IMemoryCache memoryCache,
-    IHttpClientFactory httpClientFactory)
+    IConfiguration configuration,
+    IMemoryCache memoryCache)
     : ApplicationService(serviceProvider)
 {
+    private static readonly HttpClient HttpClient = new(new SocketsHttpHandler()
+    {
+        SslOptions =
+        {
+            RemoteCertificateValidationCallback = (_, _, _, _) => true
+        },
+    });
+
+    static AuthorizeService()
+    {
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", "AIDotNet");
+        HttpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+    }
+
     public async Task<object> TokenAsync(LoginInput input)
     {
         var user = await DbContext.Users.FirstOrDefaultAsync(x =>
@@ -56,14 +70,15 @@ public sealed class AuthorizeService(
             throw new Exception("Github login is not enabled");
         }
 
-        var apiHttpClient = httpClientFactory.CreateClient("GitHubAuthApi");
-
         var clientId = SettingService.GetSetting(SettingExtensions.SystemSetting.GithubClientId);
         var clientSecret = SettingService.GetSetting(SettingExtensions.SystemSetting.GithubClientSecret);
 
+        var endpoint = configuration["Github:Endpoint"]?.TrimEnd('/');
+        var apiEndpoint = configuration["Github:ApiEndpoint"]?.TrimEnd('/');
+
         var response =
-            await apiHttpClient.PostAsync(
-                $"https://github.com/login/oauth/access_token?code={code}&client_id={clientId}&client_secret={clientSecret}",
+            await HttpClient.PostAsync(
+                $"{endpoint}/login/oauth/access_token?code={code}&client_id={clientId}&client_secret={clientSecret}",
                 null);
 
 
@@ -71,7 +86,7 @@ public sealed class AuthorizeService(
         if (result is null) throw new Exception("Github授权失败");
 
         var request = new HttpRequestMessage(HttpMethod.Get,
-            "https://api.github.com/user")
+            $"{apiEndpoint}/user")
         {
             Headers =
             {
@@ -79,7 +94,7 @@ public sealed class AuthorizeService(
             },
         };
 
-        var responseMessage = await apiHttpClient.SendAsync(request);
+        var responseMessage = await HttpClient.SendAsync(request);
 
         var githubUser = await responseMessage.Content.ReadFromJsonAsync<GithubUserDto>();
         if (githubUser is null) throw new Exception("Github授权失败");
@@ -98,8 +113,8 @@ public sealed class AuthorizeService(
             user.SetPassword("Aa123456");
 
             await DbContext.Users.AddAsync(user);
-            
-            
+
+
             // 初始用户额度
             var userQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.NewUserQuota);
             user.SetResidualCredit(userQuota);
