@@ -175,9 +175,11 @@ using var scope = app.Services.CreateScope();
 if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
-    await dbContext.Database.MigrateAsync();
+    // 不使用迁移记录生成
+    await dbContext.Database.EnsureCreatedAsync();
+
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
-    await loggerDbContext.Database.MigrateAsync();
+    await loggerDbContext.Database.EnsureCreatedAsync();
 }
 // 由于没有生成迁移记录，所以使用EnsureCreated
 else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") || string.Equals(dbType, "sqlserver") ||

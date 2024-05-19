@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\Sqlite\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>
