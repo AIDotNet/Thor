@@ -68,6 +68,6 @@ services:
 使用docker run启动服务
 
 ```sh
-docker run --name ai-dotnet-api-service --network=gateway -v ./data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=token.db" -e LoggerConnectionString="data source=logger.db" hejiale010426/ai-dotnet-api-service:latest
+docker run --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=token.db" -e LoggerConnectionString="data source=logger.db" hejiale010426/ai-dotnet-api-service:latest
 ```
 
