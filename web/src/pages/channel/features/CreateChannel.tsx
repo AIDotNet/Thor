@@ -48,8 +48,7 @@ export default function CreateChannel({
     useEffect(() => {
         if (visible) {
             loading();
-        }
-    }, [visible]);
+        }    }, [visible]);
 
     function handleSubmit(values: any) {
 
@@ -136,7 +135,7 @@ export default function CreateChannel({
                                 }
                             ]}
                             allowCreate={true}
-                            multiple={true}
+                            multiple={false}
                             filter={true}
                             defaultActiveFirstOption
                             style={{ width: '100%' }} placeholder='请输入版本'>

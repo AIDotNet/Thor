@@ -127,7 +127,7 @@ export default function UpdateChannel({
                                 }
                             ]}
                             allowCreate={true}
-                            multiple={true}
+                            multiple={false}
                             filter={true}
                             defaultActiveFirstOption
                             style={{ width: '100%' }} placeholder='请输入版本'>
