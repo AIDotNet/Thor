@@ -17,11 +17,11 @@ public class AzureOpenAiService : IApiChatCompletionService
         CancellationToken cancellationToken = default)
     {
         var client = AzureOpenAIHelper.CreateClient(options);
-        
+
         ChatCompletionsOptions chatCompletionsOptions = new()
         {
             DeploymentName = chatCompletionCreate.Model,
-            MaxTokens = chatCompletionCreate.MaxTokens,
+            MaxTokens = chatCompletionCreate.MaxTokens ?? 2048,
             Temperature = chatCompletionCreate.Temperature,
             FrequencyPenalty = chatCompletionCreate.FrequencyPenalty,
             Seed = chatCompletionCreate.Seed,
@@ -86,7 +86,7 @@ public class AzureOpenAiService : IApiChatCompletionService
         }
 
 
-        if (chatCompletionCreate.Tools is { Count: > 0 })
+        if (chatCompletionCreate?.Tools is { Count: > 0 })
         {
             foreach (var tool in chatCompletionCreate.Tools)
             {
@@ -115,10 +115,10 @@ public class AzureOpenAiService : IApiChatCompletionService
                 {
                     FunctionCall = new FunctionCall()
                     {
-                        Arguments = choice.Message.FunctionCall.Arguments,
-                        Name = choice.Message.FunctionCall.Name
+                        Arguments = choice.Message?.FunctionCall?.Arguments,
+                        Name = choice.Message?.FunctionCall?.Name
                     },
-                    ToolCalls = choice.Message.ToolCalls.Select(x =>
+                    ToolCalls = choice?.Message?.ToolCalls?.Select(x =>
                     {
                         if (x is ChatCompletionsFunctionToolCall toolCall)
                         {
@@ -147,7 +147,7 @@ public class AzureOpenAiService : IApiChatCompletionService
         CancellationToken cancellationToken = default)
     {
         var client = AzureOpenAIHelper.CreateClient(options);
-        
+
         ChatCompletionsOptions chatCompletionsOptions = new()
         {
             DeploymentName = chatCompletionCreate.Model,
@@ -216,7 +216,7 @@ public class AzureOpenAiService : IApiChatCompletionService
         }
 
 
-        if (chatCompletionCreate.Tools is { Count: > 0 })
+        if (chatCompletionCreate?.Tools is { Count: > 0 })
         {
             foreach (var tool in chatCompletionCreate.Tools)
             {
@@ -244,18 +244,18 @@ public class AzureOpenAiService : IApiChatCompletionService
                 {
                     FunctionCall = new FunctionCall()
                     {
-                        Arguments = response.FunctionArgumentsUpdate,
-                        Name = response.FunctionName
+                        Arguments = response?.FunctionArgumentsUpdate,
+                        Name = response?.FunctionName
                     },
                     ToolCalls = new List<ToolCall>()
                     {
                         new()
                         {
-                            Id = response.Id,
+                            Id = response?.Id,
                             FunctionCall = new FunctionCall()
                             {
-                                Arguments = response.FunctionArgumentsUpdate,
-                                Name = response.FunctionName,
+                                Arguments = response?.FunctionArgumentsUpdate,
+                                Name = response?.FunctionName,
                             },
                         }
                     }
