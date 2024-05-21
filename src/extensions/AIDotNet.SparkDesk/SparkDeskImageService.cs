@@ -31,7 +31,6 @@ namespace AIDotNet.SparkDesk
             }
             var ret = new ImageCreateResponse()
             {
-                HttpStatusCode = System.Net.HttpStatusCode.OK,
                 Results = new List<ImageCreateResponse.ImageDataResult>()
             };
 

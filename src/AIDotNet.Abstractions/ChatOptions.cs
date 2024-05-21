@@ -8,4 +8,9 @@ public class ChatOptions
     /// 地址
     /// </summary>
     public string? Address { get; set; }
+
+    /// <summary>
+    /// 其他
+    /// </summary>
+    public string Other { get; set; }
 }

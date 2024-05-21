@@ -139,7 +139,8 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         var setting = new ChatOptions()
         {
             Address = channel.Address,
-            Key = channel.Key
+            Key = channel.Key,
+            Other = channel.Other
         };
 
         // 获取渠道是否支持gpt-3.5-turbo

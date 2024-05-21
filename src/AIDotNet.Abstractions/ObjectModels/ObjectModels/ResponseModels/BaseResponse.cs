@@ -9,7 +9,6 @@ public record BaseResponse
     [JsonPropertyName("object")] public string? ObjectTypeName { get; set; }
     public bool Successful => Error == null;
     [JsonPropertyName("error")] public Error? Error { get; set; }
-    public HttpStatusCode HttpStatusCode { get; set; }
 }
 
 public record DataBaseResponse<T> : BaseResponse

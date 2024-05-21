@@ -126,6 +126,7 @@ public sealed class ChatService(
             {
                 Key = channel.Key,
                 Address = channel.Address,
+                Other = channel.Other
             }, context.RequestAborted);
 
             await context.Response.WriteAsJsonAsync(new AIDotNetImageCreateResponse()
@@ -219,6 +220,7 @@ public sealed class ChatService(
             {
                 Key = channel.Key,
                 Address = channel.Address,
+                Other = channel.Other
             }, context.RequestAborted);
 
             if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
@@ -351,6 +353,7 @@ public sealed class ChatService(
         {
             Key = channel.Key,
             Address = channel.Address,
+            Other = channel.Other
         };
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
@@ -448,6 +451,7 @@ public sealed class ChatService(
         {
             Key = channel.Key,
             Address = channel.Address,
+            Other = channel.Other
         };
 
         var responseMessage = new StringBuilder();

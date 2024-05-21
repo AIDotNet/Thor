@@ -22,6 +22,7 @@ AIDotNet API 提供了大部分的AI模型兼容OpenAI的接口格式，并且�
 - [x] 智谱AI
 - [x] Ollama
 - [x] 通义千问（阿里云）   
+- [x] AzureOpenAI（支持function）
 
 # 支持数据库
 
@@ -31,4 +32,42 @@ AIDotNet API 提供了大部分的AI模型兼容OpenAI的接口格式，并且�
 - [x] MySql 配置类型[mysql]
 
 修改`appsettings.json`的`ConnectionStrings:DBType`配置项即可切换数据库类型。请注意切换数据库不会迁移数据。
+
+## 简单使用
+
+### 环境变量
+
+- DBType
+	sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
+- ConnectionString 
+	主数据库连接字符串
+- LoggerConnectionString
+	日志数据连接字符串
+
+
+使用docker compose启动服务：
+
+```yaml
+version: '3.8'
+
+services:
+  ai-dotnet-api-service:
+    image: hejiale010426/ai-dotnet-api-service:latest
+    container_name: ai-dotnet-api-service
+    networks:
+      - gateway
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Asia/Shanghai
+      - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
+      - ConnectionString=data source=token.db
+      - LoggerConnectionString=data source=logger.db
+```
+
+使用docker run启动服务
+
+```sh
+docker run --name ai-dotnet-api-service --network=gateway -v ./data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=token.db" -e LoggerConnectionString="data source=logger.db" hejiale010426/ai-dotnet-api-service:latest
+```
 

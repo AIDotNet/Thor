@@ -141,8 +141,6 @@ public static class HttpClientExtensions
             result = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken) ??
                      throw new InvalidOperationException();
         }
-
-        result.HttpStatusCode = response.StatusCode;
         return result;
     }
 }

@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AIDotNet.Qiansail", "src\ex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.Ollama", "src\extensions\AIDotNet.Ollama\AIDotNet.Ollama.csproj", "{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.AzureOpenAI", "src\extensions\AIDotNet.AzureOpenAI\AIDotNet.AzureOpenAI.csproj", "{EC93981A-45E5-44A2-8DA9-BD779B02349D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC93981A-45E5-44A2-8DA9-BD779B02349D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC93981A-45E5-44A2-8DA9-BD779B02349D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC93981A-45E5-44A2-8DA9-BD779B02349D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC93981A-45E5-44A2-8DA9-BD779B02349D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +89,7 @@ Global
 		{9D365565-CDA2-4D27-87D6-439E106A64B8} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{48FD7CDD-A777-42F8-9A14-33DA28469819} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{EC93981A-45E5-44A2-8DA9-BD779B02349D} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

@@ -77,7 +77,7 @@ export default function UpdateChannel({
     >
         <Divider></Divider>
         <Form initValues={value} onSubmit={values => handleSubmit(values)} style={{ width: 400 }}>
-            {({ }: any) => (
+            {({ values }) => (
                 <>
                     <Form.Input rules={[{
                         required: true,
@@ -98,12 +98,47 @@ export default function UpdateChannel({
                             })
                         }
                     </Form.Select>
-                    <Form.Input field='address' label='代理地址' style={{ width: '100%' }} placeholder='请输入代理地址'></Form.Input>
-                    <Form.Input field='key' label='密钥' style={{ width: '100%' }} placeholder='请输入密钥'></Form.Input>
+                    <Form.Input field='address' label='代理地址' style={{ width: '100%' }} placeholder='请输入代理地址'></Form.Input>                    {
+                        values.type === "AzureOpenAI" && <Form.Select
+                            field='other'
+                            label='版本'
+                            optionList={[
+                                {
+                                    label: "2022-12-01",
+                                    value: "2022-12-01"
+                                }, {
+                                    label: "2023-05-15",
+                                    value: "2023-05-15"
+                                }, {
+                                    label: "2023-06-01-preview",
+                                    value: "2023-06-01-preview"
+                                }, {
+                                    label: "2023-07-01-preview",
+                                    value: "2023-07-01-preview"
+                                }, {
+                                    label: "2024-02-15-preview",
+                                    value: "2024-02-15-preview"
+                                }, {
+                                    label: "2024-03-01-preview",
+                                    value: "2024-03-01-preview"
+                                }, {
+                                    label: "2024-04-01-preview",
+                                    value: "2024-04-01-preview"
+                                }
+                            ]}
+                            allowCreate={true}
+                            multiple={true}
+                            filter={true}
+                            defaultActiveFirstOption
+                            style={{ width: '100%' }} placeholder='请输入版本'>
+
+                        </Form.Select>
+                    }
+                    <Form.Input field='key' label='密钥' style={{ width: '100%' }} placeholder={values.type === "SparkDesk" ? "密钥格式 AppId|AppKey|AppSecret" : "请输入密钥"}></Form.Input>
                     <Form.Select
                         field="models"
                         label="模型"
-                        
+
                         allowCreate={true}
                         multiple={true}
                         filter={true}

@@ -56,7 +56,8 @@ builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
     .AddQiansail()
     .AddMetaGLMClientV4()
     .AddClaudia()
-    .AddOllamaService();
+    .AddOllamaService()
+    .AddAzureOpenAIService();
 
 builder.Services
     .AddCors(options =>
@@ -69,19 +70,28 @@ builder.Services
                 .AllowCredentials());
     });
 
-var dbType = builder.Configuration["ConnectionStrings:DBType"];
+// 获取环境变量
+var dbType = Environment.GetEnvironmentVariable("DBType");
+
+dbType ??= builder.Configuration["ConnectionStrings:DBType"];
+
+var connectionString = Environment.GetEnvironmentVariable("ConnectionString");
+var loggerConnectionString = Environment.GetEnvironmentVariable("LoggerConnectionString");
+
+connectionString ??= builder.Configuration.GetConnectionString("DefaultConnection");
+loggerConnectionString ??= builder.Configuration.GetConnectionString("LoggerConnection");
 
 if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
 {
     builder.Services.AddDbContext<AIDotNetDbContext>(options =>
     {
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"))
+        options.UseSqlite(connectionString)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 
     builder.Services.AddDbContext<LoggerDbContext>(options =>
     {
-        options.UseSqlite(builder.Configuration.GetConnectionString("LoggerConnection"))
+        options.UseSqlite(loggerConnectionString)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 }
@@ -92,13 +102,13 @@ else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql"))
 
     builder.Services.AddDbContext<AIDotNetDbContext>(options =>
     {
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+        options.UseNpgsql(connectionString)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 
     builder.Services.AddDbContext<LoggerDbContext>(options =>
     {
-        options.UseNpgsql(builder.Configuration.GetConnectionString("LoggerConnection"))
+        options.UseNpgsql(loggerConnectionString)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 }
@@ -106,13 +116,13 @@ else if (string.Equals(dbType, "sqlserver") || string.Equals(dbType, "mssql"))
 {
     builder.Services.AddDbContext<AIDotNetDbContext>(options =>
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        options.UseSqlServer(connectionString)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 
     builder.Services.AddDbContext<LoggerDbContext>(options =>
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("LoggerConnection"))
+        options.UseSqlServer(loggerConnectionString)
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 }
@@ -120,15 +130,15 @@ else if (string.Equals(dbType, "mysql"))
 {
     builder.Services.AddDbContext<AIDotNetDbContext>(options =>
     {
-        options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
-                ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")))
+        options.UseMySql(connectionString,
+                ServerVersion.AutoDetect(connectionString))
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 
     builder.Services.AddDbContext<LoggerDbContext>(options =>
     {
-        options.UseMySql(builder.Configuration.GetConnectionString("LoggerConnection"),
-                ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("LoggerConnection")))
+        options.UseMySql(loggerConnectionString,
+                ServerVersion.AutoDetect(loggerConnectionString))
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTrackingWithIdentityResolution);
     });
 }
