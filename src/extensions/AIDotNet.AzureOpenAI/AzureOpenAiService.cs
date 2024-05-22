@@ -109,33 +109,34 @@ public class AzureOpenAiService : IApiChatCompletionService
 
         foreach (var choice in response.Value.Choices)
         {
+            var message = new ChatMessage("assistant", choice.Message.Content)
+            {
+                FunctionCall = new FunctionCall()
+                {
+                    Arguments = choice.Message?.FunctionCall?.Arguments,
+                    Name = choice.Message?.FunctionCall?.Name
+                },
+                ToolCalls = choice?.Message?.ToolCalls?.Select(x =>
+                {
+                    if (x is ChatCompletionsFunctionToolCall toolCall)
+                    {
+                        return new ToolCall()
+                        {
+                            FunctionCall = new FunctionCall()
+                            {
+                                Arguments = toolCall.Arguments,
+                                Name = toolCall.Name,
+                            },
+                        };
+                    }
+
+                    return new ToolCall();
+                }).Where(x => !string.IsNullOrEmpty(x.Id)).ToList()
+            };
             createResponse.Choices.Add(new ChatChoiceResponse()
             {
-                Delta = new ChatMessage("assistant", choice.Message.Content)
-                {
-                    FunctionCall = new FunctionCall()
-                    {
-                        Arguments = choice.Message?.FunctionCall?.Arguments,
-                        Name = choice.Message?.FunctionCall?.Name
-                    },
-                    ToolCalls = choice?.Message?.ToolCalls?.Select(x =>
-                    {
-                        if (x is ChatCompletionsFunctionToolCall toolCall)
-                        {
-                            return new ToolCall()
-                            {
-                                Id = toolCall.Id,
-                                FunctionCall = new FunctionCall()
-                                {
-                                    Arguments = toolCall.Arguments,
-                                    Name = toolCall.Name,
-                                },
-                            };
-                        }
-
-                        return new ToolCall();
-                    }).Where(x => !string.IsNullOrEmpty(x.Id)).ToList()
-                },
+                Message = message,
+                Delta = message,
             });
         }
 
@@ -238,28 +239,32 @@ public class AzureOpenAiService : IApiChatCompletionService
                 Choices = new List<ChatChoiceResponse>()
             };
 
-            createResponse.Choices.Add(new ChatChoiceResponse()
+            var delata = new ChatMessage("assistant", response.ContentUpdate);
+
+            if (!string.IsNullOrEmpty(response.FunctionName))
             {
-                Delta = new ChatMessage("assistant", response.ContentUpdate)
+                delata.FunctionCall = new FunctionCall()
+                {
+                    Arguments = response.FunctionArgumentsUpdate,
+                    Name = response.FunctionName,
+                };
+                delata.ToolCalls = new List<ToolCall>();
+                delata.ToolCalls.Add(new ToolCall()
                 {
                     FunctionCall = new FunctionCall()
                     {
-                        Arguments = response?.FunctionArgumentsUpdate,
-                        Name = response?.FunctionName
+                        Arguments = response.FunctionArgumentsUpdate,
+                        Name = response.FunctionName,
                     },
-                    ToolCalls = new List<ToolCall>()
-                    {
-                        new()
-                        {
-                            Id = response?.Id,
-                            FunctionCall = new FunctionCall()
-                            {
-                                Arguments = response?.FunctionArgumentsUpdate,
-                                Name = response?.FunctionName,
-                            },
-                        }
-                    }
-                },
+                });
+            }
+
+            createResponse.Choices.Add(new ChatChoiceResponse()
+            {
+                Delta = delata,
+                FinishReason = response.FinishReason.ToString(),
+                Index = response.ChoiceIndex,
+                Message = delata,
             });
 
             yield return createResponse;
