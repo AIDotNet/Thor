@@ -248,13 +248,17 @@ public class AzureOpenAiService : IApiChatCompletionService
                     Arguments = response.FunctionArgumentsUpdate,
                     Name = response.FunctionName,
                 };
+            }
+            
+            if(response.ToolCallUpdate is StreamingFunctionToolCallUpdate toolCallUpdate)
+            {
                 delata.ToolCalls = new List<ToolCall>();
                 delata.ToolCalls.Add(new ToolCall()
                 {
                     FunctionCall = new FunctionCall()
                     {
-                        Arguments = response.FunctionArgumentsUpdate,
-                        Name = response.FunctionName,
+                        Arguments = toolCallUpdate.ArgumentsUpdate,
+                        Name = toolCallUpdate.Name,
                     },
                 });
             }
