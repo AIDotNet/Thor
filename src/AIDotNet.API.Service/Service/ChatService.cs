@@ -30,7 +30,7 @@ public sealed class ChatService(
     private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
 
 
-    static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
+    private static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
     {
         {
             "dall-e-2", new Dictionary<string, double>

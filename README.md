@@ -61,13 +61,13 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionString=data source=token.db
-      - LoggerConnectionString=data source=logger.db
+      - ConnectionString=data source=/data/token.db
+      - LoggerConnectionString=data source=/data/logger.db
 ```
 
 使用docker run启动服务
 
 ```sh
-docker run --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=token.db" -e LoggerConnectionString="data source=logger.db" hejiale010426/ai-dotnet-api-service:latest
+docker run --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=/data/token.db" -e LoggerConnectionString="data source=/data/logger.db" hejiale010426/ai-dotnet-api-service:latest
 ```
 

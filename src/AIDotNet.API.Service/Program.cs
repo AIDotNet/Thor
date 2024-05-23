@@ -15,8 +15,32 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+
+Logger logger;
+if (builder.Environment.IsDevelopment())
+{
+    logger = new LoggerConfiguration()
+        .MinimumLevel.Information()
+        .WriteTo.Console()
+        .Enrich.FromLogContext()
+        .Enrich.WithProperty("Application", "FastWiki")
+        .CreateLogger();
+}
+else
+{
+    logger = new LoggerConfiguration()
+        .MinimumLevel.Warning()
+        .WriteTo.Console()
+        .Enrich.FromLogContext()
+        .Enrich.WithProperty("Application", "FastWiki")
+        .CreateLogger();
+}
+
+builder.Host.UseSerilog(logger);
 
 builder.Configuration.GetSection(JwtOptions.Name)
     .Get<JwtOptions>();
@@ -48,9 +72,8 @@ builder.Services
     .AddTransient<RedeemCodeService>()
     .AddHostedService<StatisticBackgroundTask>()
     .AddHostedService<LoggerBackgroundTask>()
-    .AddSingleton<UnitOfWorkMiddleware>();
-
-builder.Services.AddSingleton<IUserContext, DefaultUserContext>()
+    .AddSingleton<UnitOfWorkMiddleware>()
+    .AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
     .AddSparkDeskService()
     .AddQiansail()
@@ -320,13 +343,13 @@ model.MapGet("/models",
 
 #region Logger
 
-var logger = app.MapGroup("/api/v1/logger")
+var log = app.MapGroup("/api/v1/logger")
     .WithGroupName("Logger")
     .WithTags("Logger")
     .AddEndpointFilter<ResultFilter>()
     .RequireAuthorization();
 
-logger.MapGet(string.Empty,
+log.MapGet(string.Empty,
         async (LoggerService service, int page, int pageSize, ChatLoggerType? type, string? model, DateTime? startTime,
                 DateTime? endTime, string? keyword) =>
             await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword))

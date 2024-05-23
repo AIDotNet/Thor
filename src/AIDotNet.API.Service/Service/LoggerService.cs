@@ -40,7 +40,8 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
         {
             Type = ChatLoggerType.Recharge,
             Content = content,
-            Quota = quota
+            Quota = quota,
+            ModelName = string.Empty,
         };
         await CreateAsync(logger);
     }

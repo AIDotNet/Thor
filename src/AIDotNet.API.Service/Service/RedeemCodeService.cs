@@ -52,7 +52,7 @@ public class RedeemCodeService(
             var result = await DbContext.RedeemCodes
                 .AsNoTracking()
                 .Where(x => string.IsNullOrEmpty(keyword) || x.Name.Contains(keyword))
-                .OrderByDescending(x => x.Id)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
