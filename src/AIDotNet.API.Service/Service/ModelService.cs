@@ -14,12 +14,7 @@ public static class ModelService
 
     public static string[] GetModels()
     {
-        if (!File.Exists("model.json"))
-        {
-            return [];
-        }
-
-        var result = JsonSerializer.Deserialize<string[]>(File.ReadAllText("model.json"));
+        var result = SettingService.PromptRate.Select(x => x.Key).ToArray();
 
         return result;
     }

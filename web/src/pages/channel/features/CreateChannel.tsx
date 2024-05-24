@@ -2,6 +2,7 @@ import { Divider, Modal, SideSheet, Form, Button, Notification } from "@douyinfe
 import { useEffect, useState } from "react";
 import { getModels, getTypes } from "../../../services/ModelService";
 import { Add } from "../../../services/ChannelService";
+import { getModelPrompt } from "../../../uitls/render";
 
 interface ICreateChannelProps {
     onSuccess: () => void;
@@ -142,7 +143,27 @@ export default function CreateChannel({
 
                         </Form.Select>
                     }
-                    <Form.Input field='key' label='密钥' style={{ width: '100%' }} placeholder={values.type === "SparkDesk" ? "密钥格式 AppId|AppKey|AppSecret" : "请输入密钥"}></Form.Input>
+                    {
+                        values.type === "Hunyuan" && <Form.Select
+                            field='other'
+                            label='资源地域'
+                            optionList={[
+                                {
+                                    label: "北京（ap-beijing）",
+                                    value: "ap-beijing"
+                                }, {
+                                    label: "广州 （ap-guangzhou）",
+                                    value: "ap-guangzhou"
+                                }
+                            ]}
+                            allowCreate={true}
+                            multiple={false}
+                            filter={true}
+                            defaultActiveFirstOption
+                            style={{ width: '100%' }} placeholder='请输入资源地域'>
+                            </Form.Select>
+                    }
+                    <Form.Input field='key' label='密钥' style={{ width: '100%' }} placeholder={getModelPrompt(values.type)}></Form.Input>
                     <Form.Select
                         field="models"
                         label="模型"

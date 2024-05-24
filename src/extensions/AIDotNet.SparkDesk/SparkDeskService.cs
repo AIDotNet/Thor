@@ -6,11 +6,12 @@ using AIDotNet.Abstractions.Exceptions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.SparkDesk.API;
+using Microsoft.Extensions.Logging;
 using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.SparkDesk;
 
-public sealed class SparkDeskService : IApiChatCompletionService
+public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiChatCompletionService
 {
     public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest input,
         ChatOptions? options = null,
@@ -91,20 +92,20 @@ public sealed class SparkDeskService : IApiChatCompletionService
             var retContent = chatMsg?.Payload?.Choices?.Text.FirstOrDefault();
             if (retContent == null)
             {
-                Debug.WriteLine("AddHandleMsg(Chat): retContent is null");
+                logger.LogInformation("AddHandleMsg(Chat): retContent is null");
                 continue;
             }
 
             if (!string.IsNullOrEmpty(retContent.Content))
             {
-                Debug.WriteLine($"AddHandleMsg(Chat): {retContent.Content}");
+                logger.LogInformation($"AddHandleMsg(Chat): {retContent.Content}");
                 retMessage.Content += retContent.Content;
                 continue;
             }
 
             if (retContent.FunctionCall != null)
             {
-                Debug.WriteLine($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
+                logger.LogInformation($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
                 retMessage.ToolCalls = [
                                 new() {
                                     Id=retContent.FunctionCall.Name,
@@ -186,7 +187,7 @@ public sealed class SparkDeskService : IApiChatCompletionService
             var retContent = chatMsg?.Payload?.Choices?.Text.FirstOrDefault();
             if (retContent == null)
             {
-                Debug.WriteLine("AddHandleMsg(Chat): retContent is null");
+                logger.LogInformation("AddHandleMsg(Chat): retContent is null");
                 yield break;
             }
 
@@ -217,14 +218,14 @@ public sealed class SparkDeskService : IApiChatCompletionService
 
             if (!string.IsNullOrEmpty(retContent.Content))
             {
-                Debug.WriteLine($"AddHandleMsg(Chat): {retContent.Content}");
+                logger.LogInformation($"AddHandleMsg(Chat): {retContent.Content}");
                 retMessage.Content = retContent.Content;
                 yield return ret;
             }
 
             if (retContent.FunctionCall != null)
             {
-                Debug.WriteLine($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
+                logger.LogInformation($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
                 retMessage.ToolCalls = [
                                 new() {
                                     Id=retContent.FunctionCall.Name,

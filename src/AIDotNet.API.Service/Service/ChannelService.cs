@@ -70,16 +70,30 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
     public async ValueTask<bool> UpdateAsync(string id, ChatChannelInput chatChannel)
     {
-        var result = await DbContext.Channels.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(item =>
-                item.SetProperty(x => x.Type, chatChannel.Type)
-                    .SetProperty(x => x.Name, chatChannel.Name)
-                    .SetProperty(x => x.Address, chatChannel.Address)
-                    .SetProperty(x => x.Key, chatChannel.Key)
-                    .SetProperty(x => x.Other, chatChannel.Other)
-                    .SetProperty(x => x.Models, chatChannel.Models));
+        if (string.IsNullOrWhiteSpace(chatChannel.Key))
+        {
+            var result = await DbContext.Channels.Where(x => x.Id == id)
+                .ExecuteUpdateAsync(item =>
+                    item.SetProperty(x => x.Type, chatChannel.Type)
+                        .SetProperty(x => x.Name, chatChannel.Name)
+                        .SetProperty(x => x.Address, chatChannel.Address)
+                        .SetProperty(x => x.Other, chatChannel.Other)
+                        .SetProperty(x => x.Models, chatChannel.Models));
+            return result > 0;
+        }
+        else
+        {
+            var result = await DbContext.Channels.Where(x => x.Id == id)
+                .ExecuteUpdateAsync(item =>
+                    item.SetProperty(x => x.Type, chatChannel.Type)
+                        .SetProperty(x => x.Name, chatChannel.Name)
+                        .SetProperty(x => x.Key, chatChannel.Key)
+                        .SetProperty(x => x.Address, chatChannel.Address)
+                        .SetProperty(x => x.Other, chatChannel.Other)
+                        .SetProperty(x => x.Models, chatChannel.Models));
 
-        return result > 0;
+            return result > 0;
+        }
     }
 
     public async ValueTask UpdateOrderAsync(string id, int order)
