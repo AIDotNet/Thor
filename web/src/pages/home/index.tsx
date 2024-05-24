@@ -5,6 +5,7 @@ import { IconGithubLogo } from '@douyinfe/semi-icons';
 import { useNavigate } from 'react-router-dom'
 import { config } from '../../config';
 import { InitSetting, OtherSetting } from '../../services/SettingService';
+import { useEffect } from 'react';
 
 const { Text } = Typography;
 
@@ -64,40 +65,5 @@ const Container = styled.div`
 export default function Home() {
     const navigate = useNavigate()
 
-    const openGithub = () => {
-        window.open(config.VITE_GITHUB)
-    }
-
-
-
-    return (
-        <Container>
-            <Header >
-                <Logo>
-                    
-                </Logo>
-                <Nav>
-                    <Button size='large'
-                        onClick={() => navigate('/panel')}
-                        style={{
-                            marginRight: '1rem',
-                            
-                        }}
-                        theme='solid'>控制台
-                    </Button>
-                </Nav>
-            </Header>
-            <MainContent>
-                <Title >{InitSetting?.find(s => s.key === OtherSetting.WebTitle)?.value}</Title>
-                <Paragraph>
-                    {InitSetting?.find(s => s.key === OtherSetting.IndexContent)?.value}
-                </Paragraph>
-                <Button onClick={openGithub} size='large' icon={<IconGithubLogo />} theme="solid">
-                    GitHub
-                </Button>
-            </MainContent>
-            <Footer>
-                <Text>AIDotNet API由 Token 设计,源代码使用 Apache-2.0 许可</Text>
-            </Footer>
-        </Container>)
+    useEffect(() => navigate('/panel'), [])
 }

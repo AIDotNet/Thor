@@ -1,4 +1,4 @@
-import { Button, Card, Divider, Input, Modal, Notification, Select } from "@douyinfe/semi-ui";
+import { Button, Card, Divider, Input, Modal, Notification, Select, TabPane, Tabs, Tag } from "@douyinfe/semi-ui";
 import { renderQuota } from "../../uitls/render";
 import { useEffect, useState } from "react";
 import { GeneralSetting, InitSetting, IsEnableAlipay } from "../../services/SettingService";
@@ -16,7 +16,7 @@ export default function Pay({
     const [product, setProduct] = useState({} as any);
     const [products, setProducts] = useState([] as any[]);
     const [qrCode, setQrCode] = useState('');
-    
+
     useEffect(() => {
         loadProducts();
     }, []);
@@ -48,7 +48,7 @@ export default function Pay({
                 });
             });
     }
-    
+
     /**
      * 支付宝充值
      */
@@ -71,72 +71,104 @@ export default function Pay({
             <span style={{
                 fontSize: 24
             }}>
-                账号钱包 {renderQuota(user.residualCredit, 2)}
+                账号钱包 <Tag size='large' color='amber'>{renderQuota(user.residualCredit, 2)}</Tag>
             </span>}
         style={{
             width: '100%',
             textAlign: 'center',
         }}>
-        <Divider>兑换码充值</Divider>
-        <Input value={code}
-            onChange={(value) => {
-                setCode(value);
-            }}
-            size='large'
-            suffix={<Button type='warning' onClick={() => {
-                useCode();
-            }}>兑换余额</Button>}
-            placeholder={'输入您的兑换码'} style={{
-                marginTop: 8
-            }} >
-        </Input>
+        <Tabs type="button">
+            {
+                IsEnableAlipay() &&
+                <TabPane tab="支付宝支付" itemKey="1">
+                    <div>
+                        <Select
+                            style={{
+                                width: '100%',
+                                fontSize: 26,
+                                marginTop: 8
+                            }}
+                            size="large"
+                            value={product.id}
+                            onChange={(value) => {
+                                setProduct(products.find(x => x.id === value));
+                            }}
+                            optionList={products.map(x => {
+                                return {
+                                    label: <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
 
-        <div
-            onClick={() => {
-                const rechargeAddress = InitSetting?.find(s => s.key === GeneralSetting.RechargeAddress)?.value;
-                if (rechargeAddress) {
-                    window.open(rechargeAddress, '_blank');
-                } else {
-                    Notification.error({
-                        title: '充值失败',
-                        content: '未设置充值地址'
-                    });
-                }
-            }}
-            style={{
-                marginTop: 8,
-                cursor: 'pointer',
-                color: 'var(--semi-color-text-2)',
-                userSelect: 'none',
-            }}>
-            如何获取兑换码？
-        </div>
-        {
-            IsEnableAlipay() && <div>
-                <Divider>支付宝充值</Divider>
-                <Select
-                    value={product.id}
+                                    }}>
+                                        <span>{x.name}</span>
+                                        <Tag  color='blue' style={{
+                                            fontSize: 16,
+                                            marginLeft: 8,
+                                            height: 32,
+                                        }}>{x.price} 元</Tag>
+                                        <Tag  color='green' style={{
+                                            fontSize: 16,
+                                            marginLeft: 8,
+                                            height: 32,
+                                        }}>{renderQuota(x.remainQuota,6)} 额度</Tag>
+                                        <span style={{
+                                            marginLeft: 8,
+                                        }}>{x.description}</span>
+                                    </div>,
+                                    value: x.id
+                                }
+                            })}
+                            placeholder='选择充值金额'
+                        >
+                        </Select>
+                        <Button onClick={() => {
+                            alipayRecharge(product.id)
+                        }} style={{
+                            marginTop: 8
+                        }} block type="primary" >
+                            充值
+                        </Button>
+                    </div>
+                </TabPane>
+            }
+            <TabPane tab="兑换码" itemKey="2">
+                <Input value={code}
                     onChange={(value) => {
-                        setProduct(products.find(x => x.id === value));
+                        setCode(value);
                     }}
-                    optionList={products.map(x => {
-                        return {
-                            label: x.name,
-                            value: x.id
+                    size='large'
+                    suffix={<Button type='warning' onClick={() => {
+                        useCode();
+                    }}>兑换余额</Button>}
+                    placeholder={'输入您的兑换码'} style={{
+                        marginTop: 8
+                    }} >
+                </Input>
+
+                <Tag color='blue' 
+                    onClick={() => {
+                        const rechargeAddress = InitSetting?.find(s => s.key === GeneralSetting.RechargeAddress)?.value;
+                        if (rechargeAddress) {
+                            window.open(rechargeAddress, '_blank');
+                        } else {
+                            Notification.error({
+                                title: '充值失败',
+                                content: '未设置充值地址'
+                            });
                         }
-                    })}
-                    placeholder='选择充值金额'
-                >
-                </Select>
-                <Button onClick={() => {
-                    alipayRecharge(product.id)
-                }} style={{
-                    marginTop: 8
-                }} block type="primary" >
-                    充值
-                </Button>
-            </div>
-        }
+                    }}
+                    size='large'
+                    style={{
+                        marginTop: 8,
+                        cursor: 'pointer',
+                        color: 'var(--semi-color-text-2)',
+                        userSelect: 'none',
+                    }}>
+                    如何获取兑换码？
+                </Tag>
+            </TabPane>
+        </Tabs>
         <Modal
             visible={qrCode !== ''}
             title='支付宝充值'
@@ -147,17 +179,17 @@ export default function Pay({
                 <>
                     <Button
                         type='primary'
-                        onClick={()=>{
+                        onClick={() => {
                             setQrCode('');
                             loadProducts();
                         }}
                     >
                         我已支付
                     </Button>
-                    <Button 
-                    onClick={() => {
-                        setQrCode('');
-                    }} type='danger'>关闭</Button>
+                    <Button
+                        onClick={() => {
+                            setQrCode('');
+                        }} type='danger'>关闭</Button>
                 </>
             }
         >

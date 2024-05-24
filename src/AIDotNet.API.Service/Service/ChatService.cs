@@ -1,18 +1,15 @@
-﻿using System.Text;
-using System.Text.Json;
-using AIDotNet.Abstractions;
+﻿using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.Exceptions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
-using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Exceptions;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Helper;
-using Claudia;
 using MapsterMapper;
 using Microsoft.IdentityModel.Tokens;
-using SkiaSharp;
+using System.Text;
+using System.Text.Json;
 using CompletionCreateResponse = AIDotNet.Abstractions.Dto.CompletionCreateResponse;
 
 namespace AIDotNet.API.Service.Service;

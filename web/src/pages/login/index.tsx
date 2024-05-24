@@ -7,6 +7,11 @@ import { IconGithubLogo } from '@douyinfe/semi-icons'
 import { InitSetting, SystemSetting } from '../../services/SettingService';
 
 export default function Login() {
+    // 接收参数 redirect_uri
+    const params = new URLSearchParams(location.search);
+
+    const redirect_uri = params.get('redirect_uri');
+
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     function handleLogin(value: any) {
@@ -22,6 +27,15 @@ export default function Login() {
                         title: '登录成功',
                         content: '即将跳转到首页'
                     } as any);
+                    
+                    if(redirect_uri && redirect_uri.startsWith('http')) {
+                        const url = new URL(redirect_uri);
+                        url.searchParams.append('token', res.data.token);
+                        window.location.href = url.toString();
+                        return;
+                    }
+
+
                     setTimeout(() => {
                         navigate('/panel');
                     }, 1000);
