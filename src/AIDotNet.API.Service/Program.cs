@@ -78,6 +78,7 @@ builder.Services
     .AddSparkDeskService()
     .AddQiansail()
     .AddMetaGLMClientV4()
+    .AddHunyuan()
     .AddClaudia()
     .AddOllamaService()
     .AddAzureOpenAIService();

@@ -23,6 +23,7 @@ AIDotNet API 提供了大部分的AI模型兼容OpenAI的接口格式，并且�
 - [x] Ollama
 - [x] 通义千问（阿里云）   
 - [x] AzureOpenAI（支持function）
+- [x] 腾讯混元大模型
 
 # 支持数据库
 

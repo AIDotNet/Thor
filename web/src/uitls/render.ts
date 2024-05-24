@@ -28,3 +28,20 @@ export function renderNumber(num: number) {
         return num;
     }
 }
+
+
+/**
+ * 获取类型获取指定的提示
+ * @param type 
+ * @returns 
+ */
+export function getModelPrompt(type:string){
+        
+    if(type === "SparkDesk"){
+        return "密钥格式 AppId|AppKey|AppSecret";
+    }else if(type === "Hunyuan"){
+        return "密钥格式 secretId|secretKey";
+    }
+
+    return "请输入密钥";
+}

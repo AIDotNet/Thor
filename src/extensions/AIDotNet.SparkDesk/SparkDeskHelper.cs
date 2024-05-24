@@ -11,7 +11,6 @@ public static class SparkDeskHelper
     /// <param name="key"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
-
     public static XFSparkDeskChatAPI GetSparkDeskChatClient(string key, string model, string? url = null)
     {
         XFSparkDeskChatAPI client;
@@ -21,22 +20,22 @@ public static class SparkDeskHelper
         {
             XFSparkDeskModelType modelVersion;
             string hostURL = "";
-            if (model == "SparkDesk-v3.5")
+            if (model is "SparkDesk-v3.5" or "generalv3.5")
             {
                 modelVersion = XFSparkDeskModelType.V3_5;
                 hostURL = url ?? XFSparkDeskHostURL.Chat_V3_5;
             }
-            else if (model == "SparkDesk-v3.1")
+            else if (model is "SparkDesk-v3.1" or "generalv3")
             {
                 modelVersion = XFSparkDeskModelType.V3_0;
                 hostURL = url ?? XFSparkDeskHostURL.Chat_V3_0;
             }
-            else if (model == "SparkDesk-v1.5")
+            else if (model is "SparkDesk-v1.5" or "general")
             {
                 modelVersion = XFSparkDeskModelType.V1_5;
                 hostURL = url ?? XFSparkDeskHostURL.Chat_V1_5;
             }
-            else if (model == "SparkDesk-v2.1")
+            else if (model is "SparkDesk-v2.1" or "generalv2")
             {
                 modelVersion = XFSparkDeskModelType.V2_0;
                 hostURL = url ?? XFSparkDeskHostURL.Chat_V2_0;
@@ -63,7 +62,8 @@ public static class SparkDeskHelper
         return client;
     }
 
-    public static XFSparkDeskImageGenerationAPI GetSparkDeskImageGenerationClient(string key, HttpClient httpClient, string? url = null)
+    public static XFSparkDeskImageGenerationAPI GetSparkDeskImageGenerationClient(string key, HttpClient httpClient,
+        string? url = null)
     {
         XFSparkDeskImageGenerationAPI client;
         // appId|appKey|appSecret
@@ -86,7 +86,8 @@ public static class SparkDeskHelper
         return client;
     }
 
-    public static XFSparkDeskEmbeddingAPI GetSparkDeskEmbeddingClient(string key, HttpClient httpClient, string? url = null)
+    public static XFSparkDeskEmbeddingAPI GetSparkDeskEmbeddingClient(string key, HttpClient httpClient,
+        string? url = null)
     {
         XFSparkDeskEmbeddingAPI client;
         // appId|appKey|appSecret
