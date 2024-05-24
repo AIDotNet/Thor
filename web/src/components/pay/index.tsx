@@ -1,4 +1,4 @@
-import { Button, Card, Divider, Input, Modal, Notification, Select, TabPane, Tabs, Tag } from "@douyinfe/semi-ui";
+import { Button, Card,  Input, Modal, Notification, Select, TabPane, Tabs, Tag } from "@douyinfe/semi-ui";
 import { renderQuota } from "../../uitls/render";
 import { useEffect, useState } from "react";
 import { GeneralSetting, InitSetting, IsEnableAlipay } from "../../services/SettingService";

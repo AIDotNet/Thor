@@ -511,7 +511,7 @@ public sealed class ChatService(
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
                 responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-                await context.WriteResultAsync(item);
+                await context.WriteResultAsync(item).ConfigureAwait(false);
             }
 
             await context.WriteEndAsync();
@@ -542,10 +542,16 @@ public sealed class ChatService(
                     {
                         response.Message.Role = "assistant";
                     }
+
+                    if (string.IsNullOrEmpty(response.Delta.Content))
+                    {
+                        response.Delta.Content = null;
+                        response.Message.Content = null;
+                    }
                 }
 
                 responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-                await context.WriteResultAsync(item);
+                await context.WriteResultAsync(item).ConfigureAwait(false);
             }
 
             await context.WriteEndAsync();

@@ -12,7 +12,9 @@ public static class HttpContextExtensions
 {
     public static async ValueTask WriteResultAsync(this HttpContext context, object value)
     {
-        await context.Response.WriteAsync("data: " + JsonSerializer.Serialize(value,AIDtoNetJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
+        var str = JsonSerializer.Serialize(value, AIDtoNetJsonSerializer.DefaultOptions);
+        await context.Response.WriteAsync("data: " + str+ "\n\n", Encoding.UTF8);
+        await context.Response.Body.FlushAsync();
     }
 
     public static async Task WriteEndAsync(this HttpContext context)
