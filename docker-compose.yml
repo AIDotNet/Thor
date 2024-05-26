@@ -6,7 +6,14 @@ services:
     build:
       context: .
       dockerfile: src/AIDotNet.API.Service/Dockerfile
+    container_name: ai-dotnet-api-service
+    networks:
+      - gateway
     volumes:
       - ./data:/data
     environment:
+      - TZ=Asia/Shanghai
+      - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
+      - ConnectionString=data source=/data/token.db
+      - LoggerConnectionString=data source=/data/logger.db
       - ASPNETCORE_ENVIRONMENT=Development

@@ -1,5 +1,5 @@
 import { Layout, Nav, Avatar, Switch, Dropdown, Button } from '@douyinfe/semi-ui';
-import { IconMoon, IconCreditCard, IconSun, IconBytedanceLogo, IconCart, IconUserCardVideo,IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
+import { IconMoon, IconCreditCard, IconSun, IconCart, IconUserCardVideo, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { info } from '../services/UserService';
@@ -209,9 +209,10 @@ export default function MainLayout() {
                     key={key}
                     style={{ maxWidth: 220, height: '100%' }}
                     items={items}
+
                     header={{
-                        logo: <IconSemiLogo style={{ fontSize: 36 }} />,
-                        text: 'AIDotNet API',
+                        logo: <Avatar src='/logo.png' />,
+                        text: "AI Gateway",
                     }}
                     onClick={(data) => {
                         switch (data.itemKey) {
@@ -259,6 +260,20 @@ export default function MainLayout() {
             <Layout>
                 <Header style={{ backgroundColor: 'var(--semi-color-bg-1)' }}>
                     <Nav
+                        items={[
+                            {
+                                text: "接入教程",
+                                onClick: () => {
+                                    navigation('/doc')
+                                }
+                            },
+                            {
+                                text: "模型列表",
+                                onClick: () => {
+                                    navigation('/model')
+                                }
+                            }
+                        ]}
                         mode="horizontal"
                         footer={
                             <>
@@ -315,8 +330,7 @@ export default function MainLayout() {
                             alignItems: 'center',
                         }}
                     >
-                        <IconBytedanceLogo size="large" style={{ marginRight: '8px' }} />
-                        <span>Token © 2024 </span>
+
                     </span>
                     <span>
                         <Button

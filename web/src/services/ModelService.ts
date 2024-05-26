@@ -17,3 +17,7 @@ export const getTypes = () => {
 export const getModels = () => {
     return get(prefix + '/models')
 }
+
+export const getUseModel = () => {
+    return get(prefix + '/use-models')
+}

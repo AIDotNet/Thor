@@ -340,6 +340,12 @@ model.MapGet("/models",
     .WithDescription("获取模型")
     .WithOpenApi();
 
+model.MapGet("/use-models",
+        ModelService.GetUseModels)
+    .WithDescription("获取使用模型")
+    .AllowAnonymous()
+    .WithOpenApi();
+
 #endregion
 
 #region Logger

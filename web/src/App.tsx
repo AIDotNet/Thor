@@ -19,6 +19,9 @@ import Chat from './pages/chat'
 import Product from './pages/product'
 import Vidol from './pages/vidol'
 import Auth from './pages/github'
+import Doc from './pages/doc'
+import DocLayout from './layouts/DocLayout'
+import Model from './pages/model'
 
 const router = createBrowserRouter([{
   element: <MainLayout />,
@@ -48,6 +51,13 @@ const router = createBrowserRouter([{
 },
 { path: '/chat', element: <Chat /> },
 { path: '/vidol', element: <Vidol /> },
+{
+  element: <DocLayout />,
+  children: [
+    { path: '/doc', element: <Doc /> },
+    { path: '/model', element: <Model /> }
+  ]
+},
 ])
 
 
