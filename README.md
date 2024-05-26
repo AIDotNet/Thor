@@ -1,3 +1,46 @@
+<div align="center"><a name="readme-top"></a>
+
+<img height="160" src="https://api.token-ai.cn/logo.png">
+
+<h1>TokenAI</h1>
+
+TokenAI打造企业级人工智能客服管理系统！
+
+[![][npm-release-shield]][npm-release-link]
+[![][github-releasedate-shield]][github-releasedate-link]
+[![][github-action-test-shield]][github-action-test-link]
+[![][github-action-release-shield]][github-action-release-link]<br/>
+[![][github-contributors-shield]][github-contributors-link]
+[![][github-forks-shield]][github-forks-link]
+[![][github-stars-shield]][github-stars-link]
+[![][github-issues-shield]][github-issues-link]
+[![][github-license-shield]][github-license-link]
+
+[Changelog](./CHANGELOG.md) · [Report Bug][github-issues-link] · [Request Feature][github-issues-link]
+
+![](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+
+</div>
+
+[npm-release-shield]: https://img.shields.io/npm/v/@lobehub/chat?color=369eff&labelColor=ffcb47&logo=npm&logoColor=white&style=flat-square
+[npm-release-link]: https://www.npmjs.com/package/@lobehub/chat
+[github-releasedate-shield]: https://img.shields.io/github/release-date/AIDotNet/AIDotNet.API?color=8ae8ff&labelColor=ffcb47&style=flat-square
+[github-releasedate-link]: https://github.com/AIDotNet/AIDotNet.API/releases
+[github-action-test-shield]: https://img.shields.io/github/actions/workflow/status/AIDotNet/AIDotNet.API/test.yml?color=8ae8ff&label=test&labelColor=ffcb47&logo=githubactions&logoColor=white&style=flat-square
+[github-action-test-link]: https://github.com/AIDotNet/AIDotNet.API/actions/workflows/test.yml
+[github-action-release-shield]: https://img.shields.io/github/actions/workflow/status/AIDotNet/AIDotNet.API/release.yml?color=8ae8ff&label=release&labelColor=ffcb47&logo=githubactions&logoColor=white&style=flat-square
+[github-action-release-link]: https://github.com/AIDotNet/AIDotNet.API/actions/workflows/release.yml
+[github-contributors-shield]: https://img.shields.io/github/contributors/AIDotNet/AIDotNet.API?color=c4f042&labelColor=ffcb47&style=flat-square
+[github-contributors-link]: https://github.com/AIDotNet/AIDotNet.API/graphs/contributors
+[github-forks-shield]: https://img.shields.io/github/forks/AIDotNet/AIDotNet.API?color=8ae8ff&labelColor=ffcb47&style=flat-square
+[github-forks-link]: https://github.com/AIDotNet/AIDotNet.API/network/members
+[github-stars-shield]: https://img.shields.io/github/stars/AIDotNet/AIDotNet.API?color=ffcb47&labelColor=ffcb47&style=flat-square
+[github-stars-link]: https://github.com/AIDotNet/AIDotNet.API/network/stargazers
+[github-issues-shield]: https://img.shields.io/github/issues/AIDotNet/AIDotNet.API?color=ff80eb&labelColor=ffcb47&style=flat-square
+[github-issues-link]: https://github.com/AIDotNet/AIDotNet.API/issues
+[github-license-shield]: https://img.shields.io/github/license/AIDotNet/AIDotNet.API?color=white&labelColor=ffcb47&style=flat-square
+[github-license-link]: https://github.com/AIDotNet/AIDotNet.API/blob/main/LICENSE
+
 # AIDotNet API 
 
 AIDotNet API 提供了大部分的AI模型兼容OpenAI的接口格式，并且将所有模型的实现单独成类库打包成SDK使用，可快速使用入门，也可以使用AIDotNet API的服务部署成独立的AI中转服务，
