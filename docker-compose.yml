@@ -7,8 +7,6 @@ services:
       context: .
       dockerfile: src/AIDotNet.API.Service/Dockerfile
     container_name: ai-dotnet-api-service
-    networks:
-      - gateway
     volumes:
       - ./data:/data
     environment:
