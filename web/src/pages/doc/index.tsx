@@ -30,7 +30,7 @@ import openai
 
 openai.api_key = "您的apikey"
 
-openai.base_url = "https://api.v3.cm/v1/"
+openai.base_url = "https://api.token-ai.cn/v1/"
 openai.default_headers = {"x-foo": "true"}
 
 completion = openai.chat.completions.create(
@@ -60,7 +60,7 @@ const { Configuration, OpenAIApi } = require("openai");
 
 const configuration = new Configuration({
 apiKey: "您的apikey",
-basePath: "https://api.v3.cm/v1"
+basePath: "https://api.token-ai.cn/v1"
 });
 const openai = new OpenAIApi(configuration);
 

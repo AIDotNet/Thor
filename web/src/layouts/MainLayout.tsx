@@ -1,5 +1,5 @@
 import { Layout, Nav, Avatar, Switch, Dropdown, Button } from '@douyinfe/semi-ui';
-import { IconMoon, IconCreditCard, IconSun, IconCart, IconUserCardVideo, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting, IconSemiLogo } from '@douyinfe/semi-icons';
+import { IconMoon, IconCreditCard, IconSun, IconCart, IconUserCardVideo, IconGithubLogo, IconArticle, IconUser, IconUserSetting, IconBranch, IconHistogram, IconComment, IconKey, IconSetting } from '@douyinfe/semi-icons';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { info } from '../services/UserService';
