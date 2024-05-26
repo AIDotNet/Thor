@@ -142,6 +142,7 @@ public sealed class ChatService(
         }
         catch (UnauthorizedAccessException e)
         {
+            context.Response.StatusCode = 401;
         }
         catch (Exception e)
         {
@@ -242,6 +243,7 @@ public sealed class ChatService(
         }
         catch (UnauthorizedAccessException e)
         {
+            context.Response.StatusCode = 401;
         }
         catch (Exception e)
         {
@@ -324,6 +326,10 @@ public sealed class ChatService(
                     await context.WriteErrorAsync("当前模型未设置倍率");
                 }
             }
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            context.Response.StatusCode = 401;
         }
         catch (Exception e)
         {

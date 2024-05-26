@@ -1,4 +1,5 @@
-﻿using AIDotNet.Abstractions;
+﻿using System.Text.Json;
+using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;
@@ -22,7 +23,7 @@ public class HunyuanService : IApiChatCompletionService
         var secretId = keys[0];
         var secretKey = keys[1];
 
-        var client = HunyuanHelper.CreateClient(secretId, secretKey,region:options.Other);
+        var client = HunyuanHelper.CreateClient(secretId, secretKey, region: options.Other);
 
         var req = new ChatCompletionsRequest
         {
@@ -99,6 +100,8 @@ public class HunyuanService : IApiChatCompletionService
 
         foreach (var e in resp)
         {
+            var v = JsonSerializer.Deserialize<ChatCompletionsResponse>(e.Data);
+            var content = v?.Choices.FirstOrDefault()?.Message.Content;
             yield return new ChatCompletionCreateResponse
             {
                 Choices = new List<ChatChoiceResponse>()
@@ -107,12 +110,12 @@ public class HunyuanService : IApiChatCompletionService
                     {
                         Delta = new ChatMessage()
                         {
-                            Content = e.Data,
+                            Content = content,
                             Role = "assistant",
                         },
                         Message = new ChatMessage()
                         {
-                            Content = e.Data,
+                            Content = content,
                             Role = "assistant",
                         }
                     }
