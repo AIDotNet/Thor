@@ -159,7 +159,6 @@ export default function UpdateChannel({
                     <Form.Select
                         field="models"
                         label="模型"
-
                         allowCreate={true}
                         multiple={true}
                         filter={true}
