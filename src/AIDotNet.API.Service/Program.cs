@@ -188,6 +188,9 @@ app.Use((async (context, next) =>
 
     await next(context);
 
+    context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.0";
+    context.Response.Headers["AI-Gateway-Name"] = "AI-Gateway";
+
     if (context.Response.StatusCode == 404)
     {
         context.Request.Path = "/index.html";

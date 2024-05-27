@@ -21,7 +21,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
 
         var result =
             await response.Content.ReadFromJsonAsync<ChatCompletionCreateResponse>(
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
         return result;
     }
@@ -39,11 +39,11 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
         string? line = string.Empty;
-        while ((line = await reader.ReadLineAsync()) != null)
+        while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
 
-            if (line.StartsWith("{"))
+            if (line.StartsWith('{'))
             {
                 // 如果是json数据则直接返回
                 yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,

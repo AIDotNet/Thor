@@ -1,4 +1,5 @@
-﻿using AIDotNet.Abstractions;
+﻿using System.Net;
+using AIDotNet.Abstractions;
 using AIDotNet.OpenAI;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -46,7 +47,16 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient(OpenAIServiceOptions.ServiceName, options =>
         {
             options.Timeout = TimeSpan.FromMinutes(6);
-        });
+        })
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+                MaxConnectionsPerServer  = 300,
+                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(10),
+                PooledConnectionLifetime = TimeSpan.FromMinutes(30),
+                EnableMultipleHttp2Connections = true,
+            });
+        
         return services;
     }
 }
