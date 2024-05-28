@@ -5,6 +5,7 @@ import { Switch, Dropdown, message, Button, Table } from 'antd'
 import { renderQuota } from "../../utils/render";
 import { Input } from "@lobehub/ui";
 import CreateToken from "./features/CreateToken";
+import UpdateToken from "./features/UpdateToken";
 
 const Header = styled.header`
 
@@ -269,6 +270,15 @@ export default function TokenPage() {
         }}
         onCancel={() => {
           setCreateTokenVisible(false);
+        }} />
+      <UpdateToken visible={updateTokenVisible}
+        value={updateTokenValue}
+        onSuccess={() => {
+          setUpdateTokenVisible(false);
+          loadingData();
+        }}
+        onCancel={() => {
+          setUpdateTokenVisible(false);
         }} />
     </div>
   )

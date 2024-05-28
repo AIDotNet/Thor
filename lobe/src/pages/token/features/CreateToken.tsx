@@ -50,18 +50,11 @@ export default function CreateToken({
 
     return <Drawer
         width={500}
+        
         title="创建Token" open={visible} onClose={onCancel}>
-        <Form onFinish={values => handleSubmit(values)} style={{ width: 400 }}>
-
-            <Form.Item<FieldType>
-                label="Token名称"
-                name="name"
-                rules={[{ required: true, message: '请输入Token名称' }]}
-            >
-                <Input value={input.name} onChange={(v) => {
-                    setInput({ ...input, name: v.target.value })
-                }} />
-            </Form.Item>
+        <Form
+         
+        onFinish={values => handleSubmit(values)} style={{ width: 400 }}>
             <Form.Item<FieldType>
                 label="Token名称"
                 name="name"
