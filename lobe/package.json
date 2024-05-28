@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@lobehub/ui": "^1.141.3",
+    "echarts": "^5.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1",
+    "styled-components": "^6.1.11",
     "ua-parser-js": "^1.0.37"
   },
   "devDependencies": {

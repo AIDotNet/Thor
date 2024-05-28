@@ -2,7 +2,7 @@
 import { SidebarTabKey } from '../store/global/initialState';
 
 /**
- * Returns the active tab key (chat/market/settings/...)
+ * Returns the active tab key 
  */
 export const useActiveTabKey = () => {
     const pathname = window.location.pathname;

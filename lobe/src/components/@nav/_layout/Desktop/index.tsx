@@ -1,30 +1,24 @@
-'use client';
-declare var window: any;
 import { SideNav } from '@lobehub/ui';
-import { memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 import { useActiveTabKey } from '../../../../hooks/useActiveTabKey';
 
 import BottomActions from './BottomActions';
 import TopActions from './TopActions';
+import { useNavigate, useLocation } from 'react-router-dom';
+
 
 const Nav = memo(() => {
+  const [sidebarKey, setSidebarKey] = useState(useActiveTabKey());
+  const location = useLocation();
 
-  // 获取当前query中的sharedId
-  if(typeof window === 'undefined'){
-    return null;
-  }
-  const query = new URLSearchParams(window.location.search);
-  const sharedId = query.get('sharedId');
+  useEffect(() => {
+    setSidebarKey(useActiveTabKey())
+  }, [location]);
 
-  const sidebarKey = useActiveTabKey();
-  if(sharedId){
-    return null;
-  }
   return (
     <SideNav
       bottomActions={<BottomActions />}
-      style={{ height: '100%', zIndex: 100 }}
       topActions={<TopActions tab={sidebarKey} />}
     />
   );

@@ -5,21 +5,63 @@ import MainLayout from './_layout'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import PanelPage from './pages/panel/page'
 import Nav from './components/@nav/default'
+import ChannelPage from './pages/channel/page'
+import TokenPage from './pages/token/page'
+import ProductPage from './pages/product/page'
+import LoggerPage from './pages/logger/page'
+import RedeemCodePage from './pages/redeem-code/page'
+import UserPage from './pages/user/page'
+import CurrentPage from './pages/current/page'
+import SettingPage from './pages/setting/page'
+import LoginPage from './pages/login/page'
+import RegisterPage from './pages/register/page'
 
 
 const router = createBrowserRouter([{
-  element: <MainLayout nav={<Nav />}/>,
+  element: <MainLayout nav={<Nav />} />,
   children: [
-    { path: 'panel', element: <PanelPage /> },
     { path: '', element: <PanelPage /> },
+    { path: 'panel', element: <PanelPage /> },
+    { path: 'channel', element: <ChannelPage /> },
+    { path: 'token', element: <TokenPage /> },
+    {
+      path: 'product',
+      element: <ProductPage />
+    },
+    {
+      path: 'logger',
+      element: <LoggerPage />
+    },
+    {
+      path: 'redeem-code',
+      element: <RedeemCodePage />
+    },
+    {
+      path: 'user',
+      element: <UserPage />
+    },
+    {
+      path: 'current',
+      element: <CurrentPage />
+    },
+    {
+      path: 'setting',
+      element: <SettingPage />
+    }
   ]
+}, {
+  path: "/login",
+  element: <LoginPage />
+}, {
+  path: "/register",
+  element: <RegisterPage />
 }
 ])
 
 function App() {
   return (
-    <ThemeProvider style={{
-      height:'100%'
+    <ThemeProvider themeMode='auto' style={{
+      height: '100%'
     }}>
       <RouterProvider router={router} />
     </ThemeProvider>
