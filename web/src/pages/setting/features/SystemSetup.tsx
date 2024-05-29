@@ -52,6 +52,21 @@ export default function SystemSetup({
                                 placeholder='请输入服务器地址'
                                 rules={[{ required: true, message: '服务器地址不能为空' }]}
                             />
+                            <Form.Input
+                                field={SystemSetting.Theme}
+                                initValue={settings?.find(s => s.key === SystemSetting.Theme)?.value}
+                                onChange={(value) => {
+                                    // 更新指定的设置
+                                    let serviceAddress = settings?.find(s => s.key === SystemSetting.Theme);
+                                    if (serviceAddress) {
+                                        serviceAddress.value = value;
+                                    }
+                                    setSettings(settings);
+                                }}
+                                label='服务器主题'
+                                placeholder='请输入服务器主题（重启服务生效）'
+                                rules={[{ required: true, message: '请输入服务器主题' }]}
+                            />
                         </Collapse.Panel>
                     </Collapse>
                     <Collapse>

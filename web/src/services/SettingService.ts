@@ -146,6 +146,12 @@ class SystemSetting {
     static readonly ServerAddress: string = SystemSetting.Default + ":ServerAddress";
 
     /**
+     * 主题
+     * @type {string}
+     */
+    static readonly Theme: string = SystemSetting.Default + ":Theme";
+
+    /**
      * 启用账号注册
      * @type {string}
      */

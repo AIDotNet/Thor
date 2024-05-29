@@ -1,4 +1,4 @@
-import { Markdown, TocProps } from "@lobehub/ui";
+import { Markdown } from "@lobehub/ui";
 
 const doc =
     `

@@ -1,4 +1,4 @@
-import { Footer, Icon, Layout, MobileTabBar, } from "@lobehub/ui";
+import {  Layout, MobileTabBar, } from "@lobehub/ui";
 import { LayoutProps } from "../../../_layout/type";
 import { } from '@lobehub/icons';
 import DevelopDoc from "../features/DevelopDoc";
