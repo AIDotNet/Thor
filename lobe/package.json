@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lobehub/icons": "^1.22.1",
     "@lobehub/ui": "^1.141.3",
     "echarts": "^5.5.0",
+    "marked": "^12.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1",

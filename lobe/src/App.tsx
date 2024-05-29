@@ -15,6 +15,9 @@ import CurrentPage from './pages/current/page'
 import SettingPage from './pages/setting/page'
 import LoginPage from './pages/login/page'
 import RegisterPage from './pages/register/page'
+import DocPage from './pages/doc/page'
+import ModelPage from './pages/model/page'
+import DocMainLayout from './_layout/Home/@nav/default'
 
 
 const router = createBrowserRouter([{
@@ -55,6 +58,12 @@ const router = createBrowserRouter([{
 }, {
   path: "/register",
   element: <RegisterPage />
+}, {
+  path: "/doc",
+  element: <DocPage nav={<DocMainLayout />} />
+}, {
+  path: "/model",
+  element: <ModelPage nav={<DocMainLayout />} />
 }
 ])
 

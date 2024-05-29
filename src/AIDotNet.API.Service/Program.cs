@@ -358,8 +358,7 @@ model.MapGet("/models",
     .WithDescription("获取模型")
     .WithOpenApi();
 
-model.MapGet("/use-models",
-        ModelService.GetUseModels)
+model.MapGet("/use-models", async (HttpContext context) => { return await ModelService.GetUseModels(context); })
     .WithDescription("获取使用模型")
     .AllowAnonymous()
     .WithOpenApi();
