@@ -215,7 +215,7 @@ app.Use((async (context, next) =>
 
     context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.0";
     context.Response.Headers["AI-Gateway-Name"] = "AI-Gateway";
-    
+
     await next(context);
 
     if (context.Response.StatusCode == 404)
@@ -225,9 +225,9 @@ app.Use((async (context, next) =>
     }
 }));
 
-var theme = Environment.GetEnvironmentVariable("Theme") ??
-            SettingService.GetSetting(SettingExtensions.SystemSetting.Theme);
-if (theme == "default")
+var theme = (Environment.GetEnvironmentVariable("Theme") ??
+             SettingService.GetSetting(SettingExtensions.SystemSetting.Theme));
+if (theme == "default" || string.IsNullOrEmpty(theme))
 {
     app.UseStaticFiles(new StaticFileOptions
     {
