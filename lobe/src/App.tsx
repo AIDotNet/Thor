@@ -18,6 +18,7 @@ import RegisterPage from './pages/register/page'
 import DocPage from './pages/doc/page'
 import ModelPage from './pages/model/page'
 import DocMainLayout from './_layout/Home/@nav/default'
+import Auth from './pages/auth/page'
 
 
 const router = createBrowserRouter([{
@@ -64,6 +65,9 @@ const router = createBrowserRouter([{
 }, {
   path: "/model",
   element: <ModelPage nav={<DocMainLayout />} />
+}, {
+  path: "/auth",
+  element: <Auth />
 }
 ])
 

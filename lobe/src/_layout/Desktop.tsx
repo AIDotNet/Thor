@@ -43,7 +43,9 @@ const Layout = memo<LayoutProps>(({ nav }) => {
                     }} />
                 </Tooltip>
                 <Tooltip title="可用模型列表">
-                    <FloatButton icon={<Copilot.Color />} />
+                    <FloatButton onClick={() => {
+                        navigate('/model')
+                    }} icon={<Copilot.Color />} />
                 </Tooltip>
             </FloatButton.Group>
         </Flexbox>
