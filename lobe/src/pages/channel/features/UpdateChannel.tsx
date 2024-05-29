@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getModels, getTypes } from "../../../services/ModelService";
-import { Add, Update } from "../../../services/ChannelService";
+import {  Update } from "../../../services/ChannelService";
 import { message, Drawer } from 'antd';
 import { Button, Select, Form, Input } from 'antd';
 import { getModelPrompt } from "../../../utils/render";

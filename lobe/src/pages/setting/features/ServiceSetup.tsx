@@ -1,6 +1,6 @@
 import { Button, Card, Collapse, Form, Input, InputNumber, Switch, notification } from "antd";
 import { GeneralSetting, UpdateSetting } from "../../../services/SettingService";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ServiceSetupProps {
     settings: any[];
@@ -11,10 +11,15 @@ export default function ServiceSetup({
     settings,
     setSettings
 }: ServiceSetupProps) {
-    const [input, setInput] = useState<any>(settings.reduce((acc, setting) => {
-        acc[setting.key] = setting.value;
-        return acc;
-    }, {}));
+    const [input, setInput] = useState<any>([]);
+
+    useEffect(() => {
+        const initialValues = settings.reduce((acc, setting) => {
+            acc[setting.key] = setting.value;
+            return acc;
+        }, {});
+        setInput(initialValues);
+    }, [settings])
 
     function handleSubmit() {
         const { ModelPromptRate, ModelCompletionRate } = GeneralSetting;
@@ -36,12 +41,7 @@ export default function ServiceSetup({
             });
         }
 
-        const updatedSettings = settings.map(setting => ({
-            ...setting,
-            value: input[setting.key]
-        }));
-
-        UpdateSetting(updatedSettings)
+        UpdateSetting(settings)
             .then((res) => {
                 res.success ? notification.success({
                     message: '修改成功',
@@ -52,10 +52,16 @@ export default function ServiceSetup({
     }
 
     const handleInputChange = (key: string, value: any) => {
-        setInput({
-            ...input,
-            [key]: value
-        });
+        setInput((prevInput: any) => ({
+            ...prevInput,
+            [key]: value.toString()
+        }));
+        const setting = settings.find(s => s.key === key);
+        if (setting) {
+            setting.value = value.toString();
+        }
+
+        setSettings(settings);
     };
 
     return (

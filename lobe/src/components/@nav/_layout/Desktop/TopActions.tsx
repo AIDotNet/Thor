@@ -1,11 +1,10 @@
-/* eslint-disable sort-keys-fix/sort-keys-fix , typescript-sort-keys/interface */
 import { ActionIcon } from '@lobehub/ui';
-import { BarChart3, BarChart, KeyRound, ShipWheel, FileText, Code, User, CircleUserRound, Settings } from 'lucide-react';
-
+import { BarChart3, BarChart, KeyRound, ShipWheel, Ghost, FileText, BotMessageSquare, Code, User, CircleUserRound, Settings } from 'lucide-react';
 import { memo } from 'react';
 import { SidebarTabKey } from '../../../../store/global/initialState';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { GeneralSetting, InitSetting } from '../../../../services/SettingService';
 
 export interface TopActionProps {
     tab?: SidebarTabKey;
@@ -14,6 +13,8 @@ export interface TopActionProps {
 const TopActions = memo<TopActionProps>(({ tab }) => {
 
     const navigate = useNavigate();
+    const chatDisabled = InitSetting.find((item: any) => item.key === GeneralSetting.ChatLink)
+    const vidolDisabled = InitSetting.find((item: any) => item.key === GeneralSetting.VidolLink)
 
     const items = [
         {
@@ -32,6 +33,31 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             key: SidebarTabKey.Channel,
             onClick: () => {
                 navigate('/channel')
+            }
+        },
+        {
+            disabled: chatDisabled.value === undefined || chatDisabled.value === '',
+            href: InitSetting[GeneralSetting.RechargeAddress as any]?.value,
+            icon: BotMessageSquare,
+            title: "对话",
+            key: SidebarTabKey.Chat,
+            onClick: () => {
+                // 给chatDisabled.value url添加query
+                const url = new URL(chatDisabled.value);
+                url.searchParams.append('token', localStorage.getItem('token') || '');
+                window.open(url.href, '_blank');
+            }
+        },
+        {
+            disabled: (vidolDisabled.value === undefined || vidolDisabled.value === ''),
+            href: InitSetting[GeneralSetting.VidolLink as any]?.value,
+            icon: Ghost,
+            title: "数字人",
+            key: SidebarTabKey.Vidol,
+            onClick: () => {
+                const url = new URL(vidolDisabled.value);
+                url.searchParams.append('token', localStorage.getItem('token') || '');
+                window.open(url.href, '_blank');
             }
         },
         {
@@ -102,24 +128,26 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
 
     return (
         <>
-            {items.map((item: any) => {
-                return (
-                    <Link
-                        to={item.href}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            item.onClick();
-                        }}
-                    >
-                        <ActionIcon
-                            active={tab === item?.key}
-                            icon={item.icon}
-                            placement={'right'}
-                            size="large"
-                            title={item.title}
-                        />
-                    </Link>)
-            })}
+            {items
+                .filter((item: any) => !item.disabled)
+                .map((item: any) => {
+                    return (
+                        <Link
+                            to={item.href}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                item.onClick();
+                            }}
+                        >
+                            <ActionIcon
+                                active={tab === item?.key}
+                                icon={item.icon}
+                                placement={'right'}
+                                size="large"
+                                title={item.title}
+                            />
+                        </Link>)
+                })}
         </>
     );
 });

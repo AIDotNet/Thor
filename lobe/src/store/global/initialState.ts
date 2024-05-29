@@ -4,6 +4,10 @@ export enum SidebarTabKey {
 
   Channel = "channel",
 
+  Chat = "chat",
+  
+  Vidol = "vidol",
+
   Token = "token",
 
   Product = "product",

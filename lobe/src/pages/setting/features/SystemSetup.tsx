@@ -11,7 +11,7 @@ export default function SystemSetup({
     settings,
     setSettings
 }: SystemSetupProps) {
-    const [input, setInput] = useState<any>({});
+    const [input, setInput] = useState<any>([]);
 
     useEffect(() => {
         const initialValues = settings.reduce((acc, setting) => {
@@ -41,25 +41,21 @@ export default function SystemSetup({
         if (setting) {
             setting.value = value;
         }
-        setSettings([...settings]);
+
+        setSettings(settings);
     };
 
     return (
         <Card
             title='通用设置'
             style={{ maxWidth: '100%' }}
-            extra={
-                <Button type='primary'>立即使用</Button>
-            }
         >
             <Form
-                onFinish={handleSubmit}
                 initialValues={input}
             >
                 <Collapse>
                     <Collapse.Panel key='1' header='通用设置'>
                         <Form.Item
-                            name={SystemSetting.ServerAddress}
                             label='服务器地址'
                             rules={[{ required: true, message: '服务器地址不能为空' }]}
                         >
@@ -74,7 +70,6 @@ export default function SystemSetup({
                 <Collapse>
                     <Collapse.Panel key='2' header='账号设置'>
                         <Form.Item
-                            name={SystemSetting.EnableRegister}
                             label='启用账号注册'
                             valuePropName="checked"
                         >
@@ -84,7 +79,6 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
-                            name={SystemSetting.EnableGithubLogin}
                             label='允许Github登录'
                             valuePropName="checked"
                         >
@@ -94,7 +88,6 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
-                            name={SystemSetting.GithubClientId}
                             label='Github Client Id'
                         >
                             <Input
@@ -104,7 +97,6 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
-                            name={SystemSetting.GithubClientSecret}
                             label='Github Client Secret'
                         >
                             <Input
@@ -116,7 +108,9 @@ export default function SystemSetup({
                     </Collapse.Panel>
                 </Collapse>
                 <Form.Item>
-                    <Button type="primary" htmlType="submit" block>保存设置</Button>
+                    <Button type="primary" onClick={()=>{
+                        handleSubmit()
+                    }} block>保存设置</Button>
                 </Form.Item>
             </Form>
         </Card>

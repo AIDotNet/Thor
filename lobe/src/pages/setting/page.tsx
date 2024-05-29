@@ -1,5 +1,5 @@
 
-import { GetSetting, SystemSetting } from "../../services/SettingService";
+import { GeneralSetting, GetSetting, SystemSetting } from "../../services/SettingService";
 import { useEffect, useState } from "react";
 import { Tabs } from "antd";
 import OtherSettings from "./features/OtherSettings";
@@ -12,6 +12,14 @@ export default function Channel() {
   function loadSettings() {
     GetSetting()
       .then((res) => {
+
+        for (let i = 0; i < res.data.length; i++) {
+          // 格式化json
+          if (res.data[i].key === GeneralSetting.ModelPromptRate || res.data[i].key === GeneralSetting.ModelCompletionRate) {
+            res.data[i].value = JSON.stringify(JSON.parse(res.data[i].value), null, 2);
+          }
+        }
+
         setSettings(res.data);
       });
   }
