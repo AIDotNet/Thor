@@ -23,12 +23,12 @@ public static class SettingExtensions
         /// 对话链接
         /// </summary>
         public const string ChatLink = Default + ":ChatLink";
-        
+
         /// <summary>
         /// Vidol 链接
         /// </summary>
         public const string VidolLink = Default + ":VidolLink";
-        
+
         /// <summary>
         /// 新用户初始额度
         /// </summary>
@@ -128,6 +128,11 @@ public static class SettingExtensions
         public const string ServerAddress = Default + ":ServerAddress";
 
         /// <summary>
+        /// 服务器主题设置
+        /// </summary>
+        public const string Theme = Default + ":Theme";
+
+        /// <summary>
         /// 启用账号注册
         /// </summary>
         public const string EnableRegister = Default + ":EnableRegister";
@@ -190,7 +195,7 @@ public static class SettingExtensions
             Value = "",
             Description = "对话链接"
         });
-        
+
         settings.Add(new Setting
         {
             Key = GeneralSetting.VidolLink,
@@ -350,6 +355,13 @@ public static class SettingExtensions
             Key = SystemSetting.EnableRegister,
             Value = "true",
             Description = "启用账号注册"
+        });
+
+        settings.Add(new Setting()
+        {
+            Key = SystemSetting.Theme,
+            Value = "default",
+            Description = "服务器主题设置"
         });
 
         settings.Add(new Setting

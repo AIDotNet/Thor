@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Switch, message, Tag, Dropdown, InputNumber, Table } from 'antd';
-import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test } from "../../services/ChannelService";
+import { Remove, UpdateOrder, disable, getChannels, test } from "../../services/ChannelService";
 import { renderQuota } from "../../utils/render";
 import styled from "styled-components";
 import { Input } from "@lobehub/ui";
@@ -166,7 +166,6 @@ export default function ChannelPage() {
   const [updateValue, setUpdateValue] = useState({} as any);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [input, setInput] = useState({
     page: 1,
     pageSize: 10,

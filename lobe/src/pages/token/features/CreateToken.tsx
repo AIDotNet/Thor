@@ -1,4 +1,4 @@
-import { Drawer, Divider, Form, Button, Switch, message, Input, DatePicker, InputNumber } from 'antd';
+import { Drawer, Form, Button, Switch, message, Input, DatePicker, InputNumber } from 'antd';
 import { Add } from '../../../services/TokenService'
 import { useState } from 'react';
 import { renderQuota } from '../../../utils/render';

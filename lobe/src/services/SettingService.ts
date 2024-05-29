@@ -1,4 +1,3 @@
-import { Setting } from '../index.d'
 
 import { get, putJson } from "../utils/fetch";
 
@@ -146,6 +145,12 @@ class SystemSetting {
     static readonly ServerAddress: string = SystemSetting.Default + ":ServerAddress";
 
     /**
+     * 主题
+     * @type {string}
+     */
+    static readonly Theme: string = SystemSetting.Default + ":Theme";
+
+    /**
      * 启用账号注册
      * @type {string}
      */
@@ -214,7 +219,7 @@ export const UpdateSetting = (data: any) => {
     return putJson(prefix, data);
 }
 
-let InitSetting: Setting[];
+let InitSetting: any[];
 
 try {
 

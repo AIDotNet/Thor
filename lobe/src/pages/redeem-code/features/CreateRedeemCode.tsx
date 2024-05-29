@@ -21,7 +21,7 @@ export default function CreateRedeemCode({
         count: 1
     })
 
-    function handleSubmit(values: any) {
+    function handleSubmit() {
         Add({
             name: input.name,
             quota: input.quota,

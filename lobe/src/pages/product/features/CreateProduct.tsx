@@ -23,7 +23,7 @@ export default function CreateProduct({
         stock: 0
     })
 
-    function handleSubmit(values: any) {
+    function handleSubmit() {
         createProduct({
             name: input.name,
             description: input.description,
@@ -39,7 +39,7 @@ export default function CreateProduct({
                     message.error(res.message);
                 }
             })
-            .catch((err) => {
+            .catch(() => {
                 message.error('创建失败');
             });
     }

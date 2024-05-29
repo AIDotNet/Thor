@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Button, Divider, Form, Input, Checkbox, DatePicker, notification, Drawer } from "antd";
-import { Update } from '../../../services/RedeemCodeService';
+import { Button, Divider, Form, Input, Checkbox, DatePicker, Drawer } from "antd";
 
 interface UpdateRedeemCodeProps {
     onSuccess: () => void;
@@ -10,7 +9,6 @@ interface UpdateRedeemCodeProps {
 }
 
 export default function UpdateRedeemCode({
-    onSuccess,
     visible,
     onCancel,
     value

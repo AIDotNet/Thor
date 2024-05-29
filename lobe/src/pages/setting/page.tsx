@@ -1,5 +1,5 @@
 
-import { GeneralSetting, GetSetting, SystemSetting } from "../../services/SettingService";
+import { GeneralSetting, GetSetting } from "../../services/SettingService";
 import { useEffect, useState } from "react";
 import { Tabs } from "antd";
 import OtherSettings from "./features/OtherSettings";

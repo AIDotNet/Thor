@@ -1,4 +1,4 @@
-import { createProduct, putProduct } from "../../../services/ProductService";
+import {  putProduct } from "../../../services/ProductService";
 import { Form, Button, Drawer, Input, InputNumber, Tag, message } from 'antd';
 import { renderQuota } from "../../../utils/render";
 import { useEffect, useState } from "react";
@@ -52,7 +52,7 @@ export default function UpdateProduct({
                     message.error(res.message);
                 }
             })
-            .catch((err) => {
+            .catch(() => {
                 message.error('创建失败');
             });
     }

@@ -15,6 +15,14 @@ RUN yarn config set strict-ssl false
 RUN yarn
 RUN yarn run build
 
+
+FROM node as lobe
+WORKDIR /src
+COPY lobe .
+RUN yarn config set strict-ssl false
+RUN npm i
+RUN yarn run build
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -38,4 +46,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=builder /src/dist ./wwwroot
+COPY --from=lobe /src/dist ./lobe
 ENTRYPOINT ["dotnet", "AIDotNet.API.Service.dll"]

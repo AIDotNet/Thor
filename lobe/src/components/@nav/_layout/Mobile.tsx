@@ -1,9 +1,9 @@
-import { BarChart3, BarChart, KeyRound, ShipWheel, FileText, Code, User, CircleUserRound, Settings } from 'lucide-react';
-import { Icon, MobileTabBar, MobileTabBarItemProps, type MobileTabBarProps } from '@lobehub/ui';
+import { BarChart3, KeyRound,  FileText,  CircleUserRound } from 'lucide-react';
+import { Icon, MobileTabBar, MobileTabBarItemProps } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { rgba } from 'polished';
 import { useNavigate } from 'react-router-dom';
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo} from 'react';
 
 import { useActiveTabKey } from '../../../hooks/useActiveTabKey';
 import { SidebarTabKey } from '../../../store/global/initialState';

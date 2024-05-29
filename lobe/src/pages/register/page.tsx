@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import {message, Input, Button } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { Avatar, Logo, LogoProps, useControls, useCreateStore } from '@lobehub/ui';
+import { Avatar,  LogoProps, useControls, useCreateStore } from '@lobehub/ui';
 import styled from 'styled-components';
 import { create } from '../../services/UserService';
 import { useNavigate } from 'react-router-dom';

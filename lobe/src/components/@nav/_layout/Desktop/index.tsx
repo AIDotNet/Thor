@@ -5,7 +5,7 @@ import { useActiveTabKey } from '../../../../hooks/useActiveTabKey';
 
 import BottomActions from './BottomActions';
 import TopActions from './TopActions';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 
 const Nav = memo(() => {
