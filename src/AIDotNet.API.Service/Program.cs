@@ -221,7 +221,9 @@ app.Use((async (context, next) =>
         await next(context);
     }
 }));
-var theme = SettingService.GetSetting(SettingExtensions.SystemSetting.Theme);
+
+var theme = Environment.GetEnvironmentVariable("Theme") ??
+            SettingService.GetSetting(SettingExtensions.SystemSetting.Theme);
 if (theme == "default")
 {
     app.UseStaticFiles(new StaticFileOptions
