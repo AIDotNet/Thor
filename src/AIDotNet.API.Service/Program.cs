@@ -15,6 +15,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Serilog.Core;
 
@@ -174,39 +175,6 @@ else
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.Use((async (context, next) =>
-{
-    if (context.Request.Path == "/")
-    {
-        context.Request.Path = "/index.html";
-    }
-
-    context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.0";
-    context.Response.Headers["AI-Gateway-Name"] = "AI-Gateway";
-    
-    await next(context);
-
-    if (context.Response.StatusCode == 404)
-    {
-        context.Request.Path = "/index.html";
-        await next(context);
-    }
-}));
-
-app.UseStaticFiles();
-
-app.UseMiddleware<UnitOfWorkMiddleware>();
-
-if (!Directory.Exists("/data"))
-{
-    Directory.CreateDirectory("/data");
-}
-
 using var scope = app.Services.CreateScope();
 
 if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
@@ -231,6 +199,56 @@ else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") |
 }
 
 await SettingService.LoadingSettings(app);
+
+
+app.UseCors("AllowAll");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.Use((async (context, next) =>
+{
+    if (context.Request.Path == "/")
+    {
+        context.Request.Path = "/index.html";
+    }
+
+    context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.0";
+    context.Response.Headers["AI-Gateway-Name"] = "AI-Gateway";
+    
+    await next(context);
+
+    if (context.Response.StatusCode == 404)
+    {
+        context.Request.Path = "/index.html";
+        await next(context);
+    }
+}));
+
+var theme = Environment.GetEnvironmentVariable("Theme") ??
+            SettingService.GetSetting(SettingExtensions.SystemSetting.Theme);
+if (theme == "default")
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    });
+}
+else
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), theme))
+    });
+}
+
+app.UseMiddleware<UnitOfWorkMiddleware>();
+
+if (!Directory.Exists("/data"))
+{
+    Directory.CreateDirectory("/data");
+}
+
 
 app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBody] LoginInput input) =>
     await service.TokenAsync(input))
@@ -343,8 +361,7 @@ model.MapGet("/models",
     .WithDescription("获取模型")
     .WithOpenApi();
 
-model.MapGet("/use-models",
-        ModelService.GetUseModels)
+model.MapGet("/use-models", async (HttpContext context) => { return await ModelService.GetUseModels(context); })
     .WithDescription("获取使用模型")
     .AllowAnonymous()
     .WithOpenApi();

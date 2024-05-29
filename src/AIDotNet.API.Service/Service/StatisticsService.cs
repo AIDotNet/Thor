@@ -35,8 +35,7 @@ public static class StatisticsService
         }
 
         // 查询统计数据总和
-        var userStatistics =
-            userQuery
+        var userStatistics = await userQuery
                 .GroupBy(log => new { log.Year, log.Month, log.Day, log.Type }) // 按用户ID和模型名称分组
                 .Select(group => new
                 {
@@ -45,7 +44,8 @@ public static class StatisticsService
                     group.Key.Day,
                     group.Key.Type,
                     Value = group.Sum(log => log.Value), // 请求次数
-                });
+                }).ToListAsync()
+            ;
         // 获取过去七天的日期列表
         var dateList = Enumerable.Range(0, 7).Select(days => DateTime.Now.Date.AddDays(-days))
             .Order()
@@ -54,10 +54,11 @@ public static class StatisticsService
         // 统计用户请求 消费额度 Token总数
         foreach (var date in dateList)
         {
-            foreach (var userStatistic in (await userStatistics.ToListAsync())
-                     .Where(stat => new DateTime(stat.Year, stat.Month, stat.Day) == date))
+            if (userStatistics
+                .Any(stat => new DateTime(stat.Year, stat.Month, stat.Day) == date))
             {
-                if (userStatistic != null)
+                foreach (var userStatistic in userStatistics
+                             .Where(stat => new DateTime(stat.Year, stat.Month, stat.Day) == date))
                 {
                     switch (userStatistic.Type)
                     {
@@ -65,8 +66,9 @@ public static class StatisticsService
                             statisticsDto.Consumes.Add(new StatisticsNumberDto
                             {
                                 DateTime =
-                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                        "yyyy-MM-dd"),
+                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day)
+                                        .ToString(
+                                            "yyyy-MM-dd"),
                                 Value = userStatistic.Value
                             });
                             break;
@@ -74,8 +76,9 @@ public static class StatisticsService
                             statisticsDto.Requests.Add(new StatisticsNumberDto
                             {
                                 DateTime =
-                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                        "yyyy-MM-dd"),
+                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day)
+                                        .ToString(
+                                            "yyyy-MM-dd"),
                                 Value = userStatistic.Value
                             });
                             break;
@@ -83,31 +86,32 @@ public static class StatisticsService
                             statisticsDto.Tokens.Add(new StatisticsNumberDto
                             {
                                 DateTime =
-                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day).ToString(
-                                        "yyyy-MM-dd"),
+                                    new DateTime(userStatistic.Year, userStatistic.Month, userStatistic.Day)
+                                        .ToString(
+                                            "yyyy-MM-dd"),
                                 Value = userStatistic.Value
                             });
                             break;
                     }
                 }
-                else
+            }
+            else
+            {
+                statisticsDto.Consumes.Add(new StatisticsNumberDto
                 {
-                    statisticsDto.Consumes.Add(new StatisticsNumberDto
-                    {
-                        DateTime = date.ToString("yyyy-MM-dd"),
-                        Value = 0
-                    });
-                    statisticsDto.Requests.Add(new StatisticsNumberDto
-                    {
-                        DateTime = date.ToString("yyyy-MM-dd"),
-                        Value = 0
-                    });
-                    statisticsDto.Tokens.Add(new StatisticsNumberDto
-                    {
-                        DateTime = date.ToString("yyyy-MM-dd"),
-                        Value = 0
-                    });
-                }
+                    DateTime = date.ToString("yyyy-MM-dd"),
+                    Value = 0
+                });
+                statisticsDto.Requests.Add(new StatisticsNumberDto
+                {
+                    DateTime = date.ToString("yyyy-MM-dd"),
+                    Value = 0
+                });
+                statisticsDto.Tokens.Add(new StatisticsNumberDto
+                {
+                    DateTime = date.ToString("yyyy-MM-dd"),
+                    Value = 0
+                });
             }
         }
 
