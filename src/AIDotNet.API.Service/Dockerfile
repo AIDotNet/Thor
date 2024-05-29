@@ -12,6 +12,7 @@ FROM node as builder
 WORKDIR /src
 COPY web .
 RUN yarn config set strict-ssl false
+RUN npm config set registry https://registry.npmmirror.com
 RUN yarn
 RUN yarn run build
 
@@ -19,7 +20,7 @@ RUN yarn run build
 FROM node as lobe
 WORKDIR /src
 COPY lobe .
-RUN yarn config set strict-ssl false
+RUN npm config set registry https://registry.npmmirror.com
 RUN npm i
 RUN yarn run build
 
