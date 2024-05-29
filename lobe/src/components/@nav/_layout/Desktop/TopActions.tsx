@@ -15,7 +15,7 @@ export interface TopActionProps {
 const TopActions = memo<TopActionProps>(({ tab }) => {
 
     const navigate = useNavigate();
-    const [user, setUser] = useState<any>({})
+    const [ setUser] = useState<any>({})
     const chatDisabled = InitSetting.find((item: any) => item.key === GeneralSetting.ChatLink)
     const vidolDisabled = InitSetting.find((item: any) => item.key === GeneralSetting.VidolLink)
 
@@ -24,6 +24,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             href: '/panel',
             icon: BarChart3,
             title: "面板",
+            enable: true,
             key: SidebarTabKey.Panel,
             role: 'user,admin',
             onClick: () => {
@@ -34,6 +35,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             href: '/channel',
             icon: BarChart,
             title: "渠道",
+            enable: true,
             key: SidebarTabKey.Channel,
             onClick: () => {
                 navigate('/channel')
@@ -72,6 +74,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
         {
             href: '/token',
             icon: KeyRound,
+            enable: true,
             title: "令牌",
             key: SidebarTabKey.Token,
             onClick: () => {
@@ -83,6 +86,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             href: '/product',
             icon: ShipWheel,
             title: "产品",
+            enable: true,
             key: SidebarTabKey.Product,
             onClick: () => {
                 navigate('/product')
@@ -93,6 +97,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             href: '/logger',
             icon: FileText,
             title: "日志",
+            enable: true,
             key: SidebarTabKey.Logger,
             onClick: () => {
                 navigate('/logger')
@@ -102,6 +107,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
         {
             href: '/redeem-code',
             icon: Code,
+            enable: true,
             title: "兑换码",
             key: SidebarTabKey.RedeemCode,
             onClick: () => {
@@ -113,6 +119,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             href: '/user',
             icon: User,
             title: "用户管理",
+            enable: true,
             key: SidebarTabKey.User,
             onClick: () => {
                 navigate('/user')
@@ -123,6 +130,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             href: '/current',
             icon: CircleUserRound,
             title: "钱包/个人",
+            enable: true,
             key: SidebarTabKey.Current,
             onClick: () => {
                 navigate('/current')
@@ -133,6 +141,7 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             href: '/setting',
             icon: Settings,
             title: "系统设置",
+            enable: true,
             key: SidebarTabKey.Setting,
             onClick: () => {
                 navigate('/setting')
