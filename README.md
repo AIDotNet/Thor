@@ -141,18 +141,18 @@ docker run --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e 
 version: '3.8'
 
 services:
-	ai-dotnet-api-service:
-		image: hejiale010426/ai-dotnet-api-service:latest
-		container_name: ai-dotnet-api-service
-		ports:
-		  - 8080:8080
-		volumes:
-		  - ./data:/data
-		environment:
-		  - TZ=Asia/Shanghai
-		  - DBType=sqlite
-		  - ConnectionString=data source=/data/token.db
-		  - LoggerConnectionString=data source=/data/logger.db
+   ai-dotnet-api-service:
+      image: hejiale010426/ai-dotnet-api-service:latest
+      container_name: ai-dotnet-api-service
+      ports:
+	- 8080:8080
+      volumes:
+	- ./data:/data
+      environment:
+	- TZ=Asia/Shanghai
+	- DBType=sqlite
+	- ConnectionString=data source=/data/token.db
+	- LoggerConnectionString=data source=/data/logger.db
 ```
 
 docker run版本
@@ -175,18 +175,18 @@ sudo docker-compose up -d
 version: '3.8'
 
 services:
-	ai-dotnet-api-service:
-		image: hejiale010426/ai-dotnet-api-service:latest
-		container_name: ai-dotnet-api-service
-		ports:
-		  - 8080:8080
-		volumes:
-		  - ./data:/data
-		environment:
-		  - TZ=Asia/Shanghai
-		  - DBType=postgresql
-		  - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
-		  - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
+   ai-dotnet-api-service:
+   image: hejiale010426/ai-dotnet-api-service:latest
+   container_name: ai-dotnet-api-service
+   ports:
+      - 8080:8080
+   volumes:
+      - ./data:/data
+   environment:
+      - TZ=Asia/Shanghai
+      - DBType=postgresql
+      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
+      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
 ```
 
 docker run版本
@@ -217,18 +217,18 @@ sudo docker-compose up -d
 version: '3.8'
 
 services:
-	ai-dotnet-api-service:
-		image: hejiale010426/ai-dotnet-api-service:latest
-		container_name: ai-dotnet-api-service
-		ports:
-		  - 8080:8080
-		volumes:
-		  - ./data:/data
-		environment:
-		  - TZ=Asia/Shanghai
-		  - DBType=sqlserver
-		  - "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;"
-		  - "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;"
+   ai-dotnet-api-service:
+     image: hejiale010426/ai-dotnet-api-service:latest
+     container_name: ai-dotnet-api-service
+     ports:
+	- 8080:8080
+     volumes:
+	- ./data:/data
+     environment:
+ 	- TZ=Asia/Shanghai
+	- DBType=sqlserver
+	- "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;"
+	- "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;"
 ```
 
 docker run版本
@@ -259,18 +259,18 @@ sudo docker-compose up -d
 version: '3.8'
 
 services:
-	ai-dotnet-api-service:
-		image: hejiale010426/ai-dotnet-api-service:latest
-		container_name: ai-dotnet-api-service
-		ports:
-		  - 8080:8080
-		volumes:
-		  - ./data:/data
-		environment:
-		  - TZ=Asia/Shanghai
-		  - DBType=mysql
-		  - "ConnectionString=mysql://root:dd666666@localhost:3306/token"
-		  - "ConnectionString=mysql://root:dd666666@localhost:3306/logger"
+   ai-dotnet-api-service:
+      image: hejiale010426/ai-dotnet-api-service:latest
+      container_name: ai-dotnet-api-service
+      ports:
+  	- 8080:8080
+      volumes:
+	- ./data:/data
+      environment:
+	- TZ=Asia/Shanghai
+	- DBType=mysql
+	- "ConnectionString=mysql://root:dd666666@localhost:3306/token"
+	- "ConnectionString=mysql://root:dd666666@localhost:3306/logger"
 ```
 
 docker run版本
