@@ -229,9 +229,16 @@ var theme = (Environment.GetEnvironmentVariable("Theme") ??
              SettingService.GetSetting(SettingExtensions.SystemSetting.Theme));
 if (theme == "default" || string.IsNullOrEmpty(theme))
 {
+    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+    if (!Directory.Exists(path))
+    {
+        Directory.CreateDirectory(path);
+    }
+
     app.UseStaticFiles(new StaticFileOptions
     {
-        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+        FileProvider = new PhysicalFileProvider(path),
     });
 }
 else

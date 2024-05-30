@@ -4,6 +4,11 @@ namespace AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 
 public class ToolCall
 {
+    public ToolCall()
+    {
+        Id = Guid.NewGuid().ToString("N");
+    }
+
     /// <summary>
     ///     The Index of the tool call.
     /// </summary>

@@ -4,4 +4,4 @@
 /// 额度不足异常
 /// </summary>
 /// <param Name="message"></param>
-public class InsufficientQuotaException(string message) : Exception(message);
+public sealed  class InsufficientQuotaException(string message) : Exception(message);

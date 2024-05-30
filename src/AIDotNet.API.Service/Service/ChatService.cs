@@ -138,7 +138,7 @@ public sealed class ChatService(
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
                 channel.Name);
 
-            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key,channel.Id);
+            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id);
         }
         catch (UnauthorizedAccessException e)
         {
@@ -236,7 +236,7 @@ public sealed class ChatService(
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key,channel.Id);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
             }
 
             await context.Response.WriteAsJsonAsync(stream);
@@ -292,11 +292,13 @@ public sealed class ChatService(
 
                 if (module.Stream == true)
                 {
-                    (requestToken, responseToken) = await StreamHandlerAsync(context, module, channel, openService,user,rate);
+                    (requestToken, responseToken) =
+                        await StreamHandlerAsync(context, module, channel, openService, user, rate);
                 }
                 else
                 {
-                    (requestToken, responseToken) = await ChatHandlerAsync(context, module, channel, openService,user,rate);
+                    (requestToken, responseToken) =
+                        await ChatHandlerAsync(context, module, channel, openService, user, rate);
                 }
 
                 var quota = requestToken * rate;
@@ -312,7 +314,7 @@ public sealed class ChatService(
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key,channel.Id);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
             }
             else
             {
@@ -330,6 +332,18 @@ public sealed class ChatService(
         catch (UnauthorizedAccessException e)
         {
             context.Response.StatusCode = 401;
+        }
+        catch (OpenAIErrorException error)
+        {
+            context.Response.StatusCode = 400;
+            if (module.Stream == true)
+            {
+                await context.WriteStreamErrorAsync(error.Message, error.Code);
+            }
+            else
+            {
+                await context.WriteErrorAsync(error.Message, error.Code);
+            }
         }
         catch (Exception e)
         {
@@ -392,9 +406,9 @@ public sealed class ChatService(
                     }
                 }
             }
-            
+
             var quota = requestToken * rate;
-            
+
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit)
             {
@@ -412,7 +426,7 @@ public sealed class ChatService(
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Select(x => x.Content).ToArray());
 
             var quota = requestToken * rate;
-            
+
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit)
             {
@@ -506,7 +520,7 @@ public sealed class ChatService(
                     }
                 }
             }
-            
+
             var quota = requestToken * rate;
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit)
@@ -526,17 +540,22 @@ public sealed class ChatService(
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Select(x => x.Content).ToArray());
 
-            
+
             var quota = requestToken * rate;
-            
+
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit)
             {
                 throw new InsufficientQuotaException("账号余额不足请充值");
             }
-            
+
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
+                if (item.Error != null && !string.IsNullOrEmpty(item.Error.Message))
+                {
+                    throw new OpenAIErrorException(item.Error.Message, item.Error.Code ?? "error");
+                }
+
                 foreach (var response in item.Choices)
                 {
                     if (response.Delta.Role.IsNullOrEmpty())

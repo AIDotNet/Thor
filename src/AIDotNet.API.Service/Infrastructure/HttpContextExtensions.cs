@@ -13,7 +13,7 @@ public static class HttpContextExtensions
     public static async ValueTask WriteResultAsync(this HttpContext context, object value)
     {
         var str = JsonSerializer.Serialize(value, AIDtoNetJsonSerializer.DefaultOptions);
-        await context.Response.WriteAsync("data: " + str+ "\n\n", Encoding.UTF8);
+        await context.Response.WriteAsync("data: " + str + "\n\n", Encoding.UTF8);
         await context.Response.Body.FlushAsync();
     }
 
@@ -21,6 +21,21 @@ public static class HttpContextExtensions
     {
         await context.Response.WriteAsync("data: [DONE]\n\n");
         await context.Response.Body.FlushAsync();
+    }
+
+    public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message, string code)
+    {
+        var error = new ChatCompletionCreateResponse
+        {
+            Error = new Error()
+            {
+                MessageObject = message,
+                Type = "error",
+                Code = code
+            }
+        };
+        await context.Response.WriteAsync(
+            "data: " + JsonSerializer.Serialize(error, AIDtoNetJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
     }
 
     public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message)
@@ -82,6 +97,20 @@ public static class HttpContextExtensions
                     },
                     Index = 0
                 }
+            }
+        };
+        await context.Response.WriteAsJsonAsync(error);
+    }
+
+
+    public static async ValueTask WriteErrorAsync(this HttpContext context, string message, string code)
+    {
+        var error = new ChatCompletionCreateResponse
+        {
+            Error = new Error()
+            {
+                MessageObject = message,
+                Code = code
             }
         };
         await context.Response.WriteAsJsonAsync(error);
