@@ -4,11 +4,11 @@ namespace AIDotNet.API.Service.Domain;
 
 public class StatisticsConsumesNumber : Entity<string>
 {
-    public ushort Year { get; set; }
+    public int Year { get; set; }
     
-    public ushort Month { get; set; }
+    public int Month { get; set; }
     
-    public ushort Day { get; set; }
+    public int Day { get; set; }
 
     public long Number { get; set; }
     
