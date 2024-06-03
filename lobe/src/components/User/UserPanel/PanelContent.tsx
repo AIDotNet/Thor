@@ -4,8 +4,6 @@ import { Flexbox } from 'react-layout-kit';
 import UserAvatar from '../UserAvatar';
 import { Button } from 'antd';
 import { Tag } from '@lobehub/ui';
-import { Github } from '@lobehub/icons';
-import { config } from '../../../config';
 import { useActiveUser } from '../../../hooks/useActiveTabKey';
 import { renderQuota } from '../../../utils/render';
 
