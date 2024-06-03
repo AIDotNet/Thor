@@ -1,30 +1,10 @@
 namespace AIDotNet.MetaGLM.Models.RequestModels.FunctionModels
 {
-    public enum ParameterType
+
+    public class FunctionParameterDescriptor(string type, string description)
     {
-        String,
-        Integer,
-    }
-
-    public class FunctionParameterDescriptor
-    {
-        public string type { get; set; }
-        public string description { get; set; }
-
-        private static string ToTypeString(ParameterType type)
-        {
-            return type switch
-            {
-                ParameterType.String => "string",
-                ParameterType.Integer => "int",
-                _ => null
-            };
-        }
-
-        public FunctionParameterDescriptor(ParameterType type, string description)
-        {
-            this.type = ToTypeString(type);
-            this.description = description;
-        }
+        public string type { get; set; } = type;
+        
+        public string description { get; set; } = description;
     }
 }

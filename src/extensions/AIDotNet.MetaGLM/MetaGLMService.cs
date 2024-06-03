@@ -4,6 +4,7 @@ using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.MetaGLM.Models.RequestModels;
+using AIDotNet.MetaGLM.Models.RequestModels.FunctionModels;
 using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.MetaGLM;
@@ -42,7 +43,55 @@ public sealed class MetaGLMService : IApiChatCompletionService
             dto.SetTopP((double)input.TopP);
         }
 
+        if (input.Tools != null)
+        {
+            foreach (var tool in input.Tools)
+            {
+                var functions = new FunctionTool();
+                functions.type = tool.Type;
+                if (!string.IsNullOrEmpty(tool.Function?.Name))
+                    functions.SetName(tool.Function.Name);
+
+                if (!string.IsNullOrEmpty(tool.Function?.Description))
+                    functions.SetDescription(tool.Function.Description);
+
+                var function = new FunctionParameters()
+                {
+                    required = tool.Function?.Parameters?.Required?.ToArray(),
+                    type = tool.Function?.Parameters?.Type,
+                };
+
+                if (tool.Function?.Parameters?.Properties != null)
+                {
+                    foreach (var definition in tool.Function.Parameters.Properties)
+                    {
+                        function.properties.Add(definition.Key,
+                            new FunctionParameterDescriptor(definition.Value.Type, definition.Value.Description));
+                    }
+                }
+
+                functions.SetParameters(function);
+
+                dto.tools.Add(functions);
+            }
+        }
+
         var result = await _openAiOptions.Client?.Chat.Completion(dto, options.Key, options.Address);
+
+        var tools = new List<ToolCall>();
+        foreach (var choiceItem in result.choices)
+        {
+            tools.AddRange(choiceItem.delta.tool_calls.Select(x => new ToolCall()
+            {
+                Id = x.id,
+                Type = x.type,
+                FunctionCall = new FunctionCall()
+                {
+                    Arguments = x.function.arguments,
+                    Name = x.function.name,
+                }
+            }));
+        }
 
         return new ChatCompletionCreateResponse()
         {
@@ -50,7 +99,10 @@ public sealed class MetaGLMService : IApiChatCompletionService
             [
                 new()
                 {
-                    Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.delta.content),
+                    Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.delta.content ?? string.Empty,
+                        null, tools),
+                    Message = new ChatMessage("assistant",
+                        result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
                     FinishReason = "stop",
                     Index = 0,
                 }
@@ -81,15 +133,66 @@ public sealed class MetaGLMService : IApiChatCompletionService
             dto.SetTopP((double)input.TopP);
         }
 
+        if (input.Tools != null)
+        {
+            foreach (var tool in input.Tools)
+            {
+                var functions = new FunctionTool();
+                functions.type = tool.Type;
+                if (!string.IsNullOrEmpty(tool.Function?.Name))
+                    functions.SetName(tool.Function.Name);
+
+                if (!string.IsNullOrEmpty(tool.Function?.Description))
+                    functions.SetDescription(tool.Function.Description);
+
+                var function = new FunctionParameters()
+                {
+                    required = tool.Function?.Parameters?.Required?.ToArray(),
+                    type = tool.Function?.Parameters?.Type,
+                };
+
+                if (tool.Function?.Parameters?.Properties != null)
+                {
+                    foreach (var definition in tool.Function.Parameters.Properties)
+                    {
+                        function.properties.Add(definition.Key,
+                            new FunctionParameterDescriptor(definition.Value.Type, definition.Value.Description));
+                    }
+                }
+
+                functions.SetParameters(function);
+
+                dto.tools.Add(functions);
+            }
+        }
+
         await foreach (var result in _openAiOptions.Client?.Chat.Stream(dto, options.Key, options.Address))
         {
+            var tools = new List<ToolCall>();
+            foreach (var choiceItem in result.choices)
+            {
+                tools.AddRange(choiceItem.delta.tool_calls.Select(x => new ToolCall()
+                {
+                    Id = x.id,
+                    Type = x.type,
+                    FunctionCall = new FunctionCall()
+                    {
+                        Arguments = x.function.arguments,
+                        Name = x.function.name,
+                    }
+                }));
+            }
+
             yield return new ChatCompletionCreateResponse()
             {
                 Choices =
                 [
                     new()
                     {
-                        Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.delta.content),
+                        Delta = new ChatMessage("assistant",
+                            result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
+                        Message = new ChatMessage("assistant",
+                            result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
                         FinishReason = "stop",
                         Index = 0,
                     }

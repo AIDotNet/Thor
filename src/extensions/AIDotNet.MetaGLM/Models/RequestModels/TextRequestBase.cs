@@ -7,7 +7,7 @@ namespace AIDotNet.MetaGLM.Models.RequestModels
         public string request_id { get; private set; }
         public string model { get; private set; }
         public MessageItem[] messages { get; private set; }
-        public FunctionTool[] tools { get; private set; }
+        public List<FunctionTool> tools { get; private set; }
         public string tool_choice { get; private set; }
         public double top_p { get; private set; }
         public double temperature { get; private set; }
@@ -37,7 +37,7 @@ namespace AIDotNet.MetaGLM.Models.RequestModels
             return this;
         }
 
-        public TextRequestBase SetTools(FunctionTool[] tools)
+        public TextRequestBase SetTools(List<FunctionTool> tools)
         {
             this.tools = tools;
             return this;

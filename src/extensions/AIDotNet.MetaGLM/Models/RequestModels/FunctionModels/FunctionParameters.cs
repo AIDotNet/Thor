@@ -12,7 +12,7 @@ namespace AIDotNet.MetaGLM.Models.RequestModels.FunctionModels
             this.properties = new Dictionary<string, FunctionParameterDescriptor>();
         }
 
-        public FunctionParameters AddParameter(string name, ParameterType type, string description)
+        public FunctionParameters AddParameter(string name, string type, string description)
         {
             properties[name] = new FunctionParameterDescriptor(type, description);
             return this;
