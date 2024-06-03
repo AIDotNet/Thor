@@ -67,6 +67,7 @@ AIDotNet API还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以�
 # AI大模型支持列表
 
 - [x] OpenAI （支持function）
+- [x] Kimi（月之暗面）（支持function）
 - [x] 星火大模型（支持function）
 - [x] Claudia (非Stream支持function)
 - [x] 智谱AI (支持function)

@@ -9,6 +9,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOpenAIService(this IServiceCollection services)
     {
         IApiChatCompletionService.ServiceNames.Add("OpenAI", OpenAIServiceOptions.ServiceName);
+        IApiChatCompletionService.ServiceNames.Add("Kimi（月之暗面）", OpenAIServiceOptions.ServiceName);
         IApiChatCompletionService.ModelNames.Add("OpenAI", [
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-0125",
