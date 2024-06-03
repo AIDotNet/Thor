@@ -6,6 +6,7 @@ import { useActiveTabKey } from '../../../../hooks/useActiveTabKey';
 import BottomActions from './BottomActions';
 import TopActions from './TopActions';
 import { useLocation } from 'react-router-dom';
+import Avatar from './Avatar';
 
 
 const Nav = memo(() => {
@@ -18,6 +19,7 @@ const Nav = memo(() => {
 
   return (
     <SideNav
+      avatar={<Avatar/>}
       bottomActions={<BottomActions />}
       topActions={<TopActions tab={sidebarKey} />}
     />

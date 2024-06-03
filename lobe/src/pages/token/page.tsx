@@ -69,7 +69,6 @@ export default function TokenPage() {
       title: '过期时间',
       dataIndex: 'expiredTime',
       render: (value: any, item: any) => {
-        // unlimitedExpired
         if (item.unlimitedExpired) {
           return (<span>不过期</span>)
         } else {

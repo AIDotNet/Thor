@@ -89,6 +89,13 @@ export default function RedeemCode() {
                 },
                 {
                   key: 2,
+                  label: '复制',
+                  onClick: () => {
+                    copyKey(item.code);
+                  }
+                },
+                {
+                  key: 3,
                   label: '删除',
                   onClick: () => removeRedeemCode(item.id)
                 }
@@ -113,17 +120,17 @@ export default function RedeemCode() {
     keyword: '',
   });
 
-  // function copyKey(key: string) {
-  //   navigator.clipboard.writeText(key).then(() => {
-  //     message.success({
-  //       content: '复制成功',
-  //     })
-  //   }).catch(() => {
-  //     message.error({
-  //       content: '复制失败',
-  //     })
-  //   });
-  // }
+  function copyKey(key: string) {
+    navigator.clipboard.writeText(key).then(() => {
+      message.success({
+        content: '复制成功',
+      })
+    }).catch(() => {
+      message.error({
+        content: '复制失败',
+      })
+    });
+  }
 
   function removeRedeemCode(id: number) {
     Remove(id)
