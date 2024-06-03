@@ -7,4 +7,6 @@
 public sealed class OpenAIErrorException(string message, string code) : Exception(message)
 {
     public string Code { get; } = code;
+    
+    public override string Message { get; } = message;
 }

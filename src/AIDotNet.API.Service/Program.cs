@@ -585,7 +585,13 @@ product.MapPost("pay-complete-callback",
 #endregion
 
 app.MapPost("/v1/chat/completions", async (ChatService service, HttpContext httpContext) =>
-        await service.CompletionsAsync(httpContext))
+        await service.ChatCompletionsAsync(httpContext))
+    .WithGroupName("OpenAI")
+    .WithDescription("Get completions from OpenAI")
+    .WithOpenApi();
+
+app.MapPost("/v1/completions", async (ChatService service, HttpContext context) =>
+        await service.CompletionsAsync(context))
     .WithGroupName("OpenAI")
     .WithDescription("Get completions from OpenAI")
     .WithOpenApi();

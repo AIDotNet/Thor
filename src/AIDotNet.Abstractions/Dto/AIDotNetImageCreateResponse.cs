@@ -6,9 +6,3 @@ public class AIDotNetImageCreateResponse
     public int created { get; set; }
     public bool successful { get; set; }
 }
-
-public class Data
-{
-    public string url { get; set; }
-    public string revised_prompt { get; set; }
-}

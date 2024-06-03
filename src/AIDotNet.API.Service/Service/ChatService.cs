@@ -10,7 +10,7 @@ using MapsterMapper;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
-using CompletionCreateResponse = AIDotNet.Abstractions.Dto.CompletionCreateResponse;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace AIDotNet.API.Service.Service;
 
@@ -136,7 +136,7 @@ public sealed class ChatService(
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), module.Model,
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
-                channel.Name);
+                channel.Id);
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id);
         }
@@ -234,7 +234,7 @@ public sealed class ChatService(
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     module.Model,
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                    channel.Name);
+                    channel.Id);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
             }
@@ -253,6 +253,99 @@ public sealed class ChatService(
     }
 
     public async ValueTask CompletionsAsync(HttpContext context)
+    {
+        using var body = new MemoryStream();
+        await context.Request.Body.CopyToAsync(body);
+
+        var module = JsonSerializer.Deserialize<CompletionCreateRequest>(body.ToArray());
+
+        if (module == null)
+        {
+            throw new Exception("模型校验异常");
+        }
+
+        try
+        {
+            var (token, user) = await tokenService.CheckTokenAsync(context);
+
+            // 获取渠道 通过算法计算权重
+            var channel = CalculateWeight((await channelService.GetChannelsAsync())
+                .Where(x => x.Models.Contains(module.Model)));
+
+            if (channel == null)
+            {
+                throw new NotModelException(module.Model);
+            }
+
+            var openService = GetKeyedService<IApiCompletionService>(channel.Type);
+
+            if (openService == null)
+            {
+                throw new Exception($"并未实现：{channel.Type} 的服务");
+            }
+
+            if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
+            {
+                if (module.Stream == false)
+                {
+                    var (requestToken, responseToken) =
+                        await CompletionsHandlerAsync(context, module, channel, openService, user, rate);
+
+                    var quota = requestToken * rate;
+
+                    var completionRatio = GetCompletionRatio(module.Model);
+                    quota += responseToken * (rate * completionRatio);
+
+                    // 将quota 四舍五入
+                    quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                    await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
+                        module.Model,
+                        requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
+                        channel.Id);
+
+                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
+                }
+            }
+            else
+            {
+                context.Response.StatusCode = 200;
+                if (module.Stream == true)
+                {
+                    await context.WriteStreamErrorAsync("当前模型未设置倍率");
+                }
+                else
+                {
+                    await context.WriteErrorAsync("当前模型未设置倍率");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+        }
+    }
+
+    public async ValueTask<(int, int)> CompletionsHandlerAsync(HttpContext context, CompletionCreateRequest input,
+        ChatChannel channel, IApiCompletionService openService, User user, decimal rate)
+    {
+        var setting = new ChatOptions()
+        {
+            Key = channel.Key,
+            Address = channel.Address,
+            Other = channel.Other
+        };
+
+        var requestToken = TokenHelper.GetTotalTokens(input.Prompt ?? string.Empty);
+
+
+        var result = await openService.CompletionAsync(input, setting);
+
+        var responseToken = TokenHelper.GetTotalTokens(result.Choices.FirstOrDefault()?.Text ?? string.Empty);
+
+        return (requestToken, responseToken);
+    }
+
+    public async ValueTask ChatCompletionsAsync(HttpContext context)
     {
         using var body = new MemoryStream();
         await context.Request.Body.CopyToAsync(body);
@@ -293,7 +386,7 @@ public sealed class ChatService(
                 if (module.Stream == true)
                 {
                     (requestToken, responseToken) =
-                        await StreamHandlerAsync(context, module, channel, openService, user, rate);
+                        await StreamChatHandlerAsync(context, module, channel, openService, user, rate);
                 }
                 else
                 {
@@ -312,7 +405,7 @@ public sealed class ChatService(
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     module.Model,
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                    channel.Name);
+                    channel.Id);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
             }
@@ -458,7 +551,7 @@ public sealed class ChatService(
     /// <param Name="openService"></param>
     /// <param name="rate"></param>
     /// <returns></returns>
-    private async ValueTask<(int, int)> StreamHandlerAsync(HttpContext context,
+    private async ValueTask<(int, int)> StreamChatHandlerAsync(HttpContext context,
         ChatCompletionCreateRequest input, ChatChannel channel, IApiChatCompletionService openService, User user,
         decimal rate)
     {
