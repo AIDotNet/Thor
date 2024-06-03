@@ -90,6 +90,8 @@ namespace AIDotNet.Qiansail
                         {
                             Delta = new OpenAI.ObjectModels.RequestModels.ChatMessage("assistant",
                                 result.Output.Text),
+                            Message = new OpenAI.ObjectModels.RequestModels.ChatMessage("assistant",
+                                result.Output.Text),
                             FinishReason = "stop",
                             Index = 0,
                         }

@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="TencentCloudSDK.Hunyuan" Version="3.0.1012" />
+      <PackageReference Include="TencentCloudSDK.Hunyuan" Version="3.0.1018" />
     </ItemGroup>
 
 </Project>

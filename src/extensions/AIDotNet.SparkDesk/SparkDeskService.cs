@@ -64,7 +64,7 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
             TopK = (int)(input.TopP ?? 4)
         }, cancellationToken: cancellationToken);
 
-        var retMessage = new OpenAI.ObjectModels.RequestModels.ChatMessage()
+        var retMessage = new ChatMessage()
         {
             Role = "assistant"
         };
@@ -73,7 +73,7 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
             Model = input.Model,
             Choices = new List<Abstractions.ObjectModels.ObjectModels.SharedModels.ChatChoiceResponse>()
             {
-                new Abstractions.ObjectModels.ObjectModels.SharedModels.ChatChoiceResponse()
+                new()
                 {
                     Delta = retMessage,
                     FinishReason = "stop",
