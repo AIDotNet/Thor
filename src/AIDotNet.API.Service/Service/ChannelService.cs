@@ -186,7 +186,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         }
 
 
-        if (chatHistory.Model == null)
+        if (string.IsNullOrWhiteSpace(chatHistory.Model))
         {
             chatHistory.Model = channel.Models.FirstOrDefault();
         }
