@@ -39,7 +39,8 @@ public sealed class AutoChannelDetectionBackgroundTask(
                         {
                             // 3. 检测通道是否需要关闭
                             var (succeed, timeout) = await channelService.TestChannelAsync(channel.Id);
-                            if (succeed)
+                            // 如果检测成功并且通道未关闭则更新状态
+                            if (succeed && channel.Disable == false)
                             {
                                 await dbContext.Channels.Where(x => x.Id == channel.Id)
                                     .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, false),
@@ -58,6 +59,10 @@ public sealed class AutoChannelDetectionBackgroundTask(
                         catch (Exception e)
                         {
                             logger.LogError(e, $"AutoChannelDetectionBackgroundTask Error: {e.Message}");
+                            // 5. 如果通道超时则关闭
+                            await dbContext.Channels.Where(x => x.Id == channel.Id)
+                                .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true),
+                                    cancellationToken: stoppingToken);
                         }
                     }
                 }

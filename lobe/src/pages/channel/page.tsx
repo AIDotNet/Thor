@@ -23,14 +23,14 @@ export default function ChannelPage() {
       render: (value: any, item: any) => {
         return <Switch
           checkedChildren={<span style={{
-            color: "green"
-          }}>
-            启
-          </span>}
-          unCheckedChildren={<span style={{
             color: "red"
           }}>
             禁
+          </span>}
+          unCheckedChildren={<span style={{
+            color: "green"
+          }}>
+            启
           </span>}
           value={value} onChange={() => {
             disable(item.id)
@@ -265,7 +265,7 @@ export default function ChannelPage() {
 
   function loadingData() {
     getChannels(input.page, input.pageSize)
-      .then((v:any) => {
+      .then((v: any) => {
         if (v.success) {
           const values = v.data.items as any[];
           setData([...values]);
