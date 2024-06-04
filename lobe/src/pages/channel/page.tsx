@@ -32,7 +32,7 @@ export default function ChannelPage() {
           }}>
             禁
           </span>}
-          value={!value} onChange={() => {
+          value={value} onChange={() => {
             disable(item.id)
               .then((item) => {
                 item.success ? message.success({

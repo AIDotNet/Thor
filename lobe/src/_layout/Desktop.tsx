@@ -6,7 +6,7 @@ import { LayoutProps } from './type';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { MenuOutlined } from '@ant-design/icons';
 import { Copilot } from '@lobehub/icons';
-import { GridShowcase, Tooltip } from '@lobehub/ui';
+import { Tooltip } from '@lobehub/ui';
 
 const Layout = memo<LayoutProps>(({ nav }) => {
     const [open, setOpen] = useState(true);
