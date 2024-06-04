@@ -5,12 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AIDotNet.API.Service.Service;
 
-public sealed class LoggerService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
+public sealed class LoggerService(IServiceProvider serviceProvider, IEventBus<ChatLogger> eventBus)
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
         logger.Id = Guid.NewGuid().ToString("N");
-        await LoggerDbContext.Loggers.AddAsync(logger);
+        await eventBus.PublishAsync(logger);
     }
 
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
@@ -116,12 +117,10 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
 
         if (!UserContext.IsAdmin)
         {
-            result.ForEach(x =>
-            {
-                x.ChannelName = null;
-            });
+            result.ForEach(x => { x.ChannelName = null; });
         }
 
         return new PagingDto<ChatLogger>(total, result);
     }
+
 }

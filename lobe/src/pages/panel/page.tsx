@@ -350,13 +350,14 @@ export default function PanelPage() {
     <Dashboard>
       <Row>
         <Col style={{
-          padding: '0 16px'
-        }} span={6}>
+          marginBottom: 10,
+        }} span={6} xs={24} sm={12} md={8} lg={6}>
           <Card
             style={{
+              maxWidth: 360,
+              height: 220,
               backgroundColor: 'var(--semi-color-fill-0)',
               userSelect: 'none',
-              height: 220
             }}
           >
             <div style={{
@@ -391,8 +392,8 @@ export default function PanelPage() {
           </Card>
         </Col>
         <Col style={{
-          padding: '0 16px'
-        }} span={6}>
+          marginBottom: 10,
+        }} span={6} xs={24} sm={12} md={8} lg={6}>
           <Card
             style={{
               maxWidth: 360,
@@ -414,8 +415,8 @@ export default function PanelPage() {
           </Card>
         </Col>
         <Col style={{
-          padding: '0 16px'
-        }} span={6}>
+          marginBottom: 10,
+        }} span={6} xs={24} sm={12} md={8} lg={6}>
           <Card
             style={{
               maxWidth: 360,
@@ -437,8 +438,8 @@ export default function PanelPage() {
           </Card>
         </Col>
         <Col style={{
-          padding: '0 16px'
-        }} span={6}>
+          marginBottom: 10,
+        }} span={6} xs={24} sm={12} md={8} lg={6}>
 
           <Card
             style={{

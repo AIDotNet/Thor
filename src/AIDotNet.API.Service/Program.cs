@@ -7,6 +7,7 @@ using AIDotNet.API.Service.Cache;
 using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
+using AIDotNet.API.Service.EventBus;
 using AIDotNet.API.Service.Infrastructure;
 using AIDotNet.API.Service.Infrastructure.Middlewares;
 using AIDotNet.API.Service.Options;
@@ -74,6 +75,11 @@ else if (CacheOptions.Type.Equals("Redis", StringComparison.OrdinalIgnoreCase))
     });
     builder.Services.AddSingleton<IServiceCache, RedisCache>();
 }
+
+
+builder.Services
+    .AddSingleton(typeof(IEventBus<>), typeof(ChannelEventBus<>))
+    .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>();
 
 builder.Services
     .AddCustomAuthentication()

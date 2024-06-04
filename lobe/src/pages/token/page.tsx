@@ -261,7 +261,8 @@ export default function TokenPage() {
       </Header>
       <Table style={{
         marginTop: '1rem',
-      }} columns={columns} dataSource={data} rowSelection={rowSelection} pagination={{
+      }} 
+      columns={columns} dataSource={data} rowSelection={rowSelection} pagination={{
         total: total,
         pageSize: input.pageSize,
         defaultPageSize: input.page,

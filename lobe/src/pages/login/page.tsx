@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { message, Input, Button } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone, GithubOutlined } from '@ant-design/icons';
-import { Avatar, LogoProps, useControls, useCreateStore } from '@lobehub/ui';
+import { Avatar, GridShowcase, LogoProps, useControls, useCreateStore } from '@lobehub/ui';
 import styled from 'styled-components';
 import { login } from '../../services/AuthorizeService';
 import { InitSetting, SystemSetting } from '../../services/SettingService';
@@ -67,7 +67,7 @@ const Login = memo(() => {
 
 
     return (
-        <>
+        <GridShowcase>
             <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -170,7 +170,7 @@ const Login = memo(() => {
                     <Button onClick={() => { handleGithub() }} size='large' type='text' icon={<GithubOutlined />} />
                 </div>
             </div>
-        </>
+        </GridShowcase>
     );
 });
 

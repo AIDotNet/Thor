@@ -19,6 +19,9 @@ public sealed class AutoChannelDetectionBackgroundTask(
                 interval = 60;
             }
 
+            logger.LogInformation(
+                $"AutoChannelDetectionBackgroundTask: AutoDisable: {autoDisable}, Interval: {interval}");
+
             if (autoDisable)
             {
                 await using (var scope = serviceProvider.CreateAsyncScope())
@@ -60,7 +63,8 @@ public sealed class AutoChannelDetectionBackgroundTask(
                 }
             }
 
-            await Task.Delay(1000 * interval, stoppingToken);
+            // 默认单位（分钟）
+            await Task.Delay((1000 * 60) * interval, stoppingToken);
         }
     }
 }
