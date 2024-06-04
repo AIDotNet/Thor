@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Threading.Channels;
+﻿using System.Threading.Channels;
 using AIDotNet.Abstractions;
 using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
@@ -15,7 +14,7 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
     private readonly Channel<ChatLogger> _events = Channel.CreateUnbounded<ChatLogger>();
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    private const int Interval = 10000; // Interval in milliseconds
+    private const int Interval = 15000; // Interval in milliseconds
 
     public ChannelEventHandler(IServiceProvider serviceProvider, ILogger<ChannelEventHandler> logger)
     {
