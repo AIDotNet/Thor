@@ -34,12 +34,13 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
         await CreateAsync(logger);
     }
 
-    public async ValueTask CreateRechargeAsync(string content, int quota)
+    public async ValueTask CreateRechargeAsync(string content, int quota,string userId)
     {
         var logger = new ChatLogger
         {
             Type = ChatLoggerType.Recharge,
             Content = content,
+            UserId = userId,
             Quota = quota,
             ModelName = string.Empty,
         };

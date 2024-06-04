@@ -2,6 +2,7 @@
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Domain.Core;
 using AIDotNet.API.Service.Dto;
+using AIDotNet.API.Service.Infrastructure;
 using Aop.Api;
 using Aop.Api.Request;
 using Microsoft.EntityFrameworkCore;
@@ -127,7 +128,7 @@ public class ProductService(IServiceProvider serviceProvider, LoggerService logg
                 return;
             }
 
-            var result = await DbContext.ProductPurchaseRecords
+            await DbContext.ProductPurchaseRecords
                 .Where(x => x.Id == outTradeNo && x.Status != ProductPurchaseStatus.Paid)
                 .ExecuteUpdateAsync(x =>
                     x.SetProperty(x => x.Status, ProductPurchaseStatus.Paid));
@@ -138,9 +139,11 @@ public class ProductService(IServiceProvider serviceProvider, LoggerService logg
 
             logger.LogWarning("支付成功回调订单状态更新成功：{Data}", JsonSerializer.Serialize(dictionary));
 
+            var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == product.UserId);
+
             await loggerService.CreateRechargeAsync(
-                $"订单：{product.Id} 支付成功，充值{product.RemainQuota}额度，用户：{product.UserId}",
-                (int)product.RemainQuota);
+                $"订单：{product.Description} 支付成功，充值{RenderHelper.RenderQuota(product.RemainQuota, 6)}额度，用户：{user?.UserName}",
+                (int)product.RemainQuota, product.UserId);
         }
         else
         {
