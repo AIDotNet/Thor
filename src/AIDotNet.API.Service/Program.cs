@@ -47,12 +47,6 @@ else
 
 builder.Host.UseSerilog(logger);
 
-builder.Configuration.GetSection(JwtOptions.Name)
-    .Get<JwtOptions>();
-
-builder.Configuration.GetSection(CacheOptions.Name)
-    .Get<CacheOptions>();
-
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());

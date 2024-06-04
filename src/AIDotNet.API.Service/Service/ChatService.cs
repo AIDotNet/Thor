@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using AIDotNet.API.Service.Options;
 
 namespace AIDotNet.API.Service.Service;
 
@@ -467,7 +468,7 @@ public sealed class ChatService(
         };
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
-        if (input.Model?.Contains("vision") == true)
+        if (IsVision(input.Model))
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.SelectMany(x => x.Contents)
                 .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
@@ -568,7 +569,7 @@ public sealed class ChatService(
 
         context.Response.Headers.ContentType = "text/event-stream";
 
-        if (input.Model?.Contains("vision") == true)
+        if (IsVision(input.Model))
         {
             foreach (var message in input.Messages)
             {
@@ -678,6 +679,16 @@ public sealed class ChatService(
         var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 
         return (requestToken, responseToken);
+    }
+
+    public bool IsVision(string model)
+    {
+        if (ChatCoreOptions.VisionModel.Any(model.StartsWith))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

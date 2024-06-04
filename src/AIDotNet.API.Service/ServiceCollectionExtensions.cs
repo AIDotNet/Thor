@@ -23,6 +23,14 @@ public static class ServiceCollectionExtensions
 
     public static WebApplicationBuilder HostEnvironment(this WebApplicationBuilder builder)
     {
+        builder.Configuration.GetSection(JwtOptions.Name)
+            .Get<JwtOptions>();
+
+        builder.Configuration.GetSection(CacheOptions.Name)
+            .Get<CacheOptions>();
+        builder.Configuration.GetSection(ChatCoreOptions.Name)
+            .Get<ChatCoreOptions>();
+        
         var cacheType = Environment.GetEnvironmentVariable("CACHE_TYPE");
         var connectionString = Environment.GetEnvironmentVariable("CACHE_CONNECTION_STRING");
         if (!string.IsNullOrEmpty(cacheType))
