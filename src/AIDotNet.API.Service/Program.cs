@@ -1,7 +1,9 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using AIDotNet.Abstractions;
 using AIDotNet.API.Service;
 using AIDotNet.API.Service.BackgroundTask;
+using AIDotNet.API.Service.Cache;
 using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
@@ -11,6 +13,7 @@ using AIDotNet.API.Service.Options;
 using AIDotNet.API.Service.Service;
 using AIDotNet.Claudia;
 using AIDotNet.Qiansail;
+using FreeRedis;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +21,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Serilog.Core;
+using MemoryCache = AIDotNet.API.Service.Cache.MemoryCache;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.HostEnvironment();
 Logger logger;
 if (builder.Environment.IsDevelopment())
 {
@@ -46,6 +50,9 @@ builder.Host.UseSerilog(logger);
 builder.Configuration.GetSection(JwtOptions.Name)
     .Get<JwtOptions>();
 
+builder.Configuration.GetSection(CacheOptions.Name)
+    .Get<CacheOptions>();
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(new JsonDateTimeConverter());
@@ -58,9 +65,24 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddMapster();
 
+if (string.IsNullOrEmpty(CacheOptions.Type) ||
+    CacheOptions.Type.Equals("Memory", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddMemoryCache();
+    builder.Services.AddSingleton<IServiceCache, MemoryCache>();
+}
+else if (CacheOptions.Type.Equals("Redis", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddSingleton<RedisClient>((_) => new RedisClient(CacheOptions.ConnectionString)
+    {
+        Serialize = o => JsonSerializer.Serialize(o),
+        Deserialize = (s, type) => JsonSerializer.Deserialize(s, type)
+    });
+    builder.Services.AddSingleton<IServiceCache, RedisCache>();
+}
+
 builder.Services
     .AddCustomAuthentication()
-    .AddMemoryCache()
     .AddHttpContextAccessor()
     .AddTransient<ProductService>()
     .AddTransient<ImageService>()

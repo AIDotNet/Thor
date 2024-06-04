@@ -19,29 +19,48 @@ TokenAI打造企业级人工智能客服管理系统！
 </div>
 
 [npm-release-shield]: https://img.shields.io/npm/v/@lobehub/chat?color=369eff&labelColor=ffcb47&logo=npm&logoColor=white&style=flat-square
+
 [npm-release-link]: https://www.npmjs.com/package/@lobehub/chat
+
 [github-releasedate-shield]: https://img.shields.io/github/release-date/AIDotNet/AIDotNet.API?color=8ae8ff&labelColor=ffcb47&style=flat-square
+
 [github-releasedate-link]: https://github.com/AIDotNet/AIDotNet.API/releases
+
 [github-action-test-shield]: https://img.shields.io/github/actions/workflow/status/AIDotNet/AIDotNet.API/test.yml?color=8ae8ff&label=test&labelColor=ffcb47&logo=githubactions&logoColor=white&style=flat-square
+
 [github-action-test-link]: https://github.com/AIDotNet/AIDotNet.API/actions/workflows/test.yml
+
 [github-action-release-shield]: https://img.shields.io/github/actions/workflow/status/AIDotNet/AIDotNet.API/release.yml?color=8ae8ff&label=release&labelColor=ffcb47&logo=githubactions&logoColor=white&style=flat-square
+
 [github-action-release-link]: https://github.com/AIDotNet/AIDotNet.API/actions/workflows/release.yml
+
 [github-contributors-shield]: https://img.shields.io/github/contributors/AIDotNet/AIDotNet.API?color=c4f042&labelColor=ffcb47&style=flat-square
+
 [github-contributors-link]: https://github.com/AIDotNet/AIDotNet.API/graphs/contributors
+
 [github-forks-shield]: https://img.shields.io/github/forks/AIDotNet/AIDotNet.API?color=8ae8ff&labelColor=ffcb47&style=flat-square
+
 [github-forks-link]: https://github.com/AIDotNet/AIDotNet.API/network/members
+
 [github-stars-shield]: https://img.shields.io/github/stars/AIDotNet/AIDotNet.API?color=ffcb47&labelColor=ffcb47&style=flat-square
+
 [github-stars-link]: https://github.com/AIDotNet/AIDotNet.API/network/stargazers
+
 [github-issues-shield]: https://img.shields.io/github/issues/AIDotNet/AIDotNet.API?color=ff80eb&labelColor=ffcb47&style=flat-square
+
 [github-issues-link]: https://github.com/AIDotNet/AIDotNet.API/issues
+
 [github-license-shield]: https://img.shields.io/github/license/AIDotNet/AIDotNet.API?color=white&labelColor=ffcb47&style=flat-square
+
 [github-license-link]: https://github.com/AIDotNet/AIDotNet.API/blob/main/LICENSE
 
-# AIDotNet API 
+# AIDotNet API
 
-AIDotNet API 是一款强大的人工智能模型管理工具，其主要目的是为了实现多种AI模型的统一管理和使用。通过AIDotNet API，用户可以轻松地管理和使用众多AI模型，而且AIDotNet API兼容OpenAI的接口格式，使得使用更加方便。
+AIDotNet API 是一款强大的人工智能模型管理工具，其主要目的是为了实现多种AI模型的统一管理和使用。通过AIDotNet
+API，用户可以轻松地管理和使用众多AI模型，而且AIDotNet API兼容OpenAI的接口格式，使得使用更加方便。
 
 AIDotNet API提供了丰富的功能：
+
 1. 管理功能：支持用户管理，渠道管理以及token管理，简化了管理流程。
 2. 数据统计预览：可以清晰地看到各种数据的统计情况，帮助用户更好地了解使用情况。
 3. 日志查看：支持日志查看，方便用户跟踪和解决问题。
@@ -73,7 +92,7 @@ AIDotNet API还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以�
 - [x] 智谱AI (支持function)
 - [x] AzureOpenAI（支持function）
 - [x] Ollama
-- [x] 通义千问（阿里云）   
+- [x] 通义千问（阿里云）
 - [x] 腾讯混元大模型
 
 # 支持数据库
@@ -88,7 +107,7 @@ AIDotNet API还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以�
 ```mermaid
 graph LR
     A(用户)
-    A --->|使用 AIDotNet.API 分发的 key 进行请求| B(AIDotNet.API)
+    A --->|使用 AIDotNet . API 分发的 key 进行请求| B(AIDotNet.API)
     B -->|中继请求| C(OpenAI)
     B -->|中继请求| D(Azure)
     B -->|中继请求| E(其他 OpenAI API 格式下游渠道)
@@ -103,12 +122,15 @@ admin admin
 ### 环境变量
 
 - DBType
-	sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-- ConnectionString 
-	主数据库连接字符串
+  sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
+- ConnectionString
+  主数据库连接字符串
 - LoggerConnectionString
-	日志数据连接字符串
-
+  日志数据连接字符串
+- CACHE_TYPE
+  缓存类型 Memory|Redis
+- CACHE_CONNECTION_STRING
+  缓存连接字符串 如果是Redis则为Redis连接字符串，Memory则为空
 
 使用docker compose启动服务：
 
@@ -142,30 +164,32 @@ docker run --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e 
 version: '3.8'
 
 services:
-   ai-dotnet-api-service:
-      image: hejiale010426/ai-dotnet-api-service:latest
-      container_name: ai-dotnet-api-service
-      ports:
-         - 8080:8080
-      volumes:
-        - ./data:/data
-      environment:
-        - TZ=Asia/Shanghai
-        - DBType=sqlite
-        - ConnectionString=data source=/data/token.db
-        - LoggerConnectionString=data source=/data/logger.db
+  ai-dotnet-api-service:
+    image: hejiale010426/ai-dotnet-api-service:latest
+    container_name: ai-dotnet-api-service
+    ports:
+      - 8080:8080
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Asia/Shanghai
+      - DBType=sqlite
+      - ConnectionString=data source=/data/token.db
+      - LoggerConnectionString=data source=/data/logger.db
 ```
 
 docker run版本
+
 ```shell
 docker run -d -p 8080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString=data source=/data/token.db -e LoggerConnectionString=data source=/data/logger.db hejiale010426/ai-dotnet-api-service:latest
 ```
 
-
 执行以下命令启动服务
+
 ```shell
 sudo docker-compose up -d
 ```
+
 然后访问 http://localhost:8080 即可看到服务启动成功。
 
 ### PostgreSql构建
@@ -176,21 +200,22 @@ sudo docker-compose up -d
 version: '3.8'
 
 services:
-   ai-dotnet-api-service:
-   image: hejiale010426/ai-dotnet-api-service:latest
-   container_name: ai-dotnet-api-service
-   ports:
-      - 8080:8080
-   volumes:
-      - ./data:/data
-   environment:
-      - TZ=Asia/Shanghai
-      - DBType=postgresql
-      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
-      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
+  ai-dotnet-api-service:
+  image: hejiale010426/ai-dotnet-api-service:latest
+  container_name: ai-dotnet-api-service
+  ports:
+    - 8080:8080
+  volumes:
+    - ./data:/data
+  environment:
+    - TZ=Asia/Shanghai
+    - DBType=postgresql
+    - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
+    - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
 ```
 
 docker run版本
+
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
@@ -203,11 +228,12 @@ docker run -d \
   hejiale010426/ai-dotnet-api-service:latest
 ```
 
-
 执行以下命令启动服务
+
 ```shell
 sudo docker-compose up -d
 ```
+
 然后访问 http://localhost:8080 即可看到服务启动成功。
 
 ### SqlServer构建
@@ -218,21 +244,22 @@ sudo docker-compose up -d
 version: '3.8'
 
 services:
-   ai-dotnet-api-service:
-     image: hejiale010426/ai-dotnet-api-service:latest
-     container_name: ai-dotnet-api-service
-     ports:
-       - 8080:8080
-     volumes:
-       - ./data:/data
-     environment:
-       - TZ=Asia/Shanghai
-       - DBType=sqlserver
-       - "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;"
-       - "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;"
+  ai-dotnet-api-service:
+    image: hejiale010426/ai-dotnet-api-service:latest
+    container_name: ai-dotnet-api-service
+    ports:
+      - 8080:8080
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Asia/Shanghai
+      - DBType=sqlserver
+      - "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;"
+      - "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;"
 ```
 
 docker run版本
+
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
@@ -245,11 +272,12 @@ docker run -d \
   hejiale010426/ai-dotnet-api-service:latest
 ```
 
-
 执行以下命令启动服务
+
 ```shell
 sudo docker-compose up -d
 ```
+
 然后访问 http://localhost:8080 即可看到服务启动成功。
 
 ### MySql构建
@@ -260,21 +288,22 @@ sudo docker-compose up -d
 version: '3.8'
 
 services:
-   ai-dotnet-api-service:
-      image: hejiale010426/ai-dotnet-api-service:latest
-      container_name: ai-dotnet-api-service
-      ports:
-         - 8080:8080
-      volumes:
-         - ./data:/data
-      environment:
-         - TZ=Asia/Shanghai
-         - DBType=mysql
-         - "ConnectionString=mysql://root:dd666666@localhost:3306/token"
-         - "ConnectionString=mysql://root:dd666666@localhost:3306/logger"
+  ai-dotnet-api-service:
+    image: hejiale010426/ai-dotnet-api-service:latest
+    container_name: ai-dotnet-api-service
+    ports:
+      - 8080:8080
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Asia/Shanghai
+      - DBType=mysql
+      - "ConnectionString=mysql://root:dd666666@localhost:3306/token"
+      - "ConnectionString=mysql://root:dd666666@localhost:3306/logger"
 ```
 
 docker run版本
+
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
@@ -287,9 +316,10 @@ docker run -d \
   hejiale010426/ai-dotnet-api-service:latest
 ```
 
-
 执行以下命令启动服务
+
 ```shell
 sudo docker-compose up -d
 ```
+
 然后访问 http://localhost:8080 即可看到服务启动成功。
