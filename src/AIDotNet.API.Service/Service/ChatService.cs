@@ -528,7 +528,7 @@ public sealed class ChatService(
 
             var result = await openService.CompleteChatAsync(input, setting);
 
-            await context.Response.WriteAsJsonAsync(mapper.Map<CompletionCreateResponse>(result));
+            await context.Response.WriteAsJsonAsync(result);
 
             responseToken = TokenHelper.GetTokens(result.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
         }

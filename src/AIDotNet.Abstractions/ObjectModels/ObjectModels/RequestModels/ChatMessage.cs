@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using AIDotNet.Abstractions.ObjectModels.ObjectModels;
-using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 
-namespace OpenAI.ObjectModels.RequestModels;
+namespace AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 
 /// <summary>
 ///     The contents of the message.

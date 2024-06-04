@@ -5,6 +5,7 @@ using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;
+using ChatCompletionCreateResponse = AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
 
 namespace AIDotNet.API.Service.Infrastructure;
 

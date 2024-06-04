@@ -5,6 +5,7 @@ using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Claudia;
 using OpenAI.ObjectModels.RequestModels;
+using ChatCompletionCreateResponse = AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
 
 namespace AIDotNet.Claudia;
 

@@ -1,6 +1,7 @@
 ﻿using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.Exceptions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using ChatCompletionCreateResponse = AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
 
 namespace AIDotNet.API.Service;
 

@@ -41,7 +41,7 @@ namespace AIDotNet.Qiansail
                 [
                     new()
                     {
-                        Delta = new OpenAI.ObjectModels.RequestModels.ChatMessage("assistant", result.Output.Text),
+                        Delta = new Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant", result.Output.Text),
                         FinishReason = "stop",
                         Index = 0,
                     }
@@ -88,9 +88,9 @@ namespace AIDotNet.Qiansail
                     [
                         new()
                         {
-                            Delta = new OpenAI.ObjectModels.RequestModels.ChatMessage("assistant",
+                            Delta = new Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant",
                                 result.Output.Text),
-                            Message = new OpenAI.ObjectModels.RequestModels.ChatMessage("assistant",
+                            Message = new Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant",
                                 result.Output.Text),
                             FinishReason = "stop",
                             Index = 0,

@@ -1,13 +1,11 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
+﻿using System.Runtime.CompilerServices;
 using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Exceptions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;
 using AIDotNet.SparkDesk.API;
 using Microsoft.Extensions.Logging;
-using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.SparkDesk;
 
@@ -71,7 +69,7 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
         var ret = new ChatCompletionCreateResponse()
         {
             Model = input.Model,
-            Choices = new List<Abstractions.ObjectModels.ObjectModels.SharedModels.ChatChoiceResponse>()
+            Choices = new List<ChatChoiceResponse>()
             {
                 new()
                 {
@@ -191,16 +189,16 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
                 yield break;
             }
 
-            var retMessage = new OpenAI.ObjectModels.RequestModels.ChatMessage()
+            var retMessage = new ChatMessage()
             {
                 Role = "assistant"
             };
             var ret = new ChatCompletionCreateResponse()
             {
                 Model = input.Model,
-                Choices = new List<Abstractions.ObjectModels.ObjectModels.SharedModels.ChatChoiceResponse>()
+                Choices = new List<ChatChoiceResponse>()
                 {
-                    new Abstractions.ObjectModels.ObjectModels.SharedModels.ChatChoiceResponse()
+                    new ChatChoiceResponse()
                     {
                         Delta = retMessage,
                         FinishReason = "stop",

@@ -6,6 +6,7 @@ using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.MetaGLM.Models.RequestModels;
 using AIDotNet.MetaGLM.Models.RequestModels.FunctionModels;
 using OpenAI.ObjectModels.RequestModels;
+using ChatCompletionCreateResponse = AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
 
 namespace AIDotNet.MetaGLM;
 

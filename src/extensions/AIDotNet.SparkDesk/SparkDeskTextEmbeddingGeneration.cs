@@ -1,10 +1,8 @@
-﻿using AIDotNet.Abstractions;
+﻿using System.Runtime.InteropServices;
+using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.SparkDesk.API;
-using OpenAI.ObjectModels.RequestModels;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace AIDotNet.SparkDesk;
 

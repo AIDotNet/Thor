@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;

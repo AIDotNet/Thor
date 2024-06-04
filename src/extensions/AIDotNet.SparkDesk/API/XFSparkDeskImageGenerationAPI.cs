@@ -1,18 +1,6 @@
-﻿using AIDotNet.Abstractions;
-using AIDotNet.Abstractions.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Net.Http.Json;
-using System.Net.WebSockets;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
-using System.Text;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace AIDotNet.SparkDesk.API
 {

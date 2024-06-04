@@ -1,6 +1,5 @@
 ﻿using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.Abstractions;
 
