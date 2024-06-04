@@ -34,7 +34,7 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
         await CreateAsync(logger);
     }
 
-    public async ValueTask CreateRechargeAsync(string content, int quota,string userId)
+    public async ValueTask CreateRechargeAsync(string content, int quota, string userId)
     {
         var logger = new ChatLogger
         {
@@ -113,6 +113,14 @@ public sealed class LoggerService(IServiceProvider serviceProvider) : Applicatio
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        if (!UserContext.IsAdmin)
+        {
+            result.ForEach(x =>
+            {
+                x.ChannelName = null;
+            });
+        }
 
         return new PagingDto<ChatLogger>(total, result);
     }

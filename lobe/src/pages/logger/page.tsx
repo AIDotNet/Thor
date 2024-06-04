@@ -31,6 +31,7 @@ export default function LoggerPage() {
       key: 'createdAt'
     },
     {
+      disable: !(localStorage.getItem('role') === "admin"),
       title: '渠道',
       dataIndex: 'channelName',
       key: 'channelName',
@@ -223,7 +224,9 @@ export default function LoggerPage() {
       </Header>
       <Table loading={loading} style={{
         marginTop: '1rem',
-      }} columns={columns} dataSource={data} pagination={{
+      }} columns={columns
+        .filter((item) => item.disable == false || item.disable == undefined)
+      } dataSource={data} pagination={{
         total: total,
         pageSize: input.pageSize,
         defaultPageSize: input.page,
