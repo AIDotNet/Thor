@@ -113,8 +113,7 @@ public sealed class AuthorizeService(
             user.SetPassword("Aa123456");
 
             await DbContext.Users.AddAsync(user);
-
-
+            
             // 初始用户额度
             var userQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.NewUserQuota);
             user.SetResidualCredit(userQuota);
