@@ -683,7 +683,7 @@ public sealed class ChatService(
 
     public bool IsVision(string model)
     {
-        if (ChatCoreOptions.VisionModel.Any(model.StartsWith))
+        if (ChatCoreOptions.VisionModel.Any(model.Contains))
         {
             return true;
         }

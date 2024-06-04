@@ -3,6 +3,10 @@ using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
+using AIDotNet.Claudia;
+using AIDotNet.Hunyuan;
+using AIDotNet.OpenAI;
+using AIDotNet.SparkDesk;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -135,17 +139,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             throw new Exception("渠道服务不存在");
         }
 
-        var chatHistory = new ChatCompletionCreateRequest()
-        {
-            Messages = new List<ChatMessage>()
-            {
-                new()
-                {
-                    Content = "Return 1",
-                    Role = "user"
-                }
-            }
-        };
+        var chatHistory = new ChatCompletionCreateRequest();
 
         var setting = new ChatOptions()
         {
@@ -154,10 +148,76 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             Other = channel.Other
         };
 
-        // 获取渠道是否支持gpt-3.5-turbo
-        chatHistory.Model = channel.Models.Order().FirstOrDefault(x => x.StartsWith("gpt-"));
+        if (channel.Type == OpenAIServiceOptions.ServiceName)
+        {
+            // 获取渠道是否支持gpt-3.5-turbo
+            chatHistory.Model = channel.Models.Order()
+                .FirstOrDefault(x => x.StartsWith("gpt-", StringComparison.OrdinalIgnoreCase));
+            
+            chatHistory.Messages = new List<ChatMessage>()
+            {
+                new()
+                {
+                    Content = "Return 1",
+                    Role = "user"
+                }
+            };
+        }
+        else if (channel.Type == ClaudiaOptions.ServiceName)
+        {
+            chatHistory.Model =
+                channel.Models.FirstOrDefault(x => x.StartsWith("claude", StringComparison.OrdinalIgnoreCase));
+            chatHistory.Messages = new List<ChatMessage>()
+            {
+                new()
+                {
+                    Content = "Return 1",
+                    Role = "user"
+                }
+            };
+        }
+        else if (channel.Type == SparkDeskOptions.ServiceName)
+        {
+            chatHistory.Model = channel.Models.FirstOrDefault(x =>
+                x.StartsWith("genera", StringComparison.OrdinalIgnoreCase) ||
+                x.StartsWith("SparkDesk", StringComparison.OrdinalIgnoreCase));
+            chatHistory.Messages = new List<ChatMessage>()
+            {
+                new()
+                {
+                    Content = "回复ok",
+                    Role = "user"
+                }
+            };
+        }
+        else if (channel.Type == HunyuanOptions.ServiceName)
+        {
+            chatHistory.Model =
+                channel.Models.FirstOrDefault(x => !x.Contains("embedding", StringComparison.OrdinalIgnoreCase));
+            chatHistory.Messages = new List<ChatMessage>()
+            {
+                new()
+                {
+                    Content = "回复ok",
+                    Role = "user"
+                }
+            };
+        }
+        else
+        {
+            chatHistory.Model = channel.Models.FirstOrDefault();
+            chatHistory.Messages = new List<ChatMessage>()
+            {
+                new()
+                {
+                    Content = "Return 1",
+                    Role = "user"
+                }
+            };
+        }
 
-        if (chatHistory.Model == null)
+
+        if (string.IsNullOrWhiteSpace(chatHistory.Model))
         {
             chatHistory.Model = channel.Models.FirstOrDefault();
         }
@@ -178,6 +238,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         await DbContext.SaveChangesAsync();
 
-        return (response.Choices?.Count > 0, (int)sw.ElapsedMilliseconds);
+        return (!string.IsNullOrEmpty(response.Choices?.FirstOrDefault()?.Message.Content),
+            (int)sw.ElapsedMilliseconds);
     }
 }

@@ -31,7 +31,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
         {
             token.Creator = createId;
         }
-        
+
         token.Id = Guid.NewGuid().ToString("N");
 
         token.Key = "sk-" + StringHelper.GenerateRandomString(38);
@@ -90,13 +90,8 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
 
     public async ValueTask DisableAsync(string id)
     {
-        var token = await DbContext.Tokens.FindAsync(id);
-        if (token == null)
-        {
-            throw new Exception("Token不存在");
-        }
-
-        token.Disabled = true;
+        await DbContext.Tokens.Where(x => x.Id == id && UserContext.CurrentUserId == x.Creator)
+            .ExecuteUpdateAsync(x => x.SetProperty(x => x.Disabled, a => !a.Disabled));
     }
 
     /// <summary>

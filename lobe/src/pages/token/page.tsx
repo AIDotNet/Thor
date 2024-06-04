@@ -22,7 +22,17 @@ export default function TokenPage() {
       dataIndex: 'disabled',
       render: (value: any, item: any) => {
         return <Switch
-          defaultChecked={!value} onChange={() => {
+          unCheckedChildren={<span style={{
+            color: "red"
+          }}>
+            禁
+          </span>}
+          checkedChildren={<span style={{
+            color: "green"
+          }}>
+            启
+          </span>}
+          value={!value} onChange={() => {
             disable(item.id)
               .then((item) => {
                 item.success ? message.success({
@@ -107,6 +117,8 @@ export default function TokenPage() {
                       }) : message.error({
                         content: '操作失败',
                       });
+
+                      loadingData();
                     }), () => message.error({
                       content: '操作失败',
                     });

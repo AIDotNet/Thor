@@ -42,7 +42,14 @@ export default function Channel() {
       key: 'isDisabled',
       render: (value: any, item: any) => {
         return <Switch
-          defaultChecked={!value} onChange={() => {
+          value={!value} 
+          unCheckedChildren={'启'}
+          checkedChildren={<span style={{
+            color: "red"
+          }}>
+            禁
+          </span>}
+          onChange={() => {
             enable(item.id)
               .then((item) => {
                 item.success ? message.success({

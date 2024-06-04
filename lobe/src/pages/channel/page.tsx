@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Switch, message, Tag, Dropdown, InputNumber, Table } from 'antd';
-import { Remove, UpdateOrder, disable, getChannels, test } from "../../services/ChannelService";
+import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test } from "../../services/ChannelService";
 import { renderQuota } from "../../utils/render";
 import styled from "styled-components";
 import { Input } from "@lobehub/ui";
@@ -22,7 +22,13 @@ export default function ChannelPage() {
       dataIndex: 'disable',
       render: (value: any, item: any) => {
         return <Switch
-          defaultChecked={!value} onChange={() => {
+          checkedChildren={<span style={{
+            color: "red"
+          }}>
+            禁
+          </span>}
+          unCheckedChildren={'启'}
+          value={!value} onChange={() => {
             disable(item.id)
               .then((item) => {
                 item.success ? message.success({
@@ -35,6 +41,35 @@ export default function ChannelPage() {
                 content: '操作失败'
               });
           }} style={{
+            width: '50px',
+          }} aria-label="a switch for semi demo"></Switch>
+      }
+    },
+    {
+      title: '自动检测',
+      dataIndex: 'controlAutomatically',
+      render: (value: any, item: any) => {
+        return <Switch
+          onChange={() => {
+            controlAutomatically(item.id)
+              .then((item) => {
+                item.success ? message.success({
+                  content: '操作成功'
+                }) : message.error({
+                  content: '操作失败'
+                });
+                loadingData();
+              }), () => message.error({
+                content: '操作失败'
+              });
+          }}
+          checkedChildren={<span style={{
+            color: "red"
+          }}>
+            禁
+          </span>}
+          unCheckedChildren={'启'}
+          value={!value} style={{
             width: '50px',
           }} aria-label="a switch for semi demo"></Switch>
       }
@@ -93,6 +128,11 @@ export default function ChannelPage() {
         return <InputNumber
           onChange={(v) => {
             item.order = v;
+            data.forEach((x: any) => {
+              if (x.id === item.id) {
+                x.order = v;
+              }
+            })
             setData([...data]);
           }}
           onBlur={() => {
@@ -132,22 +172,40 @@ export default function ChannelPage() {
                 },
                 {
                   key: 2,
-                  label: item.disable ? '启用' : '禁用',
+                  label: item.disable ? '启用渠道' : '禁用渠道',
                   onClick: () => {
-                    disable(item.id).then((item) => {
-                      item.success ? message.success({
-                        content: '操作成功',
-                      }) : message.error({
+                    disable(item.id)
+                      .then((item) => {
+                        item.success ? message.success({
+                          content: '操作成功',
+                        }) : message.error({
+                          content: '操作失败',
+                        });
+                        loadingData();
+                      }), () => message.error({
                         content: '操作失败',
                       });
-                      loadingData();
-                    }), () => message.error({
-                      content: '操作失败',
-                    });
                   }
                 },
                 {
                   key: 3,
+                  label: item.controlAutomatically ? '禁用自动检测' : '启用自动检测',
+                  onClick: () => {
+                    controlAutomatically(item.id)
+                      .then((item) => {
+                        item.success ? message.success({
+                          content: '操作成功',
+                        }) : message.error({
+                          content: '操作失败',
+                        });
+                        loadingData();
+                      }), () => message.error({
+                        content: '操作失败',
+                      });
+                  }
+                },
+                {
+                  key: 4,
                   label: '删除',
                   onClick: () => removeToken(item.id)
                 }
@@ -164,7 +222,7 @@ export default function ChannelPage() {
   const [createVisible, setCreateVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [updateValue, setUpdateValue] = useState({} as any);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [input, setInput] = useState({
     page: 1,
@@ -203,9 +261,10 @@ export default function ChannelPage() {
 
   function loadingData() {
     getChannels(input.page, input.pageSize)
-      .then((v) => {
+      .then((v:any) => {
         if (v.success) {
-          setData(v.data.items);
+          const values = v.data.items as any[];
+          setData([...values]);
           setTotal(v.data.total);
         } else {
           message.error({

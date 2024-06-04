@@ -89,6 +89,7 @@ builder.Services
     .AddTransient<RedeemCodeService>()
     .AddHostedService<StatisticBackgroundTask>()
     .AddHostedService<LoggerBackgroundTask>()
+    .AddHostedService<AutoChannelDetectionBackgroundTask>()
     .AddSingleton<UnitOfWorkMiddleware>()
     .AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
