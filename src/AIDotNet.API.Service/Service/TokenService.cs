@@ -1,4 +1,5 @@
-﻿using AIDotNet.API.Service.DataAccess;
+﻿using AIDotNet.Abstractions;
+using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Exceptions;
@@ -9,7 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace AIDotNet.API.Service.Service;
 
-public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache memoryCache)
+public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache memoryCache)
     : ApplicationService(serviceProvider)
 {
     public async ValueTask CreateAsync(TokenInput input, string? createId = null)
@@ -122,7 +123,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IMemoryCache 
         // su-则是用户token
         if (key.StartsWith("su-"))
         {
-            memoryCache.TryGetValue(key, out user);
+            user = await memoryCache.GetAsync<User>(key);
 
             if (user == null)
             {

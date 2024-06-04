@@ -1,10 +1,10 @@
 ﻿using System.Net.Http.Headers;
+using AIDotNet.Abstractions;
 using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
 using AIDotNet.API.Service.Infrastructure.Helper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace AIDotNet.API.Service.Service;
 
@@ -13,7 +13,7 @@ public sealed class AuthorizeService(
     LoggerService loggerService,
     TokenService tokenService,
     IConfiguration configuration,
-    IMemoryCache memoryCache)
+    IServiceCache memoryCache)
     : ApplicationService(serviceProvider)
 {
     private static readonly HttpClient HttpClient = new(new SocketsHttpHandler()
@@ -52,7 +52,7 @@ public sealed class AuthorizeService(
 
         var key = "su-" + StringHelper.GenerateRandomString(38);
 
-        memoryCache.Set(key, user, TimeSpan.FromDays(7));
+        await memoryCache.CreateAsync(key, user, TimeSpan.FromDays(7));
 
         return new
         {
@@ -135,7 +135,7 @@ public sealed class AuthorizeService(
 
         var key = "su-" + StringHelper.GenerateRandomString(38);
 
-        memoryCache.Set(key, user, TimeSpan.FromDays(7));
+        await memoryCache.CreateAsync(key, user, TimeSpan.FromDays(7));
 
         return new
         {

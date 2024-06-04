@@ -1,4 +1,5 @@
 ﻿using AIDotNet.API.Service.Infrastructure;
+using AIDotNet.API.Service.Options;
 using Microsoft.AspNetCore.Authentication;
 
 namespace AIDotNet.API.Service;
@@ -18,5 +19,22 @@ public static class ServiceCollectionExtensions
             .AddScheme<AuthenticationSchemeOptions, CustomAuthenticationHandler>("CustomAuthentication", null);
 
         return services;
+    }
+
+    public static WebApplicationBuilder HostEnvironment(this WebApplicationBuilder builder)
+    {
+        var cacheType = Environment.GetEnvironmentVariable("CACHE_TYPE");
+        var connectionString = Environment.GetEnvironmentVariable("CACHE_CONNECTION_STRING");
+        if (!string.IsNullOrEmpty(cacheType))
+        {
+            CacheOptions.Type = cacheType;
+        }
+
+        if (!string.IsNullOrEmpty(connectionString))
+        {
+            CacheOptions.ConnectionString = connectionString;
+        }
+
+        return builder;
     }
 }

@@ -26,9 +26,10 @@ public static class ModelService
 
     public static async ValueTask<List<UseModelDto>> GetUseModels(HttpContext context)
     {
-        var cache = context.RequestServices.GetRequiredService<IMemoryCache>();
+        var cache = context.RequestServices.GetRequiredService<IServiceCache>();
 
-        if (cache.TryGetValue("UseModels", out List<UseModelDto> model))
+        var model = await cache.GetAsync<List<UseModelDto>>("UseModels").ConfigureAwait(false);
+        if (model != null)
         {
             return model;
         }
@@ -72,7 +73,7 @@ public static class ModelService
             }
         }
 
-        cache.Set("UseModels", value, TimeSpan.FromHours(5));
+        await cache.CreateAsync("UseModels", value, TimeSpan.FromHours(5));
 
         return value;
     }

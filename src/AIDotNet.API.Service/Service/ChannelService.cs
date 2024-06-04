@@ -10,7 +10,7 @@ using OpenAI.ObjectModels.RequestModels;
 
 namespace AIDotNet.API.Service.Service;
 
-public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper, IMemoryCache cache)
+public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper)
     : ApplicationService(serviceProvider)
 {
     /// <summary>
