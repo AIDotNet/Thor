@@ -41,6 +41,8 @@ export function getModelPrompt(type:string){
         return "密钥格式 AppId|AppKey|AppSecret";
     }else if(type === "Hunyuan"){
         return "密钥格式 secretId|secretKey";
+    }else if(type === "ErnieBot"){
+        return "密钥格式 ClientId|ClientSecret"
     }
 
     return "请输入密钥";

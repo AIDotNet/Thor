@@ -18,7 +18,7 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
         if (string.IsNullOrWhiteSpace(input.Model))
             throw new NotModelException(input.Model);
 
-        var client = SparkDeskHelper.GetSparkDeskChatClient(options!.Key!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
+        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.Key!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
 
         if (input.TopP == null)
         {
@@ -136,7 +136,7 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
         if (string.IsNullOrWhiteSpace(input.Model))
             throw new NotModelException(input.Model);
 
-        var client = SparkDeskHelper.GetSparkDeskChatClient(options!.Key!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
+        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.Key!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
 
         if (input.TopP == null)
         {

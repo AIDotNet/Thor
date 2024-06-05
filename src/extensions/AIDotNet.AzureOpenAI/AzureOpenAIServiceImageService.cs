@@ -10,7 +10,7 @@ public class AzureOpenAIServiceImageService : IApiImageService
     public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
-        var client = AzureOpenAIHelper.CreateClient(options);
+        var client = AzureOpenAIFactory.CreateClient(options);
 
         var response = await client.GetImageGenerationsAsync(new ImageGenerationOptions(imageCreate.Prompt)
         {

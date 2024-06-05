@@ -23,7 +23,7 @@ public class HunyuanService : IApiChatCompletionService
         var secretId = keys[0];
         var secretKey = keys[1];
 
-        var client = HunyuanHelper.CreateClient(secretId, secretKey, region: options.Other);
+        var client = HunyuanFactory.CreateClient(secretId, secretKey, region: options.Other);
 
         var req = new ChatCompletionsRequest
         {
@@ -79,7 +79,7 @@ public class HunyuanService : IApiChatCompletionService
         var secretId = keys[0];
         var secretKey = keys[1];
 
-        var client = HunyuanHelper.CreateClient(secretId, secretKey);
+        var client = HunyuanFactory.CreateClient(secretId, secretKey);
 
         var req = new ChatCompletionsRequest
         {
@@ -100,8 +100,13 @@ public class HunyuanService : IApiChatCompletionService
 
         foreach (var e in resp)
         {
-            var v = JsonSerializer.Deserialize<ChatCompletionsResponse>(e.Data);
-            var content = v?.Choices.FirstOrDefault()?.Message.Content;
+            if (string.IsNullOrEmpty(e.Data))
+            {
+                continue;
+            }
+
+            var v = JsonSerializer.Deserialize<HunyuanResultDto>(e.Data);
+            var content = v?.Choices.FirstOrDefault()?.Delta.Content;
             yield return new ChatCompletionCreateResponse
             {
                 Choices = new List<ChatChoiceResponse>()
@@ -123,5 +128,33 @@ public class HunyuanService : IApiChatCompletionService
                 Model = chatCompletionCreate.Model
             };
         }
+    }
+
+    public class HunyuanResultDto
+    {
+        public string Note { get; set; }
+        public HunyuanResultChoices[] Choices { get; set; }
+        public int Created { get; set; }
+        public string Id { get; set; }
+        public HunyuanResultUsage Usage { get; set; }
+    }
+
+    public class HunyuanResultChoices
+    {
+        public HunyuanResultDelta Delta { get; set; }
+        public string FinishReason { get; set; }
+    }
+
+    public class HunyuanResultDelta
+    {
+        public string Role { get; set; }
+        public string Content { get; set; }
+    }
+
+    public class HunyuanResultUsage
+    {
+        public int PromptTokens { get; set; }
+        public int CompletionTokens { get; set; }
+        public int TotalTokens { get; set; }
     }
 }

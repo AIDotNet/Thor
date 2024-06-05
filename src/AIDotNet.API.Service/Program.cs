@@ -90,7 +90,8 @@ builder.Services
     .AddHunyuan()
     .AddClaudia()
     .AddOllamaService()
-    .AddAzureOpenAIService();
+    .AddAzureOpenAIService()
+    .AddErnieBot();
 
 builder.Services
     .AddCors(options =>

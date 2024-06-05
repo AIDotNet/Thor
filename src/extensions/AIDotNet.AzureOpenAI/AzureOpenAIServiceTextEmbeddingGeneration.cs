@@ -11,7 +11,7 @@ public class AzureOpenAIServiceTextEmbeddingGeneration : IApiTextEmbeddingGenera
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = AzureOpenAIHelper.CreateClient(options);
+        var client = AzureOpenAIFactory.CreateClient(options);
 
         var response = await client.GetEmbeddingsAsync(new EmbeddingsOptions(createEmbeddingModel.Model,
             createEmbeddingModel.InputCalculated), cancellationToken).ConfigureAwait(false);

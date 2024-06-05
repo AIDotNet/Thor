@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.AzureOpenAI", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.Hunyuan", "src\extensions\AIDotNet.Hunyuan\AIDotNet.Hunyuan.csproj", "{20D19A83-ED2A-4C30-BC36-325581BF2CDB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIDotNet.ErnieBot", "src\extensions\AIDotNet.ErnieBot\AIDotNet.ErnieBot.csproj", "{8D97B5C6-C1C4-4485-83CC-C16B07E42409}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{20D19A83-ED2A-4C30-BC36-325581BF2CDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{20D19A83-ED2A-4C30-BC36-325581BF2CDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{20D19A83-ED2A-4C30-BC36-325581BF2CDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D97B5C6-C1C4-4485-83CC-C16B07E42409}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D97B5C6-C1C4-4485-83CC-C16B07E42409}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D97B5C6-C1C4-4485-83CC-C16B07E42409}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D97B5C6-C1C4-4485-83CC-C16B07E42409}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,6 +103,7 @@ Global
 		{01903FE0-9C98-4BB2-9948-25D3F5B4FF24} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{EC93981A-45E5-44A2-8DA9-BD779B02349D} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{20D19A83-ED2A-4C30-BC36-325581BF2CDB} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{8D97B5C6-C1C4-4485-83CC-C16B07E42409} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

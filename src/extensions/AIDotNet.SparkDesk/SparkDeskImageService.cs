@@ -11,7 +11,7 @@ namespace AIDotNet.SparkDesk
 
         public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
         {
-            var client = SparkDeskHelper.GetSparkDeskImageGenerationClient(options?.Key ?? "", HttpClient, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
+            var client = SparkDeskFactory.GetSparkDeskImageGenerationClient(options?.Key ?? "", HttpClient, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
             var width = 512;
             var height = 512;
             try

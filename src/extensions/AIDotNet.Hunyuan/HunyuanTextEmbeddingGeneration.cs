@@ -20,7 +20,7 @@ public class HunyuanTextEmbeddingGeneration : IApiTextEmbeddingGeneration
         var secretId = keys[0];
         var secretKey = keys[1];
 
-        var client = HunyuanHelper.CreateClient(secretId, secretKey);
+        var client = HunyuanFactory.CreateClient(secretId, secretKey);
 
         var req = new GetEmbeddingRequest()
         {

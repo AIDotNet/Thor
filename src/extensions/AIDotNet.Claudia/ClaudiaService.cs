@@ -5,7 +5,8 @@ using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Claudia;
 using OpenAI.ObjectModels.RequestModels;
-using ChatCompletionCreateResponse = AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
+using ChatCompletionCreateResponse =
+    AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
 
 namespace AIDotNet.Claudia;
 
@@ -15,15 +16,7 @@ public sealed class ClaudiaService : IApiChatCompletionService
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var anthropic = new Anthropic
-        {
-            ApiKey = options.Key,
-        };
-        if (!string.IsNullOrEmpty(options.Address))
-        {
-            anthropic.HttpClient.BaseAddress = new Uri(options.Address);
-        }
-
+        var anthropic = AnthropicFactory.CreateClient(options.Key, options.Address);
         var tools = new List<Tool>();
 
         foreach (var tool in input.Tools)
@@ -105,15 +98,7 @@ public sealed class ClaudiaService : IApiChatCompletionService
         ChatCompletionCreateRequest input, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var anthropic = new Anthropic
-        {
-            ApiKey = options.Key,
-        };
-        if (!string.IsNullOrEmpty(options.Address))
-        {
-            anthropic.HttpClient.BaseAddress = new Uri(options.Address);
-        }
-
+        var anthropic = AnthropicFactory.CreateClient(options.Key, options.Address);
         var tools = new List<Tool>();
 
         foreach (var tool in input.Tools)
@@ -164,7 +149,7 @@ public sealed class ClaudiaService : IApiChatCompletionService
                     [
                         new()
                         {
-                            Delta = new ChatMessage("assistant", content.Delta.Text,null),
+                            Delta = new ChatMessage("assistant", content.Delta.Text, null),
                             FinishReason = "stop",
                             Index = 0,
                         }

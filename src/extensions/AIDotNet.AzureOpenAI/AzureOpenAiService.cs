@@ -16,7 +16,7 @@ public class AzureOpenAiService : IApiChatCompletionService
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = AzureOpenAIHelper.CreateClient(options);
+        var client = AzureOpenAIFactory.CreateClient(options);
 
         ChatCompletionsOptions chatCompletionsOptions = new()
         {
@@ -147,7 +147,7 @@ public class AzureOpenAiService : IApiChatCompletionService
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = AzureOpenAIHelper.CreateClient(options);
+        var client = AzureOpenAIFactory.CreateClient(options);
 
         ChatCompletionsOptions chatCompletionsOptions = new()
         {
