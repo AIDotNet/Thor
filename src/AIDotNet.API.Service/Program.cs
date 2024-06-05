@@ -26,27 +26,12 @@ using MemoryCache = AIDotNet.API.Service.Cache.MemoryCache;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.HostEnvironment();
-Logger logger;
-if (builder.Environment.IsDevelopment())
-{
-    logger = new LoggerConfiguration()
-        .MinimumLevel.Information()
-        .WriteTo.Console()
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("Application", "FastWiki")
-        .CreateLogger();
-}
-else
-{
-    logger = new LoggerConfiguration()
-        .MinimumLevel.Warning()
-        .WriteTo.Console()
-        .Enrich.FromLogContext()
-        .Enrich.WithProperty("Application", "FastWiki")
-        .CreateLogger();
-}
 
-builder.Host.UseSerilog(logger);
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog(Log.Logger);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {

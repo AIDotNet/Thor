@@ -42,7 +42,7 @@ export default function Channel() {
       key: 'isDisabled',
       render: (value: any, item: any) => {
         return <Switch
-          value={!value} 
+          value={value} 
           unCheckedChildren={'启'}
           checkedChildren={<span style={{
             color: "red"
