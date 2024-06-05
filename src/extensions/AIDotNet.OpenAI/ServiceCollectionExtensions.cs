@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddOpenAIService(this IServiceCollection services)
     {
         IApiChatCompletionService.ServiceNames.Add("OpenAI", OpenAIServiceOptions.ServiceName);
-        IApiChatCompletionService.ServiceNames.Add("Kimi（月之暗面）", OpenAIServiceOptions.ServiceName);
+        IApiChatCompletionService.ServiceNames.Add("Kimi（月之暗面）", "Kimi" + OpenAIServiceOptions.ServiceName);
         IApiChatCompletionService.ModelNames.Add("OpenAI", [
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-0125",
@@ -39,6 +39,14 @@ public static class ServiceCollectionExtensions
             "text-moderation-stable",
             "text-search-ada-doc-001"
         ]);
+
+        services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>("Kimi" + OpenAIServiceOptions.ServiceName);
+        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
+            "Kimi" + OpenAIServiceOptions.ServiceName);
+        services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>("Kimi" +
+            OpenAIServiceOptions.ServiceName);
+        services.AddKeyedSingleton<IApiCompletionService, OpenAIServiceCompletionService>("Kimi" + OpenAIServiceOptions
+            .ServiceName);
 
         services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(OpenAIServiceOptions.ServiceName);
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(

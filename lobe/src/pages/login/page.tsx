@@ -80,7 +80,7 @@ const Login = memo(() => {
 
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 auto', width: '380px', marginBottom: '20px' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '20px', marginTop: '50%' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '20px'}}>
                         <Avatar src='/logo.png' {...control} />
                         <h2>
                             登录账号

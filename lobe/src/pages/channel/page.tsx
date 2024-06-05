@@ -353,8 +353,10 @@ export default function ChannelPage() {
       <UpdateChannel visible={updateVisible} value={updateValue} onSuccess={() => {
         setUpdateVisible(false);
         loadingData();
+        setUpdateValue({} as any);
       }} onCancel={() => {
         setUpdateVisible(false);
+        setUpdateValue({} as any);
       }} />
     </div>
   );

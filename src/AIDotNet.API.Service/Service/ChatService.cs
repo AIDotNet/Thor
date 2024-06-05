@@ -442,7 +442,6 @@ public sealed class ChatService(
         catch (Exception e)
         {
             GetLogger<ChatService>().LogError(e.Message);
-            context.Response.StatusCode = 200;
             if (module.Stream == true)
             {
                 await context.WriteStreamErrorAsync(e.Message);
