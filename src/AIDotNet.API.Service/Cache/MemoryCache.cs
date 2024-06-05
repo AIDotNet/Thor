@@ -39,4 +39,19 @@ public sealed class MemoryCache(IMemoryCache memoryCache) : IServiceCache
         memoryCache.Remove(key);
         return new ValueTask();
     }
+
+    public ValueTask IncrementAsync(string key, int value = 1, TimeSpan? ttl = null)
+    {
+        if (memoryCache.TryGetValue(key, out int cache))
+        {
+            cache += value;
+            memoryCache.Set(key, cache, ttl ?? TimeSpan.FromMinutes(1));
+        }
+        else
+        {
+            memoryCache.Set(key, value, ttl ?? TimeSpan.FromMinutes(1));
+        }
+
+        return new ValueTask();
+    }
 }

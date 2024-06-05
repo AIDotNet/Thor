@@ -24,4 +24,14 @@ public sealed class RedisCache(RedisClient redis) : IServiceCache
     {
         await redis.DelAsync(key);
     }
+
+    public async ValueTask IncrementAsync(string key, int value = 1, TimeSpan? ttl = null)
+    {
+        await redis.IncrByAsync(key, value);
+
+        if (ttl.HasValue)
+        {
+            await redis.ExpireAsync(key, ttl.Value);
+        }
+    }
 }

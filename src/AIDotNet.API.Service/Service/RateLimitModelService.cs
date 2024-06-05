@@ -54,7 +54,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
                     throw new RateLimitException("Rate limit exceeded");
                 }
 
-                await serviceCache.CreateAsync(key, cache.Value + 1);
+                await serviceCache.IncrementAsync(key);
             }
             else
             {
@@ -67,7 +67,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
                     "d" => TimeSpan.FromDays(rateLimitModel.Limit),
                     _ => throw new Exception("Invalid strategy")
                 };
-                await serviceCache.CreateAsync(key, 1, strategy);
+                await serviceCache.IncrementAsync(key, 1, strategy);
             }
         }
     }
