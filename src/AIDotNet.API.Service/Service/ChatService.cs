@@ -468,7 +468,7 @@ public sealed class ChatService(
         };
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
-        if (IsVision(input.Model))
+        if (input.Messages.Any(x => x.Contents != null))
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.SelectMany(x => x.Contents)
                 .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
@@ -569,7 +569,7 @@ public sealed class ChatService(
 
         context.Response.Headers.ContentType = "text/event-stream";
 
-        if (IsVision(input.Model))
+        if (input.Messages.Any(x => x.Contents != null))
         {
             foreach (var message in input.Messages)
             {
