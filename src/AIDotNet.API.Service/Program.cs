@@ -181,6 +181,7 @@ else
     throw new Exception("不支持的数据库类型");
 }
 
+builder.Services.AddResponseCompression();
 
 var app = builder.Build();
 
@@ -236,6 +237,8 @@ app.Use((async (context, next) =>
         await next(context);
     }
 }));
+
+app.UseResponseCompression();
 
 var theme = (Environment.GetEnvironmentVariable("Theme") ??
              SettingService.GetSetting(SettingExtensions.SystemSetting.Theme));
