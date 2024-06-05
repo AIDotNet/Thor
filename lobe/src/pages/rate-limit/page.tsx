@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Switch, message, Tag, Dropdown, InputNumber, Table } from 'antd';
-import { renderQuota } from "../../utils/render";
+import { Button, Switch, message,  Dropdown,Table } from 'antd';
 import styled from "styled-components";
 import { Input } from "@lobehub/ui";
 import { disableRateLimitModel, getRateLimitModel, removeRateLimitModel } from "../../services/RateLimitModelService";

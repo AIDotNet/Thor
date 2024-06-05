@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getModels } from "../../../services/ModelService";
 import { message, Drawer } from 'antd';
 import { Button, Select, Form, Input } from 'antd'
-import { createRateLimitModel, putRateLimitModel } from "../../../services/RateLimitModelService";
+import {  putRateLimitModel } from "../../../services/RateLimitModelService";
 
 interface IUpdateChannelProps {
     onSuccess: () => void;
