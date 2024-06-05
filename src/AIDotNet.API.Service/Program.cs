@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
-using Serilog.Core;
 using MemoryCache = AIDotNet.API.Service.Cache.MemoryCache;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -78,6 +77,7 @@ builder.Services
     .AddTransient<UserService>()
     .AddTransient<ChannelService>()
     .AddTransient<RedeemCodeService>()
+    .AddTransient<RateLimitModelService>()
     .AddHostedService<StatisticBackgroundTask>()
     .AddHostedService<LoggerBackgroundTask>()
     .AddHostedService<AutoChannelDetectionBackgroundTask>()
@@ -192,6 +192,8 @@ if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
     // 不使用迁移记录生成
     await dbContext.Database.EnsureCreatedAsync();
 
+    await RateLimitModelService.LoadAsync(dbContext);
+
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
     await loggerDbContext.Database.EnsureCreatedAsync();
 }
@@ -202,13 +204,14 @@ else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") |
     var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
     // 不使用迁移记录生成
     await dbContext.Database.EnsureCreatedAsync();
+    
+    await RateLimitModelService.LoadAsync(dbContext);
 
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
     await loggerDbContext.Database.EnsureCreatedAsync();
 }
 
 await SettingService.LoadingSettings(app);
-
 
 app.UseCors("AllowAll");
 
@@ -222,7 +225,7 @@ app.Use((async (context, next) =>
         context.Request.Path = "/index.html";
     }
 
-    context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.0";
+    context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.1";
     context.Response.Headers["AI-Gateway-Name"] = "AI-Gateway";
 
     await next(context);
@@ -590,6 +593,44 @@ product.MapPost("pay-complete-callback",
     .WithDescription("支付回调处理")
     .WithOpenApi()
     .AllowAnonymous();
+
+#endregion
+
+#region 模型限流策略
+
+var rateLimitModel = app.MapGroup("/api/v1/rateLimitModel")
+    .WithGroupName("RateLimitModel")
+    .WithTags("RateLimitModel")
+    .AddEndpointFilter<ResultFilter>()
+    .RequireAuthorization(new AuthorizeAttribute()
+    {
+        Roles = RoleConstant.Admin
+    });
+
+rateLimitModel.MapGet(string.Empty, async (RateLimitModelService service, int page, int pageSize) =>
+        await service.GetAsync(page, pageSize))
+    .WithDescription("获取限流策略")
+    .WithOpenApi();
+
+rateLimitModel.MapPost(string.Empty, async (RateLimitModelService service, RateLimitModel rateLimitModel) =>
+        await service.CreateAsync(rateLimitModel))
+    .WithDescription("创建限流策略")
+    .WithOpenApi();
+
+rateLimitModel.MapPut(string.Empty, async (RateLimitModelService service, RateLimitModel rateLimitModel) =>
+        await service.UpdateAsync(rateLimitModel))
+    .WithDescription("更新限流策略")
+    .WithOpenApi();
+
+rateLimitModel.MapDelete("{id}", async (RateLimitModelService service, string id) =>
+        await service.RemoveAsync(id))
+    .WithDescription("删除限流策略")
+    .WithOpenApi();
+
+rateLimitModel.MapPut("/disable/{id}", async (RateLimitModelService service, string id) =>
+        await service.Disable(id))
+    .WithDescription("禁用|启用限流策略")
+    .WithOpenApi();
 
 #endregion
 

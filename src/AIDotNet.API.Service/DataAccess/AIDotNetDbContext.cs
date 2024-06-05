@@ -25,6 +25,8 @@ public class AIDotNetDbContext(
 
     public DbSet<ProductPurchaseRecord> ProductPurchaseRecords { get; set; }
 
+    public DbSet<RateLimitModel> RateLimitModels { get; set; }  
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ConfigureAIDotNet();

@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { GeneralSetting, InitSetting } from '../../../../services/SettingService';
 import { info } from '../../../../services/UserService';
-
+import { SlidersOutlined } from '@ant-design/icons';
 
 export interface TopActionProps {
     tab?: SidebarTabKey;
@@ -15,7 +15,7 @@ export interface TopActionProps {
 const TopActions = memo<TopActionProps>(({ tab }) => {
 
     const navigate = useNavigate();
-    const [ setUser] = useState<any>({})
+    const [setUser] = useState<any>({})
     const chatDisabled = InitSetting.find((item: any) => item.key === GeneralSetting.ChatLink)
     const vidolDisabled = InitSetting.find((item: any) => item.key === GeneralSetting.VidolLink)
 
@@ -112,6 +112,17 @@ const TopActions = memo<TopActionProps>(({ tab }) => {
             key: SidebarTabKey.RedeemCode,
             onClick: () => {
                 navigate('/redeem-code')
+            },
+            role: 'admin'
+        },
+        {
+            href: '/rate-limit',
+            icon: SlidersOutlined,
+            enable: true,
+            title: "限流",
+            key: SidebarTabKey.RateLimit,
+            onClick: () => {
+                navigate('/rate-limit')
             },
             role: 'admin'
         },

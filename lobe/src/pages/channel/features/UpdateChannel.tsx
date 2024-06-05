@@ -13,6 +13,18 @@ interface IUpdateChannelProps {
     value?: any;
 }
 
+interface InputProps {
+    name: string;
+    type: string;
+    address: string;
+    other: string;
+    key: string;
+    models: string[];
+    extension: {
+        [key: string]: any;
+    }
+}
+
 export default function UpdateChannel({
     onSuccess,
     visible,
@@ -22,13 +34,14 @@ export default function UpdateChannel({
     // 字典models key, value类型
     const [types, setTypes] = useState<any>();
     const [models, setModels] = useState<any>();
-    const [input, setInput] = useState<any>({
+    const [input, setInput] = useState<InputProps>({
         name: '',
         type: '',
         address: '',
         other: '',
         key: '',
-        models: []
+        models: [],
+        extension: {}
     });
 
 
@@ -75,7 +88,8 @@ export default function UpdateChannel({
                 address: value.address,
                 other: value.other,
                 key: value.key,
-                models: value.models
+                models: value.models,
+                extension: value.extension
             });
         }
     }, [visible]);
@@ -212,7 +226,6 @@ export default function UpdateChannel({
                         }
                     </Select>
                 </Form.Item>
-
                 <Button type='primary' block htmlType='submit'>提交</Button>
             </Form>
         }

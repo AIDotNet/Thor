@@ -19,6 +19,7 @@ import DocPage from './pages/doc/page'
 import ModelPage from './pages/model/page'
 import DocMainLayout from './_layout/Home/@nav/default'
 import Auth from './pages/auth/page'
+import RateLimit from './pages/rate-limit/page'
 
 
 const router = createBrowserRouter([{
@@ -51,6 +52,10 @@ const router = createBrowserRouter([{
     {
       path: 'setting',
       element: <SettingPage />
+    },
+    {
+      path: 'rate-limit',
+      element: <RateLimit />
     }
   ]
 }, {

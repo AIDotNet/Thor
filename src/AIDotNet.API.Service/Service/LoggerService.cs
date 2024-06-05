@@ -11,6 +11,7 @@ public sealed class LoggerService(IServiceProvider serviceProvider, IEventBus<Ch
     public async ValueTask CreateAsync(ChatLogger logger)
     {
         logger.Id = Guid.NewGuid().ToString("N");
+        logger.CreatedAt = DateTime.Now;
         await eventBus.PublishAsync(logger);
     }
 
@@ -122,5 +123,4 @@ public sealed class LoggerService(IServiceProvider serviceProvider, IEventBus<Ch
 
         return new PagingDto<ChatLogger>(total, result);
     }
-
 }

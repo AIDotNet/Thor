@@ -20,6 +20,8 @@ public sealed class ChatService(
     ChannelService channelService,
     TokenService tokenService,
     ImageService imageService,
+    RateLimitModelService rateLimitModelService,
+    IServiceCache serviceCache,
     UserService userService,
     IMapper mapper,
     LoggerService loggerService)
@@ -87,6 +89,8 @@ public sealed class ChatService(
 
             var module = JsonSerializer.Deserialize<ImageCreateRequest>(body.ToArray());
 
+            await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
+
             var imageCostRatio = GetImageCostRatio(module);
 
             var rate = SettingService.PromptRate[module.Model];
@@ -141,6 +145,10 @@ public sealed class ChatService(
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id);
         }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
         catch (UnauthorizedAccessException e)
         {
             context.Response.StatusCode = 401;
@@ -156,8 +164,6 @@ public sealed class ChatService(
     {
         try
         {
-            var (token, user) = await tokenService.CheckTokenAsync(context);
-
             using var body = new MemoryStream();
             await context.Request.Body.CopyToAsync(body);
 
@@ -167,6 +173,10 @@ public sealed class ChatService(
             {
                 throw new Exception("模型校验异常");
             }
+
+            await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
+
+            var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight((await channelService.GetChannelsAsync())
@@ -242,6 +252,10 @@ public sealed class ChatService(
 
             await context.Response.WriteAsJsonAsync(stream);
         }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
         catch (UnauthorizedAccessException e)
         {
             context.Response.StatusCode = 401;
@@ -267,6 +281,8 @@ public sealed class ChatService(
 
         try
         {
+            await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
+
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
@@ -321,8 +337,14 @@ public sealed class ChatService(
                 }
             }
         }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
         catch (Exception e)
         {
+            GetLogger<ChatService>().LogError(e.Message);
+            await context.WriteErrorAsync(e.Message);
         }
     }
 
@@ -337,7 +359,6 @@ public sealed class ChatService(
         };
 
         var requestToken = TokenHelper.GetTotalTokens(input.Prompt ?? string.Empty);
-
 
         var result = await openService.CompletionAsync(input, setting);
 
@@ -360,6 +381,8 @@ public sealed class ChatService(
 
         try
         {
+            await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
+
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
@@ -422,6 +445,10 @@ public sealed class ChatService(
                     await context.WriteErrorAsync("当前模型未设置倍率");
                 }
             }
+        }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
         }
         catch (UnauthorizedAccessException e)
         {

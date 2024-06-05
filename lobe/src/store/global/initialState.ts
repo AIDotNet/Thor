@@ -21,4 +21,6 @@ export enum SidebarTabKey {
   Current = "current",
 
   Setting = "setting",
+
+  RateLimit = "rate-limit",
 }

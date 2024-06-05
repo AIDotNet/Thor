@@ -25,6 +25,11 @@ public sealed class ChatChannelInput
     public string Other { get; set; } = string.Empty;
 
     /// <summary>
+    /// 扩展字段
+    /// </summary>
+    public Dictionary<string, string> Extension { get; set; } = new();
+    
+    /// <summary>
     /// AI类型
     /// </summary>
     public string Type { get; set; }

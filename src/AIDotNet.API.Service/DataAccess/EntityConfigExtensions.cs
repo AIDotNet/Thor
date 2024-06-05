@@ -23,7 +23,7 @@ public static class EntityConfigExtensions
 
             options
                 .Property(e => e.Id).ValueGeneratedOnAdd();
-            
+
             options.Property(x => x.Key).IsRequired();
 
             options.HasIndex(x => x.Creator);
@@ -37,7 +37,7 @@ public static class EntityConfigExtensions
 
             options
                 .Property(e => e.Id).ValueGeneratedOnAdd();
-            
+
             options.Property(x => x.Name).IsRequired();
 
             options.Property(x => x.Code).IsRequired();
@@ -70,7 +70,7 @@ public static class EntityConfigExtensions
                 .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
                     item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, new JsonSerializerOptions()));
         });
-        
+
         modelBuilder.Entity<ProductPurchaseRecord>(options =>
         {
             options.HasKey(x => x.Id);
@@ -85,15 +85,38 @@ public static class EntityConfigExtensions
             options.HasKey(x => x.Id);
 
             options.Property(x => x.Name).IsRequired();
-
         });
-        
+
+        modelBuilder.Entity<RateLimitModel>(options =>
+        {
+            options.HasKey(x => x.Id);
+
+            options.Property(x => x.Name).IsRequired();
+
+            options.HasIndex(x => x.Model);
+
+            options.HasIndex(x => x.Creator);
+            
+            options.Property(x => x.WhiteList)
+                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
+                    item => JsonSerializer.Deserialize<List<string>>(item, new JsonSerializerOptions()));
+
+            options.Property(x => x.BlackList)
+                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
+                    item => JsonSerializer.Deserialize<List<string>>(item, new JsonSerializerOptions()));
+
+            options.Property(x => x.Model)
+                .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
+                    item => JsonSerializer.Deserialize<string[]>(item, new JsonSerializerOptions()));
+
+            
+        });
+
         return modelBuilder;
     }
 
     public static ModelBuilder ConfigureLogger(this ModelBuilder modelBuilder)
     {
-
         modelBuilder.Entity<StatisticsConsumesNumber>(options =>
         {
             options.HasKey(x => x.Id);
@@ -126,7 +149,7 @@ public static class EntityConfigExtensions
 
             options.HasIndex(x => x.Day);
         });
-        
+
         modelBuilder.Entity<ChatLogger>(options =>
         {
             options.HasKey(x => x.Id);

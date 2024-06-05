@@ -1,4 +1,6 @@
-﻿using AIDotNet.API.Service.Domain.Core;
+﻿using System.Text.Json;
+using AIDotNet.API.Service.Domain.Core;
+using AIDotNet.API.Service.Model;
 
 namespace AIDotNet.API.Service.Dto;
 
@@ -55,7 +57,7 @@ public sealed class GetChatChannelDto : Entity<string>
     /// 额度
     /// </summary>
     public long RemainQuota { get; set; }
-    
+
     /// <summary>
     /// 自动监控渠道
     /// </summary>
