@@ -94,6 +94,7 @@ AIDotNet API还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以�
 - [x] Ollama
 - [x] 通义千问（阿里云）
 - [x] 腾讯混元大模型
+- [x] 支持百度大模型(ErnieBot)
 
 # 支持数据库
 
