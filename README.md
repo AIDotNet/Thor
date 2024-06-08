@@ -120,6 +120,9 @@ graph LR
 默认账号密码
 admin admin
 
+### 注意事项
+需要注意的是，如果克隆项目后，项目根目录缺少`data`时，需要手动创建，`docker compose up` 时，需要挂载本地目录`data`。
+
 ### 环境变量
 
 - DBType
@@ -133,7 +136,7 @@ admin admin
 - CACHE_CONNECTION_STRING
   缓存连接字符串 如果是Redis则为Redis连接字符串，Memory则为空
 
-使用docker compose启动服务：
+使用`docker compose`启动服务：
 
 ```yaml
 version: '3.8'
@@ -141,6 +144,8 @@ version: '3.8'
 services:
   ai-dotnet-api-service:
     image: hejiale010426/ai-dotnet-api-service:latest
+	ports:
+      - 18080:8080
     container_name: ai-dotnet-api-service
     volumes:
       - ./data:/data
@@ -154,12 +159,13 @@ services:
 使用docker run启动服务
 
 ```sh
-docker run --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=/data/token.db" -e LoggerConnectionString="data source=/data/logger.db" hejiale010426/ai-dotnet-api-service:latest
+docker run -d -p 18080:8080 --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=/data/token.db" -e LoggerConnectionString="data source=/data/logger.db" hejiale010426/ai-dotnet-api-service:latest
 ```
 
 ### Sqlite构建
+`docker compose`版本
 
-创建`docker-compose.yml`文件，内容如下：
+项目根目录创建`docker-compose.yml`文件，内容如下：
 
 ```yaml
 version: '3.8'
@@ -169,7 +175,7 @@ services:
     image: hejiale010426/ai-dotnet-api-service:latest
     container_name: ai-dotnet-api-service
     ports:
-      - 8080:8080
+      - 18080:8080
     volumes:
       - ./data:/data
     environment:
@@ -178,24 +184,30 @@ services:
       - ConnectionString=data source=/data/token.db
       - LoggerConnectionString=data source=/data/logger.db
 ```
-
-docker run版本
-
+执行如下命令打包镜像
 ```shell
-docker run -d -p 8080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString=data source=/data/token.db -e LoggerConnectionString=data source=/data/logger.db hejiale010426/ai-dotnet-api-service:latest
+sudo docker compose build
 ```
 
 执行以下命令启动服务
 
 ```shell
-sudo docker-compose up -d
+sudo docker compose up -d
 ```
 
-然后访问 http://localhost:8080 即可看到服务启动成功。
+
+docker run版本
+
+```shell
+docker run -d -p 18080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString=data source=/data/token.db -e LoggerConnectionString=data source=/data/logger.db hejiale010426/ai-dotnet-api-service:latest
+```
+
+然后访问 http://localhost:18080 即可看到服务启动成功。
 
 ### PostgreSql构建
+`docker compose`版本
 
-创建`docker-compose.yml`文件，内容如下：
+项目根目录创建`docker-compose.yml`文件，内容如下：
 
 ```yaml
 version: '3.8'
@@ -205,7 +217,7 @@ services:
   image: hejiale010426/ai-dotnet-api-service:latest
   container_name: ai-dotnet-api-service
   ports:
-    - 8080:8080
+    - 18080:8080
   volumes:
     - ./data:/data
   environment:
@@ -215,12 +227,23 @@ services:
     - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
 ```
 
+执行如下命令打包镜像
+```shell
+sudo docker compose build
+```
+
+执行以下命令启动服务
+
+```shell
+sudo docker compose up -d
+```
+
 docker run版本
 
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
-  -p 8080:8080 \
+  -p 18080:8080 \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=postgresql \
@@ -229,17 +252,12 @@ docker run -d \
   hejiale010426/ai-dotnet-api-service:latest
 ```
 
-执行以下命令启动服务
-
-```shell
-sudo docker-compose up -d
-```
-
-然后访问 http://localhost:8080 即可看到服务启动成功。
+然后访问 http://localhost:18080 即可看到服务启动成功。
 
 ### SqlServer构建
+`docker compose`版本
 
-创建`docker-compose.yml`文件，内容如下：
+项目根目录创建`docker-compose.yml`文件，内容如下：
 
 ```yaml
 version: '3.8'
@@ -249,7 +267,7 @@ services:
     image: hejiale010426/ai-dotnet-api-service:latest
     container_name: ai-dotnet-api-service
     ports:
-      - 8080:8080
+      - 18080:8080
     volumes:
       - ./data:/data
     environment:
@@ -259,12 +277,23 @@ services:
       - "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;"
 ```
 
+执行如下命令打包镜像
+```shell
+sudo docker compose build
+```
+
+执行以下命令启动服务
+
+```shell
+sudo docker compose up -d
+```
+
 docker run版本
 
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
-  -p 8080:8080 \
+  -p 18080:8080 \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=sqlserver \
@@ -273,17 +302,12 @@ docker run -d \
   hejiale010426/ai-dotnet-api-service:latest
 ```
 
-执行以下命令启动服务
-
-```shell
-sudo docker-compose up -d
-```
-
-然后访问 http://localhost:8080 即可看到服务启动成功。
+然后访问 http://localhost:18080 即可看到服务启动成功。
 
 ### MySql构建
+`docker compose`版本
 
-创建`docker-compose.yml`文件，内容如下：
+项目根目录创建`docker-compose.yml`文件，内容如下：
 
 ```yaml
 version: '3.8'
@@ -293,7 +317,7 @@ services:
     image: hejiale010426/ai-dotnet-api-service:latest
     container_name: ai-dotnet-api-service
     ports:
-      - 8080:8080
+      - 8080
     volumes:
       - ./data:/data
     environment:
@@ -303,12 +327,22 @@ services:
       - "ConnectionString=mysql://root:dd666666@localhost:3306/logger"
 ```
 
+执行如下命令打包镜像
+```shell
+sudo docker compose build
+```
+
+执行以下命令启动服务
+
+```shell
+sudo docker compose up -d
+```
 docker run版本
 
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
-  -p 8080:8080 \
+  -p 18080:8080 \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=mysql \
@@ -317,10 +351,4 @@ docker run -d \
   hejiale010426/ai-dotnet-api-service:latest
 ```
 
-执行以下命令启动服务
-
-```shell
-sudo docker-compose up -d
-```
-
-然后访问 http://localhost:8080 即可看到服务启动成功。
+然后访问 http://localhost:18080 即可看到服务启动成功。
