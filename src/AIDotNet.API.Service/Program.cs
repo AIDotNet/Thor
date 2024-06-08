@@ -205,7 +205,7 @@ else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") |
     var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
     // 不使用迁移记录生成
     await dbContext.Database.EnsureCreatedAsync();
-    
+
     await RateLimitModelService.LoadAsync(dbContext);
 
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
@@ -223,7 +223,15 @@ app.Use((async (context, next) =>
 {
     if (context.Request.Path == "/")
     {
-        context.Request.Path = "/index.html";
+        if (string.IsNullOrEmpty(ChatCoreOptions.Master))
+        {
+            context.Request.Path = "/index.html";
+        }
+        else
+        {
+            context.Response.Redirect(ChatCoreOptions.Master);
+            return;
+        }
     }
 
     context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.1";
@@ -233,7 +241,15 @@ app.Use((async (context, next) =>
 
     if (context.Response.StatusCode == 404)
     {
-        context.Request.Path = "/index.html";
+        if (string.IsNullOrEmpty(ChatCoreOptions.Master))
+        {
+            context.Request.Path = "/index.html";
+        }
+        else
+        {
+            context.Response.Redirect(ChatCoreOptions.Master);
+            return;
+        }
         await next(context);
     }
 }));
