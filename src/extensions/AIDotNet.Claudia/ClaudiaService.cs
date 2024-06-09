@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.Dto;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
@@ -19,36 +20,39 @@ public sealed class ClaudiaService : IApiChatCompletionService
         var anthropic = AnthropicFactory.CreateClient(options.Key, options.Address);
         var tools = new List<Tool>();
 
-        foreach (var tool in input.Tools)
+        if (input.Tools != null)
         {
-            var properties = new Dictionary<string, ToolProperty>();
-            foreach (var definition in tool.Function.Parameters.Properties)
+            foreach (var tool in input.Tools)
             {
-                properties.Add(definition.Key, new ToolProperty()
+                var properties = new Dictionary<string, ToolProperty>();
+                foreach (var definition in tool.Function.Parameters.Properties)
                 {
-                    Description = definition.Value.Description ?? string.Empty,
-                    Type = definition.Value.Type,
-                    Enum = definition.Value.Enum?.ToArray(),
+                    properties.Add(definition.Key, new ToolProperty()
+                    {
+                        Description = definition.Value.Description ?? string.Empty,
+                        Type = definition.Value.Type,
+                        Enum = definition.Value.Enum?.ToArray(),
+                    });
+                }
+
+                tools.Add(new Tool
+                {
+                    Name = tool.Function?.Name ?? string.Empty,
+                    Description = tool.Function?.Description ?? string.Empty,
+                    InputSchema = new InputSchema()
+                    {
+                        Type = tool.Type,
+                        Required = tool.Function?.Parameters?.Required?.ToArray(),
+                        Properties = properties,
+                    }
                 });
             }
-
-            tools.Add(new Tool
-            {
-                Name = tool.Function?.Name ?? string.Empty,
-                Description = tool.Function?.Description ?? string.Empty,
-                InputSchema = new InputSchema()
-                {
-                    Type = tool.Type,
-                    Required = tool.Function?.Parameters?.Required?.ToArray(),
-                    Properties = properties,
-                }
-            });
         }
 
         var result = await anthropic.Messages.CreateAsync(new MessageRequest
         {
             Model = input.Model,
-            MaxTokens = (int)input.MaxTokens,
+            MaxTokens = (int)(input.MaxTokens ?? 2000),
             Messages = input.Messages.Select(x => new Message
             {
                 Content = x.Content,
@@ -61,18 +65,21 @@ public sealed class ClaudiaService : IApiChatCompletionService
 
         var toolsResult = new List<ToolCall>();
 
-        foreach (var content in result.Content)
+        if (result.Content.Any(x => string.IsNullOrEmpty(x.ToolResultId)))
         {
-            toolsResult.Add(new ToolCall()
+            foreach (var content in result.Content)
             {
-                Id = content.ToolResultId,
-                Type = content.Type,
-                FunctionCall = new FunctionCall()
+                toolsResult.Add(new ToolCall()
                 {
-                    Arguments = JsonSerializer.Serialize(content.ToolUseInput),
-                    Name = content.ToolUseName
-                }
-            });
+                    Id = content.ToolResultId,
+                    Type = content.Type,
+                    FunctionCall = new FunctionCall()
+                    {
+                        Arguments = JsonSerializer.Serialize(content.ToolUseInput),
+                        Name = content.ToolUseName
+                    }
+                });
+            }
         }
 
         return new ChatCompletionCreateResponse()
@@ -101,36 +108,39 @@ public sealed class ClaudiaService : IApiChatCompletionService
         var anthropic = AnthropicFactory.CreateClient(options.Key, options.Address);
         var tools = new List<Tool>();
 
-        foreach (var tool in input.Tools)
+        if (input.Tools != null)
         {
-            var properties = new Dictionary<string, ToolProperty>();
-            foreach (var definition in tool.Function.Parameters.Properties)
+            foreach (var tool in input.Tools)
             {
-                properties.Add(definition.Key, new ToolProperty()
+                var properties = new Dictionary<string, ToolProperty>();
+                foreach (var definition in tool.Function.Parameters.Properties)
                 {
-                    Description = definition.Value.Description ?? string.Empty,
-                    Type = definition.Value.Type,
-                    Enum = definition.Value.Enum?.ToArray(),
+                    properties.Add(definition.Key, new ToolProperty()
+                    {
+                        Description = definition.Value.Description ?? string.Empty,
+                        Type = definition.Value.Type,
+                        Enum = definition.Value.Enum?.ToArray(),
+                    });
+                }
+
+                tools.Add(new Tool
+                {
+                    Name = tool.Function?.Name ?? string.Empty,
+                    Description = tool.Function?.Description ?? string.Empty,
+                    InputSchema = new InputSchema()
+                    {
+                        Type = tool.Type,
+                        Required = tool.Function?.Parameters?.Required?.ToArray(),
+                        Properties = properties,
+                    }
                 });
             }
-
-            tools.Add(new Tool
-            {
-                Name = tool.Function?.Name ?? string.Empty,
-                Description = tool.Function?.Description ?? string.Empty,
-                InputSchema = new InputSchema()
-                {
-                    Type = tool.Type,
-                    Required = tool.Function?.Parameters?.Required?.ToArray(),
-                    Properties = properties,
-                }
-            });
         }
 
         await foreach (var result in anthropic.Messages.CreateStreamAsync(new MessageRequest
                        {
                            Model = input.Model,
-                           MaxTokens = (int)input.MaxTokens,
+                           MaxTokens = (int)(input.MaxTokens ?? 2000),
                            Messages = input.Messages.Select(x => new Message
                            {
                                Content = x.Content,
@@ -149,7 +159,27 @@ public sealed class ClaudiaService : IApiChatCompletionService
                     [
                         new()
                         {
-                            Delta = new ChatMessage("assistant", content.Delta.Text, null),
+                            Delta = new("assistant", content.Delta.Text, null, content.Delta.ToolResultContent?.Select(
+                                x =>
+                                    new ToolCall()
+                                    {
+                                        Id = x.ToolResultId,
+                                        Type = x.Type,
+                                        FunctionCall = new FunctionCall()
+                                        {
+                                            Arguments = x.ToolUseInput != null
+                                                ? JsonSerializer.Serialize(x.ToolUseInput, null,
+                                                    new JsonSerializerOptions
+                                                    {
+                                                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                                                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                                                        Encoder = System.Text.Encodings.Web.JavaScriptEncoder
+                                                            .UnsafeRelaxedJsonEscaping,
+                                                    })
+                                                : string.Empty,
+                                            Name = x.ToolUseName
+                                        }
+                                    }).ToList()),
                             FinishReason = "stop",
                             Index = 0,
                         }

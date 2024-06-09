@@ -59,10 +59,11 @@ public class LoggerDbContext(
                 switch (entry.Entity)
                 {
                     case ICreatable creatable:
-                        creatable.CreatedAt = DateTime.Now;
+                        if (creatable.CreatedAt == default)
+                            creatable.CreatedAt = DateTime.Now;
                         break;
                     case IUpdatable entity:
-                        entity.UpdatedAt = DateTime.Now;
+                        entity.UpdatedAt ??= DateTime.Now;
                         break;
                 }
             }
