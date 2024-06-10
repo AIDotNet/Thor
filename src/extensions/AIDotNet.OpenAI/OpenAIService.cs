@@ -14,7 +14,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
+        var client = httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
 
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.Key);
@@ -30,7 +30,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
+        var client = httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
 
         var response = await client.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.Key);

@@ -8,7 +8,7 @@ namespace AIDotNet.OpenAI;
 
 public class OpenAIServiceImageService(IHttpClientFactory httpClientFactory) : IApiImageService
 {
-    private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
+    private HttpClient HttpClient => httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
 
     public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))

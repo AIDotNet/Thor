@@ -24,47 +24,45 @@ public sealed class AutoChannelDetectionBackgroundTask(
 
             if (autoDisable)
             {
-                await using (var scope = serviceProvider.CreateAsyncScope())
+                await using var scope = serviceProvider.CreateAsyncScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+                var channelService = scope.ServiceProvider.GetRequiredService<ChannelService>();
+                // 自动关闭通道
+                // 1. 获取启动自动检测通道
+                var channels = await dbContext.Channels.Where(x => x.ControlAutomatically)
+                    .ToListAsync(cancellationToken: stoppingToken);
+                // 2. 对于获取的渠道进行检测
+                foreach (var channel in channels)
                 {
-                    var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
-                    var channelService = scope.ServiceProvider.GetRequiredService<ChannelService>();
-                    // 自动关闭通道
-                    // 1. 获取启动自动检测通道
-                    var channels = await dbContext.Channels.Where(x => x.ControlAutomatically)
-                        .ToListAsync(cancellationToken: stoppingToken);
-                    // 2. 对于获取的渠道进行检测
-                    foreach (var channel in channels)
+                    try
                     {
-                        try
+                        // 3. 检测通道是否需要关闭
+                        var (succeed, timeout) = await channelService.TestChannelAsync(channel.Id);
+                        // 如果检测成功并且通道未关闭则更新状态
+                        if (succeed && channel.Disable == false)
                         {
-                            // 3. 检测通道是否需要关闭
-                            var (succeed, timeout) = await channelService.TestChannelAsync(channel.Id);
-                            // 如果检测成功并且通道未关闭则更新状态
-                            if (succeed && channel.Disable == false)
-                            {
-                                logger.LogWarning($"AutoChannelDetectionBackgroundTask: Channel {channel.Id} is succeed.");
-                                await dbContext.Channels.Where(x => x.Id == channel.Id)
-                                    .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, false),
-                                        cancellationToken: stoppingToken);
-                            }
-                            else
-                            {
-                                logger.LogWarning(
-                                    $"AutoChannelDetectionBackgroundTask: Channel {channel.Id} is timeout: {timeout}");
-                                // 5. 如果通道超时则关闭
-                                await dbContext.Channels.Where(x => x.Id == channel.Id)
-                                    .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true),
-                                        cancellationToken: stoppingToken);
-                            }
+                            logger.LogWarning($"AutoChannelDetectionBackgroundTask: Channel {channel.Id} is succeed.");
+                            await dbContext.Channels.Where(x => x.Id == channel.Id)
+                                .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, false),
+                                    cancellationToken: stoppingToken);
                         }
-                        catch (Exception e)
+                        else
                         {
-                            logger.LogError(e, $"AutoChannelDetectionBackgroundTask Error: {e.Message}");
+                            logger.LogWarning(
+                                $"AutoChannelDetectionBackgroundTask: Channel {channel.Id} is timeout: {timeout}");
                             // 5. 如果通道超时则关闭
                             await dbContext.Channels.Where(x => x.Id == channel.Id)
                                 .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true),
                                     cancellationToken: stoppingToken);
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, $"AutoChannelDetectionBackgroundTask Error: {e.Message}");
+                        // 5. 如果通道超时则关闭
+                        await dbContext.Channels.Where(x => x.Id == channel.Id)
+                            .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true),
+                                cancellationToken: stoppingToken);
                     }
                 }
             }
