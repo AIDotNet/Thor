@@ -223,22 +223,21 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             chatHistory.Model = channel.Models.FirstOrDefault();
         }
+        
+        // 写一个10s的超时
+        var token = new CancellationTokenSource();
+        token.CancelAfter(10000);
 
         var sw = Stopwatch.StartNew();
-        var response = await openService.CompleteChatAsync(chatHistory, setting);
+        var response = await openService.CompleteChatAsync(chatHistory, setting, token.Token);
         sw.Stop();
-
-        if (!string.IsNullOrWhiteSpace(response.Error?.Message))
-        {
-            throw new Exception(response.Error.Message);
-        }
 
         // 更新ResponseTime
         await DbContext.Channels
             .Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResponseTime, sw.ElapsedMilliseconds));
 
-        return (string.IsNullOrWhiteSpace(response.Error?.Message) == false,
+        return (response.Choices?.Count > 0,
             (int)sw.ElapsedMilliseconds);
     }
 }

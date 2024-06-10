@@ -42,6 +42,7 @@ public sealed class AutoChannelDetectionBackgroundTask(
                             // 如果检测成功并且通道未关闭则更新状态
                             if (succeed && channel.Disable == false)
                             {
+                                logger.LogWarning($"AutoChannelDetectionBackgroundTask: Channel {channel.Id} is succeed.");
                                 await dbContext.Channels.Where(x => x.Id == channel.Id)
                                     .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, false),
                                         cancellationToken: stoppingToken);
