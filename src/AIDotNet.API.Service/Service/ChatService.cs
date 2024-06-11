@@ -89,7 +89,12 @@ public sealed class ChatService(
 
             var module = JsonSerializer.Deserialize<ImageCreateRequest>(body.ToArray());
 
-            await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
+            if (module?.Model.IsNullOrEmpty() == true)
+            {
+                module.Model = "dall-e-2";
+            }
+
+            await rateLimitModelService.CheckAsync(module.Model, context, serviceCache);
 
             var imageCostRatio = GetImageCostRatio(module);
 
@@ -500,29 +505,27 @@ public sealed class ChatService(
                 .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
 
             // 解析图片
-            foreach (var message in input.Messages.SelectMany(x => x.Contents).Where(x => x.Type == "image"))
+            foreach (var message in input.Messages.SelectMany(x => x.Contents)
+                         .Where(x => x.Type is "image" or "image_url"))
             {
-                if (message.Type == "image_url")
+                var imageUrl = message.ImageUrl;
+                if (imageUrl != null)
                 {
-                    var imageUrl = message.ImageUrl;
-                    if (imageUrl != null)
+                    var url = imageUrl.Url;
+                    var detail = "";
+                    if (!imageUrl.Detail.IsNullOrEmpty())
                     {
-                        var url = imageUrl.Url;
-                        var detail = "";
-                        if (!imageUrl.Detail.IsNullOrEmpty())
-                        {
-                            detail = imageUrl.Detail;
-                        }
+                        detail = imageUrl.Detail;
+                    }
 
-                        try
-                        {
-                            var imageTokens = await CountImageTokens(url, detail);
-                            requestToken += imageTokens.Item1;
-                        }
-                        catch (Exception ex)
-                        {
-                            GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
-                        }
+                    try
+                    {
+                        var imageTokens = await CountImageTokens(url, detail);
+                        requestToken += imageTokens.Item1;
+                    }
+                    catch (Exception ex)
+                    {
+                        GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
                     }
                 }
             }
@@ -537,7 +540,7 @@ public sealed class ChatService(
 
             var result = await openService.CompleteChatAsync(input, setting);
 
-            await context.Response.WriteAsJsonAsync(mapper.Map<CompletionCreateResponse>(result));
+            await context.Response.WriteAsJsonAsync(result);
 
             responseToken = TokenHelper.GetTokens(result.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
         }
@@ -597,16 +600,6 @@ public sealed class ChatService(
 
         if (input.Messages.Any(x => x.Contents != null))
         {
-            foreach (var message in input.Messages)
-            {
-                if (message.Content?.StartsWith('[') == true && message.Content?.EndsWith(']') == true)
-                {
-                    message.Contents = JsonSerializer.Deserialize<List<MessageContent>>(message.Content);
-                    // 俩个不能同时存在
-                    message.Content = null;
-                }
-            }
-
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x is { Contents: not null })
                 .SelectMany(x => x!.Contents)
                 .Where(x => x.Type == "text")
@@ -614,29 +607,26 @@ public sealed class ChatService(
 
             // 解析图片
             foreach (var message in input.Messages.Where(x => x is { Contents: not null }).SelectMany(x => x.Contents)
-                         .Where(x => x.Type == "image_url"))
+                         .Where(x => x.Type is "image" or "image_url"))
             {
-                if (message.Type == "image_url")
+                var imageUrl = message.ImageUrl;
+                if (imageUrl != null)
                 {
-                    var imageUrl = message.ImageUrl;
-                    if (imageUrl != null)
+                    var url = imageUrl.Url;
+                    var detail = "";
+                    if (!imageUrl.Detail.IsNullOrEmpty())
                     {
-                        var url = imageUrl.Url;
-                        var detail = "";
-                        if (!imageUrl.Detail.IsNullOrEmpty())
-                        {
-                            detail = imageUrl.Detail;
-                        }
+                        detail = imageUrl.Detail;
+                    }
 
-                        try
-                        {
-                            var imageTokens = await CountImageTokens(url, detail);
-                            requestToken += imageTokens.Item1;
-                        }
-                        catch (Exception ex)
-                        {
-                            GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
-                        }
+                    try
+                    {
+                        var imageTokens = await CountImageTokens(url, detail);
+                        requestToken += imageTokens.Item1;
+                    }
+                    catch (Exception ex)
+                    {
+                        GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
                     }
                 }
             }
@@ -650,6 +640,24 @@ public sealed class ChatService(
 
             await foreach (var item in openService.StreamChatAsync(input, setting))
             {
+                foreach (var response in item.Choices)
+                {
+                    if (response.Delta.Role.IsNullOrEmpty())
+                    {
+                        response.Delta.Role = "assistant";
+                    }
+
+                    if (response.Message.Role.IsNullOrEmpty())
+                    {
+                        response.Message.Role = "assistant";
+                    }
+
+                    if (string.IsNullOrEmpty(response.Delta.Content))
+                    {
+                        response.Delta.Content = null;
+                        response.Message.Content = null;
+                    }
+                }
                 responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                 await context.WriteResultAsync(item).ConfigureAwait(false);
             }

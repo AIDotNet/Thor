@@ -12,7 +12,7 @@ public sealed class OpenAIServiceCompletionService(IHttpClientFactory httpClient
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(nameof(OpenAIServiceOptions.ServiceName));
+        var client = httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
 
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             createCompletionModel, options.Key);

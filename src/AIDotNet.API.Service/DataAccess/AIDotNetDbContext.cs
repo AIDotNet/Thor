@@ -10,7 +10,6 @@ public class AIDotNetDbContext(
     DbContextOptions<AIDotNetDbContext> options,
     IUserContext userContext) : DbContext(options)
 {
-
     public DbSet<User> Users { get; set; }
 
     public DbSet<Token> Tokens { get; set; }
@@ -25,8 +24,8 @@ public class AIDotNetDbContext(
 
     public DbSet<ProductPurchaseRecord> ProductPurchaseRecords { get; set; }
 
-    public DbSet<RateLimitModel> RateLimitModels { get; set; }  
-    
+    public DbSet<RateLimitModel> RateLimitModels { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ConfigureAIDotNet();
@@ -94,10 +93,11 @@ public class AIDotNetDbContext(
                 switch (entry.Entity)
                 {
                     case ICreatable creatable:
-                        creatable.CreatedAt = DateTime.Now;
+                        if (creatable.CreatedAt == default)
+                            creatable.CreatedAt = DateTime.Now;
                         break;
                     case IUpdatable entity:
-                        entity.UpdatedAt = DateTime.Now;
+                        entity.UpdatedAt ??= DateTime.Now;
                         break;
                 }
             }

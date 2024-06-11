@@ -14,7 +14,7 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
     private readonly Channel<ChatLogger> _events = Channel.CreateUnbounded<ChatLogger>();
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    private const int Interval = 15000; // Interval in milliseconds
+    private const int Interval = 10000; // Interval in milliseconds
 
     public ChannelEventHandler(IServiceProvider serviceProvider, ILogger<ChannelEventHandler> logger)
     {
@@ -29,9 +29,9 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
         await _events.Writer.WriteAsync(@event);
     }
 
-    private void Flush(object state)
+    private async void Flush(object state)
     {
-        FlushAsync().Wait();
+        await FlushAsync();
     }
 
     private async Task FlushAsync()
