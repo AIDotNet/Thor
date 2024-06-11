@@ -3,6 +3,8 @@
 services:
   ai-dotnet-api-service:
     image: registry.token-ai.cn/ai-dotnet-api-service:latest
+    ports:
+      - 18080:8080
     build:
       context: .
       dockerfile: src/AIDotNet.API.Service/Dockerfile
@@ -15,3 +17,4 @@ services:
       - ConnectionString=data source=/data/token.db
       - LoggerConnectionString=data source=/data/logger.db
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_PORTS=8080
