@@ -144,7 +144,7 @@ version: '3.8'
 services:
   ai-dotnet-api-service:
     image: hejiale010426/ai-dotnet-api-service:latest
-	ports:
+    ports:
       - 18080:8080
     container_name: ai-dotnet-api-service
     volumes:
