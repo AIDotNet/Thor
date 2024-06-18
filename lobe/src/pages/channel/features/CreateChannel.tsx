@@ -145,18 +145,15 @@ export default function CreateChannel({
                     <Select
                         placeholder="请选择渠道类型"
                         value={input.type}
+                        defaultValue={'2024-06-01'}
                         onChange={(v) => {
                             setInput({ ...input, other: v });
                         }}
                         allowClear
                     >
-                        <Option key={'2022-12-01'} value={'2022-12-01'}>2022-12-01</Option>
-                        <Option key={'2023-05-15'} value={'2023-05-15'}>2023-05-15</Option>
-                        <Option key={'2023-06-01-preview'} value={'2023-06-01-preview'}>2023-06-01-preview</Option>
-                        <Option key={'2023-07-01-preview'} value={'2023-07-01-preview'}>2023-07-01-preview</Option>
-                        <Option key={'2024-02-15-preview'} value={'2024-02-15-preview'}>2024-02-15-preview</Option>
-                        <Option key={'2024-03-01-preview'} value={'2024-03-01-preview'}>2024-03-01-preview</Option>
+                        <Option key={'2024-05-01-preview'} value={'2024-05-01-preview'}>2024-05-01-preview</Option>
                         <Option key={'2024-04-01-preview'} value={'2024-04-01-preview'}>2024-04-01-preview</Option>
+                        <Option key={'2024-06-01'} value={'2024-06-01'}>2024-06-01</Option>
                     </Select>
                 </Form.Item>
 

@@ -1,12 +1,11 @@
-﻿using AIDotNet.Abstractions;
+﻿using System.Text.Json;
+using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.SharedModels;
-using Azure;
-using Azure.AI.OpenAI;
-using OpenAI.ObjectModels.RequestModels;
+using OpenAI.Chat;
+using ChatMessage = OpenAI.Chat.ChatMessage;
 using FunctionCall = AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels.FunctionCall;
-using FunctionDefinition = Azure.AI.OpenAI.FunctionDefinition;
 
 namespace AIDotNet.AzureOpenAI;
 
@@ -16,90 +15,80 @@ public class AzureOpenAiService : IApiChatCompletionService
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = AzureOpenAIFactory.CreateClient(options);
+        var createCreate = AzureOpenAIFactory.CreateClient(options);
 
-        ChatCompletionsOptions chatCompletionsOptions = new()
-        {
-            DeploymentName = chatCompletionCreate.Model,
-            MaxTokens = chatCompletionCreate.MaxTokens ?? 2048,
-            Temperature = chatCompletionCreate.Temperature,
-            FrequencyPenalty = chatCompletionCreate.FrequencyPenalty,
-            Seed = chatCompletionCreate.Seed,
-        };
+        var client = createCreate.GetChatClient(chatCompletionCreate.Model);
+
+
+        List<ChatMessage> chatCompletionsOptions = new();
 
         foreach (var message in chatCompletionCreate.Messages)
         {
             if (message.ContentCalculated is string)
             {
-                if (message.Role.Equals("user"))
+                switch (message.Role)
                 {
-                    chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(message.Content));
-                }
-                else if (message.Role.Equals("assistant"))
-                {
-                    chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage(message.Content));
-                }
-                else
-                {
-                    chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage(message.Content));
+                    case "user":
+                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(message.Content));
+                        break;
+                    case "assistant":
+                        chatCompletionsOptions.Add(ChatMessage.CreateAssistantMessage(message.Content));
+                        break;
+                    case "system":
+                        chatCompletionsOptions.Add(ChatMessage.CreateSystemMessage(message.Content));
+                        break;
+                    case "tool":
+                        chatCompletionsOptions.Add(
+                            ChatMessage.CreateToolChatMessage(message.ToolCallId, message.Content));
+                        break;
                 }
             }
             else
             {
-                if (message.Role.Equals("user"))
+                var messageContent = new List<ChatMessageContentPart>();
+                switch (message.Role)
                 {
-                    var messageContent = new List<ChatMessageContentItem>();
-                    // 将内容转换为多个消息
-                    foreach (var content in message.Contents)
-                    {
-                        if (content.Type == "text")
-                            messageContent.Add(new ChatMessageTextContentItem(content.Text));
-                        else if (content.Type == "image")
+                    case "user":
+                        // 将内容转换为多个消息
+                        foreach (var content in message.Contents)
                         {
-                            // 如果是base64图片
-                            if (content.ImageUrl.Url.StartsWith("data:image"))
-                                messageContent.Add(new ChatMessageImageContentItem(
-                                    new BinaryData(Convert.FromBase64String(content.ImageUrl.Url.Split(",")[1])),
-                                    "image/png"));
-                            else
-                                messageContent.Add(new ChatMessageImageContentItem(new Uri(content.ImageUrl.Url)));
+                            if (content.Type == "text")
+                                messageContent.Add(ChatMessageContentPart.CreateTextMessageContentPart(content.Text));
+                            else if (content.Type == "image")
+                            {
+                                // 如果是base64图片
+                                if (content.ImageUrl.Url.StartsWith("data:image"))
+                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
+                                        new BinaryData(Convert.FromBase64String(content.ImageUrl.Url.Split(",")[1])),
+                                        "image/png"));
+                                else
+                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
+                                        new Uri(content.ImageUrl.Url), content.ImageUrl.Detail));
+                            }
                         }
-                    }
 
-                    chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(messageContent));
-                }
-                else if (message.Role.Equals("assistant"))
-                {
-                    foreach (var content in message.Contents)
-                    {
-                        chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage(content.Text));
-                    }
-                }
-                else
-                {
-                    foreach (var content in message.Contents)
-                    {
-                        chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage(content.Text));
-                    }
+                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(messageContent));
+                        break;
                 }
             }
         }
 
+        var chatCompletion = new ChatCompletionOptions();
 
         if (chatCompletionCreate?.Tools is { Count: > 0 })
         {
             foreach (var tool in chatCompletionCreate.Tools)
             {
-                chatCompletionsOptions.Functions.Add(new FunctionDefinition(tool.Function.Name)
+                chatCompletion.Functions.Add(new(tool.Function?.Name)
                 {
-                    Description = tool.Function.Description,
-                    Parameters = new BinaryData(tool.Function.Parameters)
+                    FunctionDescription = tool.Function?.Description,
+                    FunctionParameters = BinaryData.FromObjectAsJson(tool.Function?.Parameters)
                 });
             }
         }
 
-        var response = await client.GetChatCompletionsAsync(chatCompletionsOptions, cancellationToken)
-            .ConfigureAwait(false);
+        var response = await client.CompleteChatAsync(chatCompletionsOptions, options: chatCompletion,
+            cancellationToken: cancellationToken);
 
         var createResponse = new ChatCompletionCreateResponse()
         {
@@ -107,32 +96,26 @@ public class AzureOpenAiService : IApiChatCompletionService
             Choices = new List<ChatChoiceResponse>()
         };
 
-        foreach (var choice in response.Value.Choices)
+        foreach (var choice in response.Value.Content)
         {
-            var message = new ChatMessage("assistant", choice.Message.Content)
-            {
-                FunctionCall = new FunctionCall()
+            var message =
+                new AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant", choice.Text)
                 {
-                    Arguments = choice.Message?.FunctionCall?.Arguments,
-                    Name = choice.Message?.FunctionCall?.Name
-                },
-                ToolCalls = choice?.Message?.ToolCalls?.Select(x =>
-                {
-                    if (x is ChatCompletionsFunctionToolCall toolCall)
+                    FunctionCall = new FunctionCall()
                     {
-                        return new ToolCall()
+                        Arguments = response.Value?.FunctionCall?.FunctionArguments,
+                        Name = response.Value?.FunctionCall?.FunctionName,
+                    },
+                    ToolCalls = response.Value?.ToolCalls?.Select(x => new ToolCall()
+                    {
+                        FunctionCall = new FunctionCall()
                         {
-                            FunctionCall = new FunctionCall()
-                            {
-                                Arguments = toolCall.Arguments,
-                                Name = toolCall.Name,
-                            },
-                        };
-                    }
-
-                    return new ToolCall();
-                }).Where(x => !string.IsNullOrEmpty(x.Id)).ToList()
-            };
+                            Arguments = x.FunctionArguments,
+                            Name = x.FunctionName,
+                        },
+                        Id = x.Id
+                    }).Where(x => !string.IsNullOrEmpty(x.Id)).ToList()
+                };
             createResponse.Choices.Add(new ChatChoiceResponse()
             {
                 Message = message,
@@ -147,131 +130,121 @@ public class AzureOpenAiService : IApiChatCompletionService
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = AzureOpenAIFactory.CreateClient(options);
+        var createCreate = AzureOpenAIFactory.CreateClient(options);
 
-        ChatCompletionsOptions chatCompletionsOptions = new()
-        {
-            DeploymentName = chatCompletionCreate.Model,
-            MaxTokens = chatCompletionCreate.MaxTokens,
-            Temperature = chatCompletionCreate.Temperature,
-            FrequencyPenalty = chatCompletionCreate.FrequencyPenalty,
-            Seed = chatCompletionCreate.Seed,
-        };
+        var client = createCreate.GetChatClient(chatCompletionCreate.Model);
+
+
+        List<ChatMessage> chatCompletionsOptions = new();
 
         foreach (var message in chatCompletionCreate.Messages)
         {
             if (message.ContentCalculated is string)
             {
-                if (message.Role.Equals("user"))
+                switch (message.Role)
                 {
-                    chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(message.Content));
-                }
-                else if (message.Role.Equals("assistant"))
-                {
-                    chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage(message.Content));
-                }
-                else
-                {
-                    chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage(message.Content));
+                    case "user":
+                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(message.Content));
+                        break;
+                    case "assistant":
+                        chatCompletionsOptions.Add(ChatMessage.CreateAssistantMessage(message.Content));
+                        break;
+                    case "system":
+                        chatCompletionsOptions.Add(ChatMessage.CreateSystemMessage(message.Content));
+                        break;
+                    case "tool":
+                        chatCompletionsOptions.Add(
+                            ChatMessage.CreateToolChatMessage(message.ToolCallId, message.Content));
+                        break;
                 }
             }
             else
             {
-                if (message.Role.Equals("user"))
+                var messageContent = new List<ChatMessageContentPart>();
+                switch (message.Role)
                 {
-                    var messageContent = new List<ChatMessageContentItem>();
-                    // 将内容转换为多个消息
-                    foreach (var content in message.Contents)
-                    {
-                        if (content.Type == "text")
-                            messageContent.Add(new ChatMessageTextContentItem(content.Text));
-                        else if (content.Type == "image")
+                    case "user":
+                        // 将内容转换为多个消息
+                        foreach (var content in message.Contents)
                         {
-                            // 如果是base64图片
-                            if (content.ImageUrl.Url.StartsWith("data:image"))
-                                messageContent.Add(new ChatMessageImageContentItem(
-                                    new BinaryData(Convert.FromBase64String(content.ImageUrl.Url.Split(",")[1])),
-                                    "image/png"));
-                            else
-                                messageContent.Add(new ChatMessageImageContentItem(new Uri(content.ImageUrl.Url)));
+                            if (content.Type == "text")
+                                messageContent.Add(ChatMessageContentPart.CreateTextMessageContentPart(content.Text));
+                            else if (content.Type == "image")
+                            {
+                                // 如果是base64图片
+                                if (content.ImageUrl.Url.StartsWith("data:image"))
+                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
+                                        new BinaryData(Convert.FromBase64String(content.ImageUrl.Url.Split(",")[1])),
+                                        "image/png"));
+                                else
+                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
+                                        new Uri(content.ImageUrl.Url), content.ImageUrl.Detail));
+                            }
                         }
-                    }
 
-                    chatCompletionsOptions.Messages.Add(new ChatRequestUserMessage(messageContent));
-                }
-                else if (message.Role.Equals("assistant"))
-                {
-                    foreach (var content in message.Contents)
-                    {
-                        chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage(content.Text));
-                    }
-                }
-                else
-                {
-                    foreach (var content in message.Contents)
-                    {
-                        chatCompletionsOptions.Messages.Add(new ChatRequestSystemMessage(content.Text));
-                    }
+                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(messageContent));
+                        break;
                 }
             }
         }
 
+        var chatCompletion = new ChatCompletionOptions();
 
         if (chatCompletionCreate?.Tools is { Count: > 0 })
         {
             foreach (var tool in chatCompletionCreate.Tools)
             {
-                chatCompletionsOptions.Functions.Add(new FunctionDefinition(tool.Function.Name)
+                chatCompletion.Functions.Add(new(tool.Function?.Name)
                 {
-                    Description = tool.Function.Description,
-                    Parameters = new BinaryData(tool.Function.Parameters)
+                    FunctionDescription = tool.Function?.Description,
+                    FunctionParameters = BinaryData.FromObjectAsJson(tool.Function?.Parameters)
                 });
             }
         }
 
-        await foreach (var response in await client
-                           .GetChatCompletionsStreamingAsync(chatCompletionsOptions, cancellationToken)
+        await foreach (var response in client
+                           .CompleteChatStreamingAsync(chatCompletionsOptions, options: chatCompletion,
+                               cancellationToken: cancellationToken)
                            .ConfigureAwait(false))
         {
-            var createResponse = new ChatCompletionCreateResponse()
-            {
-                Usage = new UsageResponse(),
-                Choices = new List<ChatChoiceResponse>()
-            };
+            if (response.ContentUpdate is null)
+                continue;
 
-            var delata = new ChatMessage("assistant", response.ContentUpdate);
-
-            if (!string.IsNullOrEmpty(response.FunctionName))
+            foreach (var contentPart in response.ContentUpdate)
             {
-                delata.FunctionCall = new FunctionCall()
+                var message =
+                    new AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant",
+                        contentPart.Text)
+                    {
+                        FunctionCall = new FunctionCall()
+                        {
+                            Arguments = response.FunctionCallUpdate.FunctionArgumentsUpdate,
+                            Name = response.FunctionCallUpdate.FunctionName,
+                        },
+                        ToolCalls = response.ToolCallUpdates?.Select(x => new ToolCall()
+                        {
+                            FunctionCall = new FunctionCall()
+                            {
+                                Arguments = x.FunctionArgumentsUpdate,
+                                Name = x.FunctionName,
+                            },
+                            Id = x.Id
+                        }).Where(x => !string.IsNullOrEmpty(x.Id)).ToList()
+                    };
+
+                yield return new ChatCompletionCreateResponse()
                 {
-                    Arguments = response.FunctionArgumentsUpdate,
-                    Name = response.FunctionName,
+                    Usage = new UsageResponse(),
+                    Choices = new List<ChatChoiceResponse>()
+                    {
+                        new()
+                        {
+                            Message = message,
+                            Delta = message,
+                        }
+                    }
                 };
             }
-            
-            if(response.ToolCallUpdate is StreamingFunctionToolCallUpdate toolCallUpdate)
-            {
-                delata.ToolCalls = new List<ToolCall>();
-                delata.ToolCalls.Add(new ToolCall()
-                {
-                    FunctionCall = new FunctionCall()
-                    {
-                        Arguments = toolCallUpdate.ArgumentsUpdate,
-                        Name = toolCallUpdate.Name,
-                    },
-                });
-            }
-
-            createResponse.Choices.Add(new ChatChoiceResponse()
-            {
-                Delta = delata,
-                FinishReason = response.FinishReason.ToString(),
-                Index = response.ChoiceIndex,
-                Message = delata,
-            });
-
-            yield return createResponse;
         }
     }
 }

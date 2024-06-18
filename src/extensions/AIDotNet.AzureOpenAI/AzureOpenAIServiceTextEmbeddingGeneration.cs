@@ -11,19 +11,25 @@ public class AzureOpenAIServiceTextEmbeddingGeneration : IApiTextEmbeddingGenera
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = AzureOpenAIFactory.CreateClient(options);
+        var createClient = AzureOpenAIFactory.CreateClient(options);
 
-        var response = await client.GetEmbeddingsAsync(new EmbeddingsOptions(createEmbeddingModel.Model,
-            createEmbeddingModel.InputCalculated), cancellationToken).ConfigureAwait(false);
+        var client = createClient.GetEmbeddingClient(createEmbeddingModel.Model);
+        if (createEmbeddingModel.InputCalculated is string)
+        {
+        }
+
+        var response = await client.GenerateEmbeddingsAsync(createEmbeddingModel.InputCalculated?.ToArray(),
+                cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
         var embeddingCreateResponse = new EmbeddingCreateResponse()
         {
             Model = createEmbeddingModel.Model,
             Data =
             [
-                ..response.Value.Data.Select(x => new EmbeddingResponse()
+                ..response.Value.Select(x => new EmbeddingResponse()
                 {
-                    Embedding = x.Embedding.ToArray().Select(x => (double)x).ToList(),
+                    Embedding = x.Vector.ToArray().Select(x => (double)x).ToList(),
                     Index = x.Index
                 })
             ]
