@@ -12,6 +12,7 @@ public sealed class AuthorizeService(
     IServiceProvider serviceProvider,
     LoggerService loggerService,
     TokenService tokenService,
+    ILogger<AuthorizeService> logger,
     IConfiguration configuration,
     IServiceCache memoryCache)
     : ApplicationService(serviceProvider)
@@ -81,9 +82,15 @@ public sealed class AuthorizeService(
                 $"{endpoint}/login/oauth/access_token?code={code}&client_id={clientId}&client_secret={clientSecret}",
                 null);
 
+        logger.LogInformation("Github授权：" + response.StatusCode +
+                              $" Endpoint {endpoint} code:{code} clientId={clientId} secret={clientSecret}");
 
         var result = await response.Content.ReadFromJsonAsync<GitTokenDto>();
-        if (result is null) throw new Exception("Github授权失败");
+        if (result is null)
+        {
+            logger.LogError("Github授权失败");
+            throw new Exception("Github授权失败");
+        }
 
         var request = new HttpRequestMessage(HttpMethod.Get,
             $"{apiEndpoint}/user")
@@ -94,12 +101,22 @@ public sealed class AuthorizeService(
             },
         };
 
+        logger.LogInformation("Github授权：" + result.access_token);
+
         var responseMessage = await HttpClient.SendAsync(request);
 
         var githubUser = await responseMessage.Content.ReadFromJsonAsync<GithubUserDto>();
-        if (githubUser is null) throw new Exception("Github授权失败");
+        if (githubUser is null)
+        {
+            logger.LogError("Github授权失败");
+            throw new Exception("Github授权失败");
+        }
 
-        if (githubUser.id < 1000) throw new Exception("Github授权失败");
+        if (githubUser.id < 1000)
+        {
+            logger.LogError("Github授权失败");
+            throw new Exception("Github授权失败");
+        }
 
         var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == githubUser.id.ToString());
 
@@ -113,7 +130,7 @@ public sealed class AuthorizeService(
             user.SetPassword("Aa123456");
 
             await DbContext.Users.AddAsync(user);
-            
+
             // 初始用户额度
             var userQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.NewUserQuota);
             user.SetResidualCredit(userQuota);
@@ -128,6 +145,8 @@ public sealed class AuthorizeService(
             }, user.Id);
 
             await loggerService.CreateSystemAsync("Github来源 创建用户：" + user.UserName);
+
+            logger.LogInformation("Github来源 创建用户：" + user.UserName);
 
             await DbContext.SaveChangesAsync();
         }
