@@ -1,5 +1,6 @@
 ﻿using AIDotNet.API.Service.DataAccess;
 using AIDotNet.API.Service.Domain;
+using AIDotNet.API.Service.Exceptions;
 using AIDotNet.API.Service.Service;
 using Microsoft.EntityFrameworkCore;
 
@@ -62,7 +63,7 @@ public sealed class AutoChannelDetectionBackgroundTask(
             var channels = await dbContext.Channels
                 .Where(x => x.ControlAutomatically && x.Disable)
                 .ToArrayAsync(cancellationToken: stoppingToken);
-            
+
             logger.LogInformation($"异常渠道处理: 当前需要处理的异常渠道数量: {channels.Length}");
 
             // 2. 对于获取的渠道进行检测
@@ -72,10 +73,9 @@ public sealed class AutoChannelDetectionBackgroundTask(
             }
 
             logger.LogInformation("异常渠道处理: 10秒后继续检测异常渠道。");
-            
+
             // 对于异常通道，每10秒检测一次，以便渠道快速恢复。
             await Task.Delay((1000 * 10), stoppingToken);
-            
         }
     }
 
@@ -100,6 +100,13 @@ public sealed class AutoChannelDetectionBackgroundTask(
                 await dbContext.Channels.Where(x => x.Id == channel.Id)
                     .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true));
             }
+        }
+        catch (ChannelException e)
+        {
+            logger.LogError(e, $"AutoChannelDetectionBackgroundTask Error: {e.Message}");
+            // 5. 如果通道超时则关闭
+            await dbContext.Channels.Where(x => x.Id == channel.Id)
+                .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true));
         }
         catch (Exception e)
         {

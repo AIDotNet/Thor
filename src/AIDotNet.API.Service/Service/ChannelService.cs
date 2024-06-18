@@ -3,6 +3,7 @@ using AIDotNet.Abstractions;
 using AIDotNet.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using AIDotNet.API.Service.Domain;
 using AIDotNet.API.Service.Dto;
+using AIDotNet.API.Service.Exceptions;
 using AIDotNet.Claudia;
 using AIDotNet.Hunyuan;
 using AIDotNet.OpenAI;
@@ -223,10 +224,10 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             chatHistory.Model = channel.Models.FirstOrDefault();
         }
-        
+
         // 写一个10s的超时
         var token = new CancellationTokenSource();
-        token.CancelAfter(10000);
+        // token.CancelAfter(20000);
 
         var sw = Stopwatch.StartNew();
         var response = await openService.CompleteChatAsync(chatHistory, setting, token.Token);
@@ -236,6 +237,11 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         await DbContext.Channels
             .Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResponseTime, sw.ElapsedMilliseconds));
+
+        if (!string.IsNullOrWhiteSpace(response.Error?.Message))
+        {
+            throw new ChannelException(response.Error?.Message);
+        }
 
         return (response.Choices?.Count > 0,
             (int)sw.ElapsedMilliseconds);
