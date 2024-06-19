@@ -2,9 +2,9 @@
 
 <img height="160" src="https://api.token-ai.cn/logo.png">
 
-<h1>TokenAI</h1>
+<h1>Thor(雷神托尔)</h1>
 
-TokenAI打造企业级人工智能客服管理系统！
+Thor(雷神托尔),一个AI大模型管理网关。
 
 [![][github-contributors-shield]][github-contributors-link]
 [![][github-forks-shield]][github-forks-link]
@@ -54,12 +54,11 @@ TokenAI打造企业级人工智能客服管理系统！
 
 [github-license-link]: https://github.com/AIDotNet/AIDotNet.API/blob/main/LICENSE
 
-# AIDotNet API
+# Thor(雷神托尔)
 
-AIDotNet API 是一款强大的人工智能模型管理工具，其主要目的是为了实现多种AI模型的统一管理和使用。通过AIDotNet
-API，用户可以轻松地管理和使用众多AI模型，而且AIDotNet API兼容OpenAI的接口格式，使得使用更加方便。
+Thor(雷神托尔) 是一款强大的人工智能模型管理工具，其主要目的是为了实现多种AI模型的统一管理和使用。通过Thor(雷神托尔)，用户可以轻松地管理和使用众多AI模型，而且Thor(雷神托尔)兼容OpenAI的接口格式，使得使用更加方便。
 
-AIDotNet API提供了丰富的功能：
+Thor(雷神托尔)提供了丰富的功能：
 
 1. 管理功能：支持用户管理，渠道管理以及token管理，简化了管理流程。
 2. 数据统计预览：可以清晰地看到各种数据的统计情况，帮助用户更好地了解使用情况。
@@ -68,9 +67,9 @@ AIDotNet API提供了丰富的功能：
 5. 外部Chat链接接入：支持接入外部Chat链接，提升交互体验。
 6. 支付宝购买账号余额：提供支付宝购买账号余额的功能，方便用户进行充值。
 
-此外，AIDotNet API还支持多种AI大模型，包括OpenAI、星火大模型、Claudia、智谱AI、Ollama、通义千问（阿里云）、AzureOpenAI以及腾讯混元大模型，满足了用户对各种AI模型的需求。
+此外，Thor(雷神托尔)还支持多种AI大模型，包括OpenAI、星火大模型、Claudia、智谱AI、Ollama、通义千问（阿里云）、AzureOpenAI以及腾讯混元大模型，满足了用户对各种AI模型的需求。
 
-AIDotNet API还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以及MySql，用户可以根据自己的需要选择合适的数据库。
+Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以及MySql，用户可以根据自己的需要选择合适的数据库。
 
 ## 功能实现
 
@@ -108,7 +107,7 @@ AIDotNet API还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以�
 ```mermaid
 graph LR
     A(用户)
-    A --->|使用 AIDotNet . API 分发的 key 进行请求| B(AIDotNet.API)
+    A --->|使用 Thor 分发的 key 进行请求| B(Thor)
     B -->|中继请求| C(OpenAI)
     B -->|中继请求| D(Azure)
     B -->|中继请求| E(其他 OpenAI API 格式下游渠道)
@@ -216,18 +215,18 @@ version: '3.8'
 
 services:
   ai-dotnet-api-service:
-  image: hejiale010426/ai-dotnet-api-service:latest
-  container_name: ai-dotnet-api-service
-  ports:
-    - 18080:8080
-  volumes:
-    - ./data:/data
-  environment:
-    - TZ=Asia/Shanghai
-    - DBType=postgresql
-    - Theme=lobe
-    - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
-    - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
+    image: hejiale010426/ai-dotnet-api-service:latest
+    container_name: ai-dotnet-api-service
+    ports:
+      - 18080:8080
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Asia/Shanghai
+      - DBType=postgresql
+      - Theme=lobe
+      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
+      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
 ```
 
 执行如下命令打包镜像

@@ -81,7 +81,7 @@ export default function Register() {
                     <div className={styles.header}>
                         <p className={styles.text}>
                             <span className={styles.text}>注册</span>
-                            <span className={styles.text1}> AIDotNet API </span>
+                            <span className={styles.text1}> Thor(雷神托尔) </span>
                             <span className={styles.text2}>账户</span>
                         </p>
                     </div>

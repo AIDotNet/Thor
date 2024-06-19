@@ -2,13 +2,13 @@
 
 services:
   ai-dotnet-api-service:
-    image: registry.token-ai.cn/ai-dotnet-api-service:latest
+    image: registry.token-ai.cn/thor:latest
     ports:
       - 18080:8080
     build:
       context: .
-      dockerfile: src/AIDotNet.API.Service/Dockerfile
-    container_name: ai-dotnet-api-service
+      dockerfile: src/Thor.Service/Dockerfile
+    container_name: thor
     volumes:
       - ./data:/data
     environment:
