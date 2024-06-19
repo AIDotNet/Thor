@@ -1,6 +1,6 @@
 <div align="center"><a name="readme-top"></a>
 
-<img height="160" src="https://api.token-ai.cn/logo.png">
+<img height="160" src="https://github.com/AIDotNet/Thor/assets/61819790/a3eb7557-0ff4-4edd-a472-e5a0a745616d">
 
 <h1>Thor(雷神托尔)</h1>
 
