@@ -144,4 +144,5 @@ public sealed class AuthorizeService(
             role = user.Role
         };
     }
+
 }

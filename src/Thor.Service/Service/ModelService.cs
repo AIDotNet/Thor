@@ -55,7 +55,7 @@ public static class ModelService
         {
             if (i == 3) break;
 
-            if (value[i].Count > 500) value[i].Hot = true;
+            if (value[i].Count > 100) value[i].Hot = true;
         }
 
         await cache.CreateAsync("UseModels", value, TimeSpan.FromHours(5));

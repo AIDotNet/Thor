@@ -29,25 +29,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Claudia", "src\extensi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Qiansail", "src\extensions\Thor.Qiansail\Thor.Qiansail.csproj", "{48FD7CDD-A777-42F8-9A14-33DA28469819}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Ollama", "src\extensions\Thor.Ollama\Thor.Ollama.csproj", "{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Ollama", "src\extensions\Thor.Ollama\Thor.Ollama.csproj", "{01903FE0-9C98-4BB2-9948-25D3F5B4FF24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AzureOpenAI", "src\extensions\Thor.AzureOpenAI\Thor.AzureOpenAI.csproj", "{EC93981A-45E5-44A2-8DA9-BD779B02349D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.AzureOpenAI", "src\extensions\Thor.AzureOpenAI\Thor.AzureOpenAI.csproj", "{EC93981A-45E5-44A2-8DA9-BD779B02349D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Hunyuan", "src\extensions\Thor.Hunyuan\Thor.Hunyuan.csproj", "{20D19A83-ED2A-4C30-BC36-325581BF2CDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Hunyuan", "src\extensions\Thor.Hunyuan\Thor.Hunyuan.csproj", "{20D19A83-ED2A-4C30-BC36-325581BF2CDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.ErnieBot", "src\extensions\Thor.ErnieBot\Thor.ErnieBot.csproj", "{8D97B5C6-C1C4-4485-83CC-C16B07E42409}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.ErnieBot", "src\extensions\Thor.ErnieBot\Thor.ErnieBot.csproj", "{8D97B5C6-C1C4-4485-83CC-C16B07E42409}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "framework", "framework", "{1035B36B-8194-43D4-8A4A-992D962CD1D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.BuildingBlocks.Event", "src\framework\Thor.BuildingBlocks.Event\Thor.BuildingBlocks.Event.csproj", "{9E348CF3-4B3D-4FF7-BD95-56D01D189A35}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.BuildingBlocks.Event", "src\framework\Thor.BuildingBlocks.Event\Thor.BuildingBlocks.Event.csproj", "{9E348CF3-4B3D-4FF7-BD95-56D01D189A35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.LocalEvent", "src\framework\Thor.LocalEvent\Thor.LocalEvent.csproj", "{943C8852-BC2B-4F72-8A1A-61AA86BE0CAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.LocalEvent", "src\framework\Thor.LocalEvent\Thor.LocalEvent.csproj", "{943C8852-BC2B-4F72-8A1A-61AA86BE0CAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.BuildingBlocks.Cache", "src\framework\Thor.BuildingBlocks.Cache\Thor.BuildingBlocks.Cache.csproj", "{F78FCCB8-19E6-43E9-91EB-765257722DD5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.BuildingBlocks.Cache", "src\framework\Thor.BuildingBlocks.Cache\Thor.BuildingBlocks.Cache.csproj", "{F78FCCB8-19E6-43E9-91EB-765257722DD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.LocalMemory.Cache", "src\framework\Thor.LocalMemory.Cache\Thor.LocalMemory.Cache.csproj", "{42402B28-DDC4-4294-A444-6D8B3C43B934}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.LocalMemory.Cache", "src\framework\Thor.LocalMemory.Cache\Thor.LocalMemory.Cache.csproj", "{42402B28-DDC4-4294-A444-6D8B3C43B934}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.RedisMemory.Cache", "src\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj", "{84C27CF3-BD3C-46D6-A774-967DB5D3F060}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.RedisMemory.Cache", "src\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj", "{84C27CF3-BD3C-46D6-A774-967DB5D3F060}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AppHost", "src\Thor.AppHost\Thor.AppHost.csproj", "{1C4C402F-6ADF-495D-AD44-02D517D9C33A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{C4094217-9E78-4660-84E4-EA36A676B5B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +123,14 @@ Global
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,12 +5,12 @@
     <SdcbSparkDeskVersion>3.0.0</SdcbSparkDeskVersion>
     <SemanticKernelVersion>1.6.1</SemanticKernelVersion>
     <Company>AIDotNet</Company>
-    <Product>AIDotNet.API</Product>
-    <Version>0.0.9</Version>
+    <Product>Thor</Product>
+    <Version>0.1.0</Version>
     <Copyright>Apache-2.0 license</Copyright>
-    <AssemblyVersion>0.0.9</AssemblyVersion>
-    <OpenSourceUrl>https://github.com/AIDotNet/AIDotNet.API</OpenSourceUrl>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <OpenSourceUrl>https://github.com/AIDotNet/Thor</OpenSourceUrl>
     <Authors>AI DotNet</Authors>
-    <Description>AI DotNet API</Description>
+    <Description>Thor(雷神托尔)AI网关，用于管理AI大模型服务。</Description>
   </PropertyGroup>
 </Project>
