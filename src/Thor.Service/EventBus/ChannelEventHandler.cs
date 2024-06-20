@@ -1,7 +1,5 @@
 ﻿using System.Threading.Channels;
-using Thor.Abstractions;
-using Thor.Service.DataAccess;
-using Thor.Service.Domain;
+using Thor.BuildingBlocks.Data;
 
 namespace Thor.Service.EventBus;
 

@@ -1,6 +1,10 @@
 ﻿namespace Thor.Service.Exceptions;
 
-public class RateLimitException(string message) : Exception(message)
+/// <summary>
+/// 限流异常
+/// </summary>
+/// <param name="message"></param>
+public sealed class RateLimitException(string message) : Exception(message)
 {
     public Dictionary<string,string> Header { get; set; }
 }

@@ -553,28 +553,10 @@ public sealed class ChatService(
 
             var quota = requestToken * rate;
             // 判断请求token数量是否超过额度
-            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
-
-            await foreach (var item in openService.StreamChatAsync(input, setting))
+            if (quota > user.ResidualCredit)
             {
-                foreach (var response in item.Choices)
-                {
-                    if (response.Delta.Role.IsNullOrEmpty()) response.Delta.Role = "assistant";
-
-                    if (response.Message.Role.IsNullOrEmpty()) response.Message.Role = "assistant";
-
-                    if (string.IsNullOrEmpty(response.Delta.Content))
-                    {
-                        response.Delta.Content = null;
-                        response.Message.Content = null;
-                    }
-                }
-
-                responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-                await context.WriteResultAsync(item).ConfigureAwait(false);
+                throw new InsufficientQuotaException("账号余额不足请充值");
             }
-
-            await context.WriteEndAsync();
         }
         else
         {
@@ -585,55 +567,45 @@ public sealed class ChatService(
 
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
-
-            await foreach (var item in openService.StreamChatAsync(input, setting))
-            {
-                if (item.Error != null && !string.IsNullOrEmpty(item.Error.Message))
-                    throw new OpenAIErrorException(item.Error.Message, item.Error.Code ?? "error");
-
-                foreach (var response in item.Choices)
-                {
-                    if (response.Delta.Role.IsNullOrEmpty()) response.Delta.Role = "assistant";
-
-                    if (response.Message.Role.IsNullOrEmpty()) response.Message.Role = "assistant";
-
-                    if (string.IsNullOrEmpty(response.Delta.Content))
-                    {
-                        response.Delta.Content = null;
-                        response.Message.Content = null;
-                    }
-                }
-
-                responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-                await context.WriteResultAsync(item).ConfigureAwait(false);
-            }
-
-            await context.WriteEndAsync();
         }
 
+        await foreach (var item in openService.StreamChatAsync(input, setting))
+        {
+            foreach (var response in item.Choices)
+            {
+                if (response.Delta.Role.IsNullOrEmpty()) response.Delta.Role = "assistant";
+
+                if (response.Message.Role.IsNullOrEmpty()) response.Message.Role = "assistant";
+
+                if (string.IsNullOrEmpty(response.Delta.Content))
+                {
+                    response.Delta.Content = null;
+                    response.Message.Content = null;
+                }
+            }
+
+            responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
+            await context.WriteResultAsync(item).ConfigureAwait(false);
+        }
+
+        await context.WriteEndAsync();
+        
         var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 
         return (requestToken, responseToken);
     }
 
-    public bool IsVision(string model)
-    {
-        if (ChatCoreOptions.VisionModel.Any(model.Contains)) return true;
-
-        return false;
-    }
-
     /// <summary>
     ///     权重算法
     /// </summary>
-    /// <param Name="channel"></param>
+    /// <param name="channel"></param>
     /// <returns></returns>
     private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel)
     {
         var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
         var total = chatChannels.Sum(x => x.Order);
 
-        if (chatChannels.Length == 0) throw new NotModelException("没有可用的渠道。");
+        if (chatChannels.Length == 0) throw new NotModelException("模型未找到可用的渠道");
 
         var value = Random.Shared.NextDouble() * total;
 

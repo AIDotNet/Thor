@@ -1,28 +1,23 @@
-using System.Text.Json;
 using System.Text.Json.Serialization;
-using Thor.Claudia;
-using Thor.Qiansail;
-using FreeRedis;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
-using Thor.Abstractions;
+using Thor.BuildingBlocks.Data;
+using Thor.Claudia;
+using Thor.LocalEvent;
+using Thor.LocalMemory.Cache;
+using Thor.Qiansail;
+using Thor.RedisMemory.Cache;
 using Thor.Service;
 using Thor.Service.BackgroundTask;
-using Thor.Service.Cache;
-using Thor.Service.DataAccess;
-using Thor.Service.Domain;
-using Thor.Service.Dto;
 using Thor.Service.EventBus;
 using Thor.Service.Filters;
 using Thor.Service.Infrastructure;
 using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
-using MemoryCache = Thor.Service.Cache.MemoryCache;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.HostEnvironment();
@@ -48,23 +43,17 @@ builder.Services.AddMapster();
 if (string.IsNullOrEmpty(CacheOptions.Type) ||
     CacheOptions.Type.Equals("Memory", StringComparison.OrdinalIgnoreCase))
 {
-    builder.Services.AddMemoryCache();
-    builder.Services.AddSingleton<IServiceCache, MemoryCache>();
+    builder.Services.AddLocalMemory();
 }
 else if (CacheOptions.Type.Equals("Redis", StringComparison.OrdinalIgnoreCase))
 {
-    builder.Services.AddSingleton<RedisClient>((_) => new RedisClient(CacheOptions.ConnectionString)
-    {
-        Serialize = o => JsonSerializer.Serialize(o),
-        Deserialize = (s, type) => JsonSerializer.Deserialize(s, type)
-    });
-    builder.Services.AddSingleton<IServiceCache, RedisCache>();
+    builder.Services.AddRedisMemory(CacheOptions.ConnectionString);
 }
 
 
 builder.Services
-    .AddSingleton(typeof(IEventBus<>), typeof(ChannelEventBus<>))
-    .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>();
+    .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>()
+    .AddLocalEventBus();
 
 builder.Services
     .AddCustomAuthentication()
@@ -482,8 +471,8 @@ var redeemCode = app.MapGroup("/api/v1/redeemCode")
     .WithTags("RedeemCode")
     .AddEndpointFilter<ResultFilter>();
 
-redeemCode.MapPost(string.Empty, async (RedeemCodeService service, RedeemCodeInput input, HttpContext context) =>
-        await service.CreateAsync(input, context))
+redeemCode.MapPost(string.Empty, async (RedeemCodeService service, RedeemCodeInput input) =>
+        await service.CreateAsync(input))
     .RequireAuthorization(new AuthorizeAttribute()
     {
         Roles = RoleConstant.Admin

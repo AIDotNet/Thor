@@ -1,7 +1,7 @@
 ﻿using FreeRedis;
-using Thor.Abstractions;
+using Thor.BuildingBlocks.Cache;
 
-namespace Thor.Service.Cache;
+namespace Thor.RedisMemory.Cache;
 
 public sealed class RedisCache(RedisClient redis) : IServiceCache
 {

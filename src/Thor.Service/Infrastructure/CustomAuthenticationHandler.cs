@@ -2,15 +2,13 @@
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
-using Thor.Abstractions;
-using Thor.Service.Domain;
 
 namespace Thor.Service.Infrastructure;
 
 public class CustomAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
-    IServiceCache memoryCache,
+    IServiceCache cache,
     UrlEncoder encoder,
     ISystemClock clock)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder, clock)
@@ -24,7 +22,7 @@ public class CustomAuthenticationHandler(
 
         authorization = authorization.ToString().Replace("Bearer ", "");
 
-        var user = await memoryCache.GetAsync<User>(authorization.ToString()).ConfigureAwait(false);
+        var user = await cache.GetAsync<User>(authorization.ToString()).ConfigureAwait(false);
 
         if (user != null)
         {

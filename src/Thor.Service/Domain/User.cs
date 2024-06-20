@@ -1,5 +1,4 @@
 ﻿using Thor.Service.Domain.Core;
-using Thor.Service.Domina.Core;
 using Thor.Service.Infrastructure.Helper;
 
 namespace Thor.Service.Domain;

@@ -47,7 +47,7 @@ public class ToolDefinition
             {
                 if (jsonElement.ValueKind == JsonValueKind.Object)
                     Function = JsonSerializer.Deserialize<FunctionDefinition>(jsonElement.GetRawText(),
-                        AIDtoNetJsonSerializer.DefaultOptions);
+                        ThorJsonSerializer.DefaultOptions);
                 else
                 {
                     FunctionsAsObject = jsonElement;

@@ -1,5 +1,4 @@
-﻿using OpenAI.ObjectModels.RequestModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+﻿using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 
 namespace Thor.Abstractions;

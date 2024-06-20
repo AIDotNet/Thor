@@ -1,5 +1,4 @@
-﻿using Thor.Abstractions.Dto;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+﻿using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Abstractions;

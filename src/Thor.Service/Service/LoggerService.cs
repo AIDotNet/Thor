@@ -1,4 +1,6 @@
-﻿namespace Thor.Service.Service;
+﻿using Thor.BuildingBlocks.Data;
+
+namespace Thor.Service.Service;
 
 public sealed class LoggerService(IServiceProvider serviceProvider, IEventBus<ChatLogger> eventBus)
     : ApplicationService(serviceProvider)

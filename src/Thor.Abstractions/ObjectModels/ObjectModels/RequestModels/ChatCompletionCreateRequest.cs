@@ -150,7 +150,7 @@ public class ChatCompletionCreateRequest : IOpenAiModels.ITemperature, IOpenAiMo
             {
                 if (jsonElement.ValueKind == JsonValueKind.Array)
                 {
-                    Tools = JsonSerializer.Deserialize<List<ToolDefinition>>(jsonElement.GetRawText(),AIDtoNetJsonSerializer.DefaultOptions);
+                    Tools = JsonSerializer.Deserialize<List<ToolDefinition>>(jsonElement.GetRawText(),ThorJsonSerializer.DefaultOptions);
                 }
                 else
                 {

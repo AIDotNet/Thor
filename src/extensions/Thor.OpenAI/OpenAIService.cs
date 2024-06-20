@@ -47,7 +47,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
             {
                 // 如果是json数据则直接返回
                 yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
-                    AIDtoNetJsonSerializer.DefaultOptions);
+                    ThorJsonSerializer.DefaultOptions);
                 
                 break;
             }
@@ -71,7 +71,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             var result = JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
-                AIDtoNetJsonSerializer.DefaultOptions);
+                ThorJsonSerializer.DefaultOptions);
             yield return result;
         }
     }

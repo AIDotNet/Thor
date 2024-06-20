@@ -10,7 +10,7 @@ public static class HttpContextExtensions
 {
     public static async ValueTask WriteResultAsync(this HttpContext context, object value)
     {
-        var str = JsonSerializer.Serialize(value, AIDtoNetJsonSerializer.DefaultOptions);
+        var str = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
         await context.Response.WriteAsync("data: " + str + "\n\n", Encoding.UTF8);
         await context.Response.Body.FlushAsync();
     }
@@ -33,7 +33,7 @@ public static class HttpContextExtensions
             }
         };
         await context.Response.WriteAsync(
-            "data: " + JsonSerializer.Serialize(error, AIDtoNetJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
+            "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
     }
 
     public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message)
@@ -65,7 +65,7 @@ public static class HttpContextExtensions
             }
         };
         await context.Response.WriteAsync(
-            "data: " + JsonSerializer.Serialize(error, AIDtoNetJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
+            "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
         await context.WriteEndAsync();
     }
 

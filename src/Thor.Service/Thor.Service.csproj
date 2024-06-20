@@ -49,6 +49,11 @@
     <ProjectReference Include="..\extensions\Thor.OpenAI\Thor.OpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Qiansail\Thor.Qiansail.csproj" />
     <ProjectReference Include="..\extensions\Thor.SparkDesk\Thor.SparkDesk.csproj" />
+    <ProjectReference Include="..\framework\Thor.BuildingBlocks.Cache\Thor.BuildingBlocks.Cache.csproj" />
+    <ProjectReference Include="..\framework\Thor.BuildingBlocks.Event\Thor.BuildingBlocks.Event.csproj" />
+    <ProjectReference Include="..\framework\Thor.LocalEvent\Thor.LocalEvent.csproj" />
+    <ProjectReference Include="..\framework\Thor.LocalMemory.Cache\Thor.LocalMemory.Cache.csproj" />
+    <ProjectReference Include="..\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj" />
     <ProjectReference Include="..\Thor.Abstractions\Thor.Abstractions.csproj" />
   </ItemGroup>
 

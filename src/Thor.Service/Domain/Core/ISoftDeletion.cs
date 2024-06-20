@@ -1,4 +1,4 @@
-﻿namespace Thor.Service.Domina.Core;
+﻿namespace Thor.Service.Domain.Core;
 
 public interface ISoftDeletion
 {

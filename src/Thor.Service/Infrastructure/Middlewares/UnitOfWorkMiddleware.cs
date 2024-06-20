@@ -1,6 +1,4 @@
-﻿using Thor.Service.DataAccess;
-
-namespace Thor.Service.Infrastructure.Middlewares;
+﻿namespace Thor.Service.Infrastructure.Middlewares;
 
 public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddleware
 {

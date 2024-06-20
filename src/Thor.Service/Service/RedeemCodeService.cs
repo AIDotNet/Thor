@@ -1,4 +1,5 @@
 ﻿using Thor.Service.Domain.Core;
+using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
@@ -8,7 +9,7 @@ public class RedeemCodeService(
     UserService userService)
     : ApplicationService(serviceProvider)
 {
-    public async Task<IEnumerable<string>> CreateAsync(RedeemCodeInput input, HttpContext context)
+    public async Task<IEnumerable<string>> CreateAsync(RedeemCodeInput input)
     {
         if (input.Count <= 0) throw new ArgumentException("生成数量必须大于0");
 
@@ -25,8 +26,6 @@ public class RedeemCodeService(
         }
 
         await DbContext.RedeemCodes.AddRangeAsync(codes);
-
-        await DbContext.SaveChangesAsync();
 
         return codes.Select(x => x.Code);
     }
@@ -99,7 +98,8 @@ public class RedeemCodeService(
         {
             Type = ChatLoggerType.System,
             ModelName = string.Empty,
-            Content = $"用户 {UserContext.CurrentUserName} 使用了兑换码 {redeemCode.Code}，额度 {redeemCode.Quota}"
+            Content =
+                $"用户 {UserContext.CurrentUserName} 使用了兑换码 {redeemCode.Code}，兑换额度 {RenderHelper.RenderQuota(redeemCode.Quota)}"
         });
     }
 }

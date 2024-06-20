@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Thor.Abstractions;
+using Thor.BuildingBlocks.Cache;
 
-namespace Thor.Service.Cache;
+namespace Thor.LocalMemory.Cache;
 
 public sealed class MemoryCache(IMemoryCache memoryCache) : IServiceCache
 {

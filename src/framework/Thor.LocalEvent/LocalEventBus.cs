@@ -1,11 +1,16 @@
 ﻿using System.Threading.Channels;
-using Thor.Abstractions;
+using Microsoft.Extensions.Logging;
+using Thor.BuildingBlocks.Data;
 
-namespace Thor.Service.EventBus;
+namespace Thor.LocalEvent;
 
-public class ChannelEventBus<TEvent> : IEventBus<TEvent>, IDisposable where TEvent : class
+public sealed class LocalEventBus<TEvent> : IEventBus<TEvent>, IDisposable where TEvent : class
 {
-    public ChannelEventBus(IEventHandler<TEvent> eventHandler, ILogger<IEventHandler<TEvent>> logger)
+    private readonly Channel<TEvent> _loggerChannel = Channel.CreateUnbounded<TEvent>();
+
+    private readonly CancellationTokenSource _cts = new();
+    
+    public LocalEventBus(IEventHandler<TEvent> eventHandler, ILogger<IEventHandler<TEvent>> logger)
     {
         Task.Run(async () =>
         {
@@ -27,12 +32,7 @@ public class ChannelEventBus<TEvent> : IEventBus<TEvent>, IDisposable where TEve
         }, _cts.Token);
     }
 
-
-    private readonly CancellationTokenSource _cts = new();
-
-    private readonly Channel<TEvent> _loggerChannel = Channel.CreateUnbounded<TEvent>();
-
-    public async Task PublishAsync(TEvent @event)
+    public async ValueTask PublishAsync(TEvent @event)
     {
         await _loggerChannel.Writer.WriteAsync(@event).ConfigureAwait(false);
     }

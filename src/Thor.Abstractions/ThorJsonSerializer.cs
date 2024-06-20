@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Thor.Abstractions;
 
-public static class AIDtoNetJsonSerializer
+public static class ThorJsonSerializer
 {
     public static JsonSerializerOptions DefaultOptions => new()
     {
