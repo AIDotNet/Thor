@@ -39,6 +39,37 @@ public static class HttpClientExtensions
         return response;
     }
 
+    public static async Task<HttpResponseMessage> HttpRequestRaw(this HttpClient httpClient, string url,
+        object? postData,
+        string token, string tokenKey)
+    {
+        HttpRequestMessage req = new(HttpMethod.Post, url);
+
+        if (postData != null)
+        {
+            if (postData is HttpContent data)
+            {
+                req.Content = data;
+            }
+            else
+            {
+                string jsonContent = JsonSerializer.Serialize(postData, ThorJsonSerializer.DefaultOptions);
+                var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                req.Content = stringContent;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            req.Headers.Add(tokenKey, token);
+        }
+
+
+        var response = await httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+
+        return response;
+    }
+
     public static async Task<HttpResponseMessage> HttpRequestRaw(this HttpClient httpClient, HttpRequestMessage req,
         object? postData)
     {
@@ -83,6 +114,33 @@ public static class HttpClientExtensions
         if (!string.IsNullOrEmpty(token))
         {
             req.Headers.Add("Authorization", $"Bearer {token}");
+        }
+
+        return httpClient.SendAsync(req);
+    }
+
+    public static Task<HttpResponseMessage> PostJsonAsync(this HttpClient httpClient, string url, object? postData,
+        string token, string tokenKey)
+    {
+        HttpRequestMessage req = new(HttpMethod.Post, url);
+
+        if (postData != null)
+        {
+            if (postData is HttpContent data)
+            {
+                req.Content = data;
+            }
+            else
+            {
+                string jsonContent = JsonSerializer.Serialize(postData, ThorJsonSerializer.DefaultOptions);
+                var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                req.Content = stringContent;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            req.Headers.Add(tokenKey, token);
         }
 
         return httpClient.SendAsync(req);
@@ -141,6 +199,7 @@ public static class HttpClientExtensions
             result = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken: cancellationToken) ??
                      throw new InvalidOperationException();
         }
+
         return result;
     }
 }

@@ -53,9 +53,7 @@ else if (CacheOptions.Type.Equals("Redis", StringComparison.OrdinalIgnoreCase))
 
 builder.Services
     .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>()
-    .AddLocalEventBus();
-
-builder.Services
+    .AddLocalEventBus()
     .AddCustomAuthentication()
     .AddHttpContextAccessor()
     .AddTransient<ProductService>()

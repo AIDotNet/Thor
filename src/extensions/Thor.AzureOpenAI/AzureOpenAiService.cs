@@ -1,250 +1,84 @@
-﻿using System.Text.Json;
+﻿using System.Net.Http.Json;
+using System.Text.Json;
 using Thor.Abstractions;
+using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
-using OpenAI.Chat;
-using ChatMessage = OpenAI.Chat.ChatMessage;
-using FunctionCall = Thor.Abstractions.ObjectModels.ObjectModels.RequestModels.FunctionCall;
 
 namespace Thor.AzureOpenAI;
 
-public class AzureOpenAiService : IApiChatCompletionService
+public class AzureOpenAiService(IHttpClientFactory httpClientFactory) : IApiChatCompletionService
 {
     public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest chatCompletionCreate,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var createCreate = AzureOpenAIFactory.CreateClient(options);
+        var client = httpClientFactory.CreateClient(AzureOpenAIServiceOptions.ServiceName);
 
-        var client = createCreate.GetChatClient(chatCompletionCreate.Model);
+        var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
 
+        chatCompletionCreate.Model = null;
 
-        List<ChatMessage> chatCompletionsOptions = new();
+        var response = await client.PostJsonAsync(url, chatCompletionCreate, options.Key, "Api-Key");
 
-        foreach (var message in chatCompletionCreate.Messages)
-        {
-            if (message.ContentCalculated is string)
-            {
-                switch (message.Role)
-                {
-                    case "user":
-                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(message.Content));
-                        break;
-                    case "assistant":
-                        chatCompletionsOptions.Add(ChatMessage.CreateAssistantMessage(message.Content));
-                        break;
-                    case "system":
-                        chatCompletionsOptions.Add(ChatMessage.CreateSystemMessage(message.Content));
-                        break;
-                    case "tool":
-                        chatCompletionsOptions.Add(
-                            ChatMessage.CreateToolChatMessage(message.ToolCallId, message.Content));
-                        break;
-                }
-            }
-            else
-            {
-                var messageContent = new List<ChatMessageContentPart>();
-                switch (message.Role)
-                {
-                    case "user":
-                        // 将内容转换为多个消息
-                        foreach (var content in message.Contents)
-                        {
-                            if (content.Type == "text")
-                                messageContent.Add(ChatMessageContentPart.CreateTextMessageContentPart(content.Text));
-                            else if (content.Type == "image")
-                            {
-                                // 如果是base64图片
-                                if (content.ImageUrl.Url.StartsWith("data:image"))
-                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
-                                        new BinaryData(Convert.FromBase64String(content.ImageUrl.Url.Split(",")[1])),
-                                        "image/png"));
-                                else
-                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
-                                        new Uri(content.ImageUrl.Url), content.ImageUrl.Detail));
-                            }
-                        }
+        var result = await response.Content
+            .ReadFromJsonAsync<ChatCompletionCreateResponse>(cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
 
-                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(messageContent));
-                        break;
-                }
-            }
-        }
-
-        var chatCompletion = new ChatCompletionOptions();
-
-        if (chatCompletionCreate?.Tools is { Count: > 0 })
-        {
-            foreach (var tool in chatCompletionCreate.Tools)
-            {
-                chatCompletion.Functions.Add(new(tool.Function?.Name)
-                {
-                    FunctionDescription = tool.Function?.Description,
-                    FunctionParameters = BinaryData.FromObjectAsJson(tool.Function?.Parameters)
-                });
-            }
-        }
-
-        var response = await client.CompleteChatAsync(chatCompletionsOptions, options: chatCompletion,
-            cancellationToken: cancellationToken);
-
-        var createResponse = new ChatCompletionCreateResponse()
-        {
-            Usage = new UsageResponse(),
-            Choices = new List<ChatChoiceResponse>()
-        };
-
-        foreach (var choice in response.Value.Content)
-        {
-            var message =
-                new Thor.Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant", choice.Text)
-                {
-                    FunctionCall = new FunctionCall()
-                    {
-                        Arguments = response.Value?.FunctionCall?.FunctionArguments,
-                        Name = response.Value?.FunctionCall?.FunctionName,
-                    },
-                    ToolCalls = response.Value?.ToolCalls?.Select(x => new ToolCall()
-                    {
-                        FunctionCall = new FunctionCall()
-                        {
-                            Arguments = x.FunctionArguments,
-                            Name = x.FunctionName,
-                        },
-                        Id = x.Id
-                    }).Where(x => !string.IsNullOrEmpty(x.Id)).ToList()
-                };
-            createResponse.Choices.Add(new ChatChoiceResponse()
-            {
-                Message = message,
-                Delta = message,
-            });
-        }
-
-        return createResponse;
+        return result;
     }
 
     public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var createCreate = AzureOpenAIFactory.CreateClient(options);
+        var client = httpClientFactory.CreateClient(AzureOpenAIServiceOptions.ServiceName);
 
-        var client = createCreate.GetChatClient(chatCompletionCreate.Model);
+        var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
 
+        chatCompletionCreate.Model = null;
+        
+        var response = await client.HttpRequestRaw(url,
+            chatCompletionCreate, options.Key,"Api-Key");
 
-        List<ChatMessage> chatCompletionsOptions = new();
+        using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 
-        foreach (var message in chatCompletionCreate.Messages)
+        using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
+        string? line = string.Empty;
+        while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
         {
-            if (message.ContentCalculated is string)
+            line += Environment.NewLine;
+
+            if (line.StartsWith('{'))
             {
-                switch (message.Role)
-                {
-                    case "user":
-                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(message.Content));
-                        break;
-                    case "assistant":
-                        chatCompletionsOptions.Add(ChatMessage.CreateAssistantMessage(message.Content));
-                        break;
-                    case "system":
-                        chatCompletionsOptions.Add(ChatMessage.CreateSystemMessage(message.Content));
-                        break;
-                    case "tool":
-                        chatCompletionsOptions.Add(
-                            ChatMessage.CreateToolChatMessage(message.ToolCallId, message.Content));
-                        break;
-                }
+                // 如果是json数据则直接返回
+                yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
+                    ThorJsonSerializer.DefaultOptions);
+
+                break;
             }
-            else
+
+            if (line.StartsWith("data:"))
+                line = line["data:".Length..];
+
+            line = line.Trim();
+
+            if (line == "[DONE]")
             {
-                var messageContent = new List<ChatMessageContentPart>();
-                switch (message.Role)
-                {
-                    case "user":
-                        // 将内容转换为多个消息
-                        foreach (var content in message.Contents)
-                        {
-                            if (content.Type == "text")
-                                messageContent.Add(ChatMessageContentPart.CreateTextMessageContentPart(content.Text));
-                            else if (content.Type == "image")
-                            {
-                                // 如果是base64图片
-                                if (content.ImageUrl.Url.StartsWith("data:image"))
-                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
-                                        new BinaryData(Convert.FromBase64String(content.ImageUrl.Url.Split(",")[1])),
-                                        "image/png"));
-                                else
-                                    messageContent.Add(ChatMessageContentPart.CreateImageMessageContentPart(
-                                        new Uri(content.ImageUrl.Url), content.ImageUrl.Detail));
-                            }
-                        }
-
-                        chatCompletionsOptions.Add(ChatMessage.CreateUserMessage(messageContent));
-                        break;
-                }
+                break;
             }
-        }
 
-        var chatCompletion = new ChatCompletionOptions();
-
-        if (chatCompletionCreate?.Tools is { Count: > 0 })
-        {
-            foreach (var tool in chatCompletionCreate.Tools)
+            if (line.StartsWith(":"))
             {
-                chatCompletion.Functions.Add(new(tool.Function?.Name)
-                {
-                    FunctionDescription = tool.Function?.Description,
-                    FunctionParameters = BinaryData.FromObjectAsJson(tool.Function?.Parameters)
-                });
-            }
-        }
-
-        await foreach (var response in client
-                           .CompleteChatStreamingAsync(chatCompletionsOptions, options: chatCompletion,
-                               cancellationToken: cancellationToken)
-                           .ConfigureAwait(false))
-        {
-            if (response.ContentUpdate is null)
                 continue;
-
-            foreach (var contentPart in response.ContentUpdate)
-            {
-                var message =
-                    new Thor.Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant",
-                        contentPart.Text)
-                    {
-                        FunctionCall = new FunctionCall()
-                        {
-                            Arguments = response.FunctionCallUpdate.FunctionArgumentsUpdate,
-                            Name = response.FunctionCallUpdate.FunctionName,
-                        },
-                        ToolCalls = response.ToolCallUpdates?.Select(x => new ToolCall()
-                        {
-                            FunctionCall = new FunctionCall()
-                            {
-                                Arguments = x.FunctionArgumentsUpdate,
-                                Name = x.FunctionName,
-                            },
-                            Id = x.Id
-                        }).Where(x => !string.IsNullOrEmpty(x.Id)).ToList()
-                    };
-
-                yield return new ChatCompletionCreateResponse()
-                {
-                    Usage = new UsageResponse(),
-                    Choices = new List<ChatChoiceResponse>()
-                    {
-                        new()
-                        {
-                            Message = message,
-                            Delta = message,
-                        }
-                    }
-                };
             }
+
+
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            var result = JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
+                ThorJsonSerializer.DefaultOptions);
+            yield return result;
         }
     }
 }

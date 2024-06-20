@@ -8,12 +8,18 @@ namespace Thor.AzureOpenAI;
 
 public static class AzureOpenAIFactory
 {
-    private static ConcurrentDictionary<string, AzureOpenAIClient> _clients = new();
+    private const string AddressTemplate = "{0}/openai/deployments/{1}/chat/completions?api-version={2}";
+    private static readonly ConcurrentDictionary<string, AzureOpenAIClient> Clients = new();
+
+    public static string GetAddress(ChatOptions options, string model)
+    {
+        return string.Format(AddressTemplate, options.Address.TrimEnd('/'), model, options.Other);
+    }
 
     public static AzureOpenAIClient CreateClient(ChatOptions options)
     {
         var key = $"{options.Key}_{options.Address}_{options.Other}";
-        return _clients.GetOrAdd(key, (_) =>
+        return Clients.GetOrAdd(key, (_) =>
         {
             var version = AzureOpenAIClientOptions.ServiceVersion.V2024_04_01_Preview;
 
@@ -30,7 +36,8 @@ public static class AzureOpenAIFactory
                     break;
             }
 
-            var client = new AzureOpenAIClient (new (options.Address), new AzureKeyCredential(options.Key),new AzureOpenAIClientOptions(version));
+            var client = new AzureOpenAIClient(new(options.Address), new AzureKeyCredential(options.Key),
+                new AzureOpenAIClientOptions(version));
 
             return client;
         });
