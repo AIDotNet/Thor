@@ -34,4 +34,19 @@ public sealed class RedisCache(RedisClient redis) : IServiceCache
             await redis.ExpireAsync(key, ttl.Value);
         }
     }
+
+    public async ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null)
+    {
+        // 实现
+        if (await redis.ExistsAsync(key))
+        {
+            return await GetAsync<T>(key);
+        }
+
+        var result = await factory();
+
+        await CreateAsync(key, result, ttl);
+
+        return result;
+    }
 }

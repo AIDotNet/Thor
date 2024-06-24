@@ -49,10 +49,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.LocalMemory.Cache", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.RedisMemory.Cache", "src\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj", "{84C27CF3-BD3C-46D6-A774-967DB5D3F060}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AppHost", "src\Thor.AppHost\Thor.AppHost.csproj", "{1C4C402F-6ADF-495D-AD44-02D517D9C33A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{C4094217-9E78-4660-84E4-EA36A676B5B7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,14 +119,6 @@ Global
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C4C402F-6ADF-495D-AD44-02D517D9C33A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4094217-9E78-4660-84E4-EA36A676B5B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

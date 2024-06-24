@@ -21,7 +21,6 @@ using Thor.Service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddServiceDefaults();
 builder.HostEnvironment();
 
 Log.Logger = new LoggerConfiguration()
@@ -62,6 +61,7 @@ builder.Services
     .AddTransient<ImageService>()
     .AddTransient<AuthorizeService>()
     .AddTransient<TokenService>()
+    .AddTransient<SystemService>()
     .AddTransient<ChatService>()
     .AddTransient<LoggerService>()
     .AddTransient<UserService>()
@@ -175,8 +175,6 @@ builder.Services.AddResponseCompression();
 
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
-
 using var scope = app.Services.CreateScope();
 
 if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
@@ -242,6 +240,7 @@ app.Use((async (context, next) =>
             context.Response.Redirect(ChatCoreOptions.Master);
             return;
         }
+
         await next(context);
     }
 }));
@@ -641,6 +640,20 @@ rateLimitModel.MapDelete("{id}", async (RateLimitModelService service, string id
 rateLimitModel.MapPut("/disable/{id}", async (RateLimitModelService service, string id) =>
         await service.Disable(id))
     .WithDescription("禁用|启用限流策略")
+    .WithOpenApi();
+
+#endregion
+
+#region System
+
+var system = app.MapGroup("/api/v1/system")
+    .WithGroupName("System")
+    .WithTags("System")
+    .AddEndpointFilter<ResultFilter>();
+
+system.MapPost("share", async (SystemService service, string userId, HttpContext context) =>
+        await service.ShareAsync(userId, context))
+    .WithDescription("触发分享获取奖励")
     .WithOpenApi();
 
 #endregion

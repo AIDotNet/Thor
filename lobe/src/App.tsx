@@ -20,6 +20,7 @@ import ModelPage from './pages/model/page'
 import DocMainLayout from './_layout/Home/@nav/default'
 import Auth from './pages/auth/page'
 import RateLimit from './pages/rate-limit/page'
+import SharePage from './pages/share'
 
 
 const router = createBrowserRouter([{
@@ -73,6 +74,9 @@ const router = createBrowserRouter([{
 }, {
   path: "/auth",
   element: <Auth />
+}, {
+  path: "/share",
+  element: <SharePage />
 }
 ])
 

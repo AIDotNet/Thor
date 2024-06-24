@@ -53,4 +53,25 @@ public sealed class MemoryCache(IMemoryCache memoryCache) : IServiceCache
 
         return new ValueTask();
     }
+
+    public async ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null)
+    {
+        if (memoryCache.TryGetValue(key, out T value))
+        {
+            return value;
+        }
+
+        var result = await factory();
+
+        if (ttl.HasValue)
+        {
+            memoryCache.Set(key, result, ttl.Value);
+        }
+        else
+        {
+            memoryCache.Set(key, result);
+        }
+
+        return result;
+    }
 }

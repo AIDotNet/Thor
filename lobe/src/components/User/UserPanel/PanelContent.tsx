@@ -2,10 +2,11 @@
 import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 import UserAvatar from '../UserAvatar';
-import { Button } from 'antd';
+import { message, Button } from 'antd';
 import { Tag } from '@lobehub/ui';
 import { useActiveUser } from '../../../hooks/useActiveTabKey';
 import { renderQuota } from '../../../utils/render';
+
 
 
 const PanelContent = memo<{ closePopover: () => void }>(({ }) => {
@@ -32,6 +33,30 @@ const PanelContent = memo<{ closePopover: () => void }>(({ }) => {
             </div>
           </div>
         </Flexbox>
+      </Flexbox>
+      <Flexbox
+        align={'center'}
+        horizontal
+        justify={'space-between'}
+        style={{ padding: '6px 6px 6px 6px' }}
+      >
+        <Button block onClick={() => {
+          // 设置粘贴板
+          const input = document.createElement('input');
+          document.body.appendChild(input);
+          // 获取当前https 和 host
+          const host = window.location.host;
+          const protocol = window.location.protocol;
+          const url = `${protocol}//${host}/share?userId=${user?.id}`;
+          input.value = url;
+          input.select();
+          document.execCommand('copy');
+          document.body.removeChild(input);
+          message.info('分享链接已复制到粘贴板');
+        }
+        }>
+          获取分享链接
+        </Button>
       </Flexbox>
       <Flexbox
         align={'center'}

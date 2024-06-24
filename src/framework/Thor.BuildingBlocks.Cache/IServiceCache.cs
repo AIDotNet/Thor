@@ -30,4 +30,14 @@ public interface IServiceCache
     /// 递增
     /// </summary>
     ValueTask IncrementAsync(string key, int value = 1, TimeSpan? ttl = null);
+
+    /// <summary>
+    /// 获取或者创建缓存，如果缓存不存在则创建
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="factory"></param>
+    /// <param name="ttl"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null);
 }
