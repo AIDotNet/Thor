@@ -7,7 +7,7 @@ namespace Thor.Service;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// 注册JWT Bearer认证服务的静态扩展方法
+    /// 注册自定义认证
     /// </summary>
     /// <param Name="services"></param>
     public static IServiceCollection AddCustomAuthentication(this IServiceCollection services)

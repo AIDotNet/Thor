@@ -1,5 +1,6 @@
 ﻿using System.Threading.Channels;
 using Thor.BuildingBlocks.Data;
+using Thor.Service.Options;
 
 namespace Thor.Service.EventBus;
 
@@ -52,6 +53,18 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
             if (!currentEvents.Any())
             {
                 return;
+            }
+
+            foreach (var chatLogger in currentEvents)
+            {
+                if (ChatCoreOptions.FreeModel?.EnableFree != true) continue;
+
+                var freeModel =
+                    ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(chatLogger.ModelName));
+                if (freeModel != null)
+                {
+                    chatLogger.Quota = 0;
+                }
             }
 
             var loggerDbContext = _serviceProvider.GetRequiredService<LoggerDbContext>();

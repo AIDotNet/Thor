@@ -1,4 +1,6 @@
-﻿namespace Thor.Service.Service;
+﻿using Thor.Service.Options;
+
+namespace Thor.Service.Service;
 
 public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache memoryCache)
     : ApplicationService(serviceProvider)
@@ -79,11 +81,12 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
     ///     校验Token 是否有效
     ///     检验账号额度是否足够
     /// </summary>
-    /// <param Name="context"></param>
+    /// <param name="context"></param>
+    /// <param name="model"></param>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
     /// <exception cref="InsufficientQuotaException"></exception>
-    public async ValueTask<(Token?, User)> CheckTokenAsync(HttpContext context)
+    public async ValueTask<(Token?, User)> CheckTokenAsync(HttpContext context, string model)
     {
         var key = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
 
@@ -151,6 +154,24 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
         {
             context.Response.StatusCode = 402;
             throw new InsufficientQuotaException("额度不足");
+        }
+
+        if (ChatCoreOptions.FreeModel?.EnableFree == true)
+        {
+            var item = ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(model));
+
+            if (item == null) return (token, user);
+
+            string freeKey = "FreeModal:" + user.Id;
+
+            var value = await memoryCache.GetAsync<int?>(freeKey);
+
+            // 如果超出限制则返回
+            if (value >= item.Limit)
+            {
+                context.Response.StatusCode = 402;
+                throw new InsufficientQuotaException("免费额度已用完");
+            }
         }
 
         return (token, user);

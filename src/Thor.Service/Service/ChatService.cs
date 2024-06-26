@@ -76,12 +76,12 @@ public sealed class ChatService(
     {
         try
         {
-            var (token, user) = await tokenService.CheckTokenAsync(context);
-
             using var body = new MemoryStream();
             await context.Request.Body.CopyToAsync(body);
 
             var module = JsonSerializer.Deserialize<ImageCreateRequest>(body.ToArray());
+
+            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
 
             if (module?.Model.IsNullOrEmpty() == true) module.Model = "dall-e-2";
 
@@ -127,7 +127,7 @@ public sealed class ChatService(
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
                 channel.Name);
 
-            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id);
+            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, module.Model);
         }
         catch (RateLimitException)
         {
@@ -157,7 +157,7 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
+            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight((await channelService.GetChannelsAsync())
@@ -222,7 +222,8 @@ public sealed class ChatService(
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                    module.Model);
             }
 
             await context.Response.WriteAsJsonAsync(stream);
@@ -255,7 +256,7 @@ public sealed class ChatService(
         {
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
+            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight((await channelService.GetChannelsAsync())
@@ -287,7 +288,8 @@ public sealed class ChatService(
                         requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                         channel.Name);
 
-                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
+                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                        module.Model);
                 }
             }
             else
@@ -342,7 +344,7 @@ public sealed class ChatService(
         {
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
+            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight((await channelService.GetChannelsAsync())
@@ -380,7 +382,8 @@ public sealed class ChatService(
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                    module.Model);
             }
             else
             {
@@ -589,7 +592,7 @@ public sealed class ChatService(
         }
 
         await context.WriteEndAsync();
-        
+
         var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 
         return (requestToken, responseToken);

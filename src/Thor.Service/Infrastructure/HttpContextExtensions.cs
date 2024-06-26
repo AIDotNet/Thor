@@ -46,12 +46,12 @@ public static class HttpContextExtensions
                 {
                     Message = new()
                     {
-                        ContentCalculated = message,
+                        Content = message,
                         Role = "assistant",
                     },
                     Delta =
                     {
-                        ContentCalculated = message,
+                        Content = message,
                         Role = "assistant",
                     },
                     FinishReason = "error",
@@ -79,12 +79,12 @@ public static class HttpContextExtensions
                 {
                     Message = new()
                     {
-                        ContentCalculated = message,
+                        Content = message,
                         Role = "assistant",
                     },
                     Delta =
                     {
-                        ContentCalculated = message,
+                        Content = message,
                         Role = "assistant",
                     },
                     FinishReason = "error",
