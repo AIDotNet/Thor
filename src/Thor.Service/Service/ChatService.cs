@@ -76,12 +76,12 @@ public sealed class ChatService(
     {
         try
         {
+            var (token, user) = await tokenService.CheckTokenAsync(context);
+
             using var body = new MemoryStream();
             await context.Request.Body.CopyToAsync(body);
 
             var module = JsonSerializer.Deserialize<ImageCreateRequest>(body.ToArray());
-
-            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
 
             if (module?.Model.IsNullOrEmpty() == true) module.Model = "dall-e-2";
 
@@ -157,7 +157,7 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
+            var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight((await channelService.GetChannelsAsync())
@@ -256,7 +256,7 @@ public sealed class ChatService(
         {
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
+            var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight((await channelService.GetChannelsAsync())
@@ -344,7 +344,7 @@ public sealed class ChatService(
         {
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context, module.Model);
+            var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight((await channelService.GetChannelsAsync())
