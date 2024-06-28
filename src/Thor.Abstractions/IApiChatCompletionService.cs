@@ -6,7 +6,7 @@ namespace Thor.Abstractions;
 public interface IApiChatCompletionService
 {
     /// <summary>
-    ///  The service Name
+    ///  服务名
     /// </summary>
     public static Dictionary<string, string> ServiceNames { get; } = new();
     
