@@ -126,7 +126,7 @@ export default function ChannelPage() {
       }
     },
     {
-      title: '权重',
+      title: '渠道权重',
       dataIndex: 'order',
       render: (value: any, item: any) => {
         return <InputNumber
@@ -327,21 +327,26 @@ export default function ChannelPage() {
           marginRight: '1rem',
         }} placeholder='搜索关键字'></Input>
       </Header>
-      <Table style={{
-        marginTop: '1rem',
-      }} columns={columns} dataSource={data} pagination={{
-        total: total,
-        pageSize: input.pageSize,
-        defaultPageSize: input.page,
-        onChange: (page, pageSize) => {
-          setInput({
-            ...input,
-            page,
-            pageSize,
-          });
-        },
+      <Table
+        style={{
+          marginTop: '1rem',
+        }}
+        columns={columns}
+        dataSource={data}
+        rowKey={row=>row.id}
+        pagination={{
+          total: total,
+          pageSize: input.pageSize,
+          defaultPageSize: input.page,
+          onChange: (page, pageSize) => {
+            setInput({
+              ...input,
+              page,
+              pageSize,
+            });
+          },
 
-      }} />
+        }} />
       <CreateChannel visible={createVisible} onSuccess={() => {
         setCreateVisible(false);
         loadingData();

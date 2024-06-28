@@ -16,6 +16,9 @@ public sealed class GetChatChannelDto : Entity<string>
     /// </summary>
     public string Type { get; set; }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string Name { get; set; }
 
     /// <summary>
@@ -27,6 +30,11 @@ public sealed class GetChatChannelDto : Entity<string>
     /// 响应时间
     /// </summary>
     public long? ResponseTime { get; set; }
+
+    /// <summary>
+    /// 密钥
+    /// </summary>
+    public string Key { get; set; } = string.Empty;
 
     /// <summary>
     /// 模型
