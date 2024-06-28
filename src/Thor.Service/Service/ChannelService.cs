@@ -36,7 +36,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             var result = await DbContext.Channels
                 .AsNoTracking()
-                .OrderByDescending(x => x.Id)
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -204,7 +204,10 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         }
 
 
-        if (string.IsNullOrWhiteSpace(chatHistory.Model)) chatHistory.Model = channel.Models.FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(chatHistory.Model))
+        {
+            chatHistory.Model = channel.Models.FirstOrDefault();
+        }
 
         // 写一个10s的超时
         var token = new CancellationTokenSource();
@@ -219,7 +222,10 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             .Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResponseTime, sw.ElapsedMilliseconds));
 
-        if (!string.IsNullOrWhiteSpace(response.Error?.Message)) throw new ChannelException(response.Error?.Message);
+        if (!string.IsNullOrWhiteSpace(response.Error?.Message))
+        {
+            throw new ChannelException(response.Error?.Message);
+        }
 
         return (response.Choices?.Count > 0,
             (int)sw.ElapsedMilliseconds);
