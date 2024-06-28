@@ -1,8 +1,12 @@
 ﻿using Thor.BuildingBlocks.Data;
+using Thor.Service.Options;
 
 namespace Thor.Service.Service;
 
-public sealed class LoggerService(IServiceProvider serviceProvider, IEventBus<ChatLogger> eventBus)
+public sealed class LoggerService(
+    IServiceProvider serviceProvider,
+    IEventBus<ChatLogger> eventBus,
+    IServiceCache serviceCache)
     : ApplicationService(serviceProvider)
 {
     public async ValueTask CreateAsync(ChatLogger logger)
@@ -15,6 +19,21 @@ public sealed class LoggerService(IServiceProvider serviceProvider, IEventBus<Ch
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
         int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName)
     {
+        if (ChatCoreOptions.FreeModel?.EnableFree == true)
+        {
+            var freeModel =
+                ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(model));
+            if (freeModel != null)
+            {
+                string key = "FreeModal:" + userId;
+                var result = await serviceCache.GetAsync<int?>(key) ?? 0;
+                if (result < freeModel.Limit)
+                {
+                    quota = 0;
+                }
+            }
+        }
+        
         var logger = new ChatLogger
         {
             Type = ChatLoggerType.Consume,

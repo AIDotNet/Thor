@@ -55,18 +55,6 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
                 return;
             }
 
-            foreach (var chatLogger in currentEvents)
-            {
-                if (ChatCoreOptions.FreeModel?.EnableFree != true) continue;
-
-                var freeModel =
-                    ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(chatLogger.ModelName));
-                if (freeModel != null)
-                {
-                    chatLogger.Quota = 0;
-                }
-            }
-
             var loggerDbContext = _serviceProvider.GetRequiredService<LoggerDbContext>();
             await loggerDbContext.Loggers.AddRangeAsync(currentEvents);
             await loggerDbContext.SaveChangesAsync();
