@@ -79,7 +79,7 @@ export default function ChannelPage() {
       }
     },
     {
-      title: 'AI类型',
+      title: '渠道类型',
       dataIndex: 'type',
       render: (value: any) => {
         return <Tag>{value}</Tag>

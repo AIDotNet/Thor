@@ -114,7 +114,7 @@ export default function UpdateChannel({
     return <Drawer
         open={visible}
         width={500}
-        title="编辑Channel"
+        title="编辑渠道(Channel)"
         onClose={() => onCancel()}
     >
         {
@@ -122,21 +122,38 @@ export default function UpdateChannel({
             <Form initialValues={value} onFinish={(values: any) => handleSubmit(values)} style={{ width: 400 }}>
 
                 <Form.Item<FieldType>
-                    label="渠道名"
+                    label="渠道名称"
                     name="name"
-                    rules={[{ required: true, message: '请输入渠道名称' }]}
+                    rules={[
+                        {
+                            required: true,
+                            message: '渠道名称不能为空'
+                        },
+                        {
+                            min: 3,
+                            message: '渠道名称长度不能小于3'
+                        }
+                    ]}
                 >
-                    <Input value={input.name} onChange={(v) => {
-                        setInput({ ...input, name: v.target.value })
-                    }} />
+                    <Input
+                        value={input.name}
+                        onChange={(v) => {
+                            setInput({ ...input, name: v.target.value })
+                        }}
+                        placeholder="请输入渠道名称"
+                    />
                 </Form.Item>
-                <Form.Item<FieldType> rules={[{
-                    required: true,
-                    message: '渠道名称不能为空'
-                }, {
-                    min: 3,
-                    message: '渠道名称长度不能小于3'
-                }]} name='type' label='渠道名称' style={{ width: '100%' }}>
+                <Form.Item<FieldType>
+                    rules={[
+                        {
+                            required: true,
+                            message: '渠道类型不能为空'
+                        },
+                    ]}
+                    name='type'
+                    label='渠道类型'
+                    style={{ width: '100%' }}
+                >
                     <Select
                         placeholder="请选择渠道类型"
                         value={input.type}
@@ -154,14 +171,14 @@ export default function UpdateChannel({
                 <Form.Item<FieldType>
                     label="代理地址"
                     name="address"
-                    rules={[{ required: true, message: '请输入代理地址' }]}
+                    rules={[{ required: true, message: '代理地址不能为空' }]}
                 >
                     <Input />
                 </Form.Item>
                 {
                     input.type === "AzureOpenAI" && <Form.Item<FieldType> name='other' label='版本' style={{ width: '100%' }}>
                         <Select
-                            placeholder="请选择渠道类型"
+                            placeholder="请选择版本"
                             value={input.type}
                             onChange={(v) => {
                                 setInput({ ...input, other: v });
@@ -196,7 +213,10 @@ export default function UpdateChannel({
                     name="key"
 
                 >
-                    <Input placeholder={getModelPrompt(input.type)} />
+                    <Input.Password
+                        placeholder={getModelPrompt(input.type)}
+                        autoComplete="new-password"
+                    />
                 </Form.Item>
                 <Form.Item<FieldType> name='models' label='模型' rules={[
                     {

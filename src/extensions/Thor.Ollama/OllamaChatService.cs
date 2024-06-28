@@ -40,7 +40,9 @@ namespace Thor.Ollama
             {
                 result = JsonSerializer.Deserialize<OllamaChatResponse>(data);
                 if (result == null)
+                {
                     throw new Exception("ollama chat result null");
+                }
             }
             catch (Exception)
             {
@@ -204,6 +206,7 @@ namespace Thor.Ollama
         public DateTime created_at { get; set; }
         public OllamaChatResponseMessage? message { get; set; }
         public bool done { get; set; }
+        public string done_reason { get; set; }
         public long? total_duration { get; set; }
         public int? load_duration { get; set; }
         public int? prompt_eval_count { get; set; }
