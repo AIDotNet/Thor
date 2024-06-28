@@ -261,20 +261,24 @@ export default function TokenPage() {
       </Header>
       <Table style={{
         marginTop: '1rem',
-      }} 
-      columns={columns} dataSource={data} rowSelection={rowSelection} pagination={{
-        total: total,
-        pageSize: input.pageSize,
-        defaultPageSize: input.page,
-        onChange: (page, pageSize) => {
-          setInput({
-            ...input,
-            page,
-            pageSize,
-          });
-        },
+      }}
+        columns={columns}
+        dataSource={data}
+        rowKey={row=>row.id}
+        rowSelection={rowSelection}
+        pagination={{
+          total: total,
+          pageSize: input.pageSize,
+          defaultPageSize: input.page,
+          onChange: (page, pageSize) => {
+            setInput({
+              ...input,
+              page,
+              pageSize,
+            });
+          },
 
-      }} />
+        }} />
       <CreateToken visible={createTokenVisible}
         onSuccess={() => {
           setCreateTokenVisible(false);
