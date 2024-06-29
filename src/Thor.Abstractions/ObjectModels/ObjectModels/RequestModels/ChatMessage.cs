@@ -100,7 +100,11 @@ public class ChatMessage
                     Contents = JsonSerializer.Deserialize<IList<MessageContent>>(value?.ToString());
                 }
             }
-            
+            else
+            {
+                Content = value?.ToString();
+            }
+
         }
     }
 
