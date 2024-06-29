@@ -33,8 +33,8 @@ public static class HttpContextExtensions
             }
         };
 
-        var contentType = "text/event-stream";
-        context.Response.Headers.TryAdd("Content-Type", contentType);
+        context.Response.Headers.ContentType = "text/event-stream";
+
         await context.Response.WriteAsync(
             "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
     }
@@ -68,8 +68,7 @@ public static class HttpContextExtensions
             }
         };
 
-        var contentType = "text/event-stream";
-        context.Response.Headers.TryAdd("Content-Type", contentType);
+        context.Response.Headers.ContentType = "text/event-stream";
 
         await context.Response.WriteAsync(
             "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
