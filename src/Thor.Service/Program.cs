@@ -21,6 +21,8 @@ using Thor.Service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.HostEnvironment();
 
 Log.Logger = new LoggerConfiguration()
@@ -174,6 +176,8 @@ else
 builder.Services.AddResponseCompression();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 using var scope = app.Services.CreateScope();
 
