@@ -1,7 +1,9 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Thor.Abstractions;
+using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
@@ -19,6 +21,18 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.Key);
 
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            throw new PaymentRequiredException();
+        }
+
+        response.EnsureSuccessStatusCode();
+
         var result =
             await response.Content.ReadFromJsonAsync<ChatCompletionCreateResponse>(
                 cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -35,6 +49,18 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         var response = await client.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.Key);
 
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            throw new PaymentRequiredException();
+        }
+
+        response.EnsureSuccessStatusCode();
+
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
@@ -48,10 +74,10 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
                 // 如果是json数据则直接返回
                 yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
                     ThorJsonSerializer.DefaultOptions);
-                
+
                 break;
             }
-            
+
             if (line.StartsWith("data:"))
                 line = line["data:".Length..];
 
@@ -66,7 +92,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
             {
                 continue;
             }
-            
+
 
             if (string.IsNullOrWhiteSpace(line)) continue;
 

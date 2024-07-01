@@ -55,7 +55,6 @@
     <ProjectReference Include="..\framework\Thor.LocalMemory.Cache\Thor.LocalMemory.Cache.csproj" />
     <ProjectReference Include="..\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj" />
     <ProjectReference Include="..\Thor.Abstractions\Thor.Abstractions.csproj" />
-    <ProjectReference Include="..\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>

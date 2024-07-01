@@ -59,10 +59,7 @@ public static class ServiceCollectionExtensions
                 options => { options.Timeout = TimeSpan.FromMinutes(6); })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
-                MaxConnectionsPerServer = 300,
-                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(10),
-                PooledConnectionLifetime = TimeSpan.FromMinutes(30),
+                AutomaticDecompression = DecompressionMethods.GZip,
                 EnableMultipleHttp2Connections = true,
             });
 

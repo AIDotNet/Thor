@@ -22,9 +22,10 @@ public static class StatisticsService
 
         // 获取七天的日期范围
         var today = DateTime.Now.Date;
+        var sevenDaysAgo = DateTime.Now.Date.AddDays(-7);
 
         var userQuery = dbContext.StatisticsConsumesNumbers
-            .Where(log => log.Year == today.Year && log.Month == today.Month && log.Day > today.Day - 7); // 七天的日志
+            .Where(log => log.CreatedAt >= sevenDaysAgo);
 
         if (!userContext.IsAdmin) userQuery = userQuery.Where(log => log.Creator == userContext.CurrentUserId);
 
@@ -108,7 +109,7 @@ public static class StatisticsService
         // 统计用户的模型数据
 
         var query = dbContext.ModelStatisticsNumbers
-            .Where(log => log.Year == today.Year && log.Month == today.Month && log.Day > today.Day - 7); // 七天的日志
+            .Where(log =>  log.CreatedAt >= sevenDaysAgo); // 七天的日志
 
         if (!userContext.IsAdmin) query = query.Where(log => log.Creator == userContext.CurrentUserId);
 
