@@ -21,6 +21,8 @@ using Thor.Service.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.HostEnvironment();
 
 Log.Logger = new LoggerConfiguration()
@@ -177,6 +179,8 @@ else
 builder.Services.AddResponseCompression();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 using var scope = app.Services.CreateScope();
 
@@ -567,7 +571,7 @@ product.MapGet(string.Empty, async (ProductService service) =>
     .WithOpenApi()
     .RequireAuthorization();
 
-product.MapPost(string.Empty, async (ProductService service, Product product) =>
+product.MapPost(string.Empty,  (ProductService service, Product product) =>
         service.Create(product))
     .WithDescription("创建产品")
     .WithOpenApi()
@@ -576,7 +580,7 @@ product.MapPost(string.Empty, async (ProductService service, Product product) =>
         Roles = RoleConstant.Admin
     });
 
-product.MapPut(string.Empty, async ([FromServices] ProductService service, [FromBody] Product product) =>
+product.MapPut(string.Empty,  ([FromServices] ProductService service, [FromBody] Product product) =>
     service.Update(product))
     .WithDescription("更新产品")
     .WithOpenApi()

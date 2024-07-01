@@ -1,4 +1,6 @@
-﻿namespace Thor.Service.Service;
+﻿using Thor.Service.Options;
+
+namespace Thor.Service.Service;
 
 public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache memoryCache)
     : ApplicationService(serviceProvider)
@@ -79,7 +81,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
     ///     校验Token 是否有效
     ///     检验账号额度是否足够
     /// </summary>
-    /// <param Name="context"></param>
+    /// <param name="context"></param>
     /// <returns></returns>
     /// <exception cref="UnauthorizedAccessException"></exception>
     /// <exception cref="InsufficientQuotaException"></exception>

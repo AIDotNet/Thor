@@ -11,6 +11,34 @@ public class ChatCoreOptions
     public static string Master { get; set; }
 
     public static Shared? Shared { get; set; }
+    
+    public static FreeModel? FreeModel { get; set; }
+}
+
+public sealed class FreeModel
+{
+    /// <summary>
+    /// 是否启用免费模式
+    /// </summary>
+    public bool EnableFree { get; set; }
+
+    /// <summary>
+    /// 免费模型列表
+    /// </summary>
+    public FreeModelItem[]? Items { get; set; }
+}
+
+public sealed class FreeModelItem
+{
+    /// <summary>
+    /// 模型
+    /// </summary>
+    public string[] Model { get; set; }
+    
+    /// <summary>
+    /// 免费次数（超出免费额度则按照收费）
+    /// </summary>
+    public int Limit { get; set; }
 }
 
 public sealed class Shared

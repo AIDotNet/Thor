@@ -1,9 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
+using Thor.Service.Options;
 
 namespace Thor.Service.Service;
 
 public partial class UserService(
     IServiceProvider serviceProvider,
+    IServiceCache cache,
     LoggerService loggerService,
     TokenService tokenService)
     : ApplicationService(serviceProvider)
@@ -88,10 +91,54 @@ public partial class UserService(
     /// <param name="consumeToken"></param>
     /// <param name="token"></param>
     /// <param name="channelId"></param>
+    /// <param name="model">模型</param>
     /// <returns></returns>
     public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string? token,
-        string channelId)
+        string channelId, string model)
     {
+        string key = "FreeModal:" + id;
+        if (ChatCoreOptions.FreeModel?.EnableFree == true)
+        {
+            var item = ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(model));
+            if (item != null)
+            {
+                // 获取当前时间到当天结束的时间
+                var now = DateTime.Now;
+                var end = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59);
+                var remain = end - now;
+
+                var value = await cache.GetOrCreateAsync(key, async () => await Task.FromResult(0), remain);
+
+                // 如果没有超过限制则扣除免费次数然后返回
+                if (value < item.Limit)
+                {
+                    await cache.IncrementAsync(key);
+
+                    await DbContext
+                        .Users
+                        .Where(x => x.Id == id && x.ResidualCredit >= consume)
+                        .ExecuteUpdateAsync(x =>
+                            x.SetProperty(y => y.RequestCount, y => y.RequestCount + 1)
+                                .SetProperty(y => y.ConsumeToken, y => y.ConsumeToken + consumeToken));
+
+                    if (!string.IsNullOrEmpty(token))
+                        await DbContext
+                            .Tokens.Where(x => x.Key == token)
+                            .ExecuteUpdateAsync(x =>
+                                x.SetProperty(y => y.RemainQuota, y => y.RemainQuota - consume)
+                                    .SetProperty(y => y.AccessedTime, DateTime.Now)
+                                    .SetProperty(y => y.UsedQuota, y => y.UsedQuota + consume));
+
+                    await DbContext
+                        .Channels
+                        .Where(x => x.Id == channelId)
+                        .ExecuteUpdateAsync(x => x.SetProperty(y => y.Quota, y => y.Quota + consume));
+
+                    return true;
+                }
+            }
+        }
+
         var result = await DbContext
             .Users
             .Where(x => x.Id == id && x.ResidualCredit >= consume)

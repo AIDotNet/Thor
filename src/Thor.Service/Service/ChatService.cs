@@ -127,7 +127,7 @@ public sealed class ChatService(
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
                 channel.Name);
 
-            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id);
+            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, module.Model);
         }
         catch (RateLimitException)
         {
@@ -222,7 +222,8 @@ public sealed class ChatService(
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                    module.Model);
             }
 
             await context.Response.WriteAsJsonAsync(stream);
@@ -290,7 +291,8 @@ public sealed class ChatService(
                         requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                         channel.Name);
 
-                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
+                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                        module.Model);
                 }
             }
             else
@@ -386,7 +388,8 @@ public sealed class ChatService(
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id);
+                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                    module.Model);
             }
             else
             {
@@ -595,7 +598,7 @@ public sealed class ChatService(
         }
 
         await context.WriteEndAsync();
-        
+
         var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 
         return (requestToken, responseToken);
