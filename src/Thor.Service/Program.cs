@@ -51,8 +51,11 @@ else if (CacheOptions.Type.Equals("Redis", StringComparison.OrdinalIgnoreCase))
     builder.Services.AddRedisMemory(CacheOptions.ConnectionString);
 }
 
+builder.Services.AddMvcCore().AddApiExplorer();
 
 builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen()
     .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>()
     .AddLocalEventBus()
     .AddCustomAuthentication()
@@ -681,5 +684,9 @@ app.MapPost("/v1/images/generations", async (ChatService imageService, HttpConte
     .WithDescription("OpenAI")
     .WithDescription("Image")
     .WithOpenApi();
+
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 await app.RunAsync();

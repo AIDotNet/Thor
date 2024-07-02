@@ -250,7 +250,10 @@ public sealed class ChatService(
 
         var module = JsonSerializer.Deserialize<CompletionCreateRequest>(body.ToArray());
 
-        if (module == null) throw new Exception("模型校验异常");
+        if (module == null)
+        {
+            throw new Exception("模型校验异常");
+        }
 
         try
         {
@@ -338,7 +341,10 @@ public sealed class ChatService(
 
         var module = JsonSerializer.Deserialize<ChatCompletionCreateRequest>(body.ToArray());
 
-        if (module == null) throw new Exception("模型校验异常");
+        if (module == null)
+        {
+            throw new Exception("模型校验异常");
+        }
 
         try
         {
