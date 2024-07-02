@@ -19,7 +19,8 @@ namespace Thor.SparkDesk.API
         V1_5,
         V2_0,
         V3_0,
-        V3_5
+        V3_5,
+        V4_0_Ultra
     }
 
     public class XFSparkDeskHostURL
@@ -28,6 +29,7 @@ namespace Thor.SparkDesk.API
         public const string Chat_V2_0 = "wss://spark-api.xf-yun.com/v2.1/chat";
         public const string Chat_V3_0 = "wss://spark-api.xf-yun.com/v3.1/chat";
         public const string Chat_V3_5 = "wss://spark-api.xf-yun.com/v3.5/chat";
+        public const string Chat_V4_0_Ultra = "wss://spark-api.xf-yun.com/v4.0/chat";
         public const string ImageGeneration_V2_1 = "https://spark-api.cn-huabei-1.xf-yun.com/v2.1/tti";
         public const string ImageAnalysis_V2_1 = "wss://spark-api.cn-huabei-1.xf-yun.com/v2.1/image";
         public const string Embedding = "https://emb-cn-huabei-1.xf-yun.com";
