@@ -334,18 +334,8 @@ public sealed class ChatService(
         return (requestToken, responseToken);
     }
 
-    public async ValueTask ChatCompletionsAsync(HttpContext context)
+    public async ValueTask ChatCompletionsAsync(HttpContext context, ChatCompletionCreateRequest module)
     {
-        using var body = new MemoryStream();
-        await context.Request.Body.CopyToAsync(body);
-
-        var module = JsonSerializer.Deserialize<ChatCompletionCreateRequest>(body.ToArray());
-
-        if (module == null)
-        {
-            throw new Exception("模型校验异常");
-        }
-
         try
         {
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
