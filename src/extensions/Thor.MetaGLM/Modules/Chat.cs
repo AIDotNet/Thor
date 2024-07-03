@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.ResponseModels;
 
@@ -18,6 +19,8 @@ public class Chat
             new MessageItemConverter()
         },
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         WriteIndented = true,
     };
 
@@ -30,23 +33,16 @@ public class Chat
 
         var json = JsonSerializer.Serialize(textRequestBody, JsonOptions);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
-        var token = string.IsNullOrEmpty(apiKey)
-            ? string.Empty
-            : AuthenticationUtils.GenerateToken(apiKey, API_TOKEN_TTL_SECONDS);
-
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
             RequestUri = requestUri,
-            Content = data,
-            Headers =
-            {
-            },
+            Content = data
         };
 
-        if (!string.IsNullOrEmpty(token))
+        if (!string.IsNullOrEmpty(apiKey))
         {
-            request.Headers.Add("Authorization", token);
+            request.Headers.Add("Authorization", "Bearer " + apiKey);
         }
 
         var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);

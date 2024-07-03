@@ -9,8 +9,8 @@ namespace Thor.MetaGLM.Models.RequestModels
         public MessageItem[] messages { get; private set; }
         public List<FunctionTool> tools { get; private set; }
         public string tool_choice { get; private set; }
-        public double top_p { get; private set; }
-        public double temperature { get; private set; }
+        public double? top_p { get; private set; }
+        public double? temperature { get; private set; }
 
         public bool stream { get; set; }
 

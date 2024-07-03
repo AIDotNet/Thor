@@ -154,11 +154,6 @@ export default function CreateChannel({
             <Form.Item<FieldType>
                 label="代理地址"
                 name="address"
-                rules={[
-                    {
-                        required: true,
-                        message: '代理地址不能为空'
-                    }]}
             >
                 <Input
                     placeholder="请输入代理地址"
