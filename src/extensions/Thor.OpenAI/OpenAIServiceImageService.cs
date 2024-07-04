@@ -15,7 +15,7 @@ public class OpenAIServiceImageService(IHttpClientFactory httpClientFactory) : I
     {
         var response = await HttpClient.PostJsonAsync(
             options.Address?.TrimEnd('/') + "/v1/images/generations",
-            imageCreate, options.Key);
+            imageCreate, options.ApiKey);
         
         var result = await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
         

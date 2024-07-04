@@ -110,7 +110,7 @@ public sealed class ChatService(
 
             var response = await openService.CreateImage(module, new ChatOptions
             {
-                Key = channel.Key,
+                ApiKey = channel.Key,
                 Address = channel.Address,
                 Other = channel.Other
             }, context.RequestAborted);
@@ -202,7 +202,7 @@ public sealed class ChatService(
 
             var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ChatOptions
             {
-                Key = channel.Key,
+                ApiKey = channel.Key,
                 Address = channel.Address,
                 Other = channel.Other
             }, context.RequestAborted);
@@ -320,7 +320,7 @@ public sealed class ChatService(
     {
         var setting = new ChatOptions
         {
-            Key = channel.Key,
+            ApiKey = channel.Key,
             Address = channel.Address,
             Other = channel.Other
         };
@@ -434,7 +434,7 @@ public sealed class ChatService(
 
         var setting = new ChatOptions
         {
-            Key = channel.Key,
+            ApiKey = channel.Key,
             Address = channel.Address,
             Other = channel.Other
         };
@@ -521,7 +521,7 @@ public sealed class ChatService(
 
         var setting = new ChatOptions
         {
-            Key = channel.Key,
+            ApiKey = channel.Key,
             Address = channel.Address,
             Other = channel.Other
         };

@@ -17,7 +17,7 @@ public sealed class ClaudiaService : IApiChatCompletionService
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var anthropic = AnthropicFactory.CreateClient(options.Key, options.Address);
+        var anthropic = AnthropicFactory.CreateClient(options.ApiKey, options.Address);
         var tools = new List<Tool>();
 
         if (input.Tools != null)
@@ -105,7 +105,7 @@ public sealed class ClaudiaService : IApiChatCompletionService
         ChatCompletionCreateRequest input, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var anthropic = AnthropicFactory.CreateClient(options.Key, options.Address);
+        var anthropic = AnthropicFactory.CreateClient(options.ApiKey, options.Address);
         var tools = new List<Tool>();
 
         if (input.Tools != null)

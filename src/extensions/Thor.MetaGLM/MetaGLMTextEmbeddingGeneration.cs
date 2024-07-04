@@ -25,7 +25,7 @@ public class MetaGLMTextEmbeddingGeneration : IApiTextEmbeddingGeneration
         var embeddingRequestBase = new EmbeddingRequestBase();
         embeddingRequestBase.SetModel(createEmbeddingModel.Model);
         embeddingRequestBase.SetInput(createEmbeddingModel.Input);
-        var response = _openAiOptions.Client!.Embeddings.Process(embeddingRequestBase, options.Key);
+        var response = _openAiOptions.Client!.Embeddings.Process(embeddingRequestBase, options.ApiKey);
         var embeddingCreateResponse = new EmbeddingCreateResponse
         {
             Model = createEmbeddingModel.Model,

@@ -15,7 +15,7 @@ public sealed class OpenAIServiceCompletionService(IHttpClientFactory httpClient
         var client = httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
 
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
-            createCompletionModel, options.Key);
+            createCompletionModel, options.ApiKey);
 
         var result = await response.Content.ReadFromJsonAsync<CompletionCreateResponse>(
             cancellationToken: cancellationToken).ConfigureAwait(false);

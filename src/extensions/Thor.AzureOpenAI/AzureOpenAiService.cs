@@ -19,7 +19,7 @@ public class AzureOpenAiService(IHttpClientFactory httpClientFactory) : IApiChat
 
         chatCompletionCreate.Model = null;
 
-        var response = await client.PostJsonAsync(url, chatCompletionCreate, options.Key, "Api-Key");
+        var response = await client.PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
 
         var result = await response.Content
             .ReadFromJsonAsync<ChatCompletionCreateResponse>(cancellationToken: cancellationToken)
@@ -39,7 +39,7 @@ public class AzureOpenAiService(IHttpClientFactory httpClientFactory) : IApiChat
         chatCompletionCreate.Model = null;
         
         var response = await client.HttpRequestRaw(url,
-            chatCompletionCreate, options.Key,"Api-Key");
+            chatCompletionCreate, options.ApiKey,"Api-Key");
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 

@@ -32,7 +32,7 @@ namespace Thor.Ollama
                     top_p = chatCompletionCreate.TopP,
                     temperature = chatCompletionCreate.Temperature,
                 }
-            }, options?.Key ?? "");
+            }, options?.ApiKey ?? "");
 
             OllamaChatResponse? result;
             var data = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -94,7 +94,7 @@ namespace Thor.Ollama
                     top_p = chatCompletionCreate.TopP,
                     temperature = chatCompletionCreate.Temperature,
                 }
-            }, options?.Key ?? "");
+            }, options?.ApiKey ?? "");
 
             using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
             string? line = string.Empty;

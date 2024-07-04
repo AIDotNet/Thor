@@ -2,7 +2,10 @@
 
 public class ChatOptions
 {
-    public string? Key { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? ApiKey { get; set; }
 
     /// <summary>
     /// 地址

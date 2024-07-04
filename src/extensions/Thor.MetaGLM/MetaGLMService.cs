@@ -1,9 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Thor.Abstractions;
-using Thor.Abstractions.Dto;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using OpenAI.ObjectModels.RequestModels;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;
 using ChatCompletionCreateResponse = Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
@@ -80,7 +77,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
             }
         }
 
-        var result = await _openAiOptions.Client?.Chat.Completion(dto, options.Key, options.Address);
+        var result = await _openAiOptions.Client?.Chat.Completion(dto, options.ApiKey, options.Address);
 
         if (result.error != null)
         {
@@ -182,7 +179,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
             }
         }
 
-        await foreach (var result in _openAiOptions.Client?.Chat.Stream(dto, options.Key, options.Address))
+        await foreach (var result in _openAiOptions.Client?.Chat.Stream(dto, options.ApiKey, options.Address))
         {
             var tools = new List<ToolCall>();
             foreach (var choiceItem in result.choices)

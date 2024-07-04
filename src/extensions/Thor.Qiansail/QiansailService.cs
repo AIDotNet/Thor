@@ -13,7 +13,7 @@ namespace Thor.Qiansail
             ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            using DashScopeClient client = new(options!.Key!);
+            using DashScopeClient client = new(options!.ApiKey!);
 
             if (chatCompletionCreate.TopP >= 1)
             {
@@ -60,7 +60,7 @@ namespace Thor.Qiansail
             ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-            using DashScopeClient client = new(options!.Key!);
+            using DashScopeClient client = new(options!.ApiKey!);
 
             if (chatCompletionCreate.TopP >= 1)
             {

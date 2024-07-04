@@ -18,7 +18,7 @@ public static class AzureOpenAIFactory
 
     public static AzureOpenAIClient CreateClient(ChatOptions options)
     {
-        var key = $"{options.Key}_{options.Address}_{options.Other}";
+        var key = $"{options.ApiKey}_{options.Address}_{options.Other}";
         return Clients.GetOrAdd(key, (_) =>
         {
             var version = AzureOpenAIClientOptions.ServiceVersion.V2024_04_01_Preview;
@@ -36,7 +36,7 @@ public static class AzureOpenAIFactory
                     break;
             }
 
-            var client = new AzureOpenAIClient(new(options.Address), new AzureKeyCredential(options.Key),
+            var client = new AzureOpenAIClient(new(options.Address), new AzureKeyCredential(options.ApiKey),
                 new AzureOpenAIClientOptions(version));
 
             return client;

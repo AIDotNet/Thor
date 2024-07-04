@@ -17,7 +17,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         var client = httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
 
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
-            chatCompletionCreate, options.Key);
+            chatCompletionCreate, options.ApiKey);
 
         var result =
             await response.Content.ReadFromJsonAsync<ChatCompletionCreateResponse>(
@@ -33,7 +33,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         var client = httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
 
         var response = await client.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
-            chatCompletionCreate, options.Key);
+            chatCompletionCreate, options.ApiKey);
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 

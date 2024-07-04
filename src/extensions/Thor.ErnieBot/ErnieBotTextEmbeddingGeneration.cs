@@ -12,7 +12,7 @@ public class ErnieBotTextEmbeddingGeneration : IApiTextEmbeddingGeneration
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var keys = options!.Key!.Split("|");
+        var keys = options!.ApiKey!.Split("|");
 
         if (keys.Length != 2)
             throw new Exception("Key is invalid format, expected ClientId|ClientSecret");

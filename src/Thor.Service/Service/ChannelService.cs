@@ -135,7 +135,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         var setting = new ChatOptions
         {
             Address = channel.Address,
-            Key = channel.Key,
+            ApiKey = channel.Key,
             Other = channel.Other
         };
 

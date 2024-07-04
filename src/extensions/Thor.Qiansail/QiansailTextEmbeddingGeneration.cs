@@ -12,7 +12,7 @@ public class QiansailTextEmbeddingGeneration : IApiTextEmbeddingGeneration
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        using DashScopeClient client = new(options!.Key!);
+        using DashScopeClient client = new(options!.ApiKey!);
 
         var result = await client.TextEmbedding.GetEmbeddings(new EmbeddingRequest
         {

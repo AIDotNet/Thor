@@ -14,7 +14,7 @@ public class HunyuanService : IApiChatCompletionService
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var keys = options!.Key.Split("|");
+        var keys = options!.ApiKey.Split("|");
 
         if (keys.Length != 2)
             throw new Exception("Key is invalid  format, expected secretId|secretKey");
@@ -70,7 +70,7 @@ public class HunyuanService : IApiChatCompletionService
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var keys = options!.Key.Split("|");
+        var keys = options!.ApiKey.Split("|");
 
         if (keys.Length != 2)
             throw new Exception("Key is invalid  format, expected secretId|secretKey");
