@@ -27,24 +27,24 @@ public sealed class MetaGLMService : IApiChatCompletionService
         CancellationToken cancellationToken = default)
     {
         var dto = new TextRequestBase();
-        dto.SetRequestId(Guid.NewGuid().ToString());
+        dto.request_id = Guid.NewGuid().ToString();
 
-        dto.SetMessages(input.Messages.Select(x => new MessageItem
+        dto.messages.AddRange(input.Messages.Select(x => new MessageItem
         {
             content = x.Content,
             role = x.Role.ToString()
-        }).ToArray());
+        }).ToList());
 
-        dto.SetModel(input.Model);
+        dto.model = input.Model;
 
-        if (input.Temperature != null)
+        if (input.Temperature.HasValue)
         {
-            dto.SetTemperature(input.Temperature.Value);
+            dto.temperature = input.Temperature.Value;
         }
 
-        if (input.TopP != null)
+        if (input.TopP.HasValue)
         {
-            dto.SetTopP(input.TopP.Value);
+            dto.top_p = input.TopP.Value;
         }
 
         if (input.Tools != null)
@@ -82,7 +82,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
 
         var result = await _openAiOptions.Client?.Chat.Completion(dto, options.Key, options.Address);
 
-        if(result.error != null)
+        if (result.error != null)
         {
             throw new Exception($"code:{result.error["code"]},message:{result.error["message"]}");
         }
@@ -90,7 +90,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
         var tools = new List<ToolCall>();
         foreach (var choiceItem in result.choices)
         {
-            if(choiceItem.message.tool_calls == null)
+            if (choiceItem.message.tool_calls == null)
             {
                 continue;
             }
@@ -130,25 +130,23 @@ public sealed class MetaGLMService : IApiChatCompletionService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var dto = new TextRequestBase();
-        dto.SetRequestId(Guid.NewGuid().ToString());
-        dto.SetMessages(input.Messages.Select(x => new MessageItem
+        dto.request_id = Guid.NewGuid().ToString();
+        dto.messages.AddRange(input.Messages.Select(x => new MessageItem
         {
             content = x.Content!,
             role = x.Role.ToString()
-        }).ToArray());
-        dto.SetModel(input.Model!);
-        if (input.Temperature != null)
+        }).ToList());
+
+        dto.model = input.Model!;
+
+        if (input.Temperature.HasValue)
         {
-            dto.SetTemperature(input.Temperature.Value);
+            dto.temperature = input.Temperature.Value;
         }
 
-        if (input.TopP != null)
+        if (input.TopP.HasValue)
         {
-            dto.SetTopP(input.TopP.Value);
-        }
-        else
-        {
-            dto.SetTopP(0.7f);
+            dto.top_p = input.TopP.Value;
         }
 
         if (input.Tools != null)
@@ -189,7 +187,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
             var tools = new List<ToolCall>();
             foreach (var choiceItem in result.choices)
             {
-                if(choiceItem.delta.tool_calls is null)
+                if (choiceItem.delta.tool_calls is null)
                 {
                     continue;
                 }
