@@ -72,7 +72,8 @@ public sealed class ChatService(
         }
     };
 
-    public async ValueTask ImageAsync(HttpContext context, ImageCreateRequest module)
+
+    public async ValueTask CreateImageAsync(HttpContext context, ImageCreateRequest module)
     {
         try
         {

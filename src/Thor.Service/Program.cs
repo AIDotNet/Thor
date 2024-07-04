@@ -683,7 +683,7 @@ app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext c
 
 app.MapPost("/v1/images/generations",
         async (ChatService imageService, HttpContext context, ImageCreateRequest module) =>
-            await imageService.ImageAsync(context, module))
+            await imageService.CreateImageAsync(context, module))
     .WithDescription("OpenAI")
     .WithDescription("Image")
     .WithOpenApi();
