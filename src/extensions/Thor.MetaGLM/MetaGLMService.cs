@@ -28,12 +28,15 @@ public sealed class MetaGLMService : IApiChatCompletionService
     {
         var dto = new TextRequestBase();
         dto.SetRequestId(Guid.NewGuid().ToString());
+
         dto.SetMessages(input.Messages.Select(x => new MessageItem
         {
             content = x.Content,
             role = x.Role.ToString()
         }).ToArray());
+
         dto.SetModel(input.Model);
+
         if (input.Temperature != null)
         {
             dto.SetTemperature(input.Temperature.Value);
@@ -41,7 +44,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
 
         if (input.TopP != null)
         {
-            dto.SetTopP((double)input.TopP);
+            dto.SetTopP(input.TopP.Value);
         }
 
         if (input.Tools != null)
@@ -79,10 +82,20 @@ public sealed class MetaGLMService : IApiChatCompletionService
 
         var result = await _openAiOptions.Client?.Chat.Completion(dto, options.Key, options.Address);
 
+        if(result.error != null)
+        {
+            throw new Exception($"code:{result.error["code"]},message:{result.error["message"]}");
+        }
+
         var tools = new List<ToolCall>();
         foreach (var choiceItem in result.choices)
         {
-            tools.AddRange(choiceItem.delta.tool_calls.Select(x => new ToolCall()
+            if(choiceItem.message.tool_calls == null)
+            {
+                continue;
+            }
+
+            tools.AddRange(choiceItem.message?.tool_calls?.Select(x => new ToolCall()
             {
                 Id = x.id,
                 Type = x.type,
@@ -100,10 +113,10 @@ public sealed class MetaGLMService : IApiChatCompletionService
             [
                 new()
                 {
-                    Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.delta.content ?? string.Empty,
+                    Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.message.content ?? string.Empty,
                         null, tools),
                     Message = new ChatMessage("assistant",
-                        result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
+                        result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
                     FinishReason = "stop",
                     Index = 0,
                 }
@@ -131,7 +144,11 @@ public sealed class MetaGLMService : IApiChatCompletionService
 
         if (input.TopP != null)
         {
-            dto.SetTopP((double)input.TopP);
+            dto.SetTopP(input.TopP.Value);
+        }
+        else
+        {
+            dto.SetTopP(0.7f);
         }
 
         if (input.Tools != null)
@@ -172,6 +189,11 @@ public sealed class MetaGLMService : IApiChatCompletionService
             var tools = new List<ToolCall>();
             foreach (var choiceItem in result.choices)
             {
+                if(choiceItem.delta.tool_calls is null)
+                {
+                    continue;
+                }
+
                 tools.AddRange(choiceItem.delta.tool_calls.Select(x => new ToolCall()
                 {
                     Id = x.id,

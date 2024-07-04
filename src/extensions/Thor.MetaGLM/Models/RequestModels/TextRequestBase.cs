@@ -9,8 +9,8 @@ namespace Thor.MetaGLM.Models.RequestModels
         public MessageItem[] messages { get; private set; }
         public List<FunctionTool> tools { get; private set; }
         public string tool_choice { get; private set; }
-        public double top_p { get; private set; }
-        public double temperature { get; private set; }
+        public float top_p { get; private set; }
+        public float temperature { get; private set; }
 
         public bool stream { get; set; }
 
@@ -49,21 +49,26 @@ namespace Thor.MetaGLM.Models.RequestModels
             return this;
         }
 
-        public TextRequestBase SetTopP(double topP)
+        public TextRequestBase SetTopP(float topP)
         {
-            if (topP is <= 0.0 or >= 1.0)
+            // 智谱AI开放平台:https://open.bigmodel.cn/dev/api#glm-4
+            // 默认值为 0.7
+
+            if (topP is <= 0.0f or >= 1.0f)
             {
-                topP = 0.1;
+                topP = 0.7f;
             }
             this.top_p = topP;
             return this;
         }
 
-        public TextRequestBase SetTemperature(double temperature)
+        public TextRequestBase SetTemperature(float temperature)
         {
-            if (temperature is <= 0.0 or >= 1.0)
+            // 智谱AI开放平台:https://open.bigmodel.cn/dev/api#glm-4
+            // 默认值为 0.95
+            if (temperature is <= 0.0f or >= 1.0f)
             {
-                temperature = 0.1;
+                temperature = 0.95f;
             }
 
             this.temperature = temperature;
