@@ -46,7 +46,8 @@ public static class SparkDeskFactory
                     modelVersion = XFSparkDeskModelType.V2_0;
                     hostURL = url ?? XFSparkDeskHostURL.Chat_V2_0;
                 }
-                else if (model.Equals("4.0Ultra", StringComparison.OrdinalIgnoreCase))
+                else if (model.Equals("4.0Ultra", StringComparison.OrdinalIgnoreCase) ||
+                         model.Equals("general-4.0-ultra", StringComparison.OrdinalIgnoreCase))
                 {
                     modelVersion = XFSparkDeskModelType.V4_0_Ultra;
                     hostURL = url ?? XFSparkDeskHostURL.Chat_V4_0_Ultra;
