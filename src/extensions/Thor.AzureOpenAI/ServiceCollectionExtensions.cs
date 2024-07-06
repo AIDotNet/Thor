@@ -7,8 +7,9 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddAzureOpenAIService(this IServiceCollection services)
     {
-        IApiChatCompletionService.ServiceNames.Add(AzureOpenAIServiceOptions.ServiceName, AzureOpenAIServiceOptions.ServiceName);
-        IApiChatCompletionService.ModelNames.Add(AzureOpenAIServiceOptions.ServiceName, [
+        ThorGlobal.PlatformNames.Add(AzureOpenAIPlatformOptions.PlatformName, AzureOpenAIPlatformOptions.PlatformCode);
+
+        ThorGlobal.ModelNames.Add(AzureOpenAIPlatformOptions.PlatformCode, [
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-0125",
             "gpt-3.5-turbo-0301",
@@ -36,10 +37,10 @@ public static class ServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IApiChatCompletionService, AzureOpenAiService>(AzureOpenAIServiceOptions.ServiceName);
+        services.AddKeyedSingleton<IApiChatCompletionService, AzureOpenAiService>(AzureOpenAIPlatformOptions.PlatformCode);
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, AzureOpenAIServiceTextEmbeddingGeneration>(
-            AzureOpenAIServiceOptions.ServiceName);
-        services.AddKeyedSingleton<IApiImageService, AzureOpenAIServiceImageService>(AzureOpenAIServiceOptions.ServiceName);
+            AzureOpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IApiImageService, AzureOpenAIServiceImageService>(AzureOpenAIPlatformOptions.PlatformCode);
 
         return services;
     }

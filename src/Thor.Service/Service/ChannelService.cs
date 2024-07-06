@@ -139,7 +139,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             Other = channel.Other
         };
 
-        if (channel.Type == OpenAIServiceOptions.ServiceName)
+        if (channel.Type == OpenAIPlatformOptions.PlatformCode)
         {
             // 获取渠道是否支持gpt-3.5-turbo
             chatHistory.Model = channel.Models.Order()
@@ -154,7 +154,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
                 }
             };
         }
-        else if (channel.Type == ClaudiaOptions.ServiceName)
+        else if (channel.Type == ClaudiaPlatformOptions.PlatformCode)
         {
             chatHistory.Model =
                 channel.Models.FirstOrDefault(x => x.StartsWith("claude", StringComparison.OrdinalIgnoreCase));
@@ -167,7 +167,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
                 }
             };
         }
-        else if (channel.Type == SparkDeskOptions.ServiceName)
+        else if (channel.Type == SparkDeskPlatformOptions.PlatformCode)
         {
             chatHistory.Model = channel.Models.FirstOrDefault(x =>
                 x.StartsWith("genera", StringComparison.OrdinalIgnoreCase) ||
@@ -181,7 +181,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
                 }
             };
         }
-        else if (channel.Type == HunyuanOptions.ServiceName)
+        else if (channel.Type == HunyuanPlatformOptions.PlatformCode)
         {
             chatHistory.Model =
                 channel.Models.FirstOrDefault(x => !x.Contains("embedding", StringComparison.OrdinalIgnoreCase));

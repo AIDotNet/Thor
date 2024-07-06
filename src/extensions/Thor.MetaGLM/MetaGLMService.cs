@@ -9,11 +9,11 @@ namespace Thor.MetaGLM;
 
 public sealed class MetaGLMService : IApiChatCompletionService
 {
-    private readonly MetaGLMOptions _openAiOptions;
+    private readonly MetaGLMPlatformOptions _openAiOptions;
 
     public MetaGLMService()
     {
-        _openAiOptions = new MetaGLMOptions
+        _openAiOptions = new MetaGLMPlatformOptions
         {
             Client = new MetaGLMClientV4()
         };

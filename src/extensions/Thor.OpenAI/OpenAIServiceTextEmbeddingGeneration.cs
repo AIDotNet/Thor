@@ -16,7 +16,7 @@ public sealed class OpenAIServiceTextEmbeddingGeneration(IHttpClientFactory http
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(OpenAIServiceOptions.ServiceName);
+        var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
 
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
             createEmbeddingModel, options!.ApiKey);

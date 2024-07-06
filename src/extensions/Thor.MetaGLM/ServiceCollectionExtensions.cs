@@ -8,8 +8,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddMetaGLMClientV4(this IServiceCollection services)
     {
 
-        IApiChatCompletionService.ServiceNames.Add("智谱 AI", MetaGLMOptions.ServiceName);
-        services.AddKeyedSingleton<IApiChatCompletionService, MetaGLMService>(MetaGLMOptions.ServiceName);
+        ThorGlobal.PlatformNames.Add(MetaGLMPlatformOptions.PlatformName, MetaGLMPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiChatCompletionService, MetaGLMService>(MetaGLMPlatformOptions.PlatformCode);
         return services;
     }
 }

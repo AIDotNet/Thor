@@ -8,7 +8,7 @@ namespace Thor.SparkDesk;
 
 public sealed class SparkDeskTextEmbeddingGeneration(IHttpClientFactory httpClientFactory) : IApiTextEmbeddingGeneration
 {
-    private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskOptions.ServiceName));
+    private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskPlatformOptions.PlatformCode));
 
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel, ChatOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))

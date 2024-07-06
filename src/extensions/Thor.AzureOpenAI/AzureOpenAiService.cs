@@ -13,7 +13,7 @@ public class AzureOpenAiService(IHttpClientFactory httpClientFactory) : IApiChat
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(AzureOpenAIServiceOptions.ServiceName);
+        var client = httpClientFactory.CreateClient(AzureOpenAIPlatformOptions.PlatformCode);
 
         var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
 
@@ -32,7 +32,7 @@ public class AzureOpenAiService(IHttpClientFactory httpClientFactory) : IApiChat
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(AzureOpenAIServiceOptions.ServiceName);
+        var client = httpClientFactory.CreateClient(AzureOpenAIPlatformOptions.PlatformCode);
 
         var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
 

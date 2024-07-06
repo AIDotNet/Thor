@@ -6,9 +6,9 @@ public static class ModelService
     ///     获取模型
     /// </summary>
     /// <returns></returns>
-    public static Dictionary<string, string> GetTypes()
+    public static Dictionary<string, string> GetPlatformNames()
     {
-        return IApiChatCompletionService.ServiceNames;
+        return ThorGlobal.PlatformNames;
     }
 
     public static string[] GetModels()

@@ -7,7 +7,7 @@ namespace Thor.SparkDesk
 {
     public class SparkDeskImageService(IHttpClientFactory httpClientFactory) : IApiImageService
     {
-        private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskOptions.ServiceName));
+        private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskPlatformOptions.PlatformCode));
 
         public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
         {

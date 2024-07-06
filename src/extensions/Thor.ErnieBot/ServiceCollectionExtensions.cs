@@ -7,10 +7,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddErnieBot(this IServiceCollection services)
     {
-        IApiChatCompletionService.ServiceNames.Add("百度ErnieBot", ErnieBotOptions.ServiceName);
-        services.AddKeyedSingleton<IApiChatCompletionService, ErnieBotService>(ErnieBotOptions.ServiceName);
-        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, ErnieBotTextEmbeddingGeneration>(ErnieBotOptions
-            .ServiceName);
+        ThorGlobal.PlatformNames.Add(ErnieBotPlatformOptions.PlatformName, ErnieBotPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiChatCompletionService, ErnieBotService>(ErnieBotPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, ErnieBotTextEmbeddingGeneration>(ErnieBotPlatformOptions
+            .PlatformCode);
         return services;
     }
 }

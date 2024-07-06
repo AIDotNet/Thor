@@ -16,14 +16,13 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(input.Model))
+        {
             throw new NotModelException(input.Model);
+        }
 
         var client = SparkDeskFactory.GetSparkDeskChatClient(options!.ApiKey!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
 
-        if (input.TopP == null)
-        {
-            input.TopP = 4;
-        }
+        input.TopP ??= 4;
 
         var results = input.Messages.Select(x => new XFSparkDeskChatAPIMessageRequest()
         {

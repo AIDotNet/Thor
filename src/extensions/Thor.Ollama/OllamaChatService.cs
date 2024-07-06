@@ -11,7 +11,7 @@ namespace Thor.Ollama
 {
     public class OllamaChatService(IHttpClientFactory httpClientFactory) : IApiChatCompletionService
     {
-        private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaOptions.ServiceName));
+        private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaPlatformOptions.PlatformCode));
 
         public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
         {

@@ -1,5 +1,8 @@
 ﻿namespace Thor.Abstractions;
 
+/// <summary>
+/// 聊天日志类型
+/// </summary>
 public enum ChatLoggerType
 {
     /// <summary>

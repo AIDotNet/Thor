@@ -7,10 +7,12 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddHunyuan(this IServiceCollection services)
     {
-        IApiChatCompletionService.ServiceNames.Add("腾讯混元大模型", HunyuanOptions.ServiceName);
-        services.AddKeyedSingleton<IApiChatCompletionService, HunyuanService>(HunyuanOptions.ServiceName);
-        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, HunyuanTextEmbeddingGeneration>(HunyuanOptions
-            .ServiceName);
+        ThorGlobal.PlatformNames.Add(HunyuanPlatformOptions.PlatformName, HunyuanPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiChatCompletionService, HunyuanService>(HunyuanPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, HunyuanTextEmbeddingGeneration>(HunyuanPlatformOptions
+            .PlatformCode);
         return services;
     }
 }

@@ -6,16 +6,6 @@ namespace Thor.Abstractions;
 public interface IApiChatCompletionService
 {
     /// <summary>
-    ///  服务名
-    /// </summary>
-    public static Dictionary<string, string> ServiceNames { get; } = new();
-    
-    /// <summary>
-    /// 渠道支持的模型列表
-    /// </summary>
-    public static Dictionary<string,List<string>> ModelNames { get; } = new();
-
-    /// <summary>
     /// 
     /// </summary>
     /// <param name="chatCompletionCreate"></param>

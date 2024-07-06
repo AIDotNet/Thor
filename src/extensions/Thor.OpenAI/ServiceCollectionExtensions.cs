@@ -8,9 +8,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddOpenAIService(this IServiceCollection services)
     {
-        IApiChatCompletionService.ServiceNames.Add("OpenAI", OpenAIServiceOptions.ServiceName);
-        IApiChatCompletionService.ServiceNames.Add("Kimi（月之暗面）", "Kimi" + OpenAIServiceOptions.ServiceName);
-        IApiChatCompletionService.ModelNames.Add("OpenAI", [
+        ThorGlobal.PlatformNames.Add(OpenAIPlatformOptions.PlatformName, OpenAIPlatformOptions.PlatformCode);
+
+        ThorGlobal.PlatformNames.Add(MoonshotPlatformOptions.PlatformName, MoonshotPlatformOptions.PlatformCode);
+
+        ThorGlobal.ModelNames.Add(OpenAIPlatformOptions.PlatformCode, [
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-0125",
             "gpt-3.5-turbo-0301",
@@ -40,22 +42,27 @@ public static class ServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>("Kimi" + OpenAIServiceOptions.ServiceName);
-        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
-            "Kimi" + OpenAIServiceOptions.ServiceName);
-        services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>("Kimi" +
-            OpenAIServiceOptions.ServiceName);
-        services.AddKeyedSingleton<IApiCompletionService, OpenAIServiceCompletionService>("Kimi" + OpenAIServiceOptions
-            .ServiceName);
+        services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(MoonshotPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(OpenAIServiceOptions.ServiceName);
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
-            OpenAIServiceOptions.ServiceName);
-        services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>(OpenAIServiceOptions.ServiceName);
-        services.AddKeyedSingleton<IApiCompletionService, OpenAIServiceCompletionService>(OpenAIServiceOptions
-            .ServiceName);
+            MoonshotPlatformOptions.PlatformCode);
 
-        services.AddHttpClient(OpenAIServiceOptions.ServiceName,
+        services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>(MoonshotPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiCompletionService, OpenAIServiceCompletionService>(MoonshotPlatformOptions
+            .PlatformCode);
+
+        services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(OpenAIPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
+            OpenAIPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>(OpenAIPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IApiCompletionService, OpenAIServiceCompletionService>(OpenAIPlatformOptions
+            .PlatformCode);
+
+        services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
                 options => { options.Timeout = TimeSpan.FromMinutes(6); })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
