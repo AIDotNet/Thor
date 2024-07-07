@@ -156,8 +156,6 @@ public static class StatisticsService
             // Find the index of the current date in the allDates list
             var dateIndex = allDates.IndexOf(modelStatistic.Key.CreateAt.ToString("MM-dd"));
 
-            // Update the data for the current date
-            model!.Data[dateIndex] = modelStatistic.Sum(x => x.Quota);
             model.TokenUsed = modelStatistic.Sum(x => x.TokenUsed);
 
             if (dateIndex == -1 || dateIndex >= model.Data.Count)
