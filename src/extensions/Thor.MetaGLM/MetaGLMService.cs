@@ -158,6 +158,10 @@ public sealed class MetaGLMService : IApiChatCompletionService
             {
                 dto.SetTopP(0.1);
             }
+            else if (input.TopP >= 1)
+            {
+                dto.SetTopP(0.99);
+            }
             else
             {
                 dto.SetTopP((double)input.TopP);
@@ -167,7 +171,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
         {
             dto.SetTopP(0.1);
         }
-        
+
         if (input.Tools != null)
         {
             foreach (var tool in input.Tools)
@@ -213,7 +217,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
             {
                 if (choiceItem.delta?.tool_calls == null)
                     continue;
-                
+
                 tools.AddRange(choiceItem.delta.tool_calls.Select(x => new ToolCall()
                 {
                     Id = x.id,
@@ -233,9 +237,9 @@ public sealed class MetaGLMService : IApiChatCompletionService
                     new()
                     {
                         Delta = new ChatMessage("assistant",
-                            result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
+                            result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
                         Message = new ChatMessage("assistant",
-                            result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
+                            result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
                         FinishReason = "stop",
                         Index = 0,
                     }
