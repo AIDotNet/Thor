@@ -80,6 +80,7 @@ namespace Thor.Qiansail
                                    TopP = chatCompletionCreate.TopP,
                                    ResultFormat = chatCompletionCreate.ResponseFormat?.Type,
                                    Stop = chatCompletionCreate.Stop,
+                                   IncrementalOutput = true
                                }, cancellationToken))
             {
                 yield return new ChatCompletionCreateResponse()
