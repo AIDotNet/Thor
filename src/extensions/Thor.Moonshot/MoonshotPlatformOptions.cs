@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Thor.OpenAI
+namespace Thor.Moonshot
 {
     /// <summary>
     /// 平台信息

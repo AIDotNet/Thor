@@ -10,8 +10,6 @@ public static class ServiceCollectionExtensions
     {
         ThorGlobal.PlatformNames.Add(OpenAIPlatformOptions.PlatformName, OpenAIPlatformOptions.PlatformCode);
 
-        ThorGlobal.PlatformNames.Add(MoonshotPlatformOptions.PlatformName, MoonshotPlatformOptions.PlatformCode);
-
         ThorGlobal.ModelNames.Add(OpenAIPlatformOptions.PlatformCode, [
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-0125",
@@ -41,16 +39,6 @@ public static class ServiceCollectionExtensions
             "text-moderation-stable",
             "text-search-ada-doc-001"
         ]);
-
-        services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(MoonshotPlatformOptions.PlatformCode);
-
-        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
-            MoonshotPlatformOptions.PlatformCode);
-
-        services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>(MoonshotPlatformOptions.PlatformCode);
-
-        services.AddKeyedSingleton<IApiCompletionService, OpenAIServiceCompletionService>(MoonshotPlatformOptions
-            .PlatformCode);
 
         services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(OpenAIPlatformOptions.PlatformCode);
 

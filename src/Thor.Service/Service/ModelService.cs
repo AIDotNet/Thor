@@ -3,7 +3,7 @@
 public static class ModelService
 {
     /// <summary>
-    ///     获取模型
+    /// 获取平台名列表
     /// </summary>
     /// <returns></returns>
     public static Dictionary<string, string> GetPlatformNames()

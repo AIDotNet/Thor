@@ -8,6 +8,7 @@ using Thor.BuildingBlocks.Data;
 using Thor.Claudia;
 using Thor.LocalEvent;
 using Thor.LocalMemory.Cache;
+using Thor.Moonshot;
 using Thor.Qiansail;
 using Thor.RedisMemory.Cache;
 using Thor.Service;
@@ -79,6 +80,7 @@ builder.Services
     .AddSingleton<UnitOfWorkMiddleware>()
     .AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
+    .AddMoonshotService()
     .AddSparkDeskService()
     .AddQiansail()
     .AddMetaGLMClientV4()
@@ -388,7 +390,7 @@ var model = app.MapGroup("/api/v1/model")
     .AddEndpointFilter<ResultFilter>()
     .RequireAuthorization();
 
-model.MapGet("/types", ModelService.GetTypes)
+model.MapGet("/types", ModelService.GetPlatformNames)
     .WithDescription("获取模型类型")
     .WithOpenApi();
 

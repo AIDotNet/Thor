@@ -5,6 +5,7 @@ using Thor.OpenAI;
 using Thor.SparkDesk;
 using MapsterMapper;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Moonshot;
 
 namespace Thor.Service.Service;
 
