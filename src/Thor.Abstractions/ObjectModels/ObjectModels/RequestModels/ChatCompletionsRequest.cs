@@ -5,6 +5,9 @@ using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 
+/// <summary>
+/// 对话补全请求参数对象
+/// </summary>
 public class ChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiModels.IModel, IOpenAiModels.IUser
 {
     public enum ResponseFormats
