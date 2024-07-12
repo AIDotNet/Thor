@@ -8,9 +8,9 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.OpenAI;
 
-public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiChatCompletionService
+public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest chatCompletionCreate,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -26,7 +26,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IApiCh
         return result;
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

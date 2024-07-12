@@ -7,9 +7,9 @@ using ChatMessage = Sdcb.DashScope.TextGeneration.ChatMessage;
 
 namespace Thor.Qiansail
 {
-    public sealed class QiansailService : IApiChatCompletionService
+    public sealed class QiansailService : IChatCompletionsService
     {
-        public async Task<ChatCompletionCreateResponse> CompleteChatAsync(
+        public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(
             ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
             CancellationToken cancellationToken = default)
         {
@@ -56,7 +56,7 @@ namespace Thor.Qiansail
             };
         }
 
-        public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(
+        public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
             ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
             CancellationToken cancellationToken = default)
         {

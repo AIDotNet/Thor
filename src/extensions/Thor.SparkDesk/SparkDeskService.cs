@@ -9,9 +9,9 @@ using Thor.SparkDesk.API;
 
 namespace Thor.SparkDesk;
 
-public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiChatCompletionService
+public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest input,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest input,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -128,7 +128,7 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IApiCha
     }
 
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(ChatCompletionCreateRequest input,
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionCreateRequest input,
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

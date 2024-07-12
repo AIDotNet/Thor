@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IApiChatCompletionService, OpenAiService>(OpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IChatCompletionsService, OpenAiService>(OpenAIPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
             OpenAIPlatformOptions.PlatformCode);

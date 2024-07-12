@@ -7,7 +7,7 @@ using ChatCompletionCreateResponse = Thor.Abstractions.ObjectModels.ObjectModels
 
 namespace Thor.MetaGLM;
 
-public sealed class MetaGLMService : IApiChatCompletionService
+public sealed class MetaGLMService : IChatCompletionsService
 {
     private readonly MetaGLMPlatformOptions _openAiOptions;
 
@@ -19,7 +19,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
         };
     }
 
-    public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest input,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest input,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -122,7 +122,7 @@ public sealed class MetaGLMService : IApiChatCompletionService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(ChatCompletionCreateRequest input,
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionCreateRequest input,
         ChatOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

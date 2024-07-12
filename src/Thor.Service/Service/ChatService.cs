@@ -359,7 +359,7 @@ public sealed class ChatService(
             if (channel == null) throw new NotModelException(module.Model);
 
             // 获取渠道指定的实现类型的服务
-            var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
+            var openService = GetKeyedService<IChatCompletionsService>(channel.Type);
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
@@ -427,7 +427,7 @@ public sealed class ChatService(
     }
 
     private async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, ChatCompletionCreateRequest input,
-        ChatChannel channel, IApiChatCompletionService openService, User user, decimal rate)
+        ChatChannel channel, IChatCompletionsService openService, User user, decimal rate)
     {
         int requestToken;
         int responseToken;
@@ -473,7 +473,7 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.CompleteChatAsync(input, setting);
+            var result = await openService.ChatCompletionsAsync(input, setting);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -488,7 +488,7 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.CompleteChatAsync(input, setting);
+            var result = await openService.ChatCompletionsAsync(input, setting);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -514,7 +514,7 @@ public sealed class ChatService(
     /// <param name="rate"></param>
     /// <returns></returns>
     private async ValueTask<(int, int)> StreamChatHandlerAsync(HttpContext context,
-        ChatCompletionCreateRequest input, ChatChannel channel, IApiChatCompletionService openService, User user,
+        ChatCompletionCreateRequest input, ChatChannel channel, IChatCompletionsService openService, User user,
         decimal rate)
     {
         int requestToken;
@@ -578,7 +578,7 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
         }
 
-        await foreach (var item in openService.StreamChatAsync(input, setting))
+        await foreach (var item in openService.StreamChatCompletionsAsync(input, setting))
         {
             foreach (var response in item.Choices)
             {
@@ -605,7 +605,7 @@ public sealed class ChatService(
     }
 
     /// <summary>
-    ///     权重算法
+    /// 权重算法
     /// </summary>
     /// <param name="channel"></param>
     /// <returns></returns>

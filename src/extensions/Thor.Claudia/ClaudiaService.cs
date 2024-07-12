@@ -11,9 +11,9 @@ using ChatCompletionCreateResponse =
 
 namespace Thor.Claudia;
 
-public sealed class ClaudiaService : IApiChatCompletionService
+public sealed class ClaudiaService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest input,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest input,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -101,7 +101,7 @@ public sealed class ClaudiaService : IApiChatCompletionService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
         ChatCompletionCreateRequest input, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {

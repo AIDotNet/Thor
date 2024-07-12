@@ -8,9 +8,9 @@ using TencentCloud.Hunyuan.V20230901.Models;
 
 namespace Thor.Hunyuan;
 
-public class HunyuanService : IApiChatCompletionService
+public class HunyuanService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest chatCompletionCreate,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -66,7 +66,7 @@ public class HunyuanService : IApiChatCompletionService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {

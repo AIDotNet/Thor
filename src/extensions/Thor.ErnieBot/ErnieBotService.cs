@@ -7,9 +7,9 @@ using ERNIE_Bot.SDK.Models;
 
 namespace Thor.ErnieBot;
 
-public class ErnieBotService : IApiChatCompletionService
+public class ErnieBotService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest chatCompletionCreate,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate,
         ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -66,7 +66,7 @@ public class ErnieBotService : IApiChatCompletionService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
         ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
         CancellationToken cancellationToken = default)
     {

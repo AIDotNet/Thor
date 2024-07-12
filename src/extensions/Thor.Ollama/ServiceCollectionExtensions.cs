@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
     {
         ThorGlobal.PlatformNames.Add(OllamaPlatformOptions.PlatformName, OllamaPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiChatCompletionService, OllamaChatService>(OllamaPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IChatCompletionsService, OllamaChatService>(OllamaPlatformOptions.PlatformCode);
         return services;
     }
 }

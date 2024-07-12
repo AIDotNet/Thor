@@ -123,7 +123,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         if (channel == null) throw new Exception("渠道不存在");
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
+        var openService = GetKeyedService<IChatCompletionsService>(channel.Type);
 
         if (openService == null) throw new Exception("渠道服务不存在");
 
@@ -219,7 +219,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         // token.CancelAfter(20000);
 
         var sw = Stopwatch.StartNew();
-        var response = await openService.CompleteChatAsync(chatHistory, setting, token.Token);
+        var response = await openService.ChatCompletionsAsync(chatHistory, setting, token.Token);
         sw.Stop();
 
         // 更新ResponseTime

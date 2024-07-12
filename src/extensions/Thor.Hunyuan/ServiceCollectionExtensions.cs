@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
     {
         ThorGlobal.PlatformNames.Add(HunyuanPlatformOptions.PlatformName, HunyuanPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiChatCompletionService, HunyuanService>(HunyuanPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IChatCompletionsService, HunyuanService>(HunyuanPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, HunyuanTextEmbeddingGeneration>(HunyuanPlatformOptions
             .PlatformCode);

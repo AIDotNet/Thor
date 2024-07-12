@@ -9,7 +9,7 @@ namespace Thor.Claudia
         {
             ThorGlobal.PlatformNames.Add(ClaudiaPlatformOptions.PlatformName, ClaudiaPlatformOptions.PlatformCode);
 
-            services.AddKeyedSingleton<IApiChatCompletionService, ClaudiaService>(ClaudiaPlatformOptions.PlatformCode);
+            services.AddKeyedSingleton<IChatCompletionsService, ClaudiaService>(ClaudiaPlatformOptions.PlatformCode);
             return services;
         }
     }

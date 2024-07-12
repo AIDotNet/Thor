@@ -9,11 +9,11 @@ using OpenAI.ObjectModels.RequestModels;
 
 namespace Thor.Ollama
 {
-    public class OllamaChatService(IHttpClientFactory httpClientFactory) : IApiChatCompletionService
+    public class OllamaChatService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
     {
         private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaPlatformOptions.PlatformCode));
 
-        public async Task<ChatCompletionCreateResponse> CompleteChatAsync(ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 
@@ -75,7 +75,7 @@ namespace Thor.Ollama
             };
         }
 
-        public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatAsync(ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 
