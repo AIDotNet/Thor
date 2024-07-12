@@ -8,7 +8,7 @@ namespace Thor.AzureOpenAI;
 public class AzureOpenAIServiceTextEmbeddingGeneration : IApiTextEmbeddingGeneration
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var createClient = AzureOpenAIFactory.CreateClient(options);

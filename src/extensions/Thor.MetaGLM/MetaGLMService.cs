@@ -19,8 +19,8 @@ public sealed class MetaGLMService : IChatCompletionsService
         };
     }
 
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest input,
-        ChatOptions? options = null,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var dto = new TextRequestBase();
@@ -122,8 +122,8 @@ public sealed class MetaGLMService : IChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionCreateRequest input,
-        ChatOptions? options = null,
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
+        ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var dto = new TextRequestBase();

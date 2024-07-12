@@ -9,7 +9,7 @@ namespace Thor.ErnieBot;
 public class ErnieBotTextEmbeddingGeneration : IApiTextEmbeddingGeneration
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey!.Split("|");

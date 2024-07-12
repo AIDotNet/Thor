@@ -11,8 +11,8 @@ namespace Thor.SparkDesk;
 
 public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest input,
-        ChatOptions? options = null,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(input.Model))
@@ -128,8 +128,8 @@ public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IChatCo
     }
 
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionCreateRequest input,
-        ChatOptions? options = null,
+    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
+        ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(input.Model))

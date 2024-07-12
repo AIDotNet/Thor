@@ -127,13 +127,13 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         if (openService == null) throw new Exception("渠道服务不存在");
 
-        var chatHistory = new ChatCompletionCreateRequest()
+        var chatHistory = new ChatCompletionsRequest()
         {
             TopP=0.7f,
             Temperature=0.95f,
         };
 
-        var setting = new ChatOptions
+        var setting = new ChatPlatformOptions
         {
             Address = channel.Address,
             ApiKey = channel.Key,

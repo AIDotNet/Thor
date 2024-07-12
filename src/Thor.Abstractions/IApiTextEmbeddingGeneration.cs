@@ -7,6 +7,6 @@ public interface IApiTextEmbeddingGeneration
 {
     Task<EmbeddingCreateResponse> EmbeddingAsync(
         EmbeddingCreateRequest createEmbeddingModel,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 }

@@ -8,7 +8,7 @@ namespace Thor.Hunyuan;
 public class HunyuanTextEmbeddingGeneration : IApiTextEmbeddingGeneration
 {
     public Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");

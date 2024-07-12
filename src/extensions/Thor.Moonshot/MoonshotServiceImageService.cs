@@ -10,7 +10,7 @@ public class MoonshotServiceImageService(IHttpClientFactory httpClientFactory) :
 {
     private HttpClient HttpClient => httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);
 
-    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
+    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var response = await HttpClient.PostJsonAsync(
@@ -23,7 +23,7 @@ public class MoonshotServiceImageService(IHttpClientFactory httpClientFactory) :
     }
 
     public async Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var multipartContent = new MultipartFormDataContent();
@@ -68,7 +68,7 @@ public class MoonshotServiceImageService(IHttpClientFactory httpClientFactory) :
     }
 
     public async Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var multipartContent = new MultipartFormDataContent();

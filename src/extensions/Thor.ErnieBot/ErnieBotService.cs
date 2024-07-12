@@ -9,8 +9,8 @@ namespace Thor.ErnieBot;
 
 public class ErnieBotService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate,
-        ChatOptions? options = null,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey!.Split("|");
@@ -67,7 +67,7 @@ public class ErnieBotService : IChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
-        ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
+        Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey!.Split("|");

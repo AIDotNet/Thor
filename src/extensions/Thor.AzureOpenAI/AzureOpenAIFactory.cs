@@ -11,12 +11,12 @@ public static class AzureOpenAIFactory
     private const string AddressTemplate = "{0}/openai/deployments/{1}/chat/completions?api-version={2}";
     private static readonly ConcurrentDictionary<string, AzureOpenAIClient> Clients = new();
 
-    public static string GetAddress(ChatOptions options, string model)
+    public static string GetAddress(ChatPlatformOptions options, string model)
     {
         return string.Format(AddressTemplate, options.Address.TrimEnd('/'), model, options.Other);
     }
 
-    public static AzureOpenAIClient CreateClient(ChatOptions options)
+    public static AzureOpenAIClient CreateClient(ChatPlatformOptions options)
     {
         var key = $"{options.ApiKey}_{options.Address}_{options.Other}";
         return Clients.GetOrAdd(key, (_) =>

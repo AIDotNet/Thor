@@ -19,7 +19,7 @@ public class MetaGLMTextEmbeddingGeneration : IApiTextEmbeddingGeneration
     }
 
     public Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var embeddingRequestBase = new EmbeddingRequestBase();

@@ -11,7 +11,7 @@ public interface IApiImageService
     /// <returns></returns>
     Task<ImageCreateResponse> CreateImage(
         ImageCreateRequest imageCreate,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default (CancellationToken));
 
     /// <summary>
@@ -22,7 +22,7 @@ public interface IApiImageService
     /// <returns></returns>
     Task<ImageCreateResponse> CreateImageEdit(
         ImageEditCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default (CancellationToken));
 
     /// <summary>Creates a variation of a given image.</summary>
@@ -31,6 +31,6 @@ public interface IApiImageService
     /// <returns></returns>
     Task<ImageCreateResponse> CreateImageVariation(
         ImageVariationCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default (CancellationToken));
 }

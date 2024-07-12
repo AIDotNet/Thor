@@ -13,6 +13,6 @@ public interface IApiCompletionService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<CompletionCreateResponse> CompletionAsync(CompletionCreateRequest createCompletionModel,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 }

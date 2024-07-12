@@ -5,7 +5,7 @@ using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 
-public class ChatCompletionCreateRequest : IOpenAiModels.ITemperature, IOpenAiModels.IModel, IOpenAiModels.IUser
+public class ChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiModels.IModel, IOpenAiModels.IUser
 {
     public enum ResponseFormats
     {

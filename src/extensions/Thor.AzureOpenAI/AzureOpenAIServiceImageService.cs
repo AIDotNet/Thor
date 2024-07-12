@@ -8,7 +8,7 @@ namespace Thor.AzureOpenAI;
 
 public class AzureOpenAIServiceImageService : IApiImageService
 {
-    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
+    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var createClient = AzureOpenAIFactory.CreateClient(options);
@@ -57,14 +57,14 @@ public class AzureOpenAIServiceImageService : IApiImageService
     }
 
     public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
         throw new NotImplementedException();
     }
 
     public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
         throw new NotImplementedException();

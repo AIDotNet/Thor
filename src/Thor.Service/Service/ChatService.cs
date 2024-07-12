@@ -108,7 +108,7 @@ public sealed class ChatService(
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
-            var response = await openService.CreateImage(module, new ChatOptions
+            var response = await openService.CreateImage(module, new ChatPlatformOptions
             {
                 ApiKey = channel.Key,
                 Address = channel.Address,
@@ -200,7 +200,7 @@ public sealed class ChatService(
                 throw new Exception("输入格式错误");
             }
 
-            var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ChatOptions
+            var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ChatPlatformOptions
             {
                 ApiKey = channel.Key,
                 Address = channel.Address,
@@ -318,7 +318,7 @@ public sealed class ChatService(
     public async ValueTask<(int, int)> CompletionsHandlerAsync(HttpContext context, CompletionCreateRequest input,
         ChatChannel channel, IApiCompletionService openService, User user, decimal rate)
     {
-        var setting = new ChatOptions
+        var setting = new ChatPlatformOptions
         {
             ApiKey = channel.Key,
             Address = channel.Address,
@@ -339,7 +339,7 @@ public sealed class ChatService(
         using var body = new MemoryStream();
         await context.Request.Body.CopyToAsync(body);
 
-        var module = JsonSerializer.Deserialize<ChatCompletionCreateRequest>(body.ToArray());
+        var module = JsonSerializer.Deserialize<ChatCompletionsRequest>(body.ToArray());
 
         if (module == null)
         {
@@ -426,13 +426,13 @@ public sealed class ChatService(
         }
     }
 
-    private async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, ChatCompletionCreateRequest input,
+    private async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, ChatCompletionsRequest input,
         ChatChannel channel, IChatCompletionsService openService, User user, decimal rate)
     {
         int requestToken;
         int responseToken;
 
-        var setting = new ChatOptions
+        var setting = new ChatPlatformOptions
         {
             ApiKey = channel.Key,
             Address = channel.Address,
@@ -514,12 +514,12 @@ public sealed class ChatService(
     /// <param name="rate"></param>
     /// <returns></returns>
     private async ValueTask<(int, int)> StreamChatHandlerAsync(HttpContext context,
-        ChatCompletionCreateRequest input, ChatChannel channel, IChatCompletionsService openService, User user,
+        ChatCompletionsRequest input, ChatChannel channel, IChatCompletionsService openService, User user,
         decimal rate)
     {
         int requestToken;
 
-        var setting = new ChatOptions
+        var setting = new ChatPlatformOptions
         {
             ApiKey = channel.Key,
             Address = channel.Address,

@@ -10,7 +10,7 @@ public sealed class SparkDeskTextEmbeddingGeneration(IHttpClientFactory httpClie
 {
     private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskPlatformOptions.PlatformCode));
 
-    public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel, ChatOptions? options = null,
+    public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var client = SparkDeskFactory.GetSparkDeskEmbeddingClient(options?.ApiKey ?? "", HttpClient, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);

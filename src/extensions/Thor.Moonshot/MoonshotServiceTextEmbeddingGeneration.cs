@@ -13,7 +13,7 @@ public sealed class MoonshotServiceTextEmbeddingGeneration(IHttpClientFactory ht
     : IApiTextEmbeddingGeneration
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatOptions? options = null,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);

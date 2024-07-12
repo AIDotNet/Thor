@@ -10,8 +10,8 @@ namespace Thor.Hunyuan;
 
 public class HunyuanService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate,
-        ChatOptions? options = null,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");
@@ -25,7 +25,7 @@ public class HunyuanService : IChatCompletionsService
 
         var client = HunyuanFactory.CreateClient(secretId, secretKey, region: options.Other);
 
-        var req = new ChatCompletionsRequest
+        var req = new TencentCloud.Hunyuan.V20230901.Models.ChatCompletionsRequest
         {
             EnableEnhancement = false,
             Stream = false,
@@ -67,7 +67,7 @@ public class HunyuanService : IChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
-        ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
+        Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");
@@ -81,7 +81,7 @@ public class HunyuanService : IChatCompletionsService
 
         var client = HunyuanFactory.CreateClient(secretId, secretKey);
 
-        var req = new ChatCompletionsRequest
+        var req = new TencentCloud.Hunyuan.V20230901.Models.ChatCompletionsRequest
         {
             EnableEnhancement = false,
             Stream = true,

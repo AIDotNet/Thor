@@ -11,10 +11,10 @@ using ChatCompletionCreateResponse =
 
 namespace Thor.Claudia;
 
-public sealed class ClaudiaService : IChatCompletionsService
+public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest input,
-        ChatOptions? options = null,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var anthropic = AnthropicFactory.CreateClient(options.ApiKey, options.Address);
@@ -102,7 +102,7 @@ public sealed class ClaudiaService : IChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
-        ChatCompletionCreateRequest input, ChatOptions? options = null,
+        ChatCompletionsRequest input, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var anthropic = AnthropicFactory.CreateClient(options.ApiKey, options.Address);

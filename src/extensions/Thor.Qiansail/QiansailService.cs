@@ -10,7 +10,7 @@ namespace Thor.Qiansail
     public sealed class QiansailService : IChatCompletionsService
     {
         public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(
-            ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
+            ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using DashScopeClient client = new(options!.ApiKey!);
@@ -57,7 +57,7 @@ namespace Thor.Qiansail
         }
 
         public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
-            ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
+            ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using DashScopeClient client = new(options!.ApiKey!);

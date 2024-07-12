@@ -13,7 +13,7 @@ namespace Thor.Ollama
     {
         private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaPlatformOptions.PlatformCode));
 
-        public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 
@@ -75,7 +75,7 @@ namespace Thor.Ollama
             };
         }
 
-        public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 

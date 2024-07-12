@@ -10,8 +10,8 @@ namespace Thor.OpenAI;
 
 public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionCreateRequest chatCompletionCreate,
-        ChatOptions? options = null,
+    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate,
+        ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
@@ -27,7 +27,7 @@ public sealed class OpenAiService(IHttpClientFactory httpClientFactory) : IChatC
     }
 
     public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
-        ChatCompletionCreateRequest chatCompletionCreate, ChatOptions? options = null,
+        ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);

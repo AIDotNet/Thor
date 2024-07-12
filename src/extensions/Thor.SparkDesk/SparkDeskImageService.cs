@@ -9,7 +9,7 @@ namespace Thor.SparkDesk
     {
         private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskPlatformOptions.PlatformCode));
 
-        public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = SparkDeskFactory.GetSparkDeskImageGenerationClient(options?.ApiKey ?? "", HttpClient, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
             var width = 512;
@@ -57,12 +57,12 @@ namespace Thor.SparkDesk
             return ret;
         }
 
-        public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             throw new NotSupportedException();
         }
 
-        public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest, ChatOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             throw new NotSupportedException();
         }
