@@ -1,5 +1,6 @@
 ﻿using Thor.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Thor.Abstractions.Chats;
 
 namespace Thor.Claudia
 {

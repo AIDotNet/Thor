@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Thor.Abstractions;
+using Thor.Abstractions.Chats;
 using Thor.OpenAI;
 
 namespace Microsoft.Extensions.DependencyInjection;

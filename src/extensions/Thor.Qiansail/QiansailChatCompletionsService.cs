@@ -1,9 +1,10 @@
 ﻿using Thor.Abstractions;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Sdcb.DashScope;
 using Sdcb.DashScope.TextGeneration;
 using ChatMessage = Sdcb.DashScope.TextGeneration.ChatMessage;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.Qiansail
 {

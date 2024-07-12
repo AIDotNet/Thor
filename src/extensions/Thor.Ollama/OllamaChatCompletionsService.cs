@@ -6,6 +6,8 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 using OpenAI.ObjectModels.RequestModels;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.Ollama
 {

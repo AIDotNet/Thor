@@ -1,4 +1,5 @@
 ﻿using Thor.Abstractions;
+using Thor.Abstractions.Chats;
 using Thor.SparkDesk;
 
 namespace Microsoft.Extensions.DependencyInjection;

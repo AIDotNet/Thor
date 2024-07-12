@@ -1,4 +1,5 @@
 ﻿using Thor.Abstractions;
+using Thor.Abstractions.Chats;
 using Thor.MetaGLM;
 
 namespace Microsoft.Extensions.DependencyInjection;

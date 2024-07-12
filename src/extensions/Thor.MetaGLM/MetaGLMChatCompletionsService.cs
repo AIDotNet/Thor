@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Thor.Abstractions;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;

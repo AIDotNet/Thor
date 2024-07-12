@@ -8,6 +8,8 @@ using Claudia;
 using OpenAI.ObjectModels.RequestModels;
 using ChatCompletionsResponse =
     Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.Claudia;
 

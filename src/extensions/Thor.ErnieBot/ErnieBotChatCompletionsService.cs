@@ -4,12 +4,13 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 using ERNIE_Bot.SDK;
 using ERNIE_Bot.SDK.Models;
+using Thor.Abstractions.Chats;
 
 namespace Thor.ErnieBot;
 
 public class ErnieBotChatCompletionsService : IChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.Chats.Dtos.ChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -67,7 +68,7 @@ public class ErnieBotChatCompletionsService : IChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+        Abstractions.Chats.Dtos.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey!.Split("|");

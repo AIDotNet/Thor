@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json;
 using MapsterMapper;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dto;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;

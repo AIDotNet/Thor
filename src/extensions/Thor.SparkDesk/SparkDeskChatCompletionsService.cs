@@ -6,6 +6,8 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 using Microsoft.Extensions.Logging;
 using Thor.SparkDesk.API;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.SparkDesk;
 

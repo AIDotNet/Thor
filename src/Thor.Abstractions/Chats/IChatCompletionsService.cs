@@ -1,7 +1,7 @@
-﻿using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+﻿using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-namespace Thor.Abstractions;
+namespace Thor.Abstractions.Chats;
 
 /// <summary>
 /// 对话补全服务

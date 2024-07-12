@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Thor.Abstractions.ObjectModels.ObjectModels;
+using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
-namespace Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+namespace Thor.Abstractions.Chats.Dtos;
 
 /// <summary>
 /// 对话补全请求参数对象
@@ -152,7 +154,7 @@ public class ChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiModels.
             {
                 if (jsonElement.ValueKind == JsonValueKind.Array)
                 {
-                    Tools = JsonSerializer.Deserialize<List<ToolDefinition>>(jsonElement.GetRawText(),ThorJsonSerializer.DefaultOptions);
+                    Tools = JsonSerializer.Deserialize<List<ToolDefinition>>(jsonElement.GetRawText(), ThorJsonSerializer.DefaultOptions);
                 }
                 else
                 {

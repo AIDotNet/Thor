@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using Thor.Abstractions;
+using Thor.Abstractions.Chats;
 
 namespace Thor.Moonshot;
 

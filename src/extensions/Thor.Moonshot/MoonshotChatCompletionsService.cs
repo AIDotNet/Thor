@@ -2,8 +2,9 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Thor.Abstractions;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Extensions;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Moonshot;
