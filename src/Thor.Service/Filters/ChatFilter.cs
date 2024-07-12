@@ -13,7 +13,7 @@ public sealed class ChatFilter : IEndpointFilter
         }
         catch (NotModelException notModel)
         {
-            return new ChatCompletionCreateResponse()
+            return new ChatCompletionsResponse()
             {
                 Error = new Error()
                 {
@@ -28,7 +28,7 @@ public sealed class ChatFilter : IEndpointFilter
         }
         catch (Exception e)
         {
-            return new ChatCompletionCreateResponse()
+            return new ChatCompletionsResponse()
             {
                 Error = new Error()
                 {

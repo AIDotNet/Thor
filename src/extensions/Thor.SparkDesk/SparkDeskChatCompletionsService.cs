@@ -11,7 +11,7 @@ namespace Thor.SparkDesk;
 
 public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -65,7 +65,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
         {
             Role = "assistant"
         };
-        var ret = new ChatCompletionCreateResponse()
+        var ret = new ChatCompletionsResponse()
         {
             Model = input.Model,
             Choices = new List<ChatChoiceResponse>()
@@ -128,7 +128,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
     }
 
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
+    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -192,7 +192,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             {
                 Role = "assistant"
             };
-            var ret = new ChatCompletionCreateResponse()
+            var ret = new ChatCompletionsResponse()
             {
                 Model = input.Model,
                 Choices = new List<ChatChoiceResponse>()

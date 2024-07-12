@@ -3,7 +3,7 @@ using Thor.Abstractions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;
-using ChatCompletionCreateResponse = Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
+using ChatCompletionsResponse = Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
 
 namespace Thor.MetaGLM;
 
@@ -19,7 +19,7 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
         };
     }
 
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -122,7 +122,7 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
+    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

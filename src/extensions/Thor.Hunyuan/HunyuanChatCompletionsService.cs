@@ -10,7 +10,7 @@ namespace Thor.Hunyuan;
 
 public class HunyuanChatCompletionsService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
+    public async Task<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -41,7 +41,7 @@ public class HunyuanChatCompletionsService : IChatCompletionsService
         // 返回的resp是一个ChatCompletionsResponse的实例，与请求对象对应
         var resp = await client.ChatCompletions(req);
 
-        return new ChatCompletionCreateResponse
+        return new Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse
         {
             Choices = resp.Choices.Select(x => new ChatChoiceResponse
             {
@@ -66,7 +66,7 @@ public class HunyuanChatCompletionsService : IChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> StreamChatCompletionsAsync(
         Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -107,7 +107,7 @@ public class HunyuanChatCompletionsService : IChatCompletionsService
 
             var v = JsonSerializer.Deserialize<HunyuanResultDto>(e.Data);
             var content = v?.Choices.FirstOrDefault()?.Delta.Content;
-            yield return new ChatCompletionCreateResponse
+            yield return new Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse
             {
                 Choices = new List<ChatChoiceResponse>()
                 {

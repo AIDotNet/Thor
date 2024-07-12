@@ -6,14 +6,14 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Claudia;
 using OpenAI.ObjectModels.RequestModels;
-using ChatCompletionCreateResponse =
-    Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
+using ChatCompletionsResponse =
+    Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
 
 namespace Thor.Claudia;
 
 public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -101,7 +101,7 @@ public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
         ChatCompletionsRequest input, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {

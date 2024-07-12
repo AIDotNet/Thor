@@ -10,7 +10,7 @@ namespace Thor.Moonshot;
 
 public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -20,13 +20,13 @@ public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClient
             chatCompletionCreate, options.ApiKey);
 
         var result =
-            await response.Content.ReadFromJsonAsync<ChatCompletionCreateResponse>(
+            await response.Content.ReadFromJsonAsync<ChatCompletionsResponse>(
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
         return result;
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
         ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -46,7 +46,7 @@ public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClient
             if (line.StartsWith('{'))
             {
                 // 如果是json数据则直接返回
-                yield return JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
+                yield return JsonSerializer.Deserialize<ChatCompletionsResponse>(line,
                     ThorJsonSerializer.DefaultOptions);
 
                 break;
@@ -70,7 +70,7 @@ public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClient
 
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var result = JsonSerializer.Deserialize<ChatCompletionCreateResponse>(line,
+            var result = JsonSerializer.Deserialize<ChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
             yield return result;
         }

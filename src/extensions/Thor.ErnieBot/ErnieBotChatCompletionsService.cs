@@ -9,7 +9,7 @@ namespace Thor.ErnieBot;
 
 public class ErnieBotChatCompletionsService : IChatCompletionsService
 {
-    public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -38,7 +38,7 @@ public class ErnieBotChatCompletionsService : IChatCompletionsService
         var response = await client.ChatAsync(chatRequest, ErnieBotHelper.GetModelEndpoint(chatCompletionCreate.Model),
             cancellationToken);
 
-        return new ChatCompletionCreateResponse
+        return new ChatCompletionsResponse
         {
             Choices = new List<ChatChoiceResponse>()
             {
@@ -66,7 +66,7 @@ public class ErnieBotChatCompletionsService : IChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
         Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -95,7 +95,7 @@ public class ErnieBotChatCompletionsService : IChatCompletionsService
                            ErnieBotHelper.GetModelEndpoint(chatCompletionCreate.Model),
                            cancellationToken))
         {
-            yield return new ChatCompletionCreateResponse()
+            yield return new ChatCompletionsResponse()
             {
                 Model = chatCompletionCreate.Model,
                 Choices = new List<ChatChoiceResponse>()

@@ -15,7 +15,7 @@ public interface IChatCompletionsService
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    Task<ChatCompletionCreateResponse> ChatCompletionsAsync(
+    Task<ChatCompletionsResponse> ChatCompletionsAsync(
         ChatCompletionsRequest request,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
@@ -27,7 +27,7 @@ public interface IChatCompletionsService
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(
+    IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
         ChatCompletionsRequest request,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default);

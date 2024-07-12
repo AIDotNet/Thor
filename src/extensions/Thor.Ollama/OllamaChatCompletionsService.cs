@@ -13,7 +13,7 @@ namespace Thor.Ollama
     {
         private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaPlatformOptions.PlatformCode));
 
-        public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 
@@ -50,7 +50,7 @@ namespace Thor.Ollama
                 throw;
             }
 
-            return new ChatCompletionCreateResponse()
+            return new ChatCompletionsResponse()
             {
                 Model = result.model,
                 Choices = result.message == null ? [] :
@@ -75,7 +75,7 @@ namespace Thor.Ollama
             };
         }
 
-        public async IAsyncEnumerable<ChatCompletionCreateResponse> StreamChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 
@@ -116,7 +116,7 @@ namespace Thor.Ollama
 
                 if (result.done)
                 {
-                    yield return new ChatCompletionCreateResponse()
+                    yield return new ChatCompletionsResponse()
                     {
                         Model = result.model,
                         Choices = [],
@@ -131,7 +131,7 @@ namespace Thor.Ollama
                 }
                 else
                 {
-                    yield return new ChatCompletionCreateResponse()
+                    yield return new ChatCompletionsResponse()
                     {
                         Model = result.model,
                         Choices = result.message == null ? [] :
