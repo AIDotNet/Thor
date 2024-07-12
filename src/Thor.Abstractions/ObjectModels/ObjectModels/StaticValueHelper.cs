@@ -4,12 +4,6 @@ public class StaticValues
 {
     public static class CompletionStatics
     {
-        public static class ResponseFormat
-        {
-            public static string Json => "json_object";
-            public static string Text => "text";
-        }
-
         public static class ToolType
         {
             public static string Function => "function";

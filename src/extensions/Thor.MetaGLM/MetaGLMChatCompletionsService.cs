@@ -104,7 +104,7 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
             }));
         }
 
-        return new ChatCompletionCreateResponse()
+        return new ChatCompletionsResponse()
         {
             Choices =
             [
@@ -201,7 +201,7 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
                 }));
             }
 
-            yield return new ChatCompletionCreateResponse()
+            yield return new ChatCompletionsResponse()
             {
                 Choices =
                 [

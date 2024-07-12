@@ -223,49 +223,6 @@ public class ChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiModels.
     public ResponseFormat? ResponseFormat { get; set; }
 
     /// <summary>
-    ///     The format that the model must output. Used to enable JSON mode.
-    ///     Must be one of "text" or "json_object".
-    /// </summary>
-    /// <example>
-    ///     This example shows how to set the ChatResponseFormat to JSON:
-    ///     <code>
-    ///         var chatResponse = new ChatResponse
-    ///         {
-    ///             ChatResponseFormat = ChatResponseFormats.Json
-    ///         };
-    ///     </code>
-    /// </example>
-    /// <exception cref="ArgumentOutOfRangeException">
-    ///     Thrown when an unsupported <see cref="ResponseFormats" /> value is provided.
-    /// </exception>
-    /// <exception cref="ValidationException">
-    ///     Thrown when <see cref="ResponseFormat" /> is already set.
-    /// </exception>
-    [JsonIgnore]
-    public ResponseFormats? ChatResponseFormat
-    {
-        set
-        {
-            if (value == null) return;
-            if (ResponseFormat?.Type != null)
-            {
-                throw new ValidationException(
-                    "ResponseFormat and ChatResponseFormat can not be assigned at the same time. One of them is should be null.");
-            }
-
-            ResponseFormat = new ResponseFormat
-            {
-                Type = value switch
-                {
-                    ResponseFormats.Json => StaticValues.CompletionStatics.ResponseFormat.Json,
-                    ResponseFormats.Text => StaticValues.CompletionStatics.ResponseFormat.Text,
-                    _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
-                }
-            };
-        }
-    }
-
-    /// <summary>
     ///     This feature is in Beta. If specified, our system will make a best effort to sample deterministically, such that
     ///     repeated requests with the same seed and parameters should return the same result. Determinism is not guaranteed,
     ///     and you should refer to the system_fingerprint response parameter to monitor changes in the backend.

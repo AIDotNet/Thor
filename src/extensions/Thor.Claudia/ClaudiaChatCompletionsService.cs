@@ -82,7 +82,7 @@ public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
             }
         }
 
-        return new ChatCompletionCreateResponse()
+        return new ChatCompletionsResponse()
         {
             Choices =
             [
@@ -153,7 +153,7 @@ public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
         {
             if (result is ContentBlockDelta content)
             {
-                yield return new ChatCompletionCreateResponse()
+                yield return new ChatCompletionsResponse()
                 {
                     Choices =
                     [
