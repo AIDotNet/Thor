@@ -8,7 +8,7 @@ namespace Thor.Qiansail
         public static IServiceCollection AddQiansail(this IServiceCollection services)
         {
             ThorGlobal.PlatformNames.Add(QiansailPlatformOptions.PlatformName, QiansailPlatformOptions.PlatformCode);
-            services.AddKeyedSingleton<IChatCompletionsService, QiansailService>(QiansailPlatformOptions.PlatformCode);
+            services.AddKeyedSingleton<IChatCompletionsService, QiansailChatCompletionsService>(QiansailPlatformOptions.PlatformCode);
             services.AddKeyedSingleton<IApiTextEmbeddingGeneration, QiansailTextEmbeddingGeneration>(QiansailPlatformOptions
                 .PlatformCode);
             return services;

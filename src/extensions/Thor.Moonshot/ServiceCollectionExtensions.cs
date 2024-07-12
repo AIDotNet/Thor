@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
             "gpt-3.5-turbo-instruct",
         ]);
 
-        services.AddKeyedSingleton<IChatCompletionsService, MoonshotService>(MoonshotPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IChatCompletionsService, MoonshotChatCompletionsService>(MoonshotPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, MoonshotServiceTextEmbeddingGeneration>(
             MoonshotPlatformOptions.PlatformCode);

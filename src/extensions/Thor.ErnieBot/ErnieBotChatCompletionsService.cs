@@ -7,7 +7,7 @@ using ERNIE_Bot.SDK.Models;
 
 namespace Thor.ErnieBot;
 
-public class ErnieBotService : IChatCompletionsService
+public class ErnieBotChatCompletionsService : IChatCompletionsService
 {
     public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,

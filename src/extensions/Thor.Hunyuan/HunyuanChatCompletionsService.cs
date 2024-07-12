@@ -8,7 +8,7 @@ using TencentCloud.Hunyuan.V20230901.Models;
 
 namespace Thor.Hunyuan;
 
-public class HunyuanService : IChatCompletionsService
+public class HunyuanChatCompletionsService : IChatCompletionsService
 {
     public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(Abstractions.ObjectModels.ObjectModels.RequestModels.ChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,

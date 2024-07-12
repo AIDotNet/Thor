@@ -9,7 +9,7 @@ using OpenAI.ObjectModels.RequestModels;
 
 namespace Thor.Ollama
 {
-    public class OllamaChatService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
+    public class OllamaChatCompletionsService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
     {
         private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaPlatformOptions.PlatformCode));
 

@@ -7,11 +7,11 @@ using ChatCompletionCreateResponse = Thor.Abstractions.ObjectModels.ObjectModels
 
 namespace Thor.MetaGLM;
 
-public sealed class MetaGLMService : IChatCompletionsService
+public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
 {
     private readonly MetaGLMPlatformOptions _openAiOptions;
 
-    public MetaGLMService()
+    public MetaGLMChatCompletionsService()
     {
         _openAiOptions = new MetaGLMPlatformOptions
         {

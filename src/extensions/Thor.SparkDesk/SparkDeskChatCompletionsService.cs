@@ -9,7 +9,7 @@ using Thor.SparkDesk.API;
 
 namespace Thor.SparkDesk;
 
-public sealed class SparkDeskService(ILogger<SparkDeskService> logger) : IChatCompletionsService
+public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IChatCompletionsService
 {
     public async Task<ChatCompletionCreateResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
