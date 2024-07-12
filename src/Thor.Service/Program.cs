@@ -667,12 +667,14 @@ system.MapPost("share", async (SystemService service, string userId, HttpContext
 
 #endregion
 
+// 对话补全请求
 app.MapPost("/v1/chat/completions", async (ChatService service, HttpContext httpContext) =>
         await service.ChatCompletionsAsync(httpContext))
     .WithGroupName("OpenAI")
     .WithDescription("Get completions from OpenAI")
     .WithOpenApi();
 
+// 文本补全接口
 app.MapPost("/v1/completions", async (ChatService service, HttpContext context) =>
         await service.CompletionsAsync(context))
     .WithGroupName("OpenAI")
