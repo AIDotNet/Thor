@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     {
         ThorGlobal.PlatformNames.Add(SparkDeskPlatformOptions.PlatformName, SparkDeskPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IChatCompletionsService, SparkDeskChatCompletionsService>(SparkDeskPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorChatCompletionsService, SparkDeskChatCompletionsService>(SparkDeskPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IApiImageService, SparkDeskImageService>(SparkDeskPlatformOptions.PlatformCode);
 

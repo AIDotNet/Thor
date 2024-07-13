@@ -9,7 +9,7 @@ using ChatCompletionsResponse = Thor.Abstractions.ObjectModels.ObjectModels.Resp
 
 namespace Thor.MetaGLM;
 
-public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
+public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
 {
     private readonly MetaGLMPlatformOptions _openAiOptions;
 
@@ -21,7 +21,7 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
         };
     }
 
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -112,9 +112,9 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
             [
                 new()
                 {
-                    Delta = new ChatMessage("assistant", result.choices.FirstOrDefault()?.message.content ?? string.Empty,
+                    Delta = new ThorChatMessage("assistant", result.choices.FirstOrDefault()?.message.content ?? string.Empty,
                         null, tools),
-                    Message = new ChatMessage("assistant",
+                    Message = new ThorChatMessage("assistant",
                         result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
                     FinishReason = "stop",
                     Index = 0,
@@ -124,7 +124,7 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
+    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -209,9 +209,9 @@ public sealed class MetaGLMChatCompletionsService : IChatCompletionsService
                 [
                     new()
                     {
-                        Delta = new ChatMessage("assistant",
+                        Delta = new ThorChatMessage("assistant",
                             result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
-                        Message = new ChatMessage("assistant",
+                        Message = new ThorChatMessage("assistant",
                             result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
                         FinishReason = "stop",
                         Index = 0,

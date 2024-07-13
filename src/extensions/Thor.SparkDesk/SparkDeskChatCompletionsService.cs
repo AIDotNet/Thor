@@ -11,9 +11,9 @@ using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.SparkDesk;
 
-public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IChatCompletionsService
+public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -63,7 +63,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             TopK = (int)(input.TopP ?? 4)
         }, cancellationToken: cancellationToken);
 
-        var retMessage = new ChatMessage()
+        var retMessage = new ThorChatMessage()
         {
             Role = "assistant"
         };
@@ -130,7 +130,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
     }
 
 
-    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ChatCompletionsRequest input,
+    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -190,7 +190,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
                 yield break;
             }
 
-            var retMessage = new ChatMessage()
+            var retMessage = new ThorChatMessage()
             {
                 Role = "assistant"
             };

@@ -8,10 +8,10 @@ using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.Qiansail
 {
-    public sealed class QiansailChatCompletionsService : IChatCompletionsService
+    public sealed class QiansailChatCompletionsService : IThorChatCompletionsService
     {
         public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
-            ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+            ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using DashScopeClient client = new(options!.ApiKey!);
@@ -42,7 +42,7 @@ namespace Thor.Qiansail
                 [
                     new()
                     {
-                        Delta = new Thor.Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant", result.Output.Text),
+                        Delta = new ThorChatMessage("assistant", result.Output.Text),
                         FinishReason = "stop",
                         Index = 0,
                     }
@@ -58,7 +58,7 @@ namespace Thor.Qiansail
         }
 
         public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-            ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+            ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using DashScopeClient client = new(options!.ApiKey!);
@@ -90,9 +90,9 @@ namespace Thor.Qiansail
                     [
                         new()
                         {
-                            Delta = new Thor.Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant",
+                            Delta = new ThorChatMessage("assistant",
                                 result.Output.Text),
-                            Message = new Thor.Abstractions.ObjectModels.ObjectModels.RequestModels.ChatMessage("assistant",
+                            Message = new ThorChatMessage("assistant",
                                 result.Output.Text),
                             FinishReason = "stop",
                             Index = 0,

@@ -8,9 +8,9 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.AzureOpenAI;
 
-public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
+public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -30,7 +30,7 @@ public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFact
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+        ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(AzureOpenAIPlatformOptions.PlatformCode);

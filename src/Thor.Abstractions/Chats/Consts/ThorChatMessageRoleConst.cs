@@ -9,7 +9,7 @@ namespace Thor.Abstractions.Chats.Consts
     /// <summary>
     /// 对话消息角色定义
     /// </summary>
-    public class ChatMessageRoleConst
+    public class ThorChatMessageRoleConst
     {
         /// <summary>
         /// 系统角色

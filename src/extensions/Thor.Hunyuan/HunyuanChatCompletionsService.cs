@@ -6,12 +6,13 @@ using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 using OpenAI.ObjectModels.RequestModels;
 using TencentCloud.Hunyuan.V20230901.Models;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.Hunyuan;
 
-public class HunyuanChatCompletionsService : IChatCompletionsService
+public class HunyuanChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.Chats.Dtos.ChatCompletionsRequest chatCompletionCreate,
+    public async Task<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -46,12 +47,12 @@ public class HunyuanChatCompletionsService : IChatCompletionsService
         {
             Choices = resp.Choices.Select(x => new ChatChoiceResponse
             {
-                Delta = new ChatMessage()
+                Delta = new ThorChatMessage()
                 {
                     Content = x.Message.Content,
                     Role = x.Message.Role,
                 },
-                Message = new ChatMessage()
+                Message = new ThorChatMessage()
                 {
                     Content = x.Message.Content,
                     Role = x.Message.Role,
@@ -68,7 +69,7 @@ public class HunyuanChatCompletionsService : IChatCompletionsService
     }
 
     public async IAsyncEnumerable<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> StreamChatCompletionsAsync(
-        Abstractions.Chats.Dtos.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+        Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");
@@ -114,12 +115,12 @@ public class HunyuanChatCompletionsService : IChatCompletionsService
                 {
                     new()
                     {
-                        Delta = new ChatMessage()
+                        Delta = new ThorChatMessage()
                         {
                             Content = content,
                             Role = "assistant",
                         },
-                        Message = new ChatMessage()
+                        Message = new ThorChatMessage()
                         {
                             Content = content,
                             Role = "assistant",

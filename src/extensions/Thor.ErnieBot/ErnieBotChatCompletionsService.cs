@@ -5,12 +5,14 @@ using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 using ERNIE_Bot.SDK;
 using ERNIE_Bot.SDK.Models;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Chats.Consts;
 
 namespace Thor.ErnieBot;
 
-public class ErnieBotChatCompletionsService : IChatCompletionsService
+public class ErnieBotChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.Chats.Dtos.ChatCompletionsRequest chatCompletionCreate,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -45,14 +47,14 @@ public class ErnieBotChatCompletionsService : IChatCompletionsService
             {
                 new()
                 {
-                    Message = new ChatMessage()
+                    Message = new ThorChatMessage()
                     {
-                        Role = "assistant",
+                        Role = ThorChatMessageRoleConst.Assistant,
                         Content = response.Result
                     },
-                    Delta = new ChatMessage()
+                    Delta = new ThorChatMessage()
                     {
-                        Role = "assistant",
+                        Role = ThorChatMessageRoleConst.Assistant,
                         Content = response.Result
                     }
                 }
@@ -68,7 +70,7 @@ public class ErnieBotChatCompletionsService : IChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        Abstractions.Chats.Dtos.ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+        Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey!.Split("|");
@@ -103,12 +105,12 @@ public class ErnieBotChatCompletionsService : IChatCompletionsService
                 {
                     new()
                     {
-                        Message = new ChatMessage()
+                        Message = new ThorChatMessage()
                         {
                             Role = "assistant",
                             Content = item.Result
                         },
-                        Delta = new ChatMessage()
+                        Delta = new ThorChatMessage()
                         {
                             Role = "assistant",
                             Content = item.Result

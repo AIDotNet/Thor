@@ -10,13 +10,18 @@ namespace Thor.Abstractions.Chats.Dtos;
 /// <summary>
 /// 对话补全请求参数对象
 /// </summary>
-public class ChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiModels.IModel, IOpenAiModels.IUser
+public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiModels.IModel, IOpenAiModels.IUser
 {
+    public ThorChatCompletionsRequest()
+    {
+        Messages = new();
+    }
+
     /// <summary>
     /// 包含迄今为止对话的消息列表
     /// </summary>
     [JsonPropertyName("messages")]
-    public required List<ChatMessage> Messages { get; set; }
+    public required List<ThorChatMessage> Messages { get; set; }
 
     /// <summary>
     ///     An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the

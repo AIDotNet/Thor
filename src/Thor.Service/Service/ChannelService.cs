@@ -1,6 +1,8 @@
 ﻿using MapsterMapper;
+using OpenAI.Chat;
 using System.Diagnostics;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Claudia;
@@ -124,14 +126,21 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         if (channel == null) throw new Exception("渠道不存在");
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IChatCompletionsService>(channel.Type);
+        var openService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
 
         if (openService == null) throw new Exception("渠道服务不存在");
 
-        var chatHistory = new ChatCompletionsRequest()
+        var chatHistory = new ThorChatCompletionsRequest()
         {
             TopP=0.7f,
             Temperature=0.95f,
+            Messages=new List<ThorChatMessage>()
+            {
+                new ThorChatMessage()
+                {
+                    Role=ThorChatMessageRoleConst.User,
+                }
+            }
         };
 
         var setting = new ChatPlatformOptions
@@ -147,7 +156,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             chatHistory.Model = channel.Models.Order()
                 .FirstOrDefault(x => x.StartsWith("gpt-", StringComparison.OrdinalIgnoreCase));
 
-            chatHistory.Messages = new List<ChatMessage>
+            chatHistory.Messages = new List<ThorChatMessage>
             {
                 new()
                 {
@@ -160,7 +169,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             chatHistory.Model =
                 channel.Models.FirstOrDefault(x => x.StartsWith("claude", StringComparison.OrdinalIgnoreCase));
-            chatHistory.Messages = new List<ChatMessage>
+            chatHistory.Messages = new List<ThorChatMessage>
             {
                 new()
                 {
@@ -174,7 +183,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             chatHistory.Model = channel.Models.FirstOrDefault(x =>
                 x.StartsWith("genera", StringComparison.OrdinalIgnoreCase) ||
                 x.StartsWith("SparkDesk", StringComparison.OrdinalIgnoreCase));
-            chatHistory.Messages = new List<ChatMessage>
+            chatHistory.Messages = new List<ThorChatMessage>
             {
                 new()
                 {
@@ -187,7 +196,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             chatHistory.Model =
                 channel.Models.FirstOrDefault(x => !x.Contains("embedding", StringComparison.OrdinalIgnoreCase));
-            chatHistory.Messages = new List<ChatMessage>
+            chatHistory.Messages = new List<ThorChatMessage>
             {
                 new()
                 {
@@ -199,7 +208,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         else
         {
             chatHistory.Model = channel.Models.FirstOrDefault();
-            chatHistory.Messages = new List<ChatMessage>
+            chatHistory.Messages = new List<ThorChatMessage>
             {
                 new()
                 {

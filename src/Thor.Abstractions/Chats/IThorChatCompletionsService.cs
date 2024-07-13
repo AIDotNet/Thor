@@ -6,7 +6,7 @@ namespace Thor.Abstractions.Chats;
 /// <summary>
 /// 对话补全服务
 /// </summary>
-public interface IChatCompletionsService
+public interface IThorChatCompletionsService
 {
     /// <summary>
     /// 非流式对话补全
@@ -16,7 +16,7 @@ public interface IChatCompletionsService
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
     Task<ChatCompletionsResponse> ChatCompletionsAsync(
-        ChatCompletionsRequest request,
+        ThorChatCompletionsRequest request,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 
@@ -28,7 +28,7 @@ public interface IChatCompletionsService
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
     IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        ChatCompletionsRequest request,
+        ThorChatCompletionsRequest request,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 }

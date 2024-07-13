@@ -13,9 +13,9 @@ using Thor.Abstractions.Chats.Dtos;
 
 namespace Thor.Claudia;
 
-public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
+public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest input,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -90,11 +90,11 @@ public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
             [
                 new()
                 {
-                    Delta = new ChatMessage("assistant", result.Content.FirstOrDefault()?.Text ?? string.Empty, null,
+                    Delta = new ThorChatMessage("assistant", result.Content.FirstOrDefault()?.Text ?? string.Empty, null,
                         toolsResult),
                     FinishReason = "stop",
                     Index = 0,
-                    Message = new ChatMessage("assistant", result.Content.FirstOrDefault()?.Text ?? string.Empty, null,
+                    Message = new ThorChatMessage("assistant", result.Content.FirstOrDefault()?.Text ?? string.Empty, null,
                         toolsResult),
                 }
             ],
@@ -104,7 +104,7 @@ public sealed class ClaudiaChatCompletionsService : IChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        ChatCompletionsRequest input, ChatPlatformOptions? options = null,
+        ThorChatCompletionsRequest input, ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var anthropic = AnthropicFactory.CreateClient(options.ApiKey, options.Address);

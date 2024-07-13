@@ -341,7 +341,7 @@ public sealed class ChatService(
         using var body = new MemoryStream();
         await context.Request.Body.CopyToAsync(body);
 
-        var module = JsonSerializer.Deserialize<ChatCompletionsRequest>(body.ToArray());
+        var module = JsonSerializer.Deserialize<ThorChatCompletionsRequest>(body.ToArray());
 
         if (module == null)
         {
@@ -361,7 +361,7 @@ public sealed class ChatService(
             if (channel == null) throw new NotModelException(module.Model);
 
             // 获取渠道指定的实现类型的服务
-            var openService = GetKeyedService<IChatCompletionsService>(channel.Type);
+            var openService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
@@ -428,8 +428,8 @@ public sealed class ChatService(
         }
     }
 
-    private async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, ChatCompletionsRequest input,
-        ChatChannel channel, IChatCompletionsService openService, User user, decimal rate)
+    private async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, ThorChatCompletionsRequest input,
+        ChatChannel channel, IThorChatCompletionsService openService, User user, decimal rate)
     {
         int requestToken;
         int responseToken;
@@ -516,7 +516,7 @@ public sealed class ChatService(
     /// <param name="rate"></param>
     /// <returns></returns>
     private async ValueTask<(int, int)> StreamChatHandlerAsync(HttpContext context,
-        ChatCompletionsRequest input, ChatChannel channel, IChatCompletionsService openService, User user,
+        ThorChatCompletionsRequest input, ChatChannel channel, IThorChatCompletionsService openService, User user,
         decimal rate)
     {
         int requestToken;

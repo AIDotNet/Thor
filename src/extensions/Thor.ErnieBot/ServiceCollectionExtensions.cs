@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     {
         ThorGlobal.PlatformNames.Add(ErnieBotPlatformOptions.PlatformName, ErnieBotPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IChatCompletionsService, ErnieBotChatCompletionsService>(ErnieBotPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorChatCompletionsService, ErnieBotChatCompletionsService>(ErnieBotPlatformOptions.PlatformCode);
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, ErnieBotTextEmbeddingGeneration>(ErnieBotPlatformOptions
             .PlatformCode);
         return services;

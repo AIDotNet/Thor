@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
 
         ThorGlobal.PlatformNames.Add(MetaGLMPlatformOptions.PlatformName, MetaGLMPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IChatCompletionsService, MetaGLMChatCompletionsService>(MetaGLMPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorChatCompletionsService, MetaGLMChatCompletionsService>(MetaGLMPlatformOptions.PlatformCode);
         return services;
     }
 }

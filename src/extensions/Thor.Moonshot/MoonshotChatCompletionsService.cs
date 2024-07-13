@@ -9,9 +9,9 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Moonshot;
 
-public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClientFactory) : IChatCompletionsService
+public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ChatCompletionsRequest chatCompletionCreate,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ChatPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -28,7 +28,7 @@ public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClient
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        ChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+        ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);

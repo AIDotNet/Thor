@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IChatCompletionsService, AzureOpenAIChatCompletionsService>(AzureOpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorChatCompletionsService, AzureOpenAIChatCompletionsService>(AzureOpenAIPlatformOptions.PlatformCode);
         services.AddKeyedSingleton<IApiTextEmbeddingGeneration, AzureOpenAIServiceTextEmbeddingGeneration>(
             AzureOpenAIPlatformOptions.PlatformCode);
         services.AddKeyedSingleton<IApiImageService, AzureOpenAIServiceImageService>(AzureOpenAIPlatformOptions.PlatformCode);
