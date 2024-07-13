@@ -134,29 +134,4 @@ public class ChatMessage
     /// </summary>
     [JsonPropertyName("tool_calls")]
     public IList<ToolCall>? ToolCalls { get; set; }
-
-    public static ChatMessage FromAssistant(string content, string? name = null, IList<ToolCall>? toolCalls = null)
-    {
-        return new(StaticValues.ChatMessageRoles.Assistant, content, name, toolCalls);
-    }
-
-    public static ChatMessage FromTool(string content, string toolCallId)
-    {
-        return new(StaticValues.ChatMessageRoles.Tool, content, toolCallId: toolCallId);
-    }
-
-    public static ChatMessage FromUser(string content, string? name = null)
-    {
-        return new(StaticValues.ChatMessageRoles.User, content, name);
-    }
-
-    public static ChatMessage FromSystem(string content, string? name = null)
-    {
-        return new(StaticValues.ChatMessageRoles.System, content, name);
-    }
-
-    public static ChatMessage FromUser(IList<MessageContent> contents)
-    {
-        return new(StaticValues.ChatMessageRoles.User, contents);
-    }
 }
