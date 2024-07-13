@@ -12,20 +12,11 @@ namespace Thor.Abstractions.Chats.Dtos;
 /// </summary>
 public class ChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiModels.IModel, IOpenAiModels.IUser
 {
-    public enum ResponseFormats
-    {
-        Text,
-        Json
-    }
-
     /// <summary>
-    ///     The messages to generate chat completions for, in the chat format.
-    ///     The main input is the messages parameter. Messages must be an array of message objects, where each object has a
-    ///     role (either “system”, “user”, or “assistant”) and content (the content of the message). Conversations can be as
-    ///     short as 1 message or fill many pages.
+    /// 包含迄今为止对话的消息列表
     /// </summary>
     [JsonPropertyName("messages")]
-    public IList<ChatMessage> Messages { get; set; }
+    public required List<ChatMessage> Messages { get; set; }
 
     /// <summary>
     ///     An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the
