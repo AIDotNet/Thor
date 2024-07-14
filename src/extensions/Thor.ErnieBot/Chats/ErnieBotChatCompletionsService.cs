@@ -8,11 +8,11 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions;
 
-namespace Thor.ErnieBot;
+namespace Thor.ErnieBot.Chats;
 
 public class ErnieBotChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate,
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -63,7 +63,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
+        ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey!.Split("|");

@@ -7,6 +7,7 @@ using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
+using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Service.Infrastructure;
 

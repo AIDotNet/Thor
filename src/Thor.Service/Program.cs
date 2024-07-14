@@ -7,6 +7,7 @@ using Serilog;
 using Thor.AzureOpenAI.Extensions;
 using Thor.BuildingBlocks.Data;
 using Thor.Claudia;
+using Thor.ErnieBot.Extensions;
 using Thor.LocalEvent;
 using Thor.LocalMemory.Cache;
 using Thor.Moonshot.Extensions;

@@ -5,9 +5,9 @@ using ERNIE_Bot.SDK;
 using ERNIE_Bot.SDK.Models;
 using Thor.Abstractions.Embeddings;
 
-namespace Thor.ErnieBot;
+namespace Thor.ErnieBot.Embeddings;
 
-public class ErnieBotTextEmbeddingGeneration : IThorTextEmbeddingService
+public class ErnieBotTextEmbeddingService : IThorTextEmbeddingService
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
         ThorPlatformOptions? options = null,
