@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
 
         services.AddKeyedSingleton<IApiImageService, MoonshotServiceImageService>(MoonshotPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiCompletionService, MoonshotServiceCompletionService>(MoonshotPlatformOptions
+        services.AddKeyedSingleton<IThorCompletionsService, MoonshotServiceCompletionService>(MoonshotPlatformOptions
             .PlatformCode);
 
         services.AddHttpClient(MoonshotPlatformOptions.PlatformCode,

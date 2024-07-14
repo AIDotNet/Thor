@@ -269,7 +269,7 @@ public sealed class ChatService(
 
             if (channel == null) throw new NotModelException(module.Model);
 
-            var openService = GetKeyedService<IApiCompletionService>(channel.Type);
+            var openService = GetKeyedService<IThorCompletionsService>(channel.Type);
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
@@ -318,7 +318,7 @@ public sealed class ChatService(
     }
 
     public async ValueTask<(int, int)> CompletionsHandlerAsync(HttpContext context, CompletionCreateRequest input,
-        ChatChannel channel, IApiCompletionService openService, User user, decimal rate)
+        ChatChannel channel, IThorCompletionsService openService, User user, decimal rate)
     {
         var setting = new ChatPlatformOptions
         {

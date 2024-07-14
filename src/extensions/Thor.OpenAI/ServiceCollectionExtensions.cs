@@ -48,7 +48,7 @@ public static class ServiceCollectionExtensions
 
         services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>(OpenAIPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiCompletionService, OpenAIServiceCompletionService>(OpenAIPlatformOptions
+        services.AddKeyedSingleton<IThorCompletionsService, OpenAIServiceCompletionService>(OpenAIPlatformOptions
             .PlatformCode);
 
         services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
