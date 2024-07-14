@@ -14,7 +14,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
 {
     public ThorChatCompletionsRequest()
     {
-        Messages = new();
+        Messages = new List<ThorChatMessage>();
     }
 
     /// <summary>
@@ -24,23 +24,36 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     public List<ThorChatMessage> Messages { get; set; }
 
     /// <summary>
-    ///     An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the
-    ///     tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are
-    ///     considered.
-    ///     We generally recommend altering this or temperature but not both.
+    /// 模型唯一编码值，如 gpt-4，gpt-3.5-turbo,moonshot-v1-8k，看底层具体平台定义
+    /// </summary>
+    [JsonPropertyName("model")]
+    public string Model { get; set; }
+
+    /// <summary>
+    /// 温度采样的替代方法称为核采样，介于 0 和 1 之间，其中模型考虑具有 top_p 概率质量的标记的结果。
+    /// 因此 0.1 意味着仅考虑包含前 10% 概率质量的标记。
+    /// 我们通常建议更改此项或 temperature ，但不要同时更改两者。
     /// </summary>
     [JsonPropertyName("top_p")]
     public float? TopP { get; set; }
 
     /// <summary>
-    ///     How many chat completion choices to generate for each input message.
+    /// 使用什么采样温度，介于 0 和 2 之间。
+    /// 较高的值（如 0.8）将使输出更加随机，而较低的值（如 0.2）将使其更加集中和确定性。
+    /// 我们通常建议更改此项或 top_p ，但不要同时更改两者。
     /// </summary>
-    [JsonPropertyName("n")]
-    public int? N { get; set; }
+    [JsonPropertyName("temperature")]
+    public float? Temperature { get; set; }
 
     /// <summary>
-    ///     If set, partial message deltas will be sent, like in ChatGPT. Tokens will be sent as data-only server-sent events
-    ///     as they become available, with the stream terminated by a data: [DONE] message.
+    /// 为每条输入消息生成多少个聊天完成选项。请注意，您将根据所有选项生成的代币数量付费。将 n 保留为 1 以最大限度地降低成本。
+    /// </summary>
+    [JsonPropertyName("n")]
+    public int? N { get; set; } = 1;
+
+    /// <summary>
+    /// 如果设置，将发送部分消息增量，就像在 ChatGPT 中一样。
+    /// 令牌可用时将作为仅数据服务器发送事件发送，流由 data: [DONE] 消息终止。
     /// </summary>
     [JsonPropertyName("stream")]
     public bool? Stream { get; set; }
@@ -228,24 +241,10 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     [JsonPropertyName("seed")]
     public int? Seed { get; set; }
 
-    /// <summary>
-    ///     ID of the model to use. For models supported see <see cref="Models" /> start with <c>Gpt_</c>
-    /// </summary>
-    [JsonPropertyName("model")]
-    public string? Model { get; set; }
-
     public IEnumerable<ValidationResult> Validate()
     {
         throw new NotImplementedException();
     }
-
-    /// <summary>
-    ///     What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while
-    ///     lower values like 0.2 will make it more focused and deterministic.
-    ///     We generally recommend altering this or top_p but not both.
-    /// </summary>
-    [JsonPropertyName("temperature")]
-    public float? Temperature { get; set; }
 
     /// <summary>
     ///     A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse. Learn more.

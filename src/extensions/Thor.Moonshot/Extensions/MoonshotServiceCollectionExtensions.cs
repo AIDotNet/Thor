@@ -2,11 +2,20 @@
 using System.Net;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
+using Thor.Moonshot.Chats;
 
-namespace Thor.Moonshot;
+namespace Thor.Moonshot.Extensions;
 
-public static class ServiceCollectionExtensions
+/// <summary>
+/// 月之暗面服务扩展
+/// </summary>
+public static class MoonshotServiceCollectionExtensions
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddMoonshotService(this IServiceCollection services)
     {
         ThorGlobal.PlatformNames.Add(MoonshotPlatformOptions.PlatformName, MoonshotPlatformOptions.PlatformCode);

@@ -7,7 +7,7 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-namespace Thor.Moonshot;
+namespace Thor.Moonshot.Chats;
 
 public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
 {

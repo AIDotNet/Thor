@@ -8,31 +8,50 @@ using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 using OpenAI.ObjectModels.RequestModels;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Ollama.Chats.Dtos;
 
-namespace Thor.Ollama
+namespace Thor.Ollama.Chats
 {
-    public class OllamaChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
+    /// <summary>
+    /// Ollama 对话补全服务实现
+    /// </summary>
+    /// <param name="httpClientFactory"></param>
+    public class OllamaChatCompletionsService(IHttpClientFactory httpClientFactory)
+        : IThorChatCompletionsService
     {
+        /// <summary>
+        /// http 客户端
+        /// </summary>
         private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaPlatformOptions.PlatformCode));
 
-        public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// 非流式对话补全
+        /// </summary>
+        /// <param name="request">对话补全请求参数对象</param>
+        /// <param name="options">平台参数对象</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns></returns>
+        public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
+            ThorChatCompletionsRequest request, 
+            ChatPlatformOptions? options = null, 
+            CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 
-            var response = await client.PostJsonAsync((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatRequest()
+            var response = await client.PostJsonAsync((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
             {
                 stream = false,
-                model = chatCompletionCreate.Model ?? "",
-                messages = chatCompletionCreate.Messages.Select(x => new OllamaChatRequestMessage()
+                model = request.Model ?? "",
+                messages = request.Messages.Select(x => new OllamaChatRequestMessage()
                 {
                     role = x.Role,
                     content = x.Content ?? ""
                 }).ToList(),
                 options = new OllamaChatOptions()
                 {
-                    stop = chatCompletionCreate.StopCalculated?.FirstOrDefault(),
-                    top_p = chatCompletionCreate.TopP,
-                    temperature = chatCompletionCreate.Temperature,
+                    stop = request.StopCalculated?.FirstOrDefault(),
+                    top_p = request.TopP,
+                    temperature = request.Temperature,
                 }
             }, options?.ApiKey ?? "");
 
@@ -74,24 +93,34 @@ namespace Thor.Ollama
             };
         }
 
-        public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// 流式对话补全
+        /// </summary>
+        /// <param name="request">对话补全请求参数对象</param>
+        /// <param name="options">平台参数对象</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        /// <returns></returns>
+        public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
+            ThorChatCompletionsRequest request, 
+            ChatPlatformOptions? options = null, 
+            CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
 
-            var response = await client.HttpRequestRaw((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatRequest()
+            var response = await client.HttpRequestRaw((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
             {
                 stream = true,
-                model = chatCompletionCreate.Model ?? "",
-                messages = chatCompletionCreate.Messages.Select(x => new OllamaChatRequestMessage()
+                model = request.Model ?? "",
+                messages = request.Messages.Select(x => new OllamaChatRequestMessage()
                 {
                     role = x.Role,
                     content = x.Content ?? ""
                 }).ToList(),
                 options = new OllamaChatOptions()
                 {
-                    stop = chatCompletionCreate.StopCalculated?.FirstOrDefault(),
-                    top_p = chatCompletionCreate.TopP,
-                    temperature = chatCompletionCreate.Temperature,
+                    stop = request.StopCalculated?.FirstOrDefault(),
+                    top_p = request.TopP,
+                    temperature = request.Temperature,
                 }
             }, options?.ApiKey ?? "");
 
@@ -154,68 +183,5 @@ namespace Thor.Ollama
                 }
             }
         }
-    }
-
-    public class OllamaChatRequest
-    {
-        public string model { get; set; } = null!;
-
-        public List<OllamaChatRequestMessage> messages { get; set; } = null!;
-
-        public string? format { get; set; }
-
-        public OllamaChatOptions? options { get; set; }
-
-        public bool? stream { get; set; }
-
-        public string? keep_alive { get; set; }
-    }
-
-    public class OllamaChatOptions
-    {
-        public int? mirostat { get; set; }
-        public float? mirostat_eta { get; set; }
-        public float? mirostat_tau { get; set; }
-        public int? num_ctx { get; set; }
-        public int? repeat_last_n { get; set; }
-        public float? repeat_penalty { get; set; }
-        public float? temperature { get; set; }
-        public int? seed { get; set; }
-        public string? stop { get; set; }
-        public float? tfs_z { get; set; }
-        public int? num_predict { get; set; }
-        public int? top_k { get; set; }
-        public float? top_p { get; set; }
-    }
-
-    public class OllamaChatRequestMessage
-    {
-        public string role { get; set; } = null!;
-
-        public string content { get; set; } = null!;
-
-        public List<string>? images { get; set; }
-    }
-
-    public class OllamaChatResponse
-    {
-        public string model { get; set; } = null!;
-        public DateTime created_at { get; set; }
-        public OllamaChatResponseMessage? message { get; set; }
-        public bool done { get; set; }
-        public string done_reason { get; set; }
-        public long? total_duration { get; set; }
-        public long? load_duration { get; set; }
-        public int? prompt_eval_count { get; set; }
-        public int? prompt_eval_duration { get; set; }
-        public int? eval_count { get; set; }
-        public long? eval_duration { get; set; }
-    }
-
-    public class OllamaChatResponseMessage
-    {
-        public string role { get; set; } = null!;
-        public string content { get; set; } = null!;
-        public List<string>? Images { get; set; }
     }
 }
