@@ -6,11 +6,14 @@ using Thor.Abstractions.Chats.Consts;
 namespace Thor.Abstractions.Chats.Dtos;
 
 /// <summary>
-/// 聊天消息体，请使用CreeateXXX系列方法构建内容
+/// 聊天消息体，建议使用CreeateXXX系列方法构建内容
 /// </summary>
 public class ThorChatMessage
 {
-    private ThorChatMessage()
+    /// <summary>
+    /// 
+    /// </summary>
+    public ThorChatMessage()
     {
 
     }
