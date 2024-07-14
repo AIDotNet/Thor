@@ -52,6 +52,7 @@ namespace Thor.Ollama
                 throw;
             }
 
+            var message = ThorChatMessage.CreateAssistantMessage(result.message.content);
             return new ChatCompletionsResponse()
             {
                 Model = result.model,
@@ -59,11 +60,7 @@ namespace Thor.Ollama
                 [
                     new ChatChoiceResponse()
                     {
-                        Delta = new ThorChatMessage()
-                        {
-                            Role = result.message.role,
-                            Content = result.message.content
-                        },
+                        Delta =message,
                         FinishReason = "stop",
                         Index = 0,
                     }
@@ -133,6 +130,8 @@ namespace Thor.Ollama
                 }
                 else
                 {
+                    var message = ThorChatMessage.CreateAssistantMessage(result.message.content);
+
                     yield return new ChatCompletionsResponse()
                     {
                         Model = result.model,
@@ -140,11 +139,7 @@ namespace Thor.Ollama
                         [
                             new ChatChoiceResponse()
                             {
-                                Delta = new ThorChatMessage()
-                                {
-                                    Role = result.message.role,
-                                    Content = result.message.content
-                                },
+                                Delta =message,
                                 FinishReason = "stop",
                                 Index = 0,
                             }

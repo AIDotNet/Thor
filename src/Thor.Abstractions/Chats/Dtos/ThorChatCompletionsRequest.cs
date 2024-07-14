@@ -21,7 +21,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// 包含迄今为止对话的消息列表
     /// </summary>
     [JsonPropertyName("messages")]
-    public required List<ThorChatMessage> Messages { get; set; }
+    public List<ThorChatMessage> Messages { get; set; }
 
     /// <summary>
     ///     An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the

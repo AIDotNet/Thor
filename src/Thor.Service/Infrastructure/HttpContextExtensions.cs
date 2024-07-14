@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using Thor.Abstractions;
+using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
@@ -41,22 +42,15 @@ public static class HttpContextExtensions
 
     public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message)
     {
+        var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
         var error = new ChatCompletionsResponse
         {
             Choices = new List<ChatChoiceResponse>()
             {
                 new()
                 {
-                    Message = new()
-                    {
-                        Content = message,
-                        Role = "assistant",
-                    },
-                    Delta =
-                    {
-                        Content = message,
-                        Role = "assistant",
-                    },
+                    Message =assistantMessage,
+                    Delta =assistantMessage,
                     FinishReason = "error",
                     FinishDetails = new()
                     {
@@ -78,22 +72,15 @@ public static class HttpContextExtensions
 
     public static async ValueTask WriteErrorAsync(this HttpContext context, string message)
     {
+        var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
         var error = new ChatCompletionsResponse
         {
             Choices = new List<ChatChoiceResponse>()
             {
                 new()
                 {
-                    Message = new()
-                    {
-                        Content = message,
-                        Role = "assistant",
-                    },
-                    Delta =
-                    {
-                        Content = message,
-                        Role = "assistant",
-                    },
+                    Message =assistantMessage,
+                    Delta =assistantMessage,
                     FinishReason = "error",
                     FinishDetails = new()
                     {

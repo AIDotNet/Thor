@@ -41,22 +41,15 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
         var response = await client.ChatAsync(chatRequest, ErnieBotHelper.GetModelEndpoint(chatCompletionCreate.Model),
             cancellationToken);
 
+        var message = ThorChatMessage.CreateAssistantMessage(response.Result);
         return new ChatCompletionsResponse
         {
             Choices = new List<ChatChoiceResponse>()
             {
                 new()
                 {
-                    Message = new ThorChatMessage()
-                    {
-                        Role = ThorChatMessageRoleConst.Assistant,
-                        Content = response.Result
-                    },
-                    Delta = new ThorChatMessage()
-                    {
-                        Role = ThorChatMessageRoleConst.Assistant,
-                        Content = response.Result
-                    }
+                    Message =message,
+                    Delta =message
                 }
             },
             Model = chatCompletionCreate.Model,
@@ -94,10 +87,11 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
             }).ToList()
         };
 
-        await foreach (var item in  client.ChatStreamAsync(chatRequest,
+        await foreach (var item in client.ChatStreamAsync(chatRequest,
                            ErnieBotHelper.GetModelEndpoint(chatCompletionCreate.Model),
                            cancellationToken))
         {
+            var message = ThorChatMessage.CreateAssistantMessage(item.Result);
             yield return new ChatCompletionsResponse()
             {
                 Model = chatCompletionCreate.Model,
@@ -105,16 +99,8 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
                 {
                     new()
                     {
-                        Message = new ThorChatMessage()
-                        {
-                            Role = "assistant",
-                            Content = item.Result
-                        },
-                        Delta = new ThorChatMessage()
-                        {
-                            Role = "assistant",
-                            Content = item.Result
-                        }
+                        Message = message,
+                        Delta =message
                     }
                 },
             };

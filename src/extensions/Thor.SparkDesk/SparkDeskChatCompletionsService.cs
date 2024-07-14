@@ -63,10 +63,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             TopK = (int)(input.TopP ?? 4)
         }, cancellationToken: cancellationToken);
 
-        var retMessage = new ThorChatMessage()
-        {
-            Role = "assistant"
-        };
+        var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
         var ret = new ChatCompletionsResponse()
         {
             Model = input.Model,
@@ -106,11 +103,11 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             {
                 logger.LogInformation($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
                 retMessage.ToolCalls = [
-                                new() {
+                                new ThorToolCall() {
                                     Id=retContent.FunctionCall.Name,
                                     Index=0,
                                     Type="function",
-                                    FunctionCall=new(){
+                                    Function=new ThorChatMessageFunction(){
                                         Name=retContent.FunctionCall.Name,
                                         Arguments=retContent.FunctionCall.Arguments
                                     }
@@ -190,10 +187,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
                 yield break;
             }
 
-            var retMessage = new ThorChatMessage()
-            {
-                Role = "assistant"
-            };
+            var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
             var ret = new ChatCompletionsResponse()
             {
                 Model = input.Model,
@@ -226,11 +220,11 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             {
                 logger.LogInformation($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
                 retMessage.ToolCalls = [
-                                new() {
+                                new ThorToolCall() {
                                     Id=retContent.FunctionCall.Name,
                                     Index=0,
                                     Type="function",
-                                    FunctionCall=new(){
+                                    Function=new(){
                                         Name=retContent.FunctionCall.Name,
                                         Arguments=retContent.FunctionCall.Arguments
                                     }

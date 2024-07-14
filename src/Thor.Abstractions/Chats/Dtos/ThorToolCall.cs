@@ -1,35 +1,38 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+namespace Thor.Abstractions.Chats.Dtos;
 
-public class ToolCall
+/// <summary>
+/// 工具调用对象定义
+/// </summary>
+public class ThorToolCall
 {
-    public ToolCall()
+    public ThorToolCall()
     {
         Id = Guid.NewGuid().ToString("N");
     }
 
     /// <summary>
-    ///     The Index of the tool call.
+    /// 工具调用序号值 
     /// </summary>
     [JsonPropertyName("index")]
     public int Index { get; set; }
 
     /// <summary>
-    ///     The ID of the tool call.
+    /// 工具调用的 ID
     /// </summary>
     [JsonPropertyName("id")]
     public string? Id { get; set; }
 
     /// <summary>
-    ///     The type of the tool. Currently, only function is supported.
+    /// 工具的类型。目前仅支持 function
     /// </summary>
     [JsonPropertyName("type")]
-    public string? Type { get; set; }
+    public string? Type { get; set; } = "function";
 
     /// <summary>
-    ///     The function that the model called.
+    /// 模型调用的函数。
     /// </summary>
     [JsonPropertyName("function")]
-    public FunctionCall? FunctionCall { get; set; }
+    public ThorChatMessageFunction? Function { get; set; }
 }

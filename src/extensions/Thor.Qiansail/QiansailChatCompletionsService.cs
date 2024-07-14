@@ -42,7 +42,7 @@ namespace Thor.Qiansail
                 [
                     new()
                     {
-                        Delta = new ThorChatMessage("assistant", result.Output.Text),
+                        Delta =ThorChatMessage.CreateAssistantMessage(result.Output.Text),
                         FinishReason = "stop",
                         Index = 0,
                     }
@@ -84,16 +84,15 @@ namespace Thor.Qiansail
                                    IncrementalOutput = true
                                }, cancellationToken))
             {
+                var message = ThorChatMessage.CreateAssistantMessage(result.Output.Text);
                 yield return new ChatCompletionsResponse()
                 {
                     Choices =
                     [
                         new()
                         {
-                            Delta = new ThorChatMessage("assistant",
-                                result.Output.Text),
-                            Message = new ThorChatMessage("assistant",
-                                result.Output.Text),
+                            Delta =message,
+                            Message =message,
                             FinishReason = "stop",
                             Index = 0,
                         }

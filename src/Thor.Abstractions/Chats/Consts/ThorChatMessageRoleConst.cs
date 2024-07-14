@@ -38,5 +38,14 @@ namespace Thor.Abstractions.Chats.Consts
         /// </para>
         /// </summary>
         public static string Assistant => "assistant";
+
+        /// <summary>
+        /// 工具角色
+        /// <para>
+        /// 表示对最终用户提示的响应实体，用于保持对话的连贯性。
+        /// 它是由模型自动生成并回复的，用于设置模型的先前响应，以继续对话流程。
+        /// </para>
+        /// </summary>
+        public static string Tool => "tool";
     }
 }

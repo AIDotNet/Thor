@@ -2,7 +2,6 @@
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;
 using ChatCompletionsResponse = Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
@@ -86,7 +85,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
             throw new Exception($"code:{result.error["code"]},message:{result.error["message"]}");
         }
 
-        var tools = new List<ToolCall>();
+        var tools = new List<ThorToolCall>();
         foreach (var choiceItem in result.choices)
         {
             if (choiceItem.message.tool_calls == null)
@@ -94,11 +93,11 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                 continue;
             }
 
-            tools.AddRange(choiceItem.message?.tool_calls?.Select(x => new ToolCall()
+            tools.AddRange(choiceItem.message?.tool_calls?.Select(x => new ThorToolCall()
             {
                 Id = x.id,
                 Type = x.type,
-                FunctionCall = new FunctionCall()
+                Function = new ThorChatMessageFunction()
                 {
                     Arguments = x.function.arguments,
                     Name = x.function.name,
@@ -112,10 +111,9 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
             [
                 new()
                 {
-                    Delta = new ThorChatMessage("assistant", result.choices.FirstOrDefault()?.message.content ?? string.Empty,
+                    Delta = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty,
                         null, tools),
-                    Message = new ThorChatMessage("assistant",
-                        result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
+                    Message = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
                     FinishReason = "stop",
                     Index = 0,
                 }
@@ -183,7 +181,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
 
         await foreach (var result in _openAiOptions.Client?.Chat.Stream(dto, options.ApiKey, options.Address))
         {
-            var tools = new List<ToolCall>();
+            var tools = new List<ThorToolCall>();
             foreach (var choiceItem in result.choices)
             {
                 if (choiceItem.delta.tool_calls is null)
@@ -191,11 +189,11 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                     continue;
                 }
 
-                tools.AddRange(choiceItem.delta.tool_calls.Select(x => new ToolCall()
+                tools.AddRange(choiceItem.delta.tool_calls.Select(x => new ThorToolCall()
                 {
                     Id = x.id,
                     Type = x.type,
-                    FunctionCall = new FunctionCall()
+                    Function = new ThorChatMessageFunction()
                     {
                         Arguments = x.function.arguments,
                         Name = x.function.name,
@@ -203,16 +201,15 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                 }));
             }
 
+            var message = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.delta.content ?? string.Empty, toolCalls: tools);
             yield return new ChatCompletionsResponse()
             {
                 Choices =
                 [
                     new()
                     {
-                        Delta = new ThorChatMessage("assistant",
-                            result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
-                        Message = new ThorChatMessage("assistant",
-                            result.choices.FirstOrDefault()?.delta.content ?? string.Empty, null, tools),
+                        Delta = message,
+                        Message =message,
                         FinishReason = "stop",
                         Index = 0,
                     }

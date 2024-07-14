@@ -3,6 +3,9 @@ using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
+/// <summary>
+/// 对话补全服务返回结果
+/// </summary>
 public record ChatCompletionsResponse : BaseResponse
 {
     [JsonPropertyName("model")] 

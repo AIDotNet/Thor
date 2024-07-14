@@ -2,7 +2,6 @@
 using System.Text.Json.Serialization;
 using Thor.Abstractions;
 using Thor.Abstractions.Dto;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Claudia;
 using OpenAI.ObjectModels.RequestModels;
@@ -65,17 +64,17 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
             Temperature = input.Temperature,
         }, cancellationToken: cancellationToken);
 
-        var toolsResult = new List<ToolCall>();
+        var toolsResult = new List<ThorToolCall>();
 
         if (result.Content.Any(x => string.IsNullOrEmpty(x.ToolResultId)))
         {
             foreach (var content in result.Content)
             {
-                toolsResult.Add(new ToolCall()
+                toolsResult.Add(new ThorToolCall()
                 {
                     Id = content.ToolResultId,
                     Type = content.Type,
-                    FunctionCall = new FunctionCall()
+                    Function = new ThorChatMessageFunction()
                     {
                         Arguments = JsonSerializer.Serialize(content.ToolUseInput),
                         Name = content.ToolUseName
@@ -84,18 +83,18 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
             }
         }
 
+        var message = ThorChatMessage.CreateAssistantMessage(result.Content.FirstOrDefault()?.Text ?? string.Empty, toolCalls: toolsResult);
         return new ChatCompletionsResponse()
         {
             Choices =
             [
                 new()
                 {
-                    Delta = new ThorChatMessage("assistant", result.Content.FirstOrDefault()?.Text ?? string.Empty, null,
-                        toolsResult),
+                    Delta = message,
+                    Message = message,
                     FinishReason = "stop",
                     Index = 0,
-                    Message = new ThorChatMessage("assistant", result.Content.FirstOrDefault()?.Text ?? string.Empty, null,
-                        toolsResult),
+
                 }
             ],
 
@@ -140,18 +139,18 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
         }
 
         await foreach (var result in anthropic.Messages.CreateStreamAsync(new MessageRequest
-                       {
-                           Model = input.Model,
-                           MaxTokens = (int)(input.MaxTokens ?? 2000),
-                           Messages = input.Messages.Select(x => new Message
-                           {
-                               Content = x.Content,
-                               Role = x.Role
-                           }).ToArray(),
-                           TopP = input.TopP,
-                           Tools = tools.ToArray(),
-                           Temperature = input.Temperature,
-                       }, cancellationToken: cancellationToken))
+        {
+            Model = input.Model,
+            MaxTokens = (int)(input.MaxTokens ?? 2000),
+            Messages = input.Messages.Select(x => new Message
+            {
+                Content = x.Content,
+                Role = x.Role
+            }).ToArray(),
+            TopP = input.TopP,
+            Tools = tools.ToArray(),
+            Temperature = input.Temperature,
+        }, cancellationToken: cancellationToken))
         {
             if (result is ContentBlockDelta content)
             {
@@ -161,14 +160,15 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
                     [
                         new()
                         {
-                            Delta = new("assistant", content.Delta.Text, null, content.Delta.ToolResultContent?.Select(
+                            Delta = ThorChatMessage.CreateAssistantMessage(content.Delta.Text,toolCalls:content.Delta.ToolResultContent?.Select(
                                 x =>
-                                    new ToolCall()
+                                    new ThorToolCall()
                                     {
                                         Id = x.ToolResultId,
                                         Type = x.Type,
-                                        FunctionCall = new FunctionCall()
+                                        Function = new ThorChatMessageFunction()
                                         {
+                                            Name = x.ToolUseName,
                                             Arguments = x.ToolUseInput != null
                                                 ? JsonSerializer.Serialize(x.ToolUseInput, null,
                                                     new JsonSerializerOptions
@@ -178,9 +178,8 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
                                                         Encoder = System.Text.Encodings.Web.JavaScriptEncoder
                                                             .UnsafeRelaxedJsonEscaping,
                                                     })
-                                                : string.Empty,
-                                            Name = x.ToolUseName
-                                        }
+                                                : string.Empty
+                                        },
                                     }).ToList()),
                             FinishReason = "stop",
                             Index = 0,

@@ -45,18 +45,14 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
 
         return new Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse
         {
-            Choices = resp.Choices.Select(x => new ChatChoiceResponse
+            Choices = resp.Choices.Select(x =>
             {
-                Delta = new ThorChatMessage()
+                var message = ThorChatMessage.CreateAssistantMessage(x.Message.Content);
+                return new ChatChoiceResponse
                 {
-                    Content = x.Message.Content,
-                    Role = x.Message.Role,
-                },
-                Message = new ThorChatMessage()
-                {
-                    Content = x.Message.Content,
-                    Role = x.Message.Role,
-                }
+                    Delta = message,
+                    Message = message
+                };
             }).ToList(),
             Model = chatCompletionCreate.Model,
             Usage = new UsageResponse()
@@ -109,22 +105,17 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
 
             var v = JsonSerializer.Deserialize<HunyuanResultDto>(e.Data);
             var content = v?.Choices.FirstOrDefault()?.Delta.Content;
+
+            var message = ThorChatMessage.CreateAssistantMessage(content);
+
             yield return new Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse
             {
                 Choices = new List<ChatChoiceResponse>()
                 {
                     new()
                     {
-                        Delta = new ThorChatMessage()
-                        {
-                            Content = content,
-                            Role = "assistant",
-                        },
-                        Message = new ThorChatMessage()
-                        {
-                            Content = content,
-                            Role = "assistant",
-                        }
+                        Delta = message,
+                        Message =message
                     }
                 },
                 Model = chatCompletionCreate.Model

@@ -12,14 +12,9 @@ public static class ServiceCollectionExtensions
         ThorGlobal.PlatformNames.Add(MoonshotPlatformOptions.PlatformName, MoonshotPlatformOptions.PlatformCode);
 
         ThorGlobal.ModelNames.Add(MoonshotPlatformOptions.PlatformCode, [
-            "gpt-3.5-turbo",
-            "gpt-3.5-turbo-0125",
-            "gpt-3.5-turbo-0301",
-            "gpt-3.5-turbo-0613",
-            "gpt-3.5-turbo-1106",
-            "gpt-3.5-turbo-16k",
-            "gpt-3.5-turbo-16k-0613",
-            "gpt-3.5-turbo-instruct",
+            "moonshot-v1-8k",
+            "moonshot-v1-32k",
+            "moonshot-v1-128k",
         ]);
 
         services.AddKeyedSingleton<IThorChatCompletionsService, MoonshotChatCompletionsService>(MoonshotPlatformOptions.PlatformCode);
