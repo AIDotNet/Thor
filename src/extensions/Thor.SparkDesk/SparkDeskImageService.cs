@@ -1,15 +1,16 @@
 ﻿using Thor.Abstractions;
+using Thor.Abstractions.Images;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 using Thor.SparkDesk.API;
 
 namespace Thor.SparkDesk
 {
-    public class SparkDeskImageService(IHttpClientFactory httpClientFactory) : IApiImageService
+    public class SparkDeskImageService(IHttpClientFactory httpClientFactory) : IThorImageService
     {
         private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskPlatformOptions.PlatformCode));
 
-        public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
+        public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ThorPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             var client = SparkDeskFactory.GetSparkDeskImageGenerationClient(options?.ApiKey ?? "", HttpClient, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
             var width = 512;
@@ -57,12 +58,12 @@ namespace Thor.SparkDesk
             return ret;
         }
 
-        public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest, ThorPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             throw new NotSupportedException();
         }
 
-        public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest, ChatPlatformOptions? options = null, CancellationToken cancellationToken = default)
+        public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest, ThorPlatformOptions? options = null, CancellationToken cancellationToken = default)
         {
             throw new NotSupportedException();
         }

@@ -21,7 +21,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
     }
 
     public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var dto = new TextRequestBase();
@@ -123,7 +123,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var dto = new TextRequestBase();

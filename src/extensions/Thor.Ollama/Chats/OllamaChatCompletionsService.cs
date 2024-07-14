@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
-using Thor.Abstractions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
@@ -9,6 +8,7 @@ using OpenAI.ObjectModels.RequestModels;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Ollama.Chats.Dtos;
+using Thor.Abstractions;
 
 namespace Thor.Ollama.Chats
 {
@@ -33,7 +33,7 @@ namespace Thor.Ollama.Chats
         /// <returns></returns>
         public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
             ThorChatCompletionsRequest request, 
-            ChatPlatformOptions? options = null, 
+            ThorPlatformOptions? options = null, 
             CancellationToken cancellationToken = default)
         {
             var client = HttpClient;
@@ -102,7 +102,7 @@ namespace Thor.Ollama.Chats
         /// <returns></returns>
         public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
             ThorChatCompletionsRequest request, 
-            ChatPlatformOptions? options = null, 
+            ThorPlatformOptions? options = null, 
             CancellationToken cancellationToken = default)
         {
             var client = HttpClient;

@@ -1,16 +1,17 @@
 ﻿using System.Net.Http.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Extensions;
+using Thor.Abstractions.Images;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 
 namespace Thor.Moonshot;
 
-public class MoonshotServiceImageService(IHttpClientFactory httpClientFactory) : IApiImageService
+public class MoonshotServiceImageService(IHttpClientFactory httpClientFactory) : IThorImageService
 {
     private HttpClient HttpClient => httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);
 
-    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatPlatformOptions? options = null,
+    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var response = await HttpClient.PostJsonAsync(
@@ -23,7 +24,7 @@ public class MoonshotServiceImageService(IHttpClientFactory httpClientFactory) :
     }
 
     public async Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var multipartContent = new MultipartFormDataContent();
@@ -68,7 +69,7 @@ public class MoonshotServiceImageService(IHttpClientFactory httpClientFactory) :
     }
 
     public async Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var multipartContent = new MultipartFormDataContent();

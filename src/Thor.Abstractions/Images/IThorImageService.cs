@@ -1,9 +1,9 @@
 ﻿using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 
-namespace Thor.Abstractions;
+namespace Thor.Abstractions.Images;
 
-public interface IApiImageService
+public interface IThorImageService
 {
     /// <summary>Creates an image given a prompt.</summary>
     /// <param name="imageCreate"></param>
@@ -11,8 +11,8 @@ public interface IApiImageService
     /// <returns></returns>
     Task<ImageCreateResponse> CreateImage(
         ImageCreateRequest imageCreate,
-        ChatPlatformOptions? options = null,
-        CancellationToken cancellationToken = default (CancellationToken));
+        ThorPlatformOptions? options = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates an edited or extended image given an original image and a prompt.
@@ -22,8 +22,8 @@ public interface IApiImageService
     /// <returns></returns>
     Task<ImageCreateResponse> CreateImageEdit(
         ImageEditCreateRequest imageEditCreateRequest,
-        ChatPlatformOptions? options = null,
-        CancellationToken cancellationToken = default (CancellationToken));
+        ThorPlatformOptions? options = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>Creates a variation of a given image.</summary>
     /// <param name="imageEditCreateRequest"></param>
@@ -31,6 +31,6 @@ public interface IApiImageService
     /// <returns></returns>
     Task<ImageCreateResponse> CreateImageVariation(
         ImageVariationCreateRequest imageEditCreateRequest,
-        ChatPlatformOptions? options = null,
-        CancellationToken cancellationToken = default (CancellationToken));
+        ThorPlatformOptions? options = null,
+        CancellationToken cancellationToken = default);
 }

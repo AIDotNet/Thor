@@ -42,7 +42,7 @@ public static class ModelService
         foreach (var item in value)
         {
             var count = await loggerDbContext.Loggers
-                .Where(x => x.CreatedAt > now && x.ModelName == item.Model && x.Type == ChatLoggerType.Consume)
+                .Where(x => x.CreatedAt > now && x.ModelName == item.Model && x.Type == ThorChatLoggerType.Consume)
                 .CountAsync();
 
             item.Count = count;

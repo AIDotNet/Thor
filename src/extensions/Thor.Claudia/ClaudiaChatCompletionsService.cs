@@ -1,21 +1,18 @@
-﻿using System.Text.Json;
+﻿using Claudia;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Thor.Abstractions;
-using Thor.Abstractions.Dto;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Claudia;
-using OpenAI.ObjectModels.RequestModels;
-using ChatCompletionsResponse =
-    Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using ChatCompletionsResponse =
+    Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
 
 namespace Thor.Claudia;
 
 public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
 {
     public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var anthropic = AnthropicFactory.CreateClient(options.ApiKey, options.Address);
@@ -103,7 +100,7 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        ThorChatCompletionsRequest input, ChatPlatformOptions? options = null,
+        ThorChatCompletionsRequest input, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var anthropic = AnthropicFactory.CreateClient(options.ApiKey, options.Address);

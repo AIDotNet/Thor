@@ -17,7 +17,7 @@ public interface IThorChatCompletionsService
     /// <returns></returns>
     Task<ChatCompletionsResponse> ChatCompletionsAsync(
         ThorChatCompletionsRequest request,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -29,6 +29,6 @@ public interface IThorChatCompletionsService
     /// <returns></returns>
     IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
         ThorChatCompletionsRequest request,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 }

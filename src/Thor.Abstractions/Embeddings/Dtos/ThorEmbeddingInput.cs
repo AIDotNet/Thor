@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Thor.Abstractions.Dto;
+namespace Thor.Abstractions.Embeddings.Dtos;
 
-public sealed class EmbeddingInput
+public sealed class ThorEmbeddingInput
 {
     [JsonPropertyName("model")]
     public string Model { get; set; }
@@ -10,7 +10,7 @@ public sealed class EmbeddingInput
     [JsonPropertyName("input")]
     public object Input { get; set; }
 
-    [JsonPropertyName("encoding_format")] 
+    [JsonPropertyName("encoding_format")]
     public string EncodingFormat { get; set; }
 
     [JsonPropertyName("dimensions")]

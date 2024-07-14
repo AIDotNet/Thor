@@ -1,17 +1,17 @@
-﻿using Thor.Abstractions;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+﻿using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Sdcb.DashScope;
 using Sdcb.DashScope.TextGeneration;
 using ChatMessage = Sdcb.DashScope.TextGeneration.ChatMessage;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions;
 
 namespace Thor.Qiansail
 {
     public sealed class QiansailChatCompletionsService : IThorChatCompletionsService
     {
         public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
-            ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+            ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using DashScopeClient client = new(options!.ApiKey!);
@@ -58,7 +58,7 @@ namespace Thor.Qiansail
         }
 
         public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-            ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+            ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using DashScopeClient client = new(options!.ApiKey!);

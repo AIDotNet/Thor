@@ -1,13 +1,14 @@
-﻿using System.Text;
+﻿using MapsterMapper;
+using System.Text;
 using System.Text.Json;
-using MapsterMapper;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.Dto;
+using Thor.Abstractions.Embeddings;
+using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.Exceptions;
+using Thor.Abstractions.Images;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Service.Infrastructure;
-using Thor.Service.Options;
 
 namespace Thor.Service.Service;
 
@@ -106,18 +107,18 @@ public sealed class ChatService(
             if (channel == null) throw new NotModelException(module.Model);
 
             // 获取渠道指定的实现类型的服务
-            var openService = GetKeyedService<IApiImageService>(channel.Type);
+            var openService = GetKeyedService<IThorImageService>(channel.Type);
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
-            var response = await openService.CreateImage(module, new ChatPlatformOptions
+            var response = await openService.CreateImage(module, new ThorPlatformOptions
             {
                 ApiKey = channel.Key,
                 Address = channel.Address,
                 Other = channel.Other
             }, context.RequestAborted);
 
-            await context.Response.WriteAsJsonAsync(new AIDotNetImageCreateResponse
+            await context.Response.WriteAsJsonAsync(new ThorImageCreateResponse
             {
                 data = response.Results,
                 created = response.CreatedAt,
@@ -153,7 +154,7 @@ public sealed class ChatService(
             using var body = new MemoryStream();
             await context.Request.Body.CopyToAsync(body);
 
-            var module = JsonSerializer.Deserialize<EmbeddingInput>(body.ToArray());
+            var module = JsonSerializer.Deserialize<ThorEmbeddingInput>(body.ToArray());
 
             if (module == null) throw new Exception("模型校验异常");
 
@@ -168,7 +169,7 @@ public sealed class ChatService(
             if (channel == null) throw new NotModelException(module.Model);
 
             // 获取渠道指定的实现类型的服务
-            var openService = GetKeyedService<IApiTextEmbeddingGeneration>(channel.Type);
+            var openService = GetKeyedService<IThorTextEmbeddingService>(channel.Type);
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
@@ -202,7 +203,7 @@ public sealed class ChatService(
                 throw new Exception("输入格式错误");
             }
 
-            var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ChatPlatformOptions
+            var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ThorPlatformOptions
             {
                 ApiKey = channel.Key,
                 Address = channel.Address,
@@ -320,7 +321,7 @@ public sealed class ChatService(
     public async ValueTask<(int, int)> CompletionsHandlerAsync(HttpContext context, CompletionCreateRequest input,
         ChatChannel channel, IThorCompletionsService openService, User user, decimal rate)
     {
-        var setting = new ChatPlatformOptions
+        var setting = new ThorPlatformOptions
         {
             ApiKey = channel.Key,
             Address = channel.Address,
@@ -434,7 +435,7 @@ public sealed class ChatService(
         int requestToken;
         int responseToken;
 
-        var setting = new ChatPlatformOptions
+        var setting = new ThorPlatformOptions
         {
             ApiKey = channel.Key,
             Address = channel.Address,
@@ -521,7 +522,7 @@ public sealed class ChatService(
     {
         int requestToken;
 
-        var setting = new ChatPlatformOptions
+        var setting = new ThorPlatformOptions
         {
             ApiKey = channel.Key,
             Address = channel.Address,

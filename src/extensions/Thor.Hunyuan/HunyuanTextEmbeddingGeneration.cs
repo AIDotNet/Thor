@@ -2,13 +2,14 @@
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using TencentCloud.Hunyuan.V20230901.Models;
+using Thor.Abstractions.Embeddings;
 
 namespace Thor.Hunyuan;
 
-public class HunyuanTextEmbeddingGeneration : IApiTextEmbeddingGeneration
+public class HunyuanTextEmbeddingGeneration : IThorTextEmbeddingService
 {
     public Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");

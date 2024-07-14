@@ -140,7 +140,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             }
         };
 
-        var setting = new ChatPlatformOptions
+        var setting = new ThorPlatformOptions
         {
             Address = channel.Address,
             ApiKey = channel.Key,

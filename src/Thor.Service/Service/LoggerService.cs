@@ -36,7 +36,7 @@ public sealed class LoggerService(
         
         var logger = new ChatLogger
         {
-            Type = ChatLoggerType.Consume,
+            Type = ThorChatLoggerType.Consume,
             Content = content,
             ModelName = model,
             PromptTokens = promptTokens,
@@ -56,7 +56,7 @@ public sealed class LoggerService(
     {
         var logger = new ChatLogger
         {
-            Type = ChatLoggerType.Recharge,
+            Type = ThorChatLoggerType.Recharge,
             Content = content,
             UserId = userId,
             Quota = quota,
@@ -69,7 +69,7 @@ public sealed class LoggerService(
     {
         var logger = new ChatLogger
         {
-            Type = ChatLoggerType.System,
+            Type = ThorChatLoggerType.System,
             Content = content,
             ModelName = string.Empty
         };
@@ -77,7 +77,7 @@ public sealed class LoggerService(
     }
 
 
-    public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ChatLoggerType? type, string? model,
+    public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ThorChatLoggerType? type, string? model,
         DateTime? startTime, DateTime? endTime, string? keyword)
     {
         var query = LoggerDbContext.Loggers

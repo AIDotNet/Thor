@@ -3,7 +3,7 @@ namespace Thor.Abstractions;
 /// <summary>
 /// 对话平台选项
 /// </summary>
-public class ChatPlatformOptions
+public class ThorPlatformOptions
 {
     /// <summary>
     /// 对话平台基地址，如月之暗面的 https://api.moonshot.cn

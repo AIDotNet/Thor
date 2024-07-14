@@ -2,13 +2,14 @@
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Azure.AI.OpenAI;
+using Thor.Abstractions.Embeddings;
 
 namespace Thor.AzureOpenAI;
 
-public class AzureOpenAIServiceTextEmbeddingGeneration : IApiTextEmbeddingGeneration
+public class AzureOpenAIServiceTextEmbeddingGeneration : IThorTextEmbeddingService
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var createClient = AzureOpenAIFactory.CreateClient(options);

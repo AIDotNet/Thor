@@ -6,12 +6,12 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-namespace Thor.AzureOpenAI;
+namespace Thor.AzureOpenAI.Chats;
 
 public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
 {
     public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(AzureOpenAIPlatformOptions.PlatformCode);
@@ -30,7 +30,7 @@ public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFact
     }
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+        ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(AzureOpenAIPlatformOptions.PlatformCode);
@@ -38,9 +38,9 @@ public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFact
         var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
 
         chatCompletionCreate.Model = null;
-        
+
         var response = await client.HttpRequestRaw(url,
-            chatCompletionCreate, options.ApiKey,"Api-Key");
+            chatCompletionCreate, options.ApiKey, "Api-Key");
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 

@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using Thor.Abstractions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
@@ -7,13 +6,14 @@ using OpenAI.ObjectModels.RequestModels;
 using TencentCloud.Hunyuan.V20230901.Models;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions;
 
 namespace Thor.Hunyuan;
 
 public class HunyuanChatCompletionsService : IThorChatCompletionsService
 {
     public async Task<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> ChatCompletionsAsync(Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");
@@ -65,7 +65,7 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
     }
 
     public async IAsyncEnumerable<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> StreamChatCompletionsAsync(
-        Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate, ChatPlatformOptions? options = null,
+        Abstractions.Chats.Dtos.ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");

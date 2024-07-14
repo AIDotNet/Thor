@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
-using Thor.Abstractions;
 using Azure;
 using Azure.AI.OpenAI;
 using OpenAI;
+using Thor.Abstractions;
 
 namespace Thor.AzureOpenAI;
 
@@ -11,12 +11,12 @@ public static class AzureOpenAIFactory
     private const string AddressTemplate = "{0}/openai/deployments/{1}/chat/completions?api-version={2}";
     private static readonly ConcurrentDictionary<string, AzureOpenAIClient> Clients = new();
 
-    public static string GetAddress(ChatPlatformOptions options, string model)
+    public static string GetAddress(ThorPlatformOptions options, string model)
     {
         return string.Format(AddressTemplate, options.Address.TrimEnd('/'), model, options.Other);
     }
 
-    public static AzureOpenAIClient CreateClient(ChatPlatformOptions options)
+    public static AzureOpenAIClient CreateClient(ThorPlatformOptions options)
     {
         var key = $"{options.ApiKey}_{options.Address}_{options.Other}";
         return Clients.GetOrAdd(key, (_) =>

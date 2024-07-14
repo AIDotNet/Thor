@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
+using Thor.AzureOpenAI.Extensions;
 using Thor.BuildingBlocks.Data;
 using Thor.Claudia;
 using Thor.LocalEvent;
@@ -416,7 +417,7 @@ var log = app.MapGroup("/api/v1/logger")
     .RequireAuthorization();
 
 log.MapGet(string.Empty,
-        async (LoggerService service, int page, int pageSize, ChatLoggerType? type, string? model, DateTime? startTime,
+        async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model, DateTime? startTime,
                 DateTime? endTime, string? keyword) =>
             await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword))
     .WithDescription("获取日志")

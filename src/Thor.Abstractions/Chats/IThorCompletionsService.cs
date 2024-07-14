@@ -17,6 +17,6 @@ public interface IThorCompletionsService
     /// <returns></returns>
     Task<CompletionCreateResponse> CompletionAsync(
         CompletionCreateRequest request,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 }

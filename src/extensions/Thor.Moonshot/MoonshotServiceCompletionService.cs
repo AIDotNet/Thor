@@ -10,7 +10,7 @@ namespace Thor.Moonshot;
 public sealed class MoonshotServiceCompletionService(IHttpClientFactory httpClientFactory) : IThorCompletionsService
 {
     public async Task<CompletionCreateResponse> CompletionAsync(CompletionCreateRequest createCompletionModel,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);

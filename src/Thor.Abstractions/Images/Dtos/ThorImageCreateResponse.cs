@@ -1,6 +1,6 @@
-﻿namespace Thor.Abstractions.Dto;
+﻿namespace Thor.Abstractions.Images.Dtos;
 
-public class AIDotNetImageCreateResponse
+public class ThorImageCreateResponse
 {
     public object data { get; set; }
     public int created { get; set; }

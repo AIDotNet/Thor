@@ -1,5 +1,6 @@
 ﻿using Thor.Abstractions;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Embeddings;
 using Thor.Hunyuan;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,7 @@ public static class ServiceCollectionExtensions
 
         services.AddKeyedSingleton<IThorChatCompletionsService, HunyuanChatCompletionsService>(HunyuanPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, HunyuanTextEmbeddingGeneration>(HunyuanPlatformOptions
+        services.AddKeyedSingleton<IThorTextEmbeddingService, HunyuanTextEmbeddingGeneration>(HunyuanPlatformOptions
             .PlatformCode);
         return services;
     }

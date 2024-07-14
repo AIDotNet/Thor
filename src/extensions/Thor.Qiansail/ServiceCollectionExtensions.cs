@@ -1,6 +1,7 @@
 ﻿using Thor.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Embeddings;
 
 namespace Thor.Qiansail
 {
@@ -10,7 +11,7 @@ namespace Thor.Qiansail
         {
             ThorGlobal.PlatformNames.Add(QiansailPlatformOptions.PlatformName, QiansailPlatformOptions.PlatformCode);
             services.AddKeyedSingleton<IThorChatCompletionsService, QiansailChatCompletionsService>(QiansailPlatformOptions.PlatformCode);
-            services.AddKeyedSingleton<IApiTextEmbeddingGeneration, QiansailTextEmbeddingGeneration>(QiansailPlatformOptions
+            services.AddKeyedSingleton<IThorTextEmbeddingService, QiansailTextEmbeddingGeneration>(QiansailPlatformOptions
                 .PlatformCode);
             return services;
         }

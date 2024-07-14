@@ -3,10 +3,11 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using OpenAI.ObjectModels.RequestModels;
 using Thor.MetaGLM.Models.RequestModels;
+using Thor.Abstractions.Embeddings;
 
 namespace Thor.MetaGLM;
 
-public class MetaGLMTextEmbeddingGeneration : IApiTextEmbeddingGeneration
+public class MetaGLMTextEmbeddingGeneration : IThorTextEmbeddingService
 {
     private readonly MetaGLMPlatformOptions _openAiOptions;
 
@@ -19,7 +20,7 @@ public class MetaGLMTextEmbeddingGeneration : IApiTextEmbeddingGeneration
     }
 
     public Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var embeddingRequestBase = new EmbeddingRequestBase();

@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Thor.Abstractions;
+using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
@@ -10,10 +11,10 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 namespace Thor.Moonshot;
 
 public sealed class MoonshotServiceTextEmbeddingGeneration(IHttpClientFactory httpClientFactory)
-    : IApiTextEmbeddingGeneration
+    : IThorTextEmbeddingService
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);

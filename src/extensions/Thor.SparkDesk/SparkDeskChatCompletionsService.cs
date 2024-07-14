@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Thor.Abstractions;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
@@ -8,13 +7,14 @@ using Microsoft.Extensions.Logging;
 using Thor.SparkDesk.API;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions;
 
 namespace Thor.SparkDesk;
 
 public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IThorChatCompletionsService
 {
     public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(input.Model))
@@ -128,7 +128,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
 
 
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(input.Model))

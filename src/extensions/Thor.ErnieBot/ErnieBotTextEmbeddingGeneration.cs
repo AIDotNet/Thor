@@ -3,13 +3,14 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using ERNIE_Bot.SDK;
 using ERNIE_Bot.SDK.Models;
+using Thor.Abstractions.Embeddings;
 
 namespace Thor.ErnieBot;
 
-public class ErnieBotTextEmbeddingGeneration : IApiTextEmbeddingGeneration
+public class ErnieBotTextEmbeddingGeneration : IThorTextEmbeddingService
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey!.Split("|");

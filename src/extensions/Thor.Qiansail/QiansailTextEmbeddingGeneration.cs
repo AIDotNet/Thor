@@ -3,13 +3,14 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Sdcb.DashScope;
 using Sdcb.DashScope.TextEmbedding;
+using Thor.Abstractions.Embeddings;
 
 namespace Thor.Qiansail;
 
-public class QiansailTextEmbeddingGeneration : IApiTextEmbeddingGeneration
+public class QiansailTextEmbeddingGeneration : IThorTextEmbeddingService
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
-        ChatPlatformOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         using DashScopeClient client = new(options!.ApiKey!);

@@ -1,5 +1,6 @@
 ﻿using Thor.Abstractions;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Embeddings;
 using Thor.ErnieBot;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -11,7 +12,7 @@ public static class ServiceCollectionExtensions
         ThorGlobal.PlatformNames.Add(ErnieBotPlatformOptions.PlatformName, ErnieBotPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IThorChatCompletionsService, ErnieBotChatCompletionsService>(ErnieBotPlatformOptions.PlatformCode);
-        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, ErnieBotTextEmbeddingGeneration>(ErnieBotPlatformOptions
+        services.AddKeyedSingleton<IThorTextEmbeddingService, ErnieBotTextEmbeddingGeneration>(ErnieBotPlatformOptions
             .PlatformCode);
         return services;
     }

@@ -1,6 +1,8 @@
 ﻿using System.Net;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Embeddings;
+using Thor.Abstractions.Images;
 using Thor.OpenAI;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -43,10 +45,10 @@ public static class ServiceCollectionExtensions
 
         services.AddKeyedSingleton<IThorChatCompletionsService, OpenAIChatCompletionsService>(OpenAIPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiTextEmbeddingGeneration, OpenAIServiceTextEmbeddingGeneration>(
+        services.AddKeyedSingleton<IThorTextEmbeddingService, OpenAIServiceTextEmbeddingGeneration>(
             OpenAIPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IApiImageService, OpenAIServiceImageService>(OpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorImageService, OpenAIServiceImageService>(OpenAIPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IThorCompletionsService, OpenAIServiceCompletionService>(OpenAIPlatformOptions
             .PlatformCode);
