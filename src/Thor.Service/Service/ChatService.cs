@@ -466,7 +466,7 @@ public sealed class ChatService(
     /// <param name="rate"></param>
     /// <returns></returns>
     /// <exception cref="InsufficientQuotaException"></exception>
-    private async ValueTask<(int, int)> ChatCompletionsHandlerAsync(HttpContext context, ThorChatCompletionsRequest input,
+    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(HttpContext context, ThorChatCompletionsRequest input,
         ChatChannel channel, IThorChatCompletionsService openService, User user, decimal rate)
     {
         int requestToken;
@@ -553,7 +553,7 @@ public sealed class ChatService(
     /// <param Name="openService"></param>
     /// <param name="rate"></param>
     /// <returns></returns>
-    private async ValueTask<(int, int)> StreamChatCompletionsHandlerAsync(HttpContext context,
+    private async ValueTask<(int requestToken, int responseToken)> StreamChatCompletionsHandlerAsync(HttpContext context,
         ThorChatCompletionsRequest input, ChatChannel channel, IThorChatCompletionsService openService, User user,
         decimal rate)
     {
