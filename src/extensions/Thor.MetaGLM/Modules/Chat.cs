@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.ResponseModels;
 
@@ -21,6 +22,8 @@ public class Chat
             new MessageItemConverter()
         },
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         WriteIndented = true,
     };
 
@@ -35,12 +38,12 @@ public class Chat
         var json = JsonSerializer.Serialize(textRequestBody, JsonOptions);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
 
-        // ²Î¿¼ÎÄµµ£ºÖÇÆ×AI¿ª·ÅÆ½Ì¨:https://open.bigmodel.cn/dev/api#http_auth
+        // å‚è€ƒæ–‡æ¡£ï¼šæ™ºè°±AIå¼€æ”¾å¹³å°:https://open.bigmodel.cn/dev/api#http_auth
 
-        // Ö±½ÓÊ¹ÓÃ api key ·½Ê½
+        // ç›´æ¥ä½¿ç”¨ api key æ–¹å¼
         //var token = apiKey;
 
-        // Í¨¹ı jwt ·½Ê½
+        // é€šè¿‡ jwt æ–¹å¼
         var token = string.IsNullOrEmpty(apiKey)
             ? string.Empty
             : AuthenticationUtils.GenerateToken(apiKey, API_TOKEN_TTL_SECONDS);
@@ -56,7 +59,7 @@ public class Chat
             },
         };
 
-        if (!string.IsNullOrEmpty(token))
+        if (!string.IsNullOrEmpty(apiKey))
         {
             request.Headers.Add("Authorization",$"Bearer {token}");
         }

@@ -171,7 +171,6 @@ export default function UpdateChannel({
                 <Form.Item<FieldType>
                     label="代理地址"
                     name="address"
-                    rules={[{ required: true, message: '代理地址不能为空' }]}
                 >
                     <Input />
                 </Form.Item>

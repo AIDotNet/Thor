@@ -5,6 +5,8 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;
 using ChatCompletionsResponse = Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
+using ChatCompletionCreateResponse =
+    Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
 
 namespace Thor.MetaGLM.Chats;
 
@@ -99,10 +101,15 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                 Type = x.type,
                 Function = new ThorChatMessageFunction()
                 {
-                    Arguments = x.function.arguments,
-                    Name = x.function.name,
-                }
-            }));
+                    Id = x.id,
+                    Type = x.type,
+                    FunctionCall = new FunctionCall()
+                    {
+                        Arguments = x.function?.arguments,
+                        Name = x.function?.name,
+                    }
+                }));
+            }
         }
 
         return new ChatCompletionsResponse()
@@ -118,6 +125,10 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                     Index = 0,
                 }
             ],
+            Error = new Error
+            {
+                MessageObject = result.error?.FirstOrDefault().Value ?? string.Empty,
+            },
             Model = input.Model
         };
     }
@@ -150,8 +161,10 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
         {
             foreach (var tool in input.Tools)
             {
-                var functions = new FunctionTool();
-                functions.type = tool.Type;
+                var functions = new FunctionTool
+                {
+                    type = tool.Type
+                };
                 if (!string.IsNullOrEmpty(tool.Function?.Name))
                     functions.SetName(tool.Function.Name);
 
@@ -160,8 +173,8 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
 
                 var function = new FunctionParameters()
                 {
-                    required = tool.Function?.Parameters?.Required?.ToArray(),
-                    type = tool.Function?.Parameters?.Type,
+                    required = tool.Function?.Parameters?.Required?.ToArray() ?? [],
+                    type = tool.Function?.Parameters?.Type ?? string.Empty,
                 };
 
                 if (tool.Function?.Parameters?.Properties != null)
@@ -169,7 +182,8 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                     foreach (var definition in tool.Function.Parameters.Properties)
                     {
                         function.properties.Add(definition.Key,
-                            new FunctionParameterDescriptor(definition.Value.Type, definition.Value.Description));
+                            new FunctionParameterDescriptor(definition.Value.Type,
+                                definition.Value?.Description ?? string.Empty));
                     }
                 }
 

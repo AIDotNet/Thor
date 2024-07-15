@@ -49,12 +49,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.LocalMemory.Cache", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.RedisMemory.Cache", "src\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj", "{84C27CF3-BD3C-46D6-A774-967DB5D3F060}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.AppHost", "src\Thor.AppHost\Thor.AppHost.csproj", "{4D7DCC4C-9896-4291-8915-D46EEFF48E3E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{46159E38-D99C-4140-A5FC-60AA67141F4E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Moonshot", "src\extensions\Thor.Moonshot\Thor.Moonshot.csproj", "{969CB243-CFD0-4635-8663-3892008BB916}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,18 +119,6 @@ Global
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D7DCC4C-9896-4291-8915-D46EEFF48E3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D7DCC4C-9896-4291-8915-D46EEFF48E3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D7DCC4C-9896-4291-8915-D46EEFF48E3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D7DCC4C-9896-4291-8915-D46EEFF48E3E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{46159E38-D99C-4140-A5FC-60AA67141F4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{46159E38-D99C-4140-A5FC-60AA67141F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{46159E38-D99C-4140-A5FC-60AA67141F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{46159E38-D99C-4140-A5FC-60AA67141F4E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{969CB243-CFD0-4635-8663-3892008BB916}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{969CB243-CFD0-4635-8663-3892008BB916}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{969CB243-CFD0-4635-8663-3892008BB916}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{969CB243-CFD0-4635-8663-3892008BB916}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

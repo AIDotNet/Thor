@@ -88,16 +88,12 @@ public sealed class ChatService(
         }
     };
 
-    public async ValueTask ImageAsync(HttpContext context)
+
+    public async ValueTask CreateImageAsync(HttpContext context, ImageCreateRequest module)
     {
         try
         {
             var (token, user) = await tokenService.CheckTokenAsync(context);
-
-            using var body = new MemoryStream();
-            await context.Request.Body.CopyToAsync(body);
-
-            var module = JsonSerializer.Deserialize<ImageCreateRequest>(body.ToArray());
 
             if (module?.Model.IsNullOrEmpty() == true) module.Model = "dall-e-2";
 
@@ -106,6 +102,8 @@ public sealed class ChatService(
             var imageCostRatio = GetImageCostRatio(module);
 
             var rate = SettingService.PromptRate[module.Model];
+
+            module.N ??= 1;
 
             var quota = (int)(rate * imageCostRatio * 1000) * module.N;
 
@@ -136,7 +134,6 @@ public sealed class ChatService(
                 created = response.CreatedAt,
                 successful = response.Successful
             });
-
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), module.Model,
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
@@ -347,25 +344,8 @@ public sealed class ChatService(
         return (requestToken, responseToken);
     }
 
-    /// <summary>
-    /// 对话补全接口
-    /// </summary>
-    /// <param name="context"></param>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    /// <exception cref="NotModelException"></exception>
-    public async ValueTask ChatCompletionsAsync(HttpContext context)
+    public async ValueTask ChatCompletionsAsync(HttpContext context, ChatCompletionCreateRequest module)
     {
-        using var body = new MemoryStream();
-        await context.Request.Body.CopyToAsync(body);
-
-        var module = JsonSerializer.Deserialize<ThorChatCompletionsRequest>(body.ToArray());
-
-        if (module == null)
-        {
-            throw new Exception("模型校验异常");
-        }
-
         try
         {
             await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);

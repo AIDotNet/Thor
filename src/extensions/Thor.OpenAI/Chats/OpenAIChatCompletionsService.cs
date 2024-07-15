@@ -1,9 +1,11 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
@@ -20,6 +22,18 @@ public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFa
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            throw new PaymentRequiredException();
+        }
+
+        response.EnsureSuccessStatusCode();
+
         var result =
             await response.Content.ReadFromJsonAsync<ChatCompletionsResponse>(
                 cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -35,6 +49,18 @@ public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFa
 
         var response = await client.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            throw new PaymentRequiredException();
+        }
+
+        response.EnsureSuccessStatusCode();
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 

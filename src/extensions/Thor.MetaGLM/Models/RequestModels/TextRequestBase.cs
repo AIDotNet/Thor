@@ -32,8 +32,8 @@ namespace Thor.MetaGLM.Models.RequestModels
         private float? _top_p = null;
 
         /// <summary>
-        /// ÖÇÆ×AI¿ª·ÅÆ½Ì¨:https://open.bigmodel.cn/dev/api#glm-4
-        /// Ä¬ÈÏÖµÎª 0.7
+        /// å‚è€ƒæ–‡æ¡£:https://open.bigmodel.cn/dev/api#glm-4
+        /// é»˜è®¤å€¼ï¼š 0.7
         /// </summary>
         public float top_p
         {
@@ -62,8 +62,8 @@ namespace Thor.MetaGLM.Models.RequestModels
 
         private float? _temperature = null;
         /// <summary>
-        /// ÖÇÆ×AI¿ª·ÅÆ½Ì¨:https://open.bigmodel.cn/dev/api#glm-4
-        /// Ä¬ÈÏÖµÎª 0.95
+        /// å‚è€ƒæ–‡æ¡£:https://open.bigmodel.cn/dev/api#glm-4
+        /// é»˜è®¤å€¼ï¼š 0.95
         /// </summary>
         public float temperature
         {

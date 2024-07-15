@@ -13,7 +13,7 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
     private readonly Channel<ChatLogger> _events = Channel.CreateUnbounded<ChatLogger>();
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    private const int Interval = 10000; // Interval in milliseconds
+    private const int Interval = 30000;
 
     public ChannelEventHandler(IServiceProvider serviceProvider, ILogger<ChannelEventHandler> logger)
     {

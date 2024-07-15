@@ -1,16 +1,18 @@
 <Project>
-  <PropertyGroup>
-    <EntityFrameworkCoreVersion>8.0.2</EntityFrameworkCoreVersion>
-    <LangVersion>12.0</LangVersion>
-    <SdcbSparkDeskVersion>3.0.0</SdcbSparkDeskVersion>
-    <SemanticKernelVersion>1.6.1</SemanticKernelVersion>
-    <Company>AIDotNet</Company>
-    <Product>Thor</Product>
-    <Version>0.1.0</Version>
-    <Copyright>Apache-2.0 license</Copyright>
-    <AssemblyVersion>0.1.0</AssemblyVersion>
-    <OpenSourceUrl>https://github.com/AIDotNet/Thor</OpenSourceUrl>
-    <Authors>AI DotNet</Authors>
-    <Description>Thor(雷神托尔)AI网关，用于管理AI大模型服务。</Description>
-  </PropertyGroup>
+    <PropertyGroup>
+        <EntityFrameworkCoreVersion>8.0.2</EntityFrameworkCoreVersion>
+        <LangVersion>12.0</LangVersion>
+        <SdcbSparkDeskVersion>3.0.0</SdcbSparkDeskVersion>
+        <SemanticKernelVersion>1.6.1</SemanticKernelVersion>
+        <Company>AIDotNet</Company>
+        <Product>Thor</Product>
+        <Version>0.1.2</Version>
+        <Copyright>Apache-2.0 license</Copyright>
+        <AssemblyVersion>0.1.2</AssemblyVersion>
+        <OpenSourceUrl>https://github.com/AIDotNet/Thor</OpenSourceUrl>
+        <Authors>AI DotNet</Authors>
+        <Description>Thor(雷神托尔)AI网关，用于管理AI大模型服务。</Description>
+        <PackageProjectUrl>https://github.com/AIDotNet/Thor</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/AIDotNet/Thor/blob/main/LICENSE</PackageLicenseUrl>
+    </PropertyGroup>
 </Project>

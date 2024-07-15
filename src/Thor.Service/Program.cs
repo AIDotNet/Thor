@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Thor.AzureOpenAI.Extensions;
+using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.BuildingBlocks.Data;
 using Thor.Claudia.Extensions;
 using Thor.ErnieBot.Extensions;
@@ -28,8 +29,6 @@ using Thor.Service.Service;
 using Thor.SparkDesk.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.AddServiceDefaults();
 
 builder.HostEnvironment();
 
@@ -188,8 +187,6 @@ else
 builder.Services.AddResponseCompression();
 
 var app = builder.Build();
-
-app.MapDefaultEndpoints();
 
 using var scope = app.Services.CreateScope();
 
@@ -580,7 +577,7 @@ product.MapGet(string.Empty, async (ProductService service) =>
     .WithOpenApi()
     .RequireAuthorization();
 
-product.MapPost(string.Empty,  (ProductService service, Product product) =>
+product.MapPost(string.Empty, (ProductService service, Product product) =>
         service.Create(product))
     .WithDescription("创建产品")
     .WithOpenApi()
@@ -589,7 +586,7 @@ product.MapPost(string.Empty,  (ProductService service, Product product) =>
         Roles = RoleConstant.Admin
     });
 
-product.MapPut(string.Empty,  ([FromServices] ProductService service, [FromBody] Product product) =>
+product.MapPut(string.Empty, ([FromServices] ProductService service, [FromBody] Product product) =>
     service.Update(product))
     .WithDescription("更新产品")
     .WithOpenApi()
@@ -675,8 +672,9 @@ system.MapPost("share", async (SystemService service, string userId, HttpContext
 #endregion
 
 // 对话补全请求
-app.MapPost("/v1/chat/completions", async (ChatService service, HttpContext httpContext) =>
-        await service.ChatCompletionsAsync(httpContext))
+app.MapPost("/v1/chat/completions",
+        async (ChatService service, HttpContext httpContext, ChatCompletionCreateRequest request) =>
+            await service.ChatCompletionsAsync(httpContext, request))
     .WithGroupName("OpenAI")
     .WithDescription("Get completions from OpenAI")
     .WithOpenApi();
@@ -694,8 +692,9 @@ app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext c
     .WithDescription("Embedding")
     .WithOpenApi();
 
-app.MapPost("/v1/images/generations", async (ChatService imageService, HttpContext context) =>
-        await imageService.ImageAsync(context))
+app.MapPost("/v1/images/generations",
+        async (ChatService imageService, HttpContext context, ImageCreateRequest module) =>
+            await imageService.CreateImageAsync(context, module))
     .WithDescription("OpenAI")
     .WithDescription("Image")
     .WithOpenApi();
