@@ -4,12 +4,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
+using Thor.AzureOpenAI.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.BuildingBlocks.Data;
-using Thor.Claudia;
+using Thor.Claudia.Extensions;
+using Thor.ErnieBot.Extensions;
+using Thor.Hunyuan.Extensions;
 using Thor.LocalEvent;
 using Thor.LocalMemory.Cache;
-using Thor.Qiansail;
+using Thor.MetaGLM.Extensions;
+using Thor.Moonshot.Extensions;
+using Thor.Ollama.Extensions;
+using Thor.OpenAI.Extensions;
+using Thor.Qiansail.Extensions;
 using Thor.RedisMemory.Cache;
 using Thor.Service;
 using Thor.Service.BackgroundTask;
@@ -19,6 +26,8 @@ using Thor.Service.Infrastructure;
 using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
+using Thor.SparkDesk.Extensions;
+using Thor.Abstractions.Chats.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,14 +87,15 @@ builder.Services
     .AddSingleton<UnitOfWorkMiddleware>()
     .AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
+    .AddMoonshotService()
     .AddSparkDeskService()
-    .AddQiansail()
-    .AddMetaGLMClientV4()
-    .AddHunyuan()
-    .AddClaudia()
+    .AddQiansailService()
+    .AddMetaGLMService()
+    .AddHunyuanService()
+    .AddClaudiaService()
     .AddOllamaService()
     .AddAzureOpenAIService()
-    .AddErnieBot();
+    .AddErnieBotService();
 
 builder.Services
     .AddCors(options =>
@@ -385,7 +395,7 @@ var model = app.MapGroup("/api/v1/model")
     .AddEndpointFilter<ResultFilter>()
     .RequireAuthorization();
 
-model.MapGet("/types", ModelService.GetTypes)
+model.MapGet("/types", ModelService.GetPlatformNames)
     .WithDescription("获取模型类型")
     .WithOpenApi();
 
@@ -410,7 +420,7 @@ var log = app.MapGroup("/api/v1/logger")
     .RequireAuthorization();
 
 log.MapGet(string.Empty,
-        async (LoggerService service, int page, int pageSize, ChatLoggerType? type, string? model, DateTime? startTime,
+        async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model, DateTime? startTime,
                 DateTime? endTime, string? keyword) =>
             await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword))
     .WithDescription("获取日志")
@@ -662,13 +672,15 @@ system.MapPost("share", async (SystemService service, string userId, HttpContext
 
 #endregion
 
+// 对话补全请求
 app.MapPost("/v1/chat/completions",
-        async (ChatService service, HttpContext httpContext, ChatCompletionCreateRequest request) =>
+        async (ChatService service, HttpContext httpContext, ThorChatCompletionsRequest request) =>
             await service.ChatCompletionsAsync(httpContext, request))
     .WithGroupName("OpenAI")
     .WithDescription("Get completions from OpenAI")
     .WithOpenApi();
 
+// 文本补全接口,不建议使用，使用对话补全即可
 app.MapPost("/v1/completions", async (ChatService service, HttpContext context) =>
         await service.CompletionsAsync(context))
     .WithGroupName("OpenAI")
@@ -682,8 +694,8 @@ app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext c
     .WithOpenApi();
 
 app.MapPost("/v1/images/generations",
-        async (ChatService imageService, HttpContext context, ImageCreateRequest module) =>
-            await imageService.CreateImageAsync(context, module))
+        async (ChatService imageService, HttpContext context, ImageCreateRequest request) =>
+            await imageService.CreateImageAsync(context, request))
     .WithDescription("OpenAI")
     .WithDescription("Image")
     .WithOpenApi();

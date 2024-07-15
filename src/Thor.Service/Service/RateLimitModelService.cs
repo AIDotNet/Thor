@@ -12,13 +12,25 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
             .ToListAsync();
     }
 
+    /// <summary>
+    /// 模型速率检测
+    /// </summary>
+    /// <param name="model"></param>
+    /// <param name="context"></param>
+    /// <param name="serviceCache"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    /// <exception cref="RateLimitException"></exception>
     public async ValueTask CheckAsync(string model, HttpContext context, IServiceCache serviceCache)
     {
         // 获取IP
         var ip = context.Connection.RemoteIpAddress?.ToString();
 
         //获取头
-        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var header)) ip = header;
+        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var header))
+        {
+            ip = header;
+        }
 
         foreach (var rateLimitModel in _rateLimitModels.Where(x => x.Model.Contains(model)))
         {

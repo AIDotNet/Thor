@@ -4,70 +4,95 @@ namespace Thor.MetaGLM.Models.RequestModels
 {
     public class TextRequestBase
     {
-        public string request_id { get; private set; }
-        public string model { get; private set; }
-        public MessageItem[] messages { get; private set; }
-        public List<FunctionTool> tools { get; private set; }
-        public string tool_choice { get; private set; }
-        public double? top_p { get; private set; }
-        public double? temperature { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string request_id { get; set; } = string.Empty;
 
-        public bool stream { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string model { get; set; } = string.Empty;
 
-        public TextRequestBase()
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<MessageItem> messages { get; set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<FunctionTool> tools { get; set; } = new();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string tool_choice { get; set; } = string.Empty;
+
+        private float? _top_p = null;
+
+        /// <summary>
+        /// 参考文档:https://open.bigmodel.cn/dev/api#glm-4
+        /// 默认值： 0.7
+        /// </summary>
+        public float top_p
         {
-            this.stream = true;
-        }
-
-        public TextRequestBase SetRequestId(string requestId)
-        {
-            this.request_id = requestId;
-            return this;
-        }
-
-        public TextRequestBase SetModel(string model)
-        {
-            this.model = model;
-            return this;
-        }
-
-        public TextRequestBase SetMessages(MessageItem[] messages)
-        {
-            this.messages = messages;
-            return this;
-        }
-
-        public TextRequestBase SetTools(List<FunctionTool> tools)
-        {
-            this.tools = tools;
-            return this;
-        }
-
-        public TextRequestBase SetToolChoice(string toolChoice)
-        {
-            this.tool_choice = toolChoice;
-            return this;
-        }
-
-        public TextRequestBase SetTopP(double topP)
-        {
-            if (topP is <= 0.0 or >= 1.0)
+            get
             {
-                topP = 0.1;
-            }
-            this.top_p = topP;
-            return this;
-        }
+                if (_top_p is null)
+                {
+                    _top_p = 0.7f;
+                }
 
-        public TextRequestBase SetTemperature(double temperature)
-        {
-            if (temperature is <= 0.0 or >= 1.0)
-            {
-                temperature = 0.1;
+                return _top_p.Value;
             }
 
-            this.temperature = temperature;
-            return this;
+            set
+            {
+                if (value is <= 0.0f or >= 1.0f)
+                {
+                    _top_p = 0.7f;
+                }
+                else
+                {
+                    _top_p = value;
+                }
+            }
         }
+
+        private float? _temperature = null;
+        /// <summary>
+        /// 参考文档:https://open.bigmodel.cn/dev/api#glm-4
+        /// 默认值： 0.95
+        /// </summary>
+        public float temperature
+        {
+            get
+            {
+                if (_temperature is null)
+                {
+                    _temperature = 0.95f;
+                }
+
+                return _temperature.Value;
+            }
+
+            set
+            {
+                if (value is <= 0.0f or >= 1.0f)
+                {
+                    _temperature = 0.95f;
+                }
+                else
+                {
+                    _temperature = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool stream { get; set; } = true;
     }
 }

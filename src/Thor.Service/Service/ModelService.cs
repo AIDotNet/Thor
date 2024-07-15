@@ -3,12 +3,12 @@
 public static class ModelService
 {
     /// <summary>
-    ///     获取模型
+    /// 获取平台名列表
     /// </summary>
     /// <returns></returns>
-    public static Dictionary<string, string> GetTypes()
+    public static Dictionary<string, string> GetPlatformNames()
     {
-        return IApiChatCompletionService.ServiceNames;
+        return ThorGlobal.PlatformNames;
     }
 
     public static string[] GetModels()
@@ -42,7 +42,7 @@ public static class ModelService
         foreach (var item in value)
         {
             var count = await loggerDbContext.Loggers
-                .Where(x => x.CreatedAt > now && x.ModelName == item.Model && x.Type == ChatLoggerType.Consume)
+                .Where(x => x.CreatedAt > now && x.ModelName == item.Model && x.Type == ThorChatLoggerType.Consume)
                 .CountAsync();
 
             item.Count = count;

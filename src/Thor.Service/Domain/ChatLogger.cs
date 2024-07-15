@@ -5,7 +5,7 @@ namespace Thor.Service.Domain;
 
 public sealed class ChatLogger : Entity<string>
 {
-    public ChatLoggerType Type { get; set; }
+    public ThorChatLoggerType Type { get; set; }
 
     public string Content { get; set; }
 

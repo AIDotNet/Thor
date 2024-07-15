@@ -96,7 +96,7 @@ public class RedeemCodeService(
 
         await loggerService.CreateAsync(new ChatLogger
         {
-            Type = ChatLoggerType.System,
+            Type = ThorChatLoggerType.System,
             ModelName = string.Empty,
             Content =
                 $"用户 {UserContext.CurrentUserName} 使用了兑换码 {redeemCode.Code}，兑换额度 {RenderHelper.RenderQuota(redeemCode.Quota)}"

@@ -4,10 +4,10 @@ namespace Thor.MetaGLM
 {
     public class MetaGLMClientV4()
     {
-        public Chat Chat { get; private set; } = new();
+        public Modules.Chat Chat { get; private set; } = new();
 
-        public Images Images { get; private set; } = new();
+        public Modules.Images Images { get; private set; } = new();
 
-        public Embeddings Embeddings { get; private set; } = new();
+        public Modules.Embeddings Embeddings { get; private set; } = new();
     }
 }

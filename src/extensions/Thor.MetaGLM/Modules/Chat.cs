@@ -8,6 +8,9 @@ namespace Thor.MetaGLM.Modules;
 
 public class Chat
 {
+    /// <summary>
+    /// 
+    /// </summary>
     private const int API_TOKEN_TTL_SECONDS = 60 * 5;
 
     private static readonly HttpClient Client = new();
@@ -31,21 +34,37 @@ public class Chat
             ? new Uri(baseAddress.TrimEnd('/') + "/api/paas/v4/chat/completions")
             : new Uri("https://open.bigmodel.cn/api/paas/v4/chat/completions");
 
+
         var json = JsonSerializer.Serialize(textRequestBody, JsonOptions);
         var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // 参考文档：智谱AI开放平台:https://open.bigmodel.cn/dev/api#http_auth
+
+        // 直接使用 api key 方式
+        //var token = apiKey;
+
+        // 通过 jwt 方式
+        var token = string.IsNullOrEmpty(apiKey)
+            ? string.Empty
+            : AuthenticationUtils.GenerateToken(apiKey, API_TOKEN_TTL_SECONDS);
+
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Post,
             RequestUri = requestUri,
-            Content = data
+            Content = data,
+            Headers =
+            {
+                
+            },
         };
 
         if (!string.IsNullOrEmpty(apiKey))
         {
-            request.Headers.Add("Authorization", "Bearer " + apiKey);
+            request.Headers.Add("Authorization",$"Bearer {token}");
         }
 
-        var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        var response = await Client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         var stream = await response.Content.ReadAsStreamAsync();
         var buffer = new byte[8192];
         int bytesRead;

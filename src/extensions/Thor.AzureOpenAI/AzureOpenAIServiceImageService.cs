@@ -3,12 +3,13 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 using Azure.AI.OpenAI;
 using OpenAI.Images;
+using Thor.Abstractions.Images;
 
 namespace Thor.AzureOpenAI;
 
-public class AzureOpenAIServiceImageService : IApiImageService
+public class AzureOpenAIServiceImageService : IThorImageService
 {
-    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ChatOptions? options = null,
+    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
         var createClient = AzureOpenAIFactory.CreateClient(options);
@@ -57,14 +58,14 @@ public class AzureOpenAIServiceImageService : IApiImageService
     }
 
     public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
         throw new NotImplementedException();
     }
 
     public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,
-        ChatOptions? options = null,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
         throw new NotImplementedException();

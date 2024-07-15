@@ -1,33 +1,63 @@
-﻿using System.Diagnostics;
+﻿using MapsterMapper;
+using OpenAI.Chat;
+using System.Diagnostics;
+using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Consts;
+using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Claudia;
 using Thor.Hunyuan;
 using Thor.OpenAI;
 using Thor.SparkDesk;
-using MapsterMapper;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 
 namespace Thor.Service.Service;
 
+/// <summary>
+/// 渠道管理
+/// </summary>
+/// <param name="serviceProvider"></param>
+/// <param name="mapper"></param>
 public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper)
     : ApplicationService(serviceProvider)
 {
     /// <summary>
-    ///     获取渠道列表 如果缓存中有则从缓存中获取
+    /// 获取渠道列表 如果缓存中有则从缓存中获取
     /// </summary>
     public async ValueTask<List<ChatChannel>> GetChannelsAsync()
     {
         return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToListAsync();
     }
 
-    public async ValueTask CreateAsync(ChatChannelInput chatChannel)
+    /// <summary>
+    /// 获取包含指定模型名的渠道列表 如果缓存中有则从缓存中获取
+    /// </summary>
+    /// <param name="model">模型名</param>
+    /// <returns></returns>
+    public async ValueTask<IEnumerable<ChatChannel>> GetChannelsContainsModelAsync(string model)
     {
-        var result = mapper.Map<ChatChannel>(chatChannel);
+        return (await GetChannelsAsync()).Where(x => x.Models.Contains(model));
+    }
+
+    /// <summary>
+    /// 创建渠道
+    /// </summary>
+    /// <param name="channel"></param>
+    /// <returns></returns>
+    public async ValueTask CreateAsync(ChatChannelInput channel)
+    {
+        var result = mapper.Map<ChatChannel>(channel);
         result.Id = Guid.NewGuid().ToString();
         await DbContext.Channels.AddAsync(result);
 
         await DbContext.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
+    /// <returns></returns>
     public async ValueTask<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize)
     {
         var total = await DbContext.Channels.CountAsync();
@@ -47,6 +77,11 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         return new PagingDto<GetChatChannelDto>(total, new List<GetChatChannelDto>());
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<bool> RemoveAsync(string id)
     {
         var result = await DbContext.Channels.Where(x => x.Id == id)
@@ -115,98 +150,78 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Disable, a => !a.Disable));
     }
 
+    /// <summary>
+    /// 测试渠道接口
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    /// <exception cref="ChannelException"></exception>
     public async ValueTask<(bool, int)> TestChannelAsync(string id)
     {
         var channel = await DbContext.Channels.FindAsync(id);
 
-        if (channel == null) throw new Exception("渠道不存在");
+        if (channel == null)
+        {
+            throw new Exception("渠道不存在");
+        }
 
         // 获取渠道指定的实现类型的服务
-        var openService = GetKeyedService<IApiChatCompletionService>(channel.Type);
+        var chatCompletionsService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
 
-        if (openService == null) throw new Exception("渠道服务不存在");
+        if (chatCompletionsService == null)
+        {
+            throw new Exception("渠道服务不存在");
+        }
 
-        var chatHistory = new ChatCompletionCreateRequest();
+        var chatRequest = new ThorChatCompletionsRequest()
+        {
+            TopP=0.7f,
+            Temperature=0.95f,
+            Messages=new List<ThorChatMessage>()
+            {
+                ThorChatMessage.CreateUserMessage("hello")
+            }
+        };
 
-        var setting = new ChatOptions
+        var platformOptions = new ThorPlatformOptions
         {
             Address = channel.Address,
-            Key = channel.Key,
+            ApiKey = channel.Key,
             Other = channel.Other
         };
 
-        if (channel.Type == OpenAIServiceOptions.ServiceName)
+        if (channel.Type == OpenAIPlatformOptions.PlatformCode)
         {
             // 获取渠道是否支持gpt-3.5-turbo
-            chatHistory.Model = channel.Models.Order()
+            chatRequest.Model = channel.Models.Order()
                 .FirstOrDefault(x => x.StartsWith("gpt-", StringComparison.OrdinalIgnoreCase));
-
-            chatHistory.Messages = new List<ChatMessage>
-            {
-                new()
-                {
-                    Content = "Return 1",
-                    Role = "user"
-                }
-            };
         }
-        else if (channel.Type == ClaudiaOptions.ServiceName)
+        else if (channel.Type == ClaudiaPlatformOptions.PlatformCode)
         {
-            chatHistory.Model =
+            chatRequest.Model =
                 channel.Models.FirstOrDefault(x => x.StartsWith("claude", StringComparison.OrdinalIgnoreCase));
-            chatHistory.Messages = new List<ChatMessage>
-            {
-                new()
-                {
-                    Content = "Return 1",
-                    Role = "user"
-                }
-            };
         }
-        else if (channel.Type == SparkDeskOptions.ServiceName)
+        else if (channel.Type == SparkDeskPlatformOptions.PlatformCode)
         {
-            chatHistory.Model = channel.Models.FirstOrDefault(x =>
-                x.StartsWith("genera", StringComparison.OrdinalIgnoreCase) ||
+            chatRequest.Model = channel.Models.FirstOrDefault(x =>
+                x.StartsWith("general", StringComparison.OrdinalIgnoreCase) ||
                 x.StartsWith("SparkDesk", StringComparison.OrdinalIgnoreCase));
-            chatHistory.Messages = new List<ChatMessage>
-            {
-                new()
-                {
-                    Content = "回复ok",
-                    Role = "user"
-                }
-            };
         }
-        else if (channel.Type == HunyuanOptions.ServiceName)
+        else if (channel.Type == HunyuanPlatformOptions.PlatformCode)
         {
-            chatHistory.Model =
+            chatRequest.Model =
                 channel.Models.FirstOrDefault(x => !x.Contains("embedding", StringComparison.OrdinalIgnoreCase));
-            chatHistory.Messages = new List<ChatMessage>
-            {
-                new()
-                {
-                    Content = "回复ok",
-                    Role = "user"
-                }
-            };
         }
         else
         {
-            chatHistory.Model = channel.Models.FirstOrDefault();
-            chatHistory.Messages = new List<ChatMessage>
-            {
-                new()
-                {
-                    Content = "Return 1",
-                    Role = "user"
-                }
-            };
+            chatRequest.Model = channel.Models.FirstOrDefault();
         }
 
 
-        if (string.IsNullOrWhiteSpace(chatHistory.Model))
+        if (string.IsNullOrWhiteSpace(chatRequest.Model))
         {
-            chatHistory.Model = channel.Models.FirstOrDefault();
+            chatRequest.Model = channel.Models.FirstOrDefault();
         }
 
         // 写一个10s的超时
@@ -214,10 +229,10 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         // token.CancelAfter(20000);
 
         var sw = Stopwatch.StartNew();
-        var response = await openService.CompleteChatAsync(chatHistory, setting, token.Token);
+        var response = await chatCompletionsService.ChatCompletionsAsync(chatRequest, platformOptions, token.Token);
         sw.Stop();
 
-        // 更新ResponseTime
+        // 更新渠道测试响应时间
         await DbContext.Channels
             .Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResponseTime, sw.ElapsedMilliseconds));
@@ -227,7 +242,6 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             throw new ChannelException(response.Error?.Message);
         }
 
-        return (response.Choices?.Count > 0,
-            (int)sw.ElapsedMilliseconds);
+        return (response.Choices?.Count > 0,(int)sw.ElapsedMilliseconds);
     }
 }

@@ -26,6 +26,10 @@ namespace Thor.MetaGLM
 
             var securityKey = new SymmetricSecurityKey(keyBytes);
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var header = new JwtHeader(credentials)
+            {
+                { "sign_type", "SIGN" }
+            };
 
             var payload = new JwtPayload
             {
@@ -33,9 +37,6 @@ namespace Thor.MetaGLM
                 { "exp", DateTimeOffset.UtcNow.ToUnixTimeSeconds() + expSeconds },
                 { "timestamp", DateTimeOffset.UtcNow.ToUnixTimeSeconds() }
             };
-
-            var header = new JwtHeader(credentials);
-            header.Add("sign_type", "SIGN");
 
             var token = new JwtSecurityToken(header, payload);
 

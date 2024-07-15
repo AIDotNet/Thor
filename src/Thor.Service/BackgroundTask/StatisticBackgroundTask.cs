@@ -23,7 +23,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                 // 查询统计数据
                 var userStatistics = await dbContext.Loggers
                     .Where(log =>
-                        log.Type == ChatLoggerType.Consume && log.CreatedAt >= today &&
+                        log.Type == ThorChatLoggerType.Consume && log.CreatedAt >= today &&
                         log.CreatedAt < tomorrow) // 今天的日志
                     .GroupBy(log => new { log.UserId }) // 按用户ID和模型名称分组
                     .Select(group => new
@@ -85,7 +85,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
 
                 var models = await dbContext.Loggers
                     .Where(log =>
-                        log.Type == ChatLoggerType.Consume && log.CreatedAt >= today &&
+                        log.Type == ThorChatLoggerType.Consume && log.CreatedAt >= today &&
                         log.CreatedAt < tomorrow) // 今天的日志
                     .GroupBy(log => new { log.UserId, log.ModelName }) // 按用户ID和模型名称分组
                     .Select(group => new
