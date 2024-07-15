@@ -3,8 +3,7 @@ using TencentCloud.Hunyuan.V20230901.Models;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
+using Thor.Abstractions.Dtos;
 
 namespace Thor.Hunyuan.Chats;
 
@@ -57,14 +56,14 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
             Choices = resp.Choices.Select(x =>
             {
                 var message = ThorChatMessage.CreateAssistantMessage(x.Message.Content);
-                return new ChatChoiceResponse
+                return new ThorChatChoiceResponse
                 {
                     Delta = message,
                     Message = message
                 };
             }).ToList(),
             Model = request.Model,
-            Usage = new UsageResponse()
+            Usage = new ThorUsageResponse()
             {
                 CompletionTokens = (int)(resp.Usage.CompletionTokens ?? 0),
                 PromptTokens = (int)(resp.Usage.PromptTokens ?? 0),
@@ -127,7 +126,7 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
 
             yield return new ThorChatCompletionsResponse
             {
-                Choices = new List<ChatChoiceResponse>()
+                Choices = new List<ThorChatChoiceResponse>()
                 {
                     new()
                     {

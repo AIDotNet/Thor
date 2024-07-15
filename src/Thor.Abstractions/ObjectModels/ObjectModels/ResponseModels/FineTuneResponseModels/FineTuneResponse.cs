@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.FineTuneResponseModels;
 
-public record FineTuneResponse : BaseResponse, IOpenAiModels.IId, IOpenAiModels.IModel, IOpenAiModels.ICreatedAt
+public record FineTuneResponse : ThorBaseResponse, IOpenAiModels.IId, IOpenAiModels.IModel, IOpenAiModels.ICreatedAt
 {
     [JsonPropertyName("events")] public List<EventResponse> Events { get; set; }
 

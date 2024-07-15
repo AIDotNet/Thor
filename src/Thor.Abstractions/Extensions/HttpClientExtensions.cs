@@ -2,7 +2,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using Thor.Abstractions.Dtos;
 
 namespace Thor.Abstractions.Extensions;
 
@@ -148,7 +148,7 @@ public static class HttpClientExtensions
 
 
     public static async Task<TResponse> PostAndReadAsAsync<TResponse>(this HttpClient client, string uri,
-        object? requestModel, CancellationToken cancellationToken = default) where TResponse : BaseResponse, new()
+        object? requestModel, CancellationToken cancellationToken = default) where TResponse : ThorBaseResponse, new()
     {
         var response = await client.PostAsJsonAsync(uri, requestModel, new JsonSerializerOptions
         {
@@ -158,7 +158,7 @@ public static class HttpClientExtensions
     }
 
     public static async Task<TResponse> PostFileAndReadAsAsync<TResponse>(this HttpClient client, string uri,
-        HttpContent content, CancellationToken cancellationToken = default) where TResponse : BaseResponse, new()
+        HttpContent content, CancellationToken cancellationToken = default) where TResponse : ThorBaseResponse, new()
     {
         var response = await client.PostAsync(uri, content, cancellationToken);
         return await HandleResponseContent<TResponse>(response, cancellationToken);
@@ -172,14 +172,14 @@ public static class HttpClientExtensions
     }
 
     public static async Task<TResponse> DeleteAndReadAsAsync<TResponse>(this HttpClient client, string uri,
-        CancellationToken cancellationToken = default) where TResponse : BaseResponse, new()
+        CancellationToken cancellationToken = default) where TResponse : ThorBaseResponse, new()
     {
         var response = await client.DeleteAsync(uri, cancellationToken);
         return await HandleResponseContent<TResponse>(response, cancellationToken);
     }
 
     private static async Task<TResponse> HandleResponseContent<TResponse>(this HttpResponseMessage response,
-        CancellationToken cancellationToken) where TResponse : BaseResponse, new()
+        CancellationToken cancellationToken) where TResponse : ThorBaseResponse, new()
     {
         TResponse result;
 

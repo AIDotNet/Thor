@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-public record CreateModerationResponse : BaseResponse, IOpenAiModels.IModel, IOpenAiModels.IId
+public record CreateModerationResponse : ThorBaseResponse, IOpenAiModels.IModel, IOpenAiModels.IId
 {
     [JsonPropertyName("results")] public List<Result> Results { get; set; }
 

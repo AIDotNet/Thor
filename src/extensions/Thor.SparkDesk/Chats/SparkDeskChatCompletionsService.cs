@@ -1,13 +1,11 @@
-﻿using System.Runtime.CompilerServices;
-using Thor.Abstractions.Exceptions;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
-using Microsoft.Extensions.Logging;
-using Thor.SparkDesk.API;
+﻿using Microsoft.Extensions.Logging;
+using System.Runtime.CompilerServices;
+using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions;
+using Thor.Abstractions.Dtos;
+using Thor.Abstractions.Exceptions;
+using Thor.SparkDesk.API;
 
 namespace Thor.SparkDesk.Chats;
 
@@ -78,7 +76,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
         var ret = new ThorChatCompletionsResponse()
         {
             Model = request.Model,
-            Choices = new List<ChatChoiceResponse>()
+            Choices = new List<ThorChatChoiceResponse>()
             {
                 new()
                 {
@@ -87,7 +85,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
                     Index = 0,
                 }
             },
-            Usage = new UsageResponse()
+            Usage = new ThorUsageResponse()
         };
 
         await foreach (var chatMsg in result)
@@ -208,16 +206,16 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             var ret = new ThorChatCompletionsResponse()
             {
                 Model = request.Model,
-                Choices = new List<ChatChoiceResponse>()
+                Choices = new List<ThorChatChoiceResponse>()
                 {
-                    new ChatChoiceResponse()
+                    new ThorChatChoiceResponse()
                     {
                         Delta = retMessage,
                         FinishReason = "stop",
                         Index = 0,
                     }
                 },
-                Usage = new UsageResponse()
+                Usage = new ThorUsageResponse()
                 {
                     CompletionTokens = chatMsg?.Payload?.Usage?.Text.CompletionTokens,
                     PromptTokens = chatMsg?.Payload?.Usage?.Text.PromptTokens ?? 0,

@@ -1,9 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Thor.Abstractions;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
+using Thor.Abstractions.Dtos;
 
 namespace Thor.Service.Infrastructure;
 
@@ -26,7 +24,7 @@ public static class HttpContextExtensions
     {
         var error = new ThorChatCompletionsResponse
         {
-            Error = new Error()
+            Error = new ThorError()
             {
                 MessageObject = message,
                 Type = "error",
@@ -45,7 +43,7 @@ public static class HttpContextExtensions
         var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
         var error = new ThorChatCompletionsResponse
         {
-            Choices = new List<ChatChoiceResponse>()
+            Choices = new List<ThorChatChoiceResponse>()
             {
                 new()
                 {
@@ -75,7 +73,7 @@ public static class HttpContextExtensions
         var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
         var error = new ThorChatCompletionsResponse
         {
-            Choices = new List<ChatChoiceResponse>()
+            Choices = new List<ThorChatChoiceResponse>()
             {
                 new()
                 {
@@ -100,7 +98,7 @@ public static class HttpContextExtensions
     {
         var error = new ThorChatCompletionsResponse
         {
-            Error = new Error()
+            Error = new ThorError()
             {
                 MessageObject = message,
                 Code = code

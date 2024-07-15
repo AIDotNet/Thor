@@ -1,10 +1,10 @@
-﻿using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Sdcb.DashScope;
+﻿using Sdcb.DashScope;
 using Sdcb.DashScope.TextGeneration;
-using ChatMessage = Sdcb.DashScope.TextGeneration.ChatMessage;
+using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions;
+using Thor.Abstractions.Dtos;
+using ChatMessage = Sdcb.DashScope.TextGeneration.ChatMessage;
 
 namespace Thor.Qiansail.Chats
 {
@@ -48,7 +48,7 @@ namespace Thor.Qiansail.Chats
                     }
                 ],
                 Model = chatCompletionCreate.Model,
-                Usage = new UsageResponse()
+                Usage = new ThorUsageResponse()
                 {
                     TotalTokens = result.Usage?.InputTokens + result.Usage?.OutputTokens ?? 0,
                     CompletionTokens = result.Usage?.OutputTokens,

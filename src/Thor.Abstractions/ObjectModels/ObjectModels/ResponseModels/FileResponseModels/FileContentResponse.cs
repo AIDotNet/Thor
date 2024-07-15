@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Thor.Abstractions.Dtos;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.FileResponseModels;
 
@@ -22,5 +23,5 @@ public class FileContentResponse<T>
     ///     Error
     /// </summary>
     [JsonPropertyName("error")]
-    public Error? Error { get; set; }
+    public ThorError? Error { get; set; }
 }

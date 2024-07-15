@@ -1,9 +1,10 @@
-﻿using Thor.Abstractions;
+﻿using Sdcb.DashScope;
+using Sdcb.DashScope.TextEmbedding;
+using Thor.Abstractions;
+using Thor.Abstractions.Dtos;
+using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Sdcb.DashScope;
-using Sdcb.DashScope.TextEmbedding;
-using Thor.Abstractions.Embeddings;
 
 namespace Thor.Qiansail.Embeddings;
 
@@ -29,7 +30,7 @@ public class QiansailTextEmbeddingService : IThorTextEmbeddingService
                 Index = x.TextIndex
             }).ToList(),
             Model = createEmbeddingModel.Model,
-            Usage = new UsageResponse()
+            Usage = new ThorUsageResponse()
             {
             }
         };
