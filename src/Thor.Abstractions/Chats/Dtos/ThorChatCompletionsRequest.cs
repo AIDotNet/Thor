@@ -193,12 +193,12 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     {
         get
         {
-            if (ToolChoice != null && 
+            if (ToolChoice != null &&
                 ToolChoice.Type != ThorToolChoiceTypeConst.Function &&
                 ToolChoice.Function != null)
             {
                 throw new ValidationException(
-                    "You cannot choose another type besides \"function\" while ToolChoice.Function is not null.");
+                    "当 type 为 \"function\" 时，属性 Function 不可为null。");
             }
 
             if (ToolChoice?.Type == ThorToolChoiceTypeConst.Function)
@@ -218,6 +218,10 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
                     {
                         Type = jsonElement.GetString()
                     };
+                }
+                else if (jsonElement.ValueKind == JsonValueKind.Object)
+                {
+                    ToolChoice= jsonElement.Deserialize<ThorToolChoice>();
                 }
             }
             else
