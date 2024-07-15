@@ -1,35 +1,44 @@
-﻿using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
-using ERNIE_Bot.SDK;
-using ERNIE_Bot.SDK.Models;
+﻿using ERNIE_Bot.SDK.Models;
+using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.Chats.Consts;
-using Thor.Abstractions;
+using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.ErnieBot.Chats;
 
+/// <summary>
+/// 百度千帆对话补全服务
+/// </summary>
 public class ErnieBotChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
+
+    /// <summary>
+    /// 非流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
+    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
+        ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var keys = options!.ApiKey!.Split("|");
+        var keys = options!.ApiKey!.Split("|",StringSplitOptions.RemoveEmptyEntries);
 
         if (keys.Length != 2)
-            throw new Exception("Key is invalid format, expected ClientId|ClientSecret");
+            throw new Exception("Key is invalid format, expected APIKey|SecretKey");
 
-        var clientId = keys[0];
-        var clientSecret = keys[1];
+        var apiKey = keys[0];
+        var secretKey = keys[1];
 
-        var client = ErnieBotClientFactory.CreateClient(clientId, clientSecret);
+        var client = ErnieBotClientFactory.CreateClient(apiKey, secretKey);
 
         var chatRequest = new ChatRequest
         {
             Stream = false,
-            Messages = chatCompletionCreate.Messages.Select(x => new Message()
+            Messages = request.Messages.Select(x => new Message()
             {
                 Content = x.Content,
                 Name = x.Name,
@@ -38,7 +47,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
         };
 
 
-        var response = await client.ChatAsync(chatRequest, ErnieBotHelper.GetModelEndpoint(chatCompletionCreate.Model),
+        var response = await client.ChatAsync(chatRequest, ErnieBotHelper.GetModelEndpoint(request.Model),
             cancellationToken);
 
         var message = ThorChatMessage.CreateAssistantMessage(response.Result);
@@ -52,7 +61,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
                     Delta =message
                 }
             },
-            Model = chatCompletionCreate.Model,
+            Model = request.Model,
             Usage = new UsageResponse
             {
                 TotalTokens = response.Usage.TotalTokens,
@@ -62,24 +71,32 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
         };
     }
 
+    /// <summary>
+    /// 流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
     public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
-        ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
+        ThorChatCompletionsRequest request, 
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var keys = options!.ApiKey!.Split("|");
+        var keys = options!.ApiKey!.Split("|", StringSplitOptions.RemoveEmptyEntries);
 
         if (keys.Length != 2)
-            throw new Exception("Key is invalid format, expected ClientId|ClientSecret");
+            throw new Exception("Key is invalid format, expected APIKey|SecretKey");
 
-        var clientId = keys[0];
-        var clientSecret = keys[1];
+        var apiKey = keys[0];
+        var secretKey = keys[1];
 
-        var client = ErnieBotClientFactory.CreateClient(clientId, clientSecret);
+        var client = ErnieBotClientFactory.CreateClient(apiKey, secretKey);
 
         var chatRequest = new ChatRequest
         {
             Stream = false,
-            Messages = chatCompletionCreate.Messages.Select(x => new Message()
+            Messages = request.Messages.Select(x => new Message()
             {
                 Content = x.Content,
                 Name = x.Name,
@@ -88,13 +105,13 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
         };
 
         await foreach (var item in client.ChatStreamAsync(chatRequest,
-                           ErnieBotHelper.GetModelEndpoint(chatCompletionCreate.Model),
+                           ErnieBotHelper.GetModelEndpoint(request.Model),
                            cancellationToken))
         {
             var message = ThorChatMessage.CreateAssistantMessage(item.Result);
             yield return new ChatCompletionsResponse()
             {
-                Model = chatCompletionCreate.Model,
+                Model = request.Model,
                 Choices = new List<ChatChoiceResponse>()
                 {
                     new()

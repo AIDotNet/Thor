@@ -4,73 +4,64 @@ namespace Thor.ErnieBot;
 
 public class ErnieBotHelper
 {
+    /// <summary>
+    /// 模型信息字典,key：模型编码，value：模型信息
+    /// </summary>
+    public static Dictionary<string, ErnieBotModelInfo> ModeInfoDict = new()
+    {
+        ["ERNIE-4.0-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-8K", Code = "completions_pro", Type = "chat" },
+        ["ERNIE-4.0-8K-Latest"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-8K-Latest", Code = "ernie-4.0-8k-latest", Type = "chat" },
+        ["ERNIE-4.0-8K-Preview"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-8K-Preview", Code = "ernie-4.0-8k-preview", Type = "chat" },
+        ["ERNIE-4.0-8K-Preview-0518"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-8K-Preview-0518", Code = "completions_adv_pro", Type = "chat" },
+        ["ERNIE-4.0-8K-0613"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-8K-0613", Code = "ernie-4.0-8k-0613", Type = "chat" },
+        ["ERNIE-4.0-8K-0329"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-8K-0329", Code = "ernie-4.0-8k-0329", Type = "chat" },
+        ["ERNIE-4.0-Turbo-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-Turbo-8K", Code = "ernie-4.0-turbo-8k", Type = "chat" },
+        ["ERNIE-3.5-128K"] = new ErnieBotModelInfo() { Name = "ERNIE-3.5-128K", Code = "ernie-3.5-128k", Type = "chat" },
+        ["ERNIE-3.5-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-3.5-8K", Code = "completions", Type = "chat" },
+        ["ERNIE-3.5-8K-Preview"] = new ErnieBotModelInfo() { Name = "ERNIE-3.5-8K-Preview", Code = "ernie-3.5-8k-preview", Type = "chat" },
+        ["ERNIE-3.5-8K-0613"] = new ErnieBotModelInfo() { Name = "ERNIE-3.5-8K-0613", Code = "ernie-3.5-8k-0613", Type = "chat" },
+        ["ERNIE-3.5-8K-0329"] = new ErnieBotModelInfo() { Name = "ERNIE-3.5-8K-0329", Code = "ernie-3.5-8k-0329", Type = "chat" },
+        ["ERNIE-Speed-128K"] = new ErnieBotModelInfo() { Name = "ERNIE-Speed-128K", Code = "ernie-speed-128k", Type = "chat" },
+        ["ERNIE-Speed-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-Speed-8K", Code = "ernie_speed", Type = "chat" },
+        ["ERNIE Speed-AppBuilder"] = new ErnieBotModelInfo() { Name = "ERNIE Speed-AppBuilder", Code = "ai_apaas", Type = "chat" },
+        ["ERNIE-Character-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-Character-8K", Code = "ernie-char-8k", Type = "chat" },
+        ["ERNIE-Functions-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-Functions-8K", Code = "ernie-func-8k", Type = "chat" },
+        ["ERNIE-Lite-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-Lite-8K", Code = "ernie-lite-8k", Type = "chat" },
+        ["ERNIE-Lite-8K-0922"] = new ErnieBotModelInfo() { Name = "ERNIE-Lite-8K-0922", Code = "eb-instant", Type = "chat" },
+        ["ERNIE-Lite-AppBuilder-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-Lite-AppBuilder-8K", Code = "ai_apaas_lite", Type = "chat" },
+        ["ERNIE-Tiny-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-Tiny-8K", Code = "ernie-tiny-8k", Type = "chat" },
+        ["Qianfan-Chinese-Llama-2-7B"] = new ErnieBotModelInfo() { Name = "Qianfan-Chinese-Llama-2-7B", Code = "qianfan_chinese_llama_2_7b", Type = "chat" },
+        ["Qianfan-Chinese-Llama-2-13B"] = new ErnieBotModelInfo() { Name = "Qianfan-Chinese-Llama-2-13B", Code = "qianfan_chinese_llama_2_13b", Type = "chat" },
+        ["Qianfan-Chinese-Llama-2-70B"] = new ErnieBotModelInfo() { Name = "Qianfan-Chinese-Llama-2-70B", Code = "qianfan_chinese_llama_2_70b", Type = "chat" },
+        ["Meta-Llama-3-8B"] = new ErnieBotModelInfo() { Name = "Meta-Llama-3-8B", Code = "llama_3_8b", Type = "chat" },
+        ["Meta-Llama-3-70B"] = new ErnieBotModelInfo() { Name = "Meta-Llama-3-70B", Code = "llama_3_70b", Type = "chat" },
+        ["Llama-2-7B-Chat"] = new ErnieBotModelInfo() { Name = "Llama-2-7B-Chat", Code = "llama_2_7b", Type = "chat" },
+        ["Llama-2-13B-Chat"] = new ErnieBotModelInfo() { Name = "Llama-2-13B-Chat", Code = "llama_2_13b", Type = "chat" },
+        ["Llama-2-70B-Chat"] = new ErnieBotModelInfo() { Name = "Llama-2-70B-Chat", Code = "llama_2_70b", Type = "chat" },
+        ["ChatGLM2-6B-32K"] = new ErnieBotModelInfo() { Name = "ChatGLM2-6B-32K", Code = "chatglm2_6b_32k", Type = "chat" },
+        ["XuanYuan-70B-Chat-4bit"] = new ErnieBotModelInfo() { Name = "XuanYuan-70B-Chat-4bit", Code = "xuanyuan_70b_chat", Type = "chat" },
+        ["Gemma-7B-It"] = new ErnieBotModelInfo() { Name = "Gemma-7B-It", Code = "gemma_7b_it", Type = "chat" },
+        ["Yi-34B-Chat"] = new ErnieBotModelInfo() { Name = "Yi-34B-Chat", Code = "yi_34b_chat", Type = "chat" },
+        ["Mixtral-8x7B-Instruct"] = new ErnieBotModelInfo() { Name = "Mixtral-8x7B-Instruct", Code = "mixtral_8x7b_instruct", Type = "chat" },
+        ["ChatLaw"] = new ErnieBotModelInfo() { Name = "ChatLaw", Code = "chatlaw", Type = "chat" },
+        ["Qianfan-BLOOMZ-7B-compressed"] = new ErnieBotModelInfo() { Name = "Qianfan-BLOOMZ-7B-compressed", Code = "qianfan_bloomz_7b_compressed", Type = "chat" },
+        ["BLOOMZ-7B"] = new ErnieBotModelInfo() { Name = "BLOOMZ-7B", Code = "bloomz_7b1", Type = "chat" },
+        ["AquilaChat-7B"] = new ErnieBotModelInfo() { Name = "AquilaChat-7B", Code = "aquilachat_7b", Type = "chat" },
+        ["ERNIE-Character-Fiction-8K"] = new ErnieBotModelInfo() { Name = "ERNIE-Character-Fiction-8K", Code = "ernie-char-fiction-8k", Type = "chat" },
+        ["ERNIE-4.0-Turbo-8K-Preview"] = new ErnieBotModelInfo() { Name = "ERNIE-4.0-Turbo-8K-Preview", Code = "ernie-4.0-turbo-8k-preview", Type = "chat" },
+        ["bge-large-en"] = new ErnieBotModelInfo() { Name = "bge-large-en", Code = "bge_large_en", Type = "embeddings" },
+        ["bge-large-zh"] = new ErnieBotModelInfo() { Name = "bge-large-zh", Code = "bge_large_zh", Type = "embeddings" },
+        ["tao-8k"] = new ErnieBotModelInfo() { Name = "tao-8k", Code = "tao_8k", Type = "embeddings" },
+        ["Embedding-V1"] = new ErnieBotModelInfo() { Name = "Embedding-V1", Code = "embedding-v1", Type = "embeddings" },
+    };
+
     public static string GetModelEndpoint(string modelId)
     {
-        if (modelId.Equals("ERNIE-Bot", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ERNIE_Bot;
-
-        if (modelId.Equals("ERNIE-Bot-4", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ERNIE_Bot;
-
-        if (modelId.Equals("ERNIE-Bot-8K", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ERNIE_Bot_8K;
-
-        if (modelId.Equals("ERNIE-Bot-Turbo", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ERNIE_Bot_Turbo;
-
-        if (modelId.Equals("ERNIE-Bot-Speed", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ERNIE_Bot_Speed;
-
-        if (modelId.Equals("ERNIE-Bot-35-4K-0205", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ERNIE_Bot_35_4K_0205;
-
-        if (modelId.Equals("ERNIE-Bot-35-8K-0205", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ERNIE_Bot_35_8K_0205;
-
-        if (modelId.Equals("bge-large-en", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.bge_large_en;
-
-        if (modelId.Equals("bge-large-zh", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.bge_large_zh;
-
-        if (modelId.Equals("Embedding-v1", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Embedding_v1;
-
-        if (modelId.Equals("Llama-2-7b-chat", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Llama_2_7b_chat;
-
-        if (modelId.Equals("Llama-2-13b-chat", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Llama_2_13b_chat;
-
-        if (modelId.Equals("Llama-2-70b-chat", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Llama_2_70b_chat;
-
-        if (modelId.Equals("tao-8k", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Tao_8k;
-
-        if (modelId.Equals("AquilaChat-7b", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.AquilaChat_7b;
-
-        if (modelId.Equals("ChatLaw", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ChatLaw;
-
-        if (modelId.Equals("Qianfan-Chinese-Llama-2-7b", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Qianfan_Chinese_Llama_2_7b;
-
-        if (modelId.Equals("Qianfan-Chinese-Llama-2-13b", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Qianfan_Chinese_Llama_2_13b;
-
-        if (modelId.Equals("ChatGLM2-6b-32k", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.ChatGLM2_6b_32k;
-
-        if (modelId.Equals("XuanYuan-70B-Chat-4bit", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.XuanYuan_70B_Chat_4bit;
-
-        if (modelId.Equals("BLOOMZ-7B", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.BLOOMZ_7B;
-
-        if (modelId.Equals("Qianfan-BLOOMZ-7B-compressed", StringComparison.OrdinalIgnoreCase))
-            return ModelEndpoints.Qianfan_BLOOMZ_7B_compressed;
+        if (ModeInfoDict.ContainsKey(modelId))
+        {
+            var info = ModeInfoDict[modelId];
+            return info.Code;
+        }
 
         return modelId;
     }
