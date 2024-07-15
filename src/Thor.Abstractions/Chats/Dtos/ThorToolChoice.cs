@@ -39,10 +39,10 @@ public class ThorToolChoice
     };
 
     /// <summary>
-    ///     "none" 表示模型不会调用任何工具<br />
-    ///     "auto" 表示模型可以在生成消息或调用一个或多个工具之间进行选择 <br />
-    ///     "required" 表示模型必须调用一个或多个工具 <br />
-    ///     "function" 指定特定工具会强制模型调用该工具<br />
+    /// "none" 表示模型不会调用任何工具<br />
+    /// "auto" 表示模型可以在生成消息或调用一个或多个工具之间进行选择 <br />
+    /// "required" 表示模型必须调用一个或多个工具 <br />
+    /// "function" 指定特定工具会强制模型调用该工具<br />
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; }
