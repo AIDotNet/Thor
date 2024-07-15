@@ -11,33 +11,44 @@ using Thor.Abstractions;
 
 namespace Thor.SparkDesk.Chats;
 
+/// <summary>
+/// 讯飞星火对话补全服务
+/// </summary>
+/// <param name="logger"></param>
 public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IThorChatCompletionsService
 {
-    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
+    /// <summary>
+    /// 非流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(input.Model))
+        if (string.IsNullOrWhiteSpace(request.Model))
         {
-            throw new NotModelException(input.Model);
+            throw new NotModelException(request.Model);
         }
 
-        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.ApiKey!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
+        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.ApiKey!, request.Model, null);
 
-        input.TopP ??= 4;
+        request.TopP ??= 4;
 
-        var results = input.Messages.Select(x => new XFSparkDeskChatAPIMessageRequest()
+        var results = request.Messages.Select(x => new XFSparkDeskChatAPIMessageRequest()
         {
             Role = x.Role.ToString(),
             Content = x.Content
         }).ToList();
 
-        if (input.Temperature <= 0)
+        if (request.Temperature <= 0)
         {
-            input.Temperature = (float?)0.5;
+            request.Temperature = (float?)0.5;
         }
 
-        var functions = input.Tools?.Where(x => x.Type.Equals("function", StringComparison.CurrentCultureIgnoreCase) && x.Function != null)
+        var functions = request.Tools?.Where(x => x.Type.Equals("function", StringComparison.CurrentCultureIgnoreCase) && x.Function != null)
             .Select(x => new XFSparkDeskChatAPIFunctionRequest()
             {
                 Name = x.Function!.Name,
@@ -58,15 +69,15 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
         {
             Messages = results,
             Functions = functions,
-            MaxTokens = input.MaxTokens ?? 2048,
-            Temperature = input.Temperature ?? 0.5,
-            TopK = (int)(input.TopP ?? 4)
+            MaxTokens = request.MaxTokens ?? 2048,
+            Temperature = request.Temperature ?? 0.5,
+            TopK = (int)(4)
         }, cancellationToken: cancellationToken);
 
         var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
         var ret = new ThorChatCompletionsResponse()
         {
-            Model = input.Model,
+            Model = request.Model,
             Choices = new List<ChatChoiceResponse>()
             {
                 new()
@@ -126,33 +137,39 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
         return ret;
     }
 
-
-    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
+    /// <summary>
+    /// 流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(input.Model))
-            throw new NotModelException(input.Model);
+        if (string.IsNullOrWhiteSpace(request.Model))
+            throw new NotModelException(request.Model);
 
-        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.ApiKey!, input.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
+        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.ApiKey!, request.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
 
-        if (input.TopP == null)
+        if (request.TopP == null)
         {
-            input.TopP = 4;
+            request.TopP = 4;
         }
 
-        var results = input.Messages.Select(x => new XFSparkDeskChatAPIMessageRequest()
+        var results = request.Messages.Select(x => new XFSparkDeskChatAPIMessageRequest()
         {
             Role = x.Role.ToString(),
             Content = x.Content
         }).ToList();
 
-        if (input.Temperature <= 0)
+        if (request.Temperature <= 0)
         {
-            input.Temperature = (float?)0.5;
+            request.Temperature = (float?)0.5;
         }
 
-        var functions = input.Tools?.Where(x => x.Type.Equals("function", StringComparison.CurrentCultureIgnoreCase) && x.Function != null)
+        var functions = request.Tools?.Where(x => x.Type.Equals("function", StringComparison.CurrentCultureIgnoreCase) && x.Function != null)
             .Select(x => new XFSparkDeskChatAPIFunctionRequest()
             {
                 Name = x.Function!.Name,
@@ -173,9 +190,9 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
         {
             Messages = results,
             Functions = functions,
-            MaxTokens = input.MaxTokens ?? 2048,
-            Temperature = input.Temperature ?? 0.5,
-            TopK = (int)(input.TopP ?? 4)
+            MaxTokens = request.MaxTokens ?? 2048,
+            Temperature = request.Temperature ?? 0.5,
+            TopK = (int)(request.TopP ?? 4)
         }, cancellationToken: cancellationToken);
 
         await foreach (var chatMsg in result)
@@ -190,7 +207,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
             var ret = new ThorChatCompletionsResponse()
             {
-                Model = input.Model,
+                Model = request.Model,
                 Choices = new List<ChatChoiceResponse>()
                 {
                     new ChatChoiceResponse()

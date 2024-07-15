@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Thor.ErnieBot.Helpers.Dtos
+namespace Thor.SparkDesk.Helpers.Dtos
 {
     /// <summary>
-    /// 千帆模型信息
+    /// 星火大模型信息
     /// </summary>
-    public class ErnieBotModelInfo
+    public class SparkDeskModelInfo
     {
         /// <summary>
         /// 模型名称
