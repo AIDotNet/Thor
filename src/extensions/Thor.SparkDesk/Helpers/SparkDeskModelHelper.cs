@@ -22,6 +22,23 @@ namespace Thor.SparkDesk.Helpers
         };
 
         /// <summary>
+        /// 模型名称映射，兼容现有名称
+        /// </summary>
+        public static Dictionary<string, string> ModelNameMap = new()
+        {
+            ["SparkDesk-v1.5"] = "SparkDesk-V1.1(Lite)",
+            ["general"] = "SparkDesk-V1.1(Lite)",
+            ["SparkDesk-v2.1"] = "SparkDesk-V2.1(V2.0)",
+            ["generalv2"] = "SparkDesk-V2.1(V2.0)",
+            ["SparkDesk-v3.1"] = "SparkDesk-V3.1(Pro)",
+            ["generalv3"] = "SparkDesk-V3.1(Pro)",
+            ["SparkDesk-v3.5"] = "SparkDesk-V3.5(Max)",
+            ["generalv3.5"] = "SparkDesk-V3.5(Max)",
+            ["4.0Ultra"] = "SparkDesk-V4.0(Ultra)",
+            ["general-4.0-ultra"] = "SparkDesk-V4.0(Ultra)",
+        };
+
+        /// <summary>
         /// 获取模型端点
         /// </summary>
         /// <param name="modelId">模型id</param>
@@ -30,6 +47,11 @@ namespace Thor.SparkDesk.Helpers
         public static string GetModelCode(string modelId, string modelType = "chat")
         {
             modelId = modelId ?? string.Empty;
+
+            if (ModelNameMap.ContainsKey(modelId))
+            {
+                modelId = ModelNameMap[modelId];
+            }
 
             if (ModeInfoDict.ContainsKey(modelId))
             {
