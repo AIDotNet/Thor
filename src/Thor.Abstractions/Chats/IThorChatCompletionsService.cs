@@ -1,5 +1,4 @@
 ﻿using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Abstractions.Chats;
 
@@ -15,7 +14,7 @@ public interface IThorChatCompletionsService
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    Task<ChatCompletionsResponse> ChatCompletionsAsync(
+    Task<ThorChatCompletionsResponse> ChatCompletionsAsync(
         ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
@@ -27,7 +26,7 @@ public interface IThorChatCompletionsService
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
+    IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
         ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default);

@@ -10,7 +10,7 @@ namespace Thor.Qiansail.Chats
 {
     public sealed class QiansailChatCompletionsService : IThorChatCompletionsService
     {
-        public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
+        public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(
             ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
@@ -36,7 +36,7 @@ namespace Thor.Qiansail.Chats
                     Stop = chatCompletionCreate.Stop,
                 }, cancellationToken);
 
-            return new ChatCompletionsResponse()
+            return new ThorChatCompletionsResponse()
             {
                 Choices =
                 [
@@ -57,7 +57,7 @@ namespace Thor.Qiansail.Chats
             };
         }
 
-        public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
+        public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
             ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
@@ -85,7 +85,7 @@ namespace Thor.Qiansail.Chats
                                }, cancellationToken))
             {
                 var message = ThorChatMessage.CreateAssistantMessage(result.Output.Text);
-                yield return new ChatCompletionsResponse()
+                yield return new ThorChatCompletionsResponse()
                 {
                     Choices =
                     [

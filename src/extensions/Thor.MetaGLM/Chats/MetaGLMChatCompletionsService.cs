@@ -5,7 +5,7 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;
-using ChatCompletionsResponse = Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
+using ThorChatCompletionsResponse = Thor.Abstractions.Chats.Dtos.ThorChatCompletionsResponse;
 
 namespace Thor.MetaGLM.Chats;
 
@@ -21,7 +21,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
         };
     }
 
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -106,15 +106,16 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
             }));
         }
 
-        return new ChatCompletionsResponse()
+        var message = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools);
+
+        return new ThorChatCompletionsResponse()
         {
             Choices =
             [
                 new()
                     {
-                        Delta = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty,
-                            null, tools),
-                        Message = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
+                        Delta = message,
+                        Message = message,
                         FinishReason = "stop",
                         Index = 0,
                     }
@@ -127,7 +128,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
         ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -210,7 +211,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
             }
 
             var message = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.delta.content ?? string.Empty, toolCalls: tools);
-            yield return new ChatCompletionsResponse()
+            yield return new ThorChatCompletionsResponse()
             {
                 Choices =
                 [

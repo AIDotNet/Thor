@@ -4,13 +4,12 @@ using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Extensions;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.AzureOpenAI.Chats;
 
 public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -23,13 +22,13 @@ public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFact
         var response = await client.PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
 
         var result = await response.Content
-            .ReadFromJsonAsync<ChatCompletionsResponse>(cancellationToken: cancellationToken)
+            .ReadFromJsonAsync<ThorChatCompletionsResponse>(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
         return result;
     }
 
-    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -53,7 +52,7 @@ public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFact
             if (line.StartsWith('{'))
             {
                 // 如果是json数据则直接返回
-                yield return JsonSerializer.Deserialize<ChatCompletionsResponse>(line,
+                yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                     ThorJsonSerializer.DefaultOptions);
 
                 break;
@@ -77,7 +76,7 @@ public class AzureOpenAIChatCompletionsService(IHttpClientFactory httpClientFact
 
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var result = JsonSerializer.Deserialize<ChatCompletionsResponse>(line,
+            var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
             yield return result;
         }

@@ -21,7 +21,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(
         ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
@@ -52,7 +52,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
             cancellationToken);
 
         var message = ThorChatMessage.CreateAssistantMessage(response.Result);
-        return new ChatCompletionsResponse
+        return new ThorChatCompletionsResponse
         {
             Choices = new List<ChatChoiceResponse>()
             {
@@ -79,7 +79,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
         ThorChatCompletionsRequest request, 
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
@@ -110,7 +110,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
                            cancellationToken))
         {
             var message = ThorChatMessage.CreateAssistantMessage(item.Result);
-            yield return new ChatCompletionsResponse()
+            yield return new ThorChatCompletionsResponse()
             {
                 Model = request.Model,
                 Choices = new List<ChatChoiceResponse>()

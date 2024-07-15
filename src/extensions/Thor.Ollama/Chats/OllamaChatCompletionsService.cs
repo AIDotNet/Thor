@@ -31,7 +31,7 @@ namespace Thor.Ollama.Chats
         /// <param name="options">平台参数对象</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async Task<ChatCompletionsResponse> ChatCompletionsAsync(
+        public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(
             ThorChatCompletionsRequest request, 
             ThorPlatformOptions? options = null, 
             CancellationToken cancellationToken = default)
@@ -72,7 +72,7 @@ namespace Thor.Ollama.Chats
             }
 
             var message = ThorChatMessage.CreateAssistantMessage(result.message.content);
-            return new ChatCompletionsResponse()
+            return new ThorChatCompletionsResponse()
             {
                 Model = result.model,
                 Choices = result.message == null ? [] :
@@ -100,7 +100,7 @@ namespace Thor.Ollama.Chats
         /// <param name="options">平台参数对象</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
+        public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
             ThorChatCompletionsRequest request, 
             ThorPlatformOptions? options = null, 
             CancellationToken cancellationToken = default)
@@ -144,7 +144,7 @@ namespace Thor.Ollama.Chats
 
                 if (result.done)
                 {
-                    yield return new ChatCompletionsResponse()
+                    yield return new ThorChatCompletionsResponse()
                     {
                         Model = result.model,
                         Choices = [],
@@ -161,7 +161,7 @@ namespace Thor.Ollama.Chats
                 {
                     var message = ThorChatMessage.CreateAssistantMessage(result.message.content);
 
-                    yield return new ChatCompletionsResponse()
+                    yield return new ThorChatCompletionsResponse()
                     {
                         Model = result.model,
                         Choices = result.message == null ? [] :

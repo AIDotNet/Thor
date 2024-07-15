@@ -4,14 +4,14 @@ using System.Text.Json.Serialization;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using ChatCompletionsResponse =
-    Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
+using ThorChatCompletionsResponse =
+    Thor.Abstractions.Chats.Dtos.ThorChatCompletionsResponse;
 
 namespace Thor.Claudia.Chats;
 
 public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -81,7 +81,7 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
         }
 
         var message = ThorChatMessage.CreateAssistantMessage(result.Content.FirstOrDefault()?.Text ?? string.Empty, toolCalls: toolsResult);
-        return new ChatCompletionsResponse()
+        return new ThorChatCompletionsResponse()
         {
             Choices =
             [
@@ -99,7 +99,7 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
         ThorChatCompletionsRequest input, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -151,7 +151,7 @@ public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
         {
             if (result is ContentBlockDelta content)
             {
-                yield return new ChatCompletionsResponse()
+                yield return new ThorChatCompletionsResponse()
                 {
                     Choices =
                     [

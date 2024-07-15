@@ -1,4 +1,5 @@
-﻿using Thor.Abstractions.Exceptions;
+﻿using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Service.Filters;
@@ -13,7 +14,7 @@ public sealed class ChatFilter : IEndpointFilter
         }
         catch (NotModelException notModel)
         {
-            return new ChatCompletionsResponse()
+            return new ThorChatCompletionsResponse()
             {
                 Error = new Error()
                 {
@@ -28,7 +29,7 @@ public sealed class ChatFilter : IEndpointFilter
         }
         catch (Exception e)
         {
-            return new ChatCompletionsResponse()
+            return new ThorChatCompletionsResponse()
             {
                 Error = new Error()
                 {

@@ -13,7 +13,7 @@ namespace Thor.SparkDesk.Chats;
 
 public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IThorChatCompletionsService
 {
-    public async Task<ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest input,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -64,7 +64,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
         }, cancellationToken: cancellationToken);
 
         var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
-        var ret = new ChatCompletionsResponse()
+        var ret = new ThorChatCompletionsResponse()
         {
             Model = input.Model,
             Choices = new List<ChatChoiceResponse>()
@@ -127,7 +127,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
     }
 
 
-    public async IAsyncEnumerable<ChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
         ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -188,7 +188,7 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             }
 
             var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
-            var ret = new ChatCompletionsResponse()
+            var ret = new ThorChatCompletionsResponse()
             {
                 Model = input.Model,
                 Choices = new List<ChatChoiceResponse>()

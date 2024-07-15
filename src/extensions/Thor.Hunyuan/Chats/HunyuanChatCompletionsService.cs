@@ -10,7 +10,7 @@ namespace Thor.Hunyuan.Chats;
 
 public class HunyuanChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -41,7 +41,7 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
         // 返回的resp是一个ChatCompletionsResponse的实例，与请求对象对应
         var resp = await client.ChatCompletions(req);
 
-        return new Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse
+        return new ThorChatCompletionsResponse
         {
             Choices = resp.Choices.Select(x =>
             {
@@ -62,7 +62,7 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
         };
     }
 
-    public async IAsyncEnumerable<Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse> StreamChatCompletionsAsync(
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -106,7 +106,7 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
 
             var message = ThorChatMessage.CreateAssistantMessage(content);
 
-            yield return new Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse
+            yield return new ThorChatCompletionsResponse
             {
                 Choices = new List<ChatChoiceResponse>()
                 {

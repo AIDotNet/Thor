@@ -24,7 +24,7 @@ public static class HttpContextExtensions
 
     public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message, string code)
     {
-        var error = new ChatCompletionsResponse
+        var error = new ThorChatCompletionsResponse
         {
             Error = new Error()
             {
@@ -43,7 +43,7 @@ public static class HttpContextExtensions
     public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message)
     {
         var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
-        var error = new ChatCompletionsResponse
+        var error = new ThorChatCompletionsResponse
         {
             Choices = new List<ChatChoiceResponse>()
             {
@@ -73,7 +73,7 @@ public static class HttpContextExtensions
     public static async ValueTask WriteErrorAsync(this HttpContext context, string message)
     {
         var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
-        var error = new ChatCompletionsResponse
+        var error = new ThorChatCompletionsResponse
         {
             Choices = new List<ChatChoiceResponse>()
             {
@@ -98,7 +98,7 @@ public static class HttpContextExtensions
 
     public static async ValueTask WriteErrorAsync(this HttpContext context, string message, string code)
     {
-        var error = new ChatCompletionsResponse
+        var error = new ThorChatCompletionsResponse
         {
             Error = new Error()
             {
