@@ -55,14 +55,26 @@ public class ErnieBotHelper
         ["Embedding-V1"] = new ErnieBotModelInfo() { Name = "Embedding-V1", Code = "embedding-v1", Type = "embeddings" },
     };
 
-    public static string GetModelEndpoint(string modelId)
+    /// <summary>
+    /// 获取模型端点
+    /// </summary>
+    /// <param name="modelId">模型id</param>
+    /// <param name="modelType">模型类型，值有 chat,embeddings</param>
+    /// <returns></returns>
+    public static string GetModelEndpoint(string modelId, string modelType = "chat")
     {
+        modelId = modelId ?? string.Empty;
+
         if (ModeInfoDict.ContainsKey(modelId))
         {
             var info = ModeInfoDict[modelId];
-            return info.Code;
+            if (info.Type == modelType)
+            {
+                return info.Code;
+            }
+
         }
 
-        return modelId;
+        return modelId.ToLower().Replace("-", "_");
     }
 }
