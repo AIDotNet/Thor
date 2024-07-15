@@ -8,7 +8,7 @@ namespace Thor.MetaGLM.Extensions;
 
 public static class MetaGLMServiceCollectionExtensions
 {
-    public static IServiceCollection AddMetaGLMClientV4(this IServiceCollection services)
+    public static IServiceCollection AddMetaGLMService(this IServiceCollection services)
     {
 
         ThorGlobal.PlatformNames.Add(MetaGLMPlatformOptions.PlatformName, MetaGLMPlatformOptions.PlatformCode);

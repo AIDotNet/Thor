@@ -9,7 +9,7 @@ namespace Thor.ErnieBot.Extensions;
 
 public static class ErnieBotServiceCollectionExtensions
 {
-    public static IServiceCollection AddErnieBot(this IServiceCollection services)
+    public static IServiceCollection AddErnieBotService(this IServiceCollection services)
     {
         //添加平台名和编码对应
         ThorGlobal.PlatformNames.Add(ErnieBotPlatformOptions.PlatformName, ErnieBotPlatformOptions.PlatformCode);

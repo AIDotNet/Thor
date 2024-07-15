@@ -7,7 +7,7 @@ namespace Thor.Claudia.Extensions
 {
     public static class ClaudiaServiceCollectionExtensions
     {
-        public static IServiceCollection AddClaudia(this IServiceCollection services)
+        public static IServiceCollection AddClaudiaService(this IServiceCollection services)
         {
             ThorGlobal.PlatformNames.Add(ClaudiaPlatformOptions.PlatformName, ClaudiaPlatformOptions.PlatformCode);
 

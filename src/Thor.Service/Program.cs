@@ -89,13 +89,13 @@ builder.Services
     .AddOpenAIService()
     .AddMoonshotService()
     .AddSparkDeskService()
-    .AddQiansail()
-    .AddMetaGLMClientV4()
-    .AddHunyuan()
-    .AddClaudia()
+    .AddQiansailService()
+    .AddMetaGLMService()
+    .AddHunyuanService()
+    .AddClaudiaService()
     .AddOllamaService()
     .AddAzureOpenAIService()
-    .AddErnieBot();
+    .AddErnieBotService();
 
 builder.Services
     .AddCors(options =>
