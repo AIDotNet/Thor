@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Thor.ErnieBot.Helpers
+namespace Thor.ErnieBot.Helpers.Dtos
 {
     /// <summary>
     /// 千帆模型信息

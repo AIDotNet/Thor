@@ -48,7 +48,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
         };
 
 
-        var response = await client.ChatAsync(chatRequest, ErnieBotHelper.GetModelEndpoint(request.Model),
+        var response = await client.ChatAsync(chatRequest, ErnieBotModelHelper.GetModelEndpoint(request.Model),
             cancellationToken);
 
         var message = ThorChatMessage.CreateAssistantMessage(response.Result);
@@ -106,7 +106,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
         };
 
         await foreach (var item in client.ChatStreamAsync(chatRequest,
-                           ErnieBotHelper.GetModelEndpoint(request.Model),
+                           ErnieBotModelHelper.GetModelEndpoint(request.Model),
                            cancellationToken))
         {
             var message = ThorChatMessage.CreateAssistantMessage(item.Result);

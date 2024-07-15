@@ -1,8 +1,9 @@
 ﻿using ERNIE_Bot.SDK;
+using Thor.ErnieBot.Helpers.Dtos;
 
 namespace Thor.ErnieBot.Helpers;
 
-public class ErnieBotHelper
+public class ErnieBotModelHelper
 {
     /// <summary>
     /// 模型信息字典,key：模型编码，value：模型信息
