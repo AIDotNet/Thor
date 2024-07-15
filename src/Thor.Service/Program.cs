@@ -677,7 +677,7 @@ app.MapPost("/v1/chat/completions", async (ChatService service, HttpContext http
     .WithDescription("Get completions from OpenAI")
     .WithOpenApi();
 
-// 文本补全接口
+// 文本补全接口,不建议使用，使用对话补全即可
 app.MapPost("/v1/completions", async (ChatService service, HttpContext context) =>
         await service.CompletionsAsync(context))
     .WithGroupName("OpenAI")

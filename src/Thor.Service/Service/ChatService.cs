@@ -13,6 +13,18 @@ using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
+/// <summary>
+/// 对话服务
+/// </summary>
+/// <param name="serviceProvider"></param>
+/// <param name="channelService"></param>
+/// <param name="tokenService"></param>
+/// <param name="imageService"></param>
+/// <param name="rateLimitModelService"></param>
+/// <param name="serviceCache"></param>
+/// <param name="userService"></param>
+/// <param name="mapper"></param>
+/// <param name="loggerService"></param>
 public sealed class ChatService(
     IServiceProvider serviceProvider,
     ChannelService channelService,
@@ -102,8 +114,7 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight((await channelService.GetChannelsAsync())
-                .Where(x => x.Models.Contains(module.Model)));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model));
 
             if (channel == null) throw new NotModelException(module.Model);
 
@@ -164,8 +175,7 @@ public sealed class ChatService(
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight((await channelService.GetChannelsAsync())
-                .Where(x => x.Models.Contains(module.Model)));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model));
 
             if (channel == null) throw new NotModelException(module.Model);
 
@@ -266,8 +276,7 @@ public sealed class ChatService(
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight((await channelService.GetChannelsAsync())
-                .Where(x => x.Models.Contains(module.Model)));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model));
 
             if (channel == null) throw new NotModelException(module.Model);
 
@@ -338,6 +347,13 @@ public sealed class ChatService(
         return (requestToken, responseToken);
     }
 
+    /// <summary>
+    /// 对话补全接口
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    /// <exception cref="NotModelException"></exception>
     public async ValueTask ChatCompletionsAsync(HttpContext context)
     {
         using var body = new MemoryStream();
@@ -356,16 +372,21 @@ public sealed class ChatService(
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
-            // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight((await channelService.GetChannelsAsync())
-                .Where(x => x.Models.Contains(module.Model)));
+            // 获取渠道通过算法计算权重
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model));
 
-            if (channel == null) throw new NotModelException(module.Model);
+            if (channel == null)
+            {
+                throw new NotModelException(module.Model);
+            }
 
             // 获取渠道指定的实现类型的服务
-            var openService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
+            var chatCompletionsService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
 
-            if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
+            if (chatCompletionsService == null)
+            {
+                throw new Exception($"并未实现：{channel.Type} 的服务");
+            }
 
             if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
             {
@@ -373,12 +394,16 @@ public sealed class ChatService(
                 var responseToken = 0;
 
                 if (module.Stream == true)
+                {
                     (requestToken, responseToken) =
-                        await StreamChatHandlerAsync(context, module, channel, openService, user, rate);
+                        await StreamChatCompletionsHandlerAsync(context, module, channel, chatCompletionsService, user, rate);
+                }
                 else
+                {
                     (requestToken, responseToken) =
-                        await ChatHandlerAsync(context, module, channel, openService, user, rate);
+                        await ChatCompletionsHandlerAsync(context, module, channel, chatCompletionsService, user, rate);
 
+                }
                 var quota = requestToken * rate;
 
                 var completionRatio = GetCompletionRatio(module.Model);
@@ -430,7 +455,18 @@ public sealed class ChatService(
         }
     }
 
-    private async ValueTask<(int, int)> ChatHandlerAsync(HttpContext context, ThorChatCompletionsRequest input,
+    /// <summary>
+    /// 对话补全服务处理
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="input"></param>
+    /// <param name="channel"></param>
+    /// <param name="openService"></param>
+    /// <param name="user"></param>
+    /// <param name="rate"></param>
+    /// <returns></returns>
+    /// <exception cref="InsufficientQuotaException"></exception>
+    private async ValueTask<(int, int)> ChatCompletionsHandlerAsync(HttpContext context, ThorChatCompletionsRequest input,
         ChatChannel channel, IThorChatCompletionsService openService, User user, decimal rate)
     {
         int requestToken;
@@ -503,7 +539,7 @@ public sealed class ChatService(
     }
 
     /// <summary>
-    ///     Stream 对话处理
+    /// 流式对话补全服务处理
     /// </summary>
     /// <param name="context"></param>
     /// <param name="input">输入</param>
@@ -517,7 +553,7 @@ public sealed class ChatService(
     /// <param Name="openService"></param>
     /// <param name="rate"></param>
     /// <returns></returns>
-    private async ValueTask<(int, int)> StreamChatHandlerAsync(HttpContext context,
+    private async ValueTask<(int, int)> StreamChatCompletionsHandlerAsync(HttpContext context,
         ThorChatCompletionsRequest input, ChatChannel channel, IThorChatCompletionsService openService, User user,
         decimal rate)
     {
@@ -618,7 +654,10 @@ public sealed class ChatService(
         var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
         var total = chatChannels.Sum(x => x.Order);
 
-        if (chatChannels.Length == 0) throw new NotModelException("模型未找到可用的渠道");
+        if (chatChannels.Length == 0)
+        {
+            throw new NotModelException("模型未找到可用的渠道");
+        }
 
         var value = Random.Shared.NextDouble() * total;
 
@@ -663,7 +702,7 @@ public sealed class ChatService(
     }
 
     /// <summary>
-    ///     计算图片倍率
+    /// 计算图片倍率
     /// </summary>
     /// <param name="module"></param>
     /// <returns></returns>
@@ -682,7 +721,7 @@ public sealed class ChatService(
     }
 
     /// <summary>
-    ///     计算图片倍率
+    /// 计算图片倍率
     /// </summary>
     /// <param name="model"></param>
     /// <param name="size"></param>
@@ -697,7 +736,7 @@ public sealed class ChatService(
     }
 
     /// <summary>
-    ///     计算图片token
+    /// 计算图片token
     /// </summary>
     /// <param name="url"></param>
     /// <param name="detail"></param>

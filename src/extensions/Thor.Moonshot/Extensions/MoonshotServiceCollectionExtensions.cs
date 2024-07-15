@@ -14,7 +14,7 @@ namespace Thor.Moonshot.Extensions;
 public static class MoonshotServiceCollectionExtensions
 {
     /// <summary>
-    /// 
+    /// 添加月之暗面平台支持
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>

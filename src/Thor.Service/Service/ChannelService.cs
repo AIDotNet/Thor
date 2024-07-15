@@ -12,26 +12,52 @@ using Thor.SparkDesk;
 
 namespace Thor.Service.Service;
 
+/// <summary>
+/// 渠道管理
+/// </summary>
+/// <param name="serviceProvider"></param>
+/// <param name="mapper"></param>
 public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper)
     : ApplicationService(serviceProvider)
 {
     /// <summary>
-    ///     获取渠道列表 如果缓存中有则从缓存中获取
+    /// 获取渠道列表 如果缓存中有则从缓存中获取
     /// </summary>
     public async ValueTask<List<ChatChannel>> GetChannelsAsync()
     {
         return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToListAsync();
     }
 
-    public async ValueTask CreateAsync(ChatChannelInput chatChannel)
+    /// <summary>
+    /// 获取包含指定模型名的渠道列表 如果缓存中有则从缓存中获取
+    /// </summary>
+    /// <param name="model">模型名</param>
+    /// <returns></returns>
+    public async ValueTask<IEnumerable<ChatChannel>> GetChannelsContainsModelAsync(string model)
     {
-        var result = mapper.Map<ChatChannel>(chatChannel);
+        return (await GetChannelsAsync()).Where(x => x.Models.Contains(model));
+    }
+
+    /// <summary>
+    /// 创建渠道
+    /// </summary>
+    /// <param name="channel"></param>
+    /// <returns></returns>
+    public async ValueTask CreateAsync(ChatChannelInput channel)
+    {
+        var result = mapper.Map<ChatChannel>(channel);
         result.Id = Guid.NewGuid().ToString();
         await DbContext.Channels.AddAsync(result);
 
         await DbContext.SaveChangesAsync();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="page"></param>
+    /// <param name="pageSize"></param>
+    /// <returns></returns>
     public async ValueTask<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize)
     {
         var total = await DbContext.Channels.CountAsync();
@@ -51,6 +77,11 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         return new PagingDto<GetChatChannelDto>(total, new List<GetChatChannelDto>());
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public async Task<bool> RemoveAsync(string id)
     {
         var result = await DbContext.Channels.Where(x => x.Id == id)
