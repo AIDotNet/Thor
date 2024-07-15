@@ -171,49 +171,11 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     public string? ServiceTier { get; set; }
 
     /// <summary>
-    /// A list of functions the model may generate JSON inputs for.
-    /// </summary>
-    [JsonIgnore]
-    public IList<ToolDefinition>? Tools { get; set; }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [JsonIgnore]
-    public object? ToolsAsObject { get; set; }
-
-    /// <summary>
-    ///     A list of tools the model may call. Currently, only functions are supported as a tool. Use this to provide a list
-    ///     of functions the model may generate JSON inputs for.
+    /// 模型可能调用的工具列表。目前，仅支持函数作为工具。使用它来提供模型可以为其生成 JSON 输入的函数列表。最多支持 128 个功能。
     /// </summary>
     [JsonPropertyName("tools")]
-    public object? ToolsCalculated
-    {
-        get
-        {
-            if (ToolsAsObject != null && Tools != null)
-            {
-                throw new ValidationException(
-                    "ToolsAsObject and Tools can not be assigned at the same time. One of them is should be null.");
-            }
+    public List<ThorToolDefinition>? Tools { get; set; }
 
-            return Tools ?? ToolsAsObject;
-        }
-        set
-        {
-            if (value is JsonElement jsonElement)
-            {
-                if (jsonElement.ValueKind == JsonValueKind.Array)
-                {
-                    Tools = JsonSerializer.Deserialize<List<ToolDefinition>>(jsonElement.GetRawText(), ThorJsonSerializer.DefaultOptions);
-                }
-                else
-                {
-                    ToolsAsObject = jsonElement;
-                }
-            }
-        }
-    }
 
     /// <summary>
     ///     Controls which (if any) function is called by the model. none means the model will not call a function and instead

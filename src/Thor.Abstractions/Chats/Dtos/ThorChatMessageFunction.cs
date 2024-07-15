@@ -29,12 +29,6 @@ namespace Thor.Abstractions.Chats.Dtos
         public string? Arguments { get; set; }
 
         /// <summary>
-        /// 函数说明,如：Get the current weather in a given location
-        /// </summary>
-        [JsonPropertyName("description")]
-        public string? Description { get; set; }
-
-        /// <summary>
         /// 转换参数为字典
         /// </summary>
         /// <returns></returns>

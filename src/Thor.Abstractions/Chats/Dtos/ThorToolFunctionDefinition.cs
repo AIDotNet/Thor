@@ -1,32 +1,31 @@
 ﻿using System.Text.Json.Serialization;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
-namespace Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+namespace Thor.Abstractions.Chats.Dtos;
 
 /// <summary>
-///     Definition of a valid function call.
+/// 有效函数调用的定义。
 /// </summary>
-public class FunctionDefinition
+public class ThorToolFunctionDefinition
 {
     /// <summary>
-    ///     The name of the function to be called. Must be a-z, A-Z, 0-9,
-    ///     or contain underscores and dashes, with a maximum length of 64.
+    /// 要调用的函数的名称。必须是 a-z、A-Z、0-9 或包含下划线和破折号，最大长度为 64。
     /// </summary>
     [JsonPropertyName("name")]
     public string Name { get; set; }
 
     /// <summary>
-    ///     A description of what the function does, used by the model to choose when and how to call the function.
+    /// 函数功能的描述，模型使用它来选择何时以及如何调用函数。
     /// </summary>
     [JsonPropertyName("description")]
     public string? Description { get; set; }
 
     /// <summary>
-    ///     Optional. The parameters the functions accepts, described as a JSON Schema object.
+    ///     函数接受的参数，描述为 JSON 架构对象。有关示例，请参阅指南，有关格式的文档，请参阅 JSON 架构参考。
+    ///     省略 parameters 定义一个参数列表为空的函数。
     ///     See the <a href="https://platform.openai.com/docs/guides/gpt/function-calling">guide</a> for examples,
     ///     and the <a href="https://json-schema.org/understanding-json-schema/">JSON Schema reference</a> for
     ///     documentation about the format.
     /// </summary>
     [JsonPropertyName("parameters")]
-    public PropertyDefinition Parameters { get; set; }
+    public ThorToolFunctionPropertyDefinition Parameters { get; set; }
 }
