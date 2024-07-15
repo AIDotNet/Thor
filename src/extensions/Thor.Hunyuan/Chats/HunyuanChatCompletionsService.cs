@@ -8,9 +8,20 @@ using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Hunyuan.Chats;
 
+/// <summary>
+///腾讯混元对话补全服务
+/// </summary>
 public class HunyuanChatCompletionsService : IThorChatCompletionsService
 {
-    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
+    /// <summary>
+    /// 非流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(
+        ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -29,10 +40,10 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
         {
             EnableEnhancement = false,
             Stream = false,
-            Model = chatCompletionCreate.Model,
-            TopP = chatCompletionCreate.TopP,
-            Temperature = chatCompletionCreate.Temperature,
-            Messages = chatCompletionCreate.Messages.Select(x => new Message
+            Model = request.Model,
+            TopP = request.TopP,
+            Temperature = request.Temperature,
+            Messages = request.Messages.Select(x => new Message
             {
                 Content = x.Content,
                 Role = x.Role
@@ -52,7 +63,7 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
                     Message = message
                 };
             }).ToList(),
-            Model = chatCompletionCreate.Model,
+            Model = request.Model,
             Usage = new UsageResponse()
             {
                 CompletionTokens = (int)(resp.Usage.CompletionTokens ?? 0),
@@ -62,8 +73,16 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
         };
     }
 
+    /// <summary>
+    /// 流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
     public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
-        ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
+        ThorChatCompletionsRequest request, 
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var keys = options!.ApiKey.Split("|");
@@ -81,10 +100,10 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
         {
             EnableEnhancement = false,
             Stream = true,
-            Model = chatCompletionCreate.Model,
-            TopP = chatCompletionCreate.TopP,
-            Temperature = chatCompletionCreate.Temperature,
-            Messages = chatCompletionCreate.Messages.Select(x => new Message
+            Model = request.Model,
+            TopP = request.TopP,
+            Temperature = request.Temperature,
+            Messages = request.Messages.Select(x => new Message
             {
                 Content = x.Content,
                 Role = x.Role
@@ -116,7 +135,7 @@ public class HunyuanChatCompletionsService : IThorChatCompletionsService
                         Message =message
                     }
                 },
-                Model = chatCompletionCreate.Model
+                Model = request.Model
             };
         }
     }
