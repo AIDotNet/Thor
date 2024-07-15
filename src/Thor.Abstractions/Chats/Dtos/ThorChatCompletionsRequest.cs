@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.ObjectModels.ObjectModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Abstractions.Chats.Dtos;
@@ -178,28 +178,30 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
 
 
     /// <summary>
-    ///     Controls which (if any) function is called by the model. none means the model will not call a function and instead
-    ///     generates a message. auto means the model can pick between generating a message or calling a function. Specifying
-    ///     a particular function via {"type: "function", "function": {"name": "my_function"}} forces the model to call that
-    ///     function.
-    ///     none is the default when no functions are present. auto is the default if functions are present.
+    /// 控制模型调用哪个（如果有）工具。
+    /// none 表示模型不会调用任何工具，而是生成一条消息。 
+    /// auto 表示模型可以在生成消息或调用一个或多个工具之间进行选择。 
+    /// required 表示模型必须调用一个或多个工具。
+    /// 通过 {"type": "function", "function": {"name": "my_function"}} 指定特定工具会强制模型调用该工具。
+    /// 当不存在任何工具时， none 是默认值。如果存在工具，则 auto 是默认值。
     /// </summary>
     [JsonIgnore]
-    public ToolChoice? ToolChoice { get; set; }
+    public ThorToolChoice? ToolChoice { get; set; }
 
     [JsonPropertyName("tool_choice")]
     public object? ToolChoiceCalculated
     {
         get
         {
-            if (ToolChoice != null && ToolChoice.Type != StaticValues.CompletionStatics.ToolChoiceType.Function &&
+            if (ToolChoice != null && 
+                ToolChoice.Type != ThorToolChoiceTypeConst.Function &&
                 ToolChoice.Function != null)
             {
                 throw new ValidationException(
                     "You cannot choose another type besides \"function\" while ToolChoice.Function is not null.");
             }
 
-            if (ToolChoice?.Type == StaticValues.CompletionStatics.ToolChoiceType.Function)
+            if (ToolChoice?.Type == ThorToolChoiceTypeConst.Function)
             {
                 return ToolChoice;
             }
@@ -212,7 +214,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
             {
                 if (jsonElement.ValueKind == JsonValueKind.String)
                 {
-                    ToolChoice = new ToolChoice
+                    ToolChoice = new ThorToolChoice
                     {
                         Type = jsonElement.GetString()
                     };
@@ -220,7 +222,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
             }
             else
             {
-                ToolChoice = (ToolChoice)value;
+                ToolChoice = (ThorToolChoice)value;
             }
         }
     }
@@ -250,6 +252,11 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     [JsonPropertyName("user")]
     public string User { get; set; }
 
+    /// <summary>
+    /// 参数验证
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
     public IEnumerable<ValidationResult> Validate()
     {
         throw new NotImplementedException();
