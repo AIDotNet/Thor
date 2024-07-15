@@ -6,13 +6,16 @@ using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Thor.AzureOpenAI.Extensions;
 using Thor.BuildingBlocks.Data;
-using Thor.Claudia;
+using Thor.Claudia.Extensions;
 using Thor.ErnieBot.Extensions;
+using Thor.Hunyuan.Extensions;
 using Thor.LocalEvent;
 using Thor.LocalMemory.Cache;
+using Thor.MetaGLM.Extensions;
 using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
-using Thor.Qiansail;
+using Thor.OpenAI.Extensions;
+using Thor.Qiansail.Extensions;
 using Thor.RedisMemory.Cache;
 using Thor.Service;
 using Thor.Service.BackgroundTask;
@@ -22,6 +25,7 @@ using Thor.Service.Infrastructure;
 using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
+using Thor.SparkDesk.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

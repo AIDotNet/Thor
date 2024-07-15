@@ -3,8 +3,8 @@ using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
-using Thor.AzureOpenAI;
 using Thor.AzureOpenAI.Chats;
+using Thor.AzureOpenAI.Embeddings;
 
 namespace Thor.AzureOpenAI.Extensions;
 
@@ -43,7 +43,7 @@ public static class AzureOpenAIServiceCollectionExtensions
         ]);
 
         services.AddKeyedSingleton<IThorChatCompletionsService, AzureOpenAIChatCompletionsService>(AzureOpenAIPlatformOptions.PlatformCode);
-        services.AddKeyedSingleton<IThorTextEmbeddingService, AzureOpenAIServiceTextEmbeddingGeneration>(
+        services.AddKeyedSingleton<IThorTextEmbeddingService, AzureOpenAITextEmbeddingGenerationService>(
             AzureOpenAIPlatformOptions.PlatformCode);
         services.AddKeyedSingleton<IThorImageService, AzureOpenAIServiceImageService>(AzureOpenAIPlatformOptions.PlatformCode);
 

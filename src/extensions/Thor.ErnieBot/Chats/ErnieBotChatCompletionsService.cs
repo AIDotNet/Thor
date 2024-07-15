@@ -4,6 +4,7 @@ using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
+using Thor.ErnieBot.Helpers;
 
 namespace Thor.ErnieBot.Chats;
 

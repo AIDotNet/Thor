@@ -180,9 +180,9 @@ public sealed class ChatService(
             if (channel == null) throw new NotModelException(module.Model);
 
             // 获取渠道指定的实现类型的服务
-            var openService = GetKeyedService<IThorTextEmbeddingService>(channel.Type);
+            var embeddingService = GetKeyedService<IThorTextEmbeddingService>(channel.Type);
 
-            if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
+            if (embeddingService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
             var embeddingCreateRequest = new EmbeddingCreateRequest
             {
@@ -214,7 +214,7 @@ public sealed class ChatService(
                 throw new Exception("输入格式错误");
             }
 
-            var stream = await openService.EmbeddingAsync(embeddingCreateRequest, new ThorPlatformOptions
+            var stream = await embeddingService.EmbeddingAsync(embeddingCreateRequest, new ThorPlatformOptions
             {
                 ApiKey = channel.Key,
                 Address = channel.Address,

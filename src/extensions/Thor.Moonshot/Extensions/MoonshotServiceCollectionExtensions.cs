@@ -5,6 +5,8 @@ using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.Moonshot.Chats;
+using Thor.Moonshot.Embeddings;
+using Thor.Moonshot.Images;
 
 namespace Thor.Moonshot.Extensions;
 
@@ -30,12 +32,12 @@ public static class MoonshotServiceCollectionExtensions
 
         services.AddKeyedSingleton<IThorChatCompletionsService, MoonshotChatCompletionsService>(MoonshotPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IThorTextEmbeddingService, MoonshotServiceTextEmbeddingGeneration>(
+        services.AddKeyedSingleton<IThorTextEmbeddingService, MoonshotTextEmbeddingService>(
             MoonshotPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IThorImageService, MoonshotServiceImageService>(MoonshotPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorImageService, MoonshotImageService>(MoonshotPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IThorCompletionsService, MoonshotServiceCompletionService>(MoonshotPlatformOptions
+        services.AddKeyedSingleton<IThorCompletionsService, MoonshotCompletionService>(MoonshotPlatformOptions
             .PlatformCode);
 
         services.AddHttpClient(MoonshotPlatformOptions.PlatformCode,
