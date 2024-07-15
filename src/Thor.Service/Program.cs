@@ -27,6 +27,7 @@ using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
 using Thor.SparkDesk.Extensions;
+using Thor.Abstractions.Chats.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -673,7 +674,7 @@ system.MapPost("share", async (SystemService service, string userId, HttpContext
 
 // 对话补全请求
 app.MapPost("/v1/chat/completions",
-        async (ChatService service, HttpContext httpContext, ChatCompletionCreateRequest request) =>
+        async (ChatService service, HttpContext httpContext, ThorChatCompletionsRequest request) =>
             await service.ChatCompletionsAsync(httpContext, request))
     .WithGroupName("OpenAI")
     .WithDescription("Get completions from OpenAI")
@@ -693,8 +694,8 @@ app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext c
     .WithOpenApi();
 
 app.MapPost("/v1/images/generations",
-        async (ChatService imageService, HttpContext context, ImageCreateRequest module) =>
-            await imageService.CreateImageAsync(context, module))
+        async (ChatService imageService, HttpContext context, ImageCreateRequest request) =>
+            await imageService.CreateImageAsync(context, request))
     .WithDescription("OpenAI")
     .WithDescription("Image")
     .WithOpenApi();

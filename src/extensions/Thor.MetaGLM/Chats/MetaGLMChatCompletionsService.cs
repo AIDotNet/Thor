@@ -2,11 +2,10 @@
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;
 using ChatCompletionsResponse = Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionsResponse;
-using ChatCompletionCreateResponse =
-    Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ChatCompletionCreateResponse;
 
 namespace Thor.MetaGLM.Chats;
 
@@ -101,15 +100,10 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                 Type = x.type,
                 Function = new ThorChatMessageFunction()
                 {
-                    Id = x.id,
-                    Type = x.type,
-                    FunctionCall = new FunctionCall()
-                    {
-                        Arguments = x.function?.arguments,
-                        Name = x.function?.name,
-                    }
-                }));
-            }
+                    Arguments = x.function?.arguments,
+                    Name = x.function?.name,
+                }
+            }));
         }
 
         return new ChatCompletionsResponse()
@@ -117,13 +111,13 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
             Choices =
             [
                 new()
-                {
-                    Delta = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty,
-                        null, tools),
-                    Message = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
-                    FinishReason = "stop",
-                    Index = 0,
-                }
+                    {
+                        Delta = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty,
+                            null, tools),
+                        Message = ThorChatMessage.CreateAssistantMessage(result.choices.FirstOrDefault()?.message.content ?? string.Empty, null, tools),
+                        FinishReason = "stop",
+                        Index = 0,
+                    }
             ],
             Error = new Error
             {
