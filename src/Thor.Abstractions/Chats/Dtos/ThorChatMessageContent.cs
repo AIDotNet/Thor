@@ -6,9 +6,9 @@ namespace Thor.Abstractions.Chats.Dtos;
 /// <summary>
 /// 发出的消息内容，包含图文，一般是一文一图，一文多图两种情况，请使用CreeateXXX系列方法构建内容
 /// </summary>
-public class ThorMessageContent
+public class ThorChatMessageContent
 {
-    private ThorMessageContent()
+    private ThorChatMessageContent()
     {
 
     }
@@ -35,7 +35,7 @@ public class ThorMessageContent
     /// 创建文本类消息
     /// <param name="text">文本内容</param>
     /// </summary>
-    public static ThorMessageContent CreateTextContent(string text)
+    public static ThorChatMessageContent CreateTextContent(string text)
     {
         return new()
         {
@@ -51,7 +51,7 @@ public class ThorMessageContent
     /// 可以控制模型的处理方式图像并生成其文本理解。默认情况下，模型将使用 auto 设置，
     /// 该设置将查看图像输入大小并决定是否应使用 low 或 high 设置。</param>
     /// </summary>
-    public static ThorMessageContent CreateImageUrlContent(string imageUrl, string? detail = "auto")
+    public static ThorChatMessageContent CreateImageUrlContent(string imageUrl, string? detail = "auto")
     {
         return new()
         {
@@ -70,7 +70,7 @@ public class ThorMessageContent
     /// <param name="imageType">图片类型，如 png,jpg</param>
     /// <param name="detail">指定图像的详细程度。</param>
     /// </summary>
-    public static ThorMessageContent CreateImageBinaryContent(
+    public static ThorChatMessageContent CreateImageBinaryContent(
         byte[] binaryImage,
         string imageType,
         string? detail = "auto"

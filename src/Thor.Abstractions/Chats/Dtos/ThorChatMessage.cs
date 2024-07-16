@@ -49,7 +49,7 @@ public class ThorChatMessage
     /// ]
     /// </example>
     [JsonIgnore]
-    public IList<ThorMessageContent>? Contents { get; set; }
+    public IList<ThorChatMessageContent>? Contents { get; set; }
 
     /// <summary>
     ///  发出的消息内容计算，用于json序列号和反序列化，Content 和 Contents 不能同时赋值，只能二选一
@@ -81,7 +81,7 @@ public class ThorChatMessage
                 }
                 else if (str.ValueKind == JsonValueKind.Array)
                 {
-                    Contents = JsonSerializer.Deserialize<IList<ThorMessageContent>>(value?.ToString());
+                    Contents = JsonSerializer.Deserialize<IList<ThorChatMessageContent>>(value?.ToString());
                 }
             }
             else

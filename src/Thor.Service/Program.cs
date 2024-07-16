@@ -399,8 +399,7 @@ model.MapGet("/types", ModelService.GetPlatformNames)
     .WithDescription("获取渠道平台类型")
     .WithOpenApi();
 
-model.MapGet("/models",
-        ModelService.GetModels)
+model.MapGet("/models",ModelService.GetModels)
     .WithDescription("获取模型")
     .WithOpenApi();
 
