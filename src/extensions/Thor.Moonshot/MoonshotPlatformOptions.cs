@@ -14,7 +14,7 @@ namespace Thor.Moonshot
         /// <summary>
         /// 平台名称
         /// </summary>
-        public const string PlatformName = "Kimi（月之暗面）";
+        public const string PlatformName = "月之暗面";
 
         /// <summary>
         /// 平台编码

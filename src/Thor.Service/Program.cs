@@ -396,7 +396,7 @@ var model = app.MapGroup("/api/v1/model")
     .RequireAuthorization();
 
 model.MapGet("/types", ModelService.GetPlatformNames)
-    .WithDescription("获取模型类型")
+    .WithDescription("获取渠道平台类型")
     .WithOpenApi();
 
 model.MapGet("/models",

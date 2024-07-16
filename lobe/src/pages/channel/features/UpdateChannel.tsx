@@ -147,15 +147,15 @@ export default function UpdateChannel({
                     rules={[
                         {
                             required: true,
-                            message: '渠道类型不能为空'
+                            message: '平台类型不能为空'
                         },
                     ]}
                     name='type'
-                    label='渠道类型'
+                    label='平台类型'
                     style={{ width: '100%' }}
                 >
                     <Select
-                        placeholder="请选择渠道类型"
+                        placeholder="请选择平台类型"
                         value={input.type}
                         onChange={(v) => {
                             setInput({ ...input, type: v });
