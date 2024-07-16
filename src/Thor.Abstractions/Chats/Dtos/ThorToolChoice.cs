@@ -43,6 +43,7 @@ public class ThorToolChoice
     /// "auto" 表示模型可以在生成消息或调用一个或多个工具之间进行选择 <br />
     /// "required" 表示模型必须调用一个或多个工具 <br />
     /// "function" 指定特定工具会强制模型调用该工具<br />
+    /// 使用<see cref="ThorToolChoiceTypeConst"/> 赋值
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; }

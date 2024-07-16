@@ -1,9 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using OpenAI.ObjectModels;
+﻿using System.Text.Json.Serialization;
 using Thor.Abstractions.Chats.Consts;
-using Thor.Abstractions.ObjectModels.ObjectModels;
 
 namespace Thor.Abstractions.Chats.Dtos;
 
