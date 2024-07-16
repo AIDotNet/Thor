@@ -9,7 +9,8 @@ namespace Thor.Abstractions.Chats.Dtos;
 public record ThorChatCompletionsResponse
 {
     /// <summary>
-    /// 对话补全的唯一标识符。
+    /// 对话补全的唯一标识符。<br/>
+    /// 聊天完成的唯一标识符。如果是流式对话，每个区块都具有相同的 ID。
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; }
@@ -36,6 +37,8 @@ public record ThorChatCompletionsResponse
 
     /// <summary>
     /// 完成请求的使用情况统计信息。
+    /// 仅在您 stream_options: {"include_usage": true} 设置请求时才会显示。
+    /// 如果存在，则它包含一个 null 值，但最后一个块除外，该块包含整个请求的令牌使用情况统计信息。
     /// </summary>
     [JsonPropertyName("usage")]
     public ThorUsageResponse? Usage { get; set; }

@@ -4,12 +4,13 @@ using OpenAI.ObjectModels.RequestModels;
 namespace Thor.Abstractions.Chats.Dtos;
 
 /// <summary>
-/// 
+/// 聊天完成选项列
 /// </summary>
 public record ThorChatChoiceResponse
 {
     /// <summary>
-    /// 
+    /// 模型生成的聊天完成消息。【流式】模型响应生成的聊天完成增量存储在此属性。<br/>
+    /// 在当前模型中，无论流式还是非流式，Message 和 Delta存储相同的值
     /// </summary>
     [JsonPropertyName("delta")]
     public ThorChatMessage Delta
@@ -19,7 +20,8 @@ public record ThorChatChoiceResponse
     }
 
     /// <summary>
-    /// 模型生成的聊天完成消息。
+    /// 模型生成的聊天完成消息。【非流式】返回的消息存储在此属性。<br/>
+    /// 在当前模型中，无论流式还是非流式，Message 和 Delta存储相同的值
     /// </summary>
     [JsonPropertyName("message")]
     public ThorChatMessage Message { get; set; }
