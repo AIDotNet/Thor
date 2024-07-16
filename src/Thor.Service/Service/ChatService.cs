@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Embeddings.Dtos;
@@ -344,6 +345,13 @@ public sealed class ChatService(
         return (requestToken, responseToken);
     }
 
+    /// <summary>
+    /// 对话补全调用
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="NotModelException"></exception>
     public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
         try
@@ -384,6 +392,7 @@ public sealed class ChatService(
                         await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user, rate);
 
                 }
+
                 var quota = requestToken * rate;
 
                 var completionRatio = GetCompletionRatio(request.Model);
@@ -439,34 +448,34 @@ public sealed class ChatService(
     /// 对话补全服务处理
     /// </summary>
     /// <param name="context"></param>
-    /// <param name="input"></param>
+    /// <param name="request"></param>
     /// <param name="channel"></param>
     /// <param name="openService"></param>
     /// <param name="user"></param>
     /// <param name="rate"></param>
     /// <returns></returns>
     /// <exception cref="InsufficientQuotaException"></exception>
-    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(HttpContext context, ThorChatCompletionsRequest input,
-        ChatChannel channel, IThorChatCompletionsService openService, User user, decimal rate)
+    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(
+        HttpContext context,
+        ThorChatCompletionsRequest request,
+        ChatChannel channel,
+        IThorChatCompletionsService openService,
+        User user,
+        decimal rate)
     {
         int requestToken;
         int responseToken;
 
-        var setting = new ThorPlatformOptions
-        {
-            ApiKey = channel.Key,
-            Address = channel.Address,
-            Other = channel.Other
-        };
+        var setting = new ThorPlatformOptions(channel.Key, channel.Address, channel.Other);
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
-        if (input.Messages.Any(x => x.Contents != null))
+        if (request.Messages.Any(x => x.Contents != null))
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.SelectMany(x => x.Contents)
+            requestToken = TokenHelper.GetTotalTokens(request.Messages.SelectMany(x => x.Contents)
                 .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
 
             // 解析图片
-            foreach (var message in input.Messages.SelectMany(x => x.Contents)
+            foreach (var message in request.Messages.SelectMany(x => x.Contents)
                          .Where(x => x.Type is "image" or "image_url"))
             {
                 var imageUrl = message.ImageUrl;
@@ -493,7 +502,7 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(input, setting);
+            var result = await openService.ChatCompletionsAsync(request, setting);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -501,14 +510,15 @@ public sealed class ChatService(
         }
         else
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Select(x => x.Content).ToArray());
+            var contentArray = request.Messages.Select(x => x.Content).ToArray();
+            requestToken = TokenHelper.GetTotalTokens(contentArray);
 
             var quota = requestToken * rate;
 
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(input, setting);
+            var result = await openService.ChatCompletionsAsync(request, setting);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -631,20 +641,24 @@ public sealed class ChatService(
     /// <returns></returns>
     private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel)
     {
-        var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
-        var total = chatChannels.Sum(x => x.Order);
-
-        if (chatChannels.Length == 0)
+        var chatChannels = channel.ToList();
+        if (chatChannels.Count == 0)
         {
             throw new NotModelException("模型未找到可用的渠道");
         }
 
-        var value = Random.Shared.NextDouble() * total;
+        // 所有权重值之和
+        var total = chatChannels.Sum(x => x.Order);
+
+        var value = Convert.ToInt32(Random.Shared.NextDouble() * total);
 
         foreach (var chatChannel in chatChannels)
         {
             value -= chatChannel.Order;
-            if (value <= 0) return chatChannel;
+            if (value <= 0)
+            {
+                return chatChannel;
+            }
         }
 
         return chatChannels.Last();

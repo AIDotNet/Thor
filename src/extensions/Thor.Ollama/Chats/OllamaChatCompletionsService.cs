@@ -35,7 +35,9 @@ namespace Thor.Ollama.Chats
         {
             var client = HttpClient;
 
-            var response = await client.PostJsonAsync((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
+            var url = (options?.Address?.TrimEnd('/') ?? "") + "/api/chat";
+
+            var response = await client.PostJsonAsync(url, new OllamaChatCompletionsRequest()
             {
                 stream = false,
                 model = request.Model ?? "",

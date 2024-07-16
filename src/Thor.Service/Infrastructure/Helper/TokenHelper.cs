@@ -11,6 +11,11 @@ public static class TokenHelper
         GptEncoding ??= GptEncoding.GetEncodingForModel("gpt-4");
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="content"></param>
+    /// <returns></returns>
     public static int GetTotalTokens(params string[] content)
     {
         return content.Sum(item => GptEncoding.Encode(item).Count);
