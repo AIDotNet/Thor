@@ -466,7 +466,7 @@ public sealed class ChatService(
         int requestToken;
         int responseToken;
 
-        var setting = new ThorPlatformOptions(channel.Key, channel.Address, channel.Other);
+        var setting = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
         if (request.Messages.Any(x => x.Contents != null))
