@@ -1,11 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.SparkDesk.API;
+using Thor.SparkDesk.Chats.Dtos;
+using Thor.SparkDesk.Helpers;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Thor.SparkDesk.Chats;
 
@@ -13,8 +20,24 @@ namespace Thor.SparkDesk.Chats;
 /// 讯飞星火对话补全服务
 /// </summary>
 /// <param name="logger"></param>
-public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatCompletionsService> logger) : IThorChatCompletionsService
+public sealed class SparkDeskChatCompletionsService(
+    ILogger<SparkDeskChatCompletionsService> logger,
+    IHttpClientFactory httpClientFactory)
+    : IThorChatCompletionsService
 {
+    /// <summary>
+    /// http 客户端
+    /// </summary>
+    private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(SparkDeskPlatformOptions.PlatformCode));
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        WriteIndented = true,
+    };
+
     /// <summary>
     /// 非流式对话补全
     /// </summary>
@@ -22,7 +45,8 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest request,
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(
+        ThorChatCompletionsRequest request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -31,108 +55,34 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
             throw new NotModelException(request.Model);
         }
 
-        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.ApiKey!, request.Model, null);
+        // https://spark-api-open.xf-yun.com/v1/chat/completions
+        var requestUri = new Uri($"{options.Address.TrimEnd('/')}/v1/chat/completions");
+        (string appId, string apiKey, string apiSecret) = SparkDeskApiKeyHelper.ParseThorApiKey(options.ApiKey);
 
-        request.TopP ??= 4;
 
-        var results = request.Messages.Select(x => new XFSparkDeskChatAPIMessageRequest()
+        var spardDeskRequest = SparkDeskChatCompletionsRequest.CreateByThorChatCompletionsRequest(request);
+
+        var json = JsonSerializer.Serialize(spardDeskRequest, JsonOptions);
+
+        var requestContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var requestMessage = new HttpRequestMessage()
         {
-            Role = x.Role.ToString(),
-            Content = x.Content
-        }).ToList();
-
-        if (request.Temperature <= 0)
-        {
-            request.Temperature = (float?)0.5;
-        }
-
-        var functions = request.Tools?.Where(x => x.Type.Equals("function", StringComparison.CurrentCultureIgnoreCase) && x.Function != null)
-            .Select(x => new XFSparkDeskChatAPIFunctionRequest()
-            {
-                Name = x.Function!.Name,
-                Description = x.Function.Description ?? "",
-                Required = x.Function.Parameters.Required?.ToList() ?? [],
-                Parameters = new XFSparkDeskChatAPIFunctionParametersRequest()
-                {
-                    Type = x.Function.Parameters.Type,
-                    Properties = x.Function.Parameters.Properties?.ToDictionary(x2 => x2.Key, x2 => new XFSparkDeskChatAPIFunctionParametersPropertieRequest()
-                    {
-                        Type = x2.Value.Type,
-                        Description = x2.Value.Description ?? ""
-                    }) ?? []
-                }
-            }).ToList();
-
-        var result = client.SendChat(new XFSparkDeskChatAPIRequest()
-        {
-            Messages = results,
-            Functions = functions,
-            MaxTokens = request.MaxTokens ?? 2048,
-            Temperature = request.Temperature ?? 0.5,
-            TopK = (int)(4)
-        }, cancellationToken: cancellationToken);
-
-        var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
-        var ret = new ThorChatCompletionsResponse()
-        {
-            Model = request.Model,
-            Choices = new List<ThorChatChoiceResponse>()
-            {
-                new()
-                {
-                    Delta = retMessage,
-                    FinishReason = "stop",
-                    Index = 0,
-                }
-            },
-            Usage = new ThorUsageResponse()
+            RequestUri = requestUri,
+            Method = HttpMethod.Post,
+            Content = requestContent,
         };
 
-        await foreach (var chatMsg in result)
-        {
-            ret.Usage.CompletionTokens += chatMsg?.Payload?.Usage?.Text.CompletionTokens;
-            ret.Usage.PromptTokens += chatMsg?.Payload?.Usage?.Text.PromptTokens ?? 0;
-            ret.Usage.TotalTokens += chatMsg?.Payload?.Usage?.Text.TotalTokens ?? 0;
+        // 添加 Bearer 认证
+        requestMessage.Headers.Add("Authorization", $"Bearer {apiKey}:{apiSecret}");
 
-            var retContent = chatMsg?.Payload?.Choices?.Text.FirstOrDefault();
-            if (retContent == null)
-            {
-                logger.LogInformation("AddHandleMsg(Chat): retContent is null");
-                continue;
-            }
+        var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead, cancellationToken);
+        //var content = await responseMessage.Content.ReadAsStringAsync();
+        using var responseContentStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
+        var sparkDeskResponse = await JsonSerializer.DeserializeAsync<SparkDeskChatCompletionsResponse>(responseContentStream);
 
-            if (!string.IsNullOrEmpty(retContent.Content))
-            {
-                logger.LogInformation($"AddHandleMsg(Chat): {retContent.Content}");
-                retMessage.Content += retContent.Content;
-                continue;
-            }
-
-            if (retContent.FunctionCall != null)
-            {
-                logger.LogInformation($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
-                retMessage.ToolCalls = [
-                                new ThorToolCall() {
-                                    Id=retContent.FunctionCall.Name,
-                                    Index=0,
-                                    Type="function",
-                                    Function=new ThorChatMessageFunction(){
-                                        Name=retContent.FunctionCall.Name,
-                                        Arguments=retContent.FunctionCall.Arguments
-                                    }
-                                }
-                            ];
-                retMessage.FunctionCall = new()
-                {
-                    Name = retContent.FunctionCall.Name,
-                    Arguments = retContent.FunctionCall.Arguments
-                };
-                ret.Choices.First().FinishReason = "tool_calls";
-                continue;
-            }
-        }
-
-        return ret;
+        var thorResponse = sparkDeskResponse.ToThorChatCompletionsResponse(false, spardDeskRequest.Model);
+        return thorResponse;
     }
 
     /// <summary>
@@ -147,112 +97,53 @@ public sealed class SparkDeskChatCompletionsService(ILogger<SparkDeskChatComplet
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(request.Model))
+        {
             throw new NotModelException(request.Model);
-
-        var client = SparkDeskFactory.GetSparkDeskChatClient(options!.ApiKey!, request.Model, string.IsNullOrWhiteSpace(options?.Address) ? null : options?.Address);
-
-        if (request.TopP == null)
-        {
-            request.TopP = 4;
         }
 
-        var results = request.Messages.Select(x => new XFSparkDeskChatAPIMessageRequest()
-        {
-            Role = x.Role.ToString(),
-            Content = x.Content
-        }).ToList();
+        // https://spark-api-open.xf-yun.com/v1/chat/completions
+        var requestUri = new Uri($"{options.Address.TrimEnd('/')}/v1/chat/completions");
+        (string appId, string apiKey, string apiSecret) = SparkDeskApiKeyHelper.ParseThorApiKey(options.ApiKey);
 
-        if (request.Temperature <= 0)
-        {
-            request.Temperature = (float?)0.5;
-        }
 
-        var functions = request.Tools?.Where(x => x.Type.Equals("function", StringComparison.CurrentCultureIgnoreCase) && x.Function != null)
-            .Select(x => new XFSparkDeskChatAPIFunctionRequest()
+        var spardDeskRequest = SparkDeskChatCompletionsRequest.CreateByThorChatCompletionsRequest(request);
+
+        var json = JsonSerializer.Serialize(spardDeskRequest, JsonOptions);
+
+        var requestContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var requestMessage = new HttpRequestMessage()
+        {
+            RequestUri = requestUri,
+            Method = HttpMethod.Post,
+            Content = requestContent,
+        };
+
+        // 添加 Bearer 认证
+        requestMessage.Headers.Add("Authorization", $"Bearer {apiKey}:{apiSecret}");
+
+        var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        using StreamReader reader = new(await responseMessage.Content.ReadAsStreamAsync(cancellationToken));
+
+        while (reader.EndOfStream == false)
+        {
+            var line = await reader.ReadLineAsync();
+
+            if (string.IsNullOrWhiteSpace(line))
             {
-                Name = x.Function!.Name,
-                Description = x.Function.Description ?? "",
-                Required = x.Function.Parameters.Required?.ToList() ?? [],
-                Parameters = new XFSparkDeskChatAPIFunctionParametersRequest()
-                {
-                    Type = x.Function.Parameters.Type,
-                    Properties = x.Function.Parameters.Properties?.ToDictionary(x2 => x2.Key, x2 => new XFSparkDeskChatAPIFunctionParametersPropertieRequest()
-                    {
-                        Type = x2.Value.Type,
-                        Description = x2.Value.Description ?? ""
-                    }) ?? []
-                }
-            }).ToList();
-
-        var result = client.SendChat(new XFSparkDeskChatAPIRequest()
-        {
-            Messages = results,
-            Functions = functions,
-            MaxTokens = request.MaxTokens ?? 2048,
-            Temperature = request.Temperature ?? 0.5,
-            TopK = (int)(request.TopP ?? 4)
-        }, cancellationToken: cancellationToken);
-
-        await foreach (var chatMsg in result)
-        {
-            var retContent = chatMsg?.Payload?.Choices?.Text.FirstOrDefault();
-            if (retContent == null)
-            {
-                logger.LogInformation("AddHandleMsg(Chat): retContent is null");
-                yield break;
+                continue;
             }
 
-            var retMessage = ThorChatMessage.CreateAssistantMessage(string.Empty);
-            var ret = new ThorChatCompletionsResponse()
-            {
-                Model = request.Model,
-                Choices = new List<ThorChatChoiceResponse>()
-                {
-                    new ThorChatChoiceResponse()
-                    {
-                        Delta = retMessage,
-                        FinishReason = "stop",
-                        Index = 0,
-                    }
-                },
-                Usage = new ThorUsageResponse()
-                {
-                    CompletionTokens = chatMsg?.Payload?.Usage?.Text.CompletionTokens,
-                    PromptTokens = chatMsg?.Payload?.Usage?.Text.PromptTokens ?? 0,
-                    TotalTokens = chatMsg?.Payload?.Usage?.Text.TotalTokens ?? 0
-                }
-            };
+            line = SparkDeskEventStreamHelper.RemovePrefix(line);
 
-
-            if (!string.IsNullOrEmpty(retContent.Content))
+            if (SparkDeskEventStreamHelper.IsStreamEndText(line))
             {
-                logger.LogInformation($"AddHandleMsg(Chat): {retContent.Content}");
-                retMessage.Content = retContent.Content;
-                yield return ret;
+                continue;
             }
 
-            if (retContent.FunctionCall != null)
-            {
-                logger.LogInformation($"AddHandleMsg(Chat): Function Call, {retContent.FunctionCall.Name}, {retContent.FunctionCall.Arguments}");
-                retMessage.ToolCalls = [
-                                new ThorToolCall() {
-                                    Id=retContent.FunctionCall.Name,
-                                    Index=0,
-                                    Type="function",
-                                    Function=new(){
-                                        Name=retContent.FunctionCall.Name,
-                                        Arguments=retContent.FunctionCall.Arguments
-                                    }
-                                }
-                            ];
-                retMessage.FunctionCall = new()
-                {
-                    Name = retContent.FunctionCall.Name,
-                    Arguments = retContent.FunctionCall.Arguments
-                };
-                ret.Choices.First().FinishReason = "tool_calls";
-                yield return ret;
-            }
+            var sparkDeskResponse = JsonSerializer.Deserialize<SparkDeskChatCompletionsResponse>(line);
+
+            yield return sparkDeskResponse.ToThorChatCompletionsResponse(true, spardDeskRequest.Model);
         }
     }
 

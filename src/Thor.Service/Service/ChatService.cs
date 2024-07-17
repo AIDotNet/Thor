@@ -10,7 +10,7 @@ using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
-using Thor.Service.Infrastructure;
+using Thor.Service.Extensions;
 
 namespace Thor.Service.Service;
 
@@ -466,7 +466,7 @@ public sealed class ChatService(
         int requestToken;
         int responseToken;
 
-        var setting = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
+        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
         if (request.Messages.Any(x => x.Contents != null))
@@ -502,7 +502,7 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(request, setting);
+            var result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -518,7 +518,7 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(request, setting);
+            var result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -549,16 +549,11 @@ public sealed class ChatService(
     {
         int requestToken;
 
-        var setting = new ThorPlatformOptions
-        {
-            ApiKey = channel.Key,
-            Address = channel.Address,
-            Other = channel.Other
-        };
+        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         var responseMessage = new StringBuilder();
 
-        context.Response.Headers.ContentType = "text/event-stream";
+        context.SetEventStreamHeaders();
 
         if (input.Messages.Any(x => x.Contents != null))
         {
@@ -608,13 +603,19 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
         }
 
-        await foreach (var item in openService.StreamChatCompletionsAsync(input, setting))
+        await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
         {
             foreach (var response in item.Choices)
             {
-                if (response.Delta.Role.IsNullOrEmpty()) response.Delta.Role = "assistant";
+                if (response.Delta.Role.IsNullOrEmpty())
+                {
+                    response.Delta.Role = "assistant";
+                }
 
-                if (response.Message.Role.IsNullOrEmpty()) response.Message.Role = "assistant";
+                if (response.Message.Role.IsNullOrEmpty())
+                {
+                    response.Message.Role = "assistant";
+                }
 
                 if (string.IsNullOrEmpty(response.Delta.Content))
                 {
@@ -624,10 +625,10 @@ public sealed class ChatService(
             }
 
             responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-            await context.WriteResultAsync(item).ConfigureAwait(false);
+            await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
         }
 
-        await context.WriteEndAsync();
+        await context.WriteAsEventStreamEndAsync();
 
         var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 

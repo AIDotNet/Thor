@@ -12,5 +12,10 @@ public sealed class SparkDeskPlatformOptions
     /// </summary>
     public const string PlatformCode = "SparkDesk";
 
+    /// <summary>
+    /// 平台基础Url
+    /// </summary>
+    public const string PlatformBaseUrl = "https://spark-api.xf-yun.com";
+
     public IServiceProvider ServiceProvider { get; set; }
 }

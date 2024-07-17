@@ -18,9 +18,9 @@ namespace Thor.Abstractions
         public static Dictionary<string, string> PlatformNames { get; } = [];
 
         /// <summary>
-        /// 每个平台支持的模型列表,key:平台编码,value:模型编码列表
+        /// 每个平台支持的模型列表,key:平台编码,value:模型名称列表
         /// </summary>
-        /// <example>如：key:通义千问（阿里云）,value:Qiansail</example>
+        /// <example>如：key:Qiansail,value:Qwen-Max</example>
         public static Dictionary<string, List<string>> ModelNames { get; } = new();
     }
 }
