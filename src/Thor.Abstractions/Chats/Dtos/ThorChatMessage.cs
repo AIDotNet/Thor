@@ -81,7 +81,7 @@ public class ThorChatMessage
                 }
                 else if (str.ValueKind == JsonValueKind.Array)
                 {
-                    Contents = JsonSerializer.Deserialize<IList<ThorMessageContent>>(value?.ToString());
+                    Contents = JsonSerializer.Deserialize<List<ThorMessageContent>>(value?.ToString());
                 }
             }
             else

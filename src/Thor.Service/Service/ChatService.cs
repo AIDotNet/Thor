@@ -376,14 +376,16 @@ public sealed class ChatService(
                 if (request.Stream == true)
                 {
                     (requestToken, responseToken) =
-                        await StreamChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user, rate);
+                        await StreamChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
+                            rate);
                 }
                 else
                 {
                     (requestToken, responseToken) =
-                        await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user, rate);
-
+                        await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
+                            rate);
                 }
+
                 var quota = requestToken * rate;
 
                 var completionRatio = GetCompletionRatio(request.Model);
@@ -446,7 +448,8 @@ public sealed class ChatService(
     /// <param name="rate"></param>
     /// <returns></returns>
     /// <exception cref="InsufficientQuotaException"></exception>
-    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(HttpContext context, ThorChatCompletionsRequest input,
+    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(HttpContext context,
+        ThorChatCompletionsRequest input,
         ChatChannel channel, IThorChatCompletionsService openService, User user, decimal rate)
     {
         int requestToken;
@@ -462,11 +465,15 @@ public sealed class ChatService(
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
         if (input.Messages.Any(x => x.Contents != null))
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.SelectMany(x => x.Contents)
+            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x.Contents != null)
+                .SelectMany(x => x.Contents)
                 .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
 
+            requestToken += TokenHelper.GetTotalTokens(input.Messages.Where(x => x.Contents == null)
+                .Select(x => x.Content).ToArray());
+
             // 解析图片
-            foreach (var message in input.Messages.SelectMany(x => x.Contents)
+            foreach (var message in input.Messages.Where(x => x.Contents != null).SelectMany(x => x.Contents)
                          .Where(x => x.Type is "image" or "image_url"))
             {
                 var imageUrl = message.ImageUrl;
@@ -533,7 +540,8 @@ public sealed class ChatService(
     /// <param Name="openService"></param>
     /// <param name="rate"></param>
     /// <returns></returns>
-    private async ValueTask<(int requestToken, int responseToken)> StreamChatCompletionsHandlerAsync(HttpContext context,
+    private async ValueTask<(int requestToken, int responseToken)> StreamChatCompletionsHandlerAsync(
+        HttpContext context,
         ThorChatCompletionsRequest input, ChatChannel channel, IThorChatCompletionsService openService, User user,
         decimal rate)
     {
@@ -552,10 +560,12 @@ public sealed class ChatService(
 
         if (input.Messages.Any(x => x.Contents != null))
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x is { Contents: not null })
-                .SelectMany(x => x!.Contents)
-                .Where(x => x.Type == "text")
-                .Select(x => x.Text).ToArray());
+            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x.Contents != null)
+                .SelectMany(x => x.Contents)
+                .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
+
+            requestToken += TokenHelper.GetTotalTokens(input.Messages.Where(x => x.Contents == null)
+                .Select(x => x.Content).ToArray());
 
             // 解析图片
             foreach (var message in input.Messages.Where(x => x is { Contents: not null }).SelectMany(x => x.Contents)
