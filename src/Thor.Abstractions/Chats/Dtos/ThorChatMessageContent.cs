@@ -8,7 +8,7 @@ namespace Thor.Abstractions.Chats.Dtos;
 /// </summary>
 public class ThorChatMessageContent
 {
-    private ThorChatMessageContent()
+    public ThorChatMessageContent()
     {
 
     }
