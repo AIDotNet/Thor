@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Embeddings.Dtos;
@@ -9,7 +10,7 @@ using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
-using Thor.Service.Infrastructure;
+using Thor.Service.Extensions;
 
 namespace Thor.Service.Service;
 
@@ -344,6 +345,13 @@ public sealed class ChatService(
         return (requestToken, responseToken);
     }
 
+    /// <summary>
+    /// 对话补全调用
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    /// <exception cref="NotModelException"></exception>
     public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
         try
@@ -441,39 +449,38 @@ public sealed class ChatService(
     /// 对话补全服务处理
     /// </summary>
     /// <param name="context"></param>
-    /// <param name="input"></param>
+    /// <param name="request"></param>
     /// <param name="channel"></param>
     /// <param name="openService"></param>
     /// <param name="user"></param>
     /// <param name="rate"></param>
     /// <returns></returns>
     /// <exception cref="InsufficientQuotaException"></exception>
-    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(HttpContext context,
-        ThorChatCompletionsRequest input,
-        ChatChannel channel, IThorChatCompletionsService openService, User user, decimal rate)
+    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(
+        HttpContext context,
+        ThorChatCompletionsRequest request,
+        ChatChannel channel,
+        IThorChatCompletionsService openService,
+        User user,
+        decimal rate)
     {
         int requestToken;
         int responseToken;
 
-        var setting = new ThorPlatformOptions
-        {
-            ApiKey = channel.Key,
-            Address = channel.Address,
-            Other = channel.Other
-        };
+        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
-        if (input.Messages.Any(x => x.Contents != null))
+        if (request.Messages.Any(x => x.Contents != null))
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x.Contents != null)
+            requestToken = TokenHelper.GetTotalTokens(request?.Messages.Where(x => x.Contents != null)
                 .SelectMany(x => x.Contents)
                 .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
 
-            requestToken += TokenHelper.GetTotalTokens(input.Messages.Where(x => x.Contents == null)
+            requestToken += TokenHelper.GetTotalTokens(request.Messages.Where(x => x.Contents == null)
                 .Select(x => x.Content).ToArray());
 
             // 解析图片
-            foreach (var message in input.Messages.Where(x => x.Contents != null).SelectMany(x => x.Contents)
+            foreach (var message in request.Messages.Where(x => x.Contents != null).SelectMany(x => x.Contents)
                          .Where(x => x.Type is "image" or "image_url"))
             {
                 var imageUrl = message.ImageUrl;
@@ -500,7 +507,7 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(input, setting);
+            var result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -508,14 +515,15 @@ public sealed class ChatService(
         }
         else
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Select(x => x.Content).ToArray());
+            var contentArray = request.Messages.Select(x => x.Content).ToArray();
+            requestToken = TokenHelper.GetTotalTokens(contentArray);
 
             var quota = requestToken * rate;
 
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(input, setting);
+            var result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -547,16 +555,11 @@ public sealed class ChatService(
     {
         int requestToken;
 
-        var setting = new ThorPlatformOptions
-        {
-            ApiKey = channel.Key,
-            Address = channel.Address,
-            Other = channel.Other
-        };
+        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         var responseMessage = new StringBuilder();
 
-        context.Response.Headers.ContentType = "text/event-stream";
+        context.SetEventStreamHeaders();
 
         if (input.Messages.Any(x => x.Contents != null))
         {
@@ -608,26 +611,39 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
         }
 
-        await foreach (var item in openService.StreamChatCompletionsAsync(input, setting))
+        await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
         {
-            foreach (var response in item.Choices)
+            if (item.Error != null)
             {
-                if (response.Delta.Role.IsNullOrEmpty()) response.Delta.Role = "assistant";
-
-                if (response.Message.Role.IsNullOrEmpty()) response.Message.Role = "assistant";
-
-                if (string.IsNullOrEmpty(response.Delta.Content))
+                await context.WriteStreamErrorAsync(item.Error.Message);
+            }
+            else
+            {
+                foreach (var response in item.Choices)
                 {
-                    response.Delta.Content = null;
-                    response.Message.Content = null;
+                    if (response.Delta.Role.IsNullOrEmpty())
+                    {
+                        response.Delta.Role = "assistant";
+                    }
+
+                    if (response.Message.Role.IsNullOrEmpty())
+                    {
+                        response.Message.Role = "assistant";
+                    }
+
+                    if (string.IsNullOrEmpty(response.Delta.Content))
+                    {
+                        response.Delta.Content = null;
+                        response.Message.Content = null;
+                    }
                 }
             }
 
             responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-            await context.WriteResultAsync(item).ConfigureAwait(false);
+            await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
         }
 
-        await context.WriteEndAsync();
+        await context.WriteAsEventStreamEndAsync();
 
         var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
 
@@ -641,20 +657,24 @@ public sealed class ChatService(
     /// <returns></returns>
     private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel)
     {
-        var chatChannels = channel as ChatChannel[] ?? channel.ToArray();
-        var total = chatChannels.Sum(x => x.Order);
-
-        if (chatChannels.Length == 0)
+        var chatChannels = channel.ToList();
+        if (chatChannels.Count == 0)
         {
             throw new NotModelException("模型未找到可用的渠道");
         }
 
-        var value = Random.Shared.NextDouble() * total;
+        // 所有权重值之和
+        var total = chatChannels.Sum(x => x.Order);
+
+        var value = Convert.ToInt32(Random.Shared.NextDouble() * total);
 
         foreach (var chatChannel in chatChannels)
         {
             value -= chatChannel.Order;
-            if (value <= 0) return chatChannel;
+            if (value <= 0)
+            {
+                return chatChannel;
+            }
         }
 
         return chatChannels.Last();

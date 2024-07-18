@@ -2,8 +2,7 @@
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
+using Thor.Abstractions.Dtos;
 using Thor.ErnieBot.Helpers;
 
 namespace Thor.ErnieBot.Chats;
@@ -54,7 +53,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
         var message = ThorChatMessage.CreateAssistantMessage(response.Result);
         return new ThorChatCompletionsResponse
         {
-            Choices = new List<ChatChoiceResponse>()
+            Choices = new List<ThorChatChoiceResponse>()
             {
                 new()
                 {
@@ -63,7 +62,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
                 }
             },
             Model = request.Model,
-            Usage = new UsageResponse
+            Usage = new ThorUsageResponse
             {
                 TotalTokens = response.Usage.TotalTokens,
                 CompletionTokens = response.Usage.CompletionTokens,
@@ -113,7 +112,7 @@ public class ErnieBotChatCompletionsService : IThorChatCompletionsService
             yield return new ThorChatCompletionsResponse()
             {
                 Model = request.Model,
-                Choices = new List<ChatChoiceResponse>()
+                Choices = new List<ThorChatChoiceResponse>()
                 {
                     new()
                     {

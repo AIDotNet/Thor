@@ -5,6 +5,17 @@ namespace Thor.Abstractions;
 /// </summary>
 public class ThorPlatformOptions
 {
+    public ThorPlatformOptions()
+    {
+        
+    }
+    public ThorPlatformOptions(string address, string apiKey, string? other = null)
+    {
+        this.Address = address;
+        this.ApiKey = apiKey;
+        this.Other = other;
+    }
+
     /// <summary>
     /// 对话平台基地址，如月之暗面的 https://api.moonshot.cn
     /// </summary>

@@ -10,7 +10,15 @@ namespace Thor.Moonshot.Chats;
 
 public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
 {
-    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
+    /// <summary>
+    /// 非流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
+    public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(
+        ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -26,8 +34,16 @@ public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClient
         return result;
     }
 
+    /// <summary>
+    /// 流式对话补全
+    /// </summary>
+    /// <param name="request">对话补全请求参数对象</param>
+    /// <param name="options">平台参数对象</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns></returns>
     public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
-        ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
+        ThorChatCompletionsRequest chatCompletionCreate, 
+        ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);

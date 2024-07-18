@@ -1,14 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
-using Thor.Abstractions.Extensions;
-using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
-using OpenAI.ObjectModels.RequestModels;
+using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
+using Thor.Abstractions.Extensions;
 using Thor.Ollama.Chats.Dtos;
-using Thor.Abstractions;
 
 namespace Thor.Ollama.Chats
 {
@@ -38,7 +35,9 @@ namespace Thor.Ollama.Chats
         {
             var client = HttpClient;
 
-            var response = await client.PostJsonAsync((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
+            var url = (options?.Address?.TrimEnd('/') ?? "") + "/api/chat";
+
+            var response = await client.PostJsonAsync(url, new OllamaChatCompletionsRequest()
             {
                 stream = false,
                 model = request.Model ?? "",
@@ -77,14 +76,14 @@ namespace Thor.Ollama.Chats
                 Model = result.model,
                 Choices = result.message == null ? [] :
                 [
-                    new ChatChoiceResponse()
+                    new ThorChatChoiceResponse()
                     {
                         Delta =message,
                         FinishReason = "stop",
                         Index = 0,
                     }
                 ],
-                Usage = new UsageResponse()
+                Usage = new ThorUsageResponse()
                 {
                     PromptTokens = result.prompt_eval_count ?? 0,
                     CompletionTokens = result.eval_count ?? 0,
@@ -148,7 +147,7 @@ namespace Thor.Ollama.Chats
                     {
                         Model = result.model,
                         Choices = [],
-                        Usage = new UsageResponse()
+                        Usage = new ThorUsageResponse()
                         {
                             PromptTokens = result.prompt_eval_count ?? 0,
                             CompletionTokens = result.eval_count ?? 0,
@@ -166,14 +165,14 @@ namespace Thor.Ollama.Chats
                         Model = result.model,
                         Choices = result.message == null ? [] :
                         [
-                            new ChatChoiceResponse()
+                            new ThorChatChoiceResponse()
                             {
                                 Delta =message,
                                 FinishReason = "stop",
                                 Index = 0,
                             }
                         ],
-                        Usage = new UsageResponse()
+                        Usage = new ThorUsageResponse()
                         {
                             PromptTokens = result.prompt_eval_count ?? 0,
                             CompletionTokens = result.eval_count ?? 0,

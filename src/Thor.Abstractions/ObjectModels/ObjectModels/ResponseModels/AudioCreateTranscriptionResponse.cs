@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using Thor.Abstractions.Dtos;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-public record AudioCreateTranscriptionResponse : BaseResponse
+public record AudioCreateTranscriptionResponse : ThorBaseResponse
 {
     [JsonPropertyName("text")] public string Text { get; set; }
 

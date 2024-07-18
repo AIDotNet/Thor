@@ -2,6 +2,7 @@
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.RequestModels.FunctionModels;
@@ -120,7 +121,7 @@ public sealed class MetaGLMChatCompletionsService : IThorChatCompletionsService
                         Index = 0,
                     }
             ],
-            Error = new Error
+            Error = new ThorError
             {
                 MessageObject = result.error?.FirstOrDefault().Value ?? string.Empty,
             },

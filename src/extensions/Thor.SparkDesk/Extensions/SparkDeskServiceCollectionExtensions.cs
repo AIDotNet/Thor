@@ -5,6 +5,7 @@ using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.SparkDesk.Chats;
 using Thor.SparkDesk.Embeddings;
+using Thor.SparkDesk.Helpers;
 using Thor.SparkDesk.Images;
 
 namespace Thor.SparkDesk.Extensions;
@@ -17,13 +18,8 @@ public static class SparkDeskServiceCollectionExtensions
         ThorGlobal.PlatformNames.Add(SparkDeskPlatformOptions.PlatformName, SparkDeskPlatformOptions.PlatformCode);
 
         // 添加平台支持模型列表
-        ThorGlobal.ModelNames.Add(SparkDeskPlatformOptions.PlatformCode, [
-            "SparkDesk-V1.1(Lite)",
-            "SparkDesk-V2.1(V2.0)",
-            "SparkDesk-V3.1(Pro)",
-            "SparkDesk-V3.5(Max)",
-            "SparkDesk-V4.0(Ultra)",
-        ]);
+        var modelNames = SparkDeskModelHelper.ModeInfoDict.Values.Select(x => x.Name).Order().ToList();
+        ThorGlobal.ModelNames.Add(SparkDeskPlatformOptions.PlatformCode, modelNames);
 
         services.AddKeyedSingleton<IThorChatCompletionsService, SparkDeskChatCompletionsService>(SparkDeskPlatformOptions.PlatformCode);
 

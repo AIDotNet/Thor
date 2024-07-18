@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Thor.Abstractions.Dtos;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ModelResponseModels;
 
@@ -7,7 +8,7 @@ public record ModelRetrieveResponse : ModelResponse
 {
 }
 
-public record ModelResponse : BaseResponse
+public record ModelResponse : ThorBaseResponse
 {
     [JsonPropertyName("id")] public string Id { get; set; }
 
@@ -24,7 +25,7 @@ public record ModelResponse : BaseResponse
     [JsonPropertyName("parent")] public string? Parent { get; set; }
 }
 
-public record Permission : BaseResponse
+public record Permission : ThorBaseResponse
 {
     [JsonPropertyName("id")] public string Id { get; set; }
 

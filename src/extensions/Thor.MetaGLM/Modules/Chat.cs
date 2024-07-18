@@ -53,10 +53,6 @@ public class Chat
             Method = HttpMethod.Post,
             RequestUri = requestUri,
             Content = data,
-            Headers =
-            {
-                
-            },
         };
 
         if (!string.IsNullOrEmpty(apiKey))

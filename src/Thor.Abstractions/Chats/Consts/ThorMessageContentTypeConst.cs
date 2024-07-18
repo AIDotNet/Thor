@@ -9,7 +9,7 @@ namespace Thor.Abstractions.Chats.Consts
     /// <summary>
     /// 支持图片识别的消息体内容类型
     /// </summary>
-    internal class ThorMessageContentTypeConst
+    public class ThorMessageContentTypeConst
     {
         /// <summary>
         /// 文本内容
@@ -20,5 +20,10 @@ namespace Thor.Abstractions.Chats.Consts
         /// 图片 Url 类型
         /// </summary>
         public static string ImageUrl => "image_url";
+
+        /// <summary>
+        /// 图片 Url 类型
+        /// </summary>
+        public static string Image => "image";
     }
 }

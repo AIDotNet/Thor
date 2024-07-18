@@ -1,6 +1,6 @@
 ﻿using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Exceptions;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Service.Filters;
 
@@ -16,7 +16,7 @@ public sealed class ChatFilter : IEndpointFilter
         {
             return new ThorChatCompletionsResponse()
             {
-                Error = new Error()
+                Error = new ThorError()
                 {
                     Code = "400",
                     Messages =
@@ -31,7 +31,7 @@ public sealed class ChatFilter : IEndpointFilter
         {
             return new ThorChatCompletionsResponse()
             {
-                Error = new Error()
+                Error = new ThorError()
                 {
                     Code = "400",
                     Messages =

@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.FineTuningJobResponseModels;
 
-public record FineTuningJobResponse : BaseResponse, IOpenAiModels.IId, IOpenAiModels.IModel, IOpenAiModels.ICreatedAt
+public record FineTuningJobResponse : ThorBaseResponse, IOpenAiModels.IId, IOpenAiModels.IModel, IOpenAiModels.ICreatedAt
 {
     /// <summary>
     ///     The Unix timestamp (in seconds) for when the fine-tuning job was finished. The value will be null if the

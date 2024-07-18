@@ -1,22 +1,44 @@
-﻿using System.Text;
+﻿using Azure;
+using System.Text;
 using System.Text.Json;
-using Thor.Abstractions;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
+using Thor.Abstractions.Dtos;
 
-namespace Thor.Service.Infrastructure;
+namespace Thor.Service.Extensions;
 
 public static class HttpContextExtensions
 {
-    public static async ValueTask WriteResultAsync(this HttpContext context, object value)
+    /// <summary>
+    /// 设置响应为 text/event-stream 相关的头
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static void SetEventStreamHeaders(this HttpContext context)
     {
-        var str = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
-        await context.Response.WriteAsync("data: " + str + "\n\n", Encoding.UTF8);
+        context.Response.ContentType = "text/event-stream;charset=utf-8;";
+        context.Response.Headers.TryAdd("Cache-Control", "no-cache");
+        context.Response.Headers.TryAdd("Connection", "keep-alive");
+    }
+
+    /// <summary>
+    /// 往响应内容写入事件流数据,调用前需要先调用 <see cref="SetEventStreamHeaders"/>
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static async ValueTask WriteAsEventStreamDataAsync(this HttpContext context, object value)
+    {
+        var jsonData = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
+        await context.Response.WriteAsync($"data: {jsonData}\n\n", Encoding.UTF8);
         await context.Response.Body.FlushAsync();
     }
 
-    public static async Task WriteEndAsync(this HttpContext context)
+    /// <summary>
+    /// 往响应内容写入事件流结束数据
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static async ValueTask WriteAsEventStreamEndAsync(this HttpContext context)
     {
         await context.Response.WriteAsync("data: [DONE]\n\n");
         await context.Response.Body.FlushAsync();
@@ -26,7 +48,7 @@ public static class HttpContextExtensions
     {
         var error = new ThorChatCompletionsResponse
         {
-            Error = new Error()
+            Error = new ThorError()
             {
                 MessageObject = message,
                 Type = "error",
@@ -45,7 +67,7 @@ public static class HttpContextExtensions
         var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
         var error = new ThorChatCompletionsResponse
         {
-            Choices = new List<ChatChoiceResponse>()
+            Choices = new List<ThorChatChoiceResponse>()
             {
                 new()
                 {
@@ -67,7 +89,7 @@ public static class HttpContextExtensions
         await context.Response.WriteAsync(
             "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
 
-        await context.WriteEndAsync();
+        await context.WriteAsEventStreamEndAsync();
     }
 
     public static async ValueTask WriteErrorAsync(this HttpContext context, string message)
@@ -75,7 +97,7 @@ public static class HttpContextExtensions
         var assistantMessage = ThorChatMessage.CreateAssistantMessage(message);
         var error = new ThorChatCompletionsResponse
         {
-            Choices = new List<ChatChoiceResponse>()
+            Choices = new List<ThorChatChoiceResponse>()
             {
                 new()
                 {
@@ -100,7 +122,7 @@ public static class HttpContextExtensions
     {
         var error = new ThorChatCompletionsResponse
         {
-            Error = new Error()
+            Error = new ThorError()
             {
                 MessageObject = message,
                 Code = code

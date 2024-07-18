@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using OpenAI.ObjectModels;
-using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using Thor.Abstractions.Dtos;
 
 namespace Thor.Abstractions.ObjectModels.ObjectModels.SharedModels;
 
-public record FileResponse : BaseResponse, IOpenAiModels.IId, IOpenAiModels.ICreatedAt
+public record FileResponse : ThorBaseResponse, IOpenAiModels.IId, IOpenAiModels.ICreatedAt
 {
     [JsonPropertyName("bytes")] public int? Bytes { get; set; }
     [JsonPropertyName("filename")] public string FileName { get; set; }

@@ -49,7 +49,7 @@ public class ThorChatMessage
     /// ]
     /// </example>
     [JsonIgnore]
-    public IList<ThorMessageContent>? Contents { get; set; }
+    public IList<ThorChatMessageContent>? Contents { get; set; }
 
     /// <summary>
     ///  发出的消息内容计算，用于json序列号和反序列化，Content 和 Contents 不能同时赋值，只能二选一
@@ -81,7 +81,7 @@ public class ThorChatMessage
                 }
                 else if (str.ValueKind == JsonValueKind.Array)
                 {
-                    Contents = JsonSerializer.Deserialize<List<ThorMessageContent>>(value?.ToString());
+                    Contents = JsonSerializer.Deserialize<IList<ThorChatMessageContent>>(value?.ToString());
                 }
             }
             else
@@ -111,7 +111,8 @@ public class ThorChatMessage
     public ThorChatMessageFunction? FunctionCall { get; set; }
 
     /// <summary>
-    /// 工具调用列表，模型生成的工具调用，例如函数调用。
+    /// 工具调用列表，模型生成的工具调用，例如函数调用。<br/>
+    /// 此属性存储在客户端进行tool use 第一次调用模型返回的使用的函数名和传入的参数
     /// </summary>
     [JsonPropertyName("tool_calls")]
     public List<ThorToolCall>? ToolCalls { get; set; }

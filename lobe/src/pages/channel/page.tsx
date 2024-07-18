@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { Input } from "@lobehub/ui";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
+import { getTypes} from "../../services/ModelService";
 
 const Header = styled.header`
 
@@ -79,8 +80,8 @@ export default function ChannelPage() {
       }
     },
     {
-      title: '渠道类型',
-      dataIndex: 'type',
+      title: '平台类型',
+      dataIndex: 'typeName',
       render: (value: any) => {
         return <Tag>{value}</Tag>
       }
@@ -268,8 +269,26 @@ export default function ChannelPage() {
       .then((v: any) => {
         if (v.success) {
           const values = v.data.items as any[];
-          setData([...values]);
-          setTotal(v.data.total);
+          getTypes()
+          .then(res => {
+              if (res.success) {
+                  const entries = Object.entries(res.data);
+                  values.forEach(x=>{
+                    for (const [key, value] of entries) {
+                      if(value==x.type){
+                        x.typeName=key;
+                        break;
+                      }
+                    }
+                  })
+                  setData([...values]);
+                  setTotal(v.data.total);
+              } else {
+                  message.error({
+                      content: res.message
+                  });
+              }
+          })
         } else {
           message.error({
             content: v.message,
