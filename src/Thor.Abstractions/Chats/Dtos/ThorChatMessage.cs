@@ -111,7 +111,8 @@ public class ThorChatMessage
     public ThorChatMessageFunction? FunctionCall { get; set; }
 
     /// <summary>
-    /// 工具调用列表，模型生成的工具调用，例如函数调用。
+    /// 工具调用列表，模型生成的工具调用，例如函数调用。<br/>
+    /// 此属性存储在客户端进行tool use 第一次调用模型返回的使用的函数名和传入的参数
     /// </summary>
     [JsonPropertyName("tool_calls")]
     public List<ThorToolCall>? ToolCalls { get; set; }

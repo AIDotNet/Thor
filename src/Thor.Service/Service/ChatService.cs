@@ -613,22 +613,29 @@ public sealed class ChatService(
 
         await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
         {
-            foreach (var response in item.Choices)
+            if (item.Error != null)
             {
-                if (response.Delta.Role.IsNullOrEmpty())
+                await context.WriteStreamErrorAsync(item.Error.Message);
+            }
+            else
+            {
+                foreach (var response in item.Choices)
                 {
-                    response.Delta.Role = "assistant";
-                }
+                    if (response.Delta.Role.IsNullOrEmpty())
+                    {
+                        response.Delta.Role = "assistant";
+                    }
 
-                if (response.Message.Role.IsNullOrEmpty())
-                {
-                    response.Message.Role = "assistant";
-                }
+                    if (response.Message.Role.IsNullOrEmpty())
+                    {
+                        response.Message.Role = "assistant";
+                    }
 
-                if (string.IsNullOrEmpty(response.Delta.Content))
-                {
-                    response.Delta.Content = null;
-                    response.Message.Content = null;
+                    if (string.IsNullOrEmpty(response.Delta.Content))
+                    {
+                        response.Delta.Content = null;
+                        response.Message.Content = null;
+                    }
                 }
             }
 

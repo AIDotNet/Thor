@@ -77,7 +77,6 @@ public sealed class SparkDeskChatCompletionsService(
         requestMessage.Headers.Add("Authorization", $"Bearer {apiKey}:{apiSecret}");
 
         var responseMessage = await HttpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead, cancellationToken);
-        //var content = await responseMessage.Content.ReadAsStringAsync();
         using var responseContentStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
         var sparkDeskResponse = await JsonSerializer.DeserializeAsync<SparkDeskChatCompletionsResponse>(responseContentStream);
 
