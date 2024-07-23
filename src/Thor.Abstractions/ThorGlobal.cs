@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Thor.Abstractions
+﻿namespace Thor.Abstractions
 {
     /// <summary>
     /// 全局对象挂载

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
@@ -46,7 +47,8 @@ public static class OpenAIServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IThorChatCompletionsService, OpenAIChatCompletionsService>(OpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorChatCompletionsService, OpenAIChatCompletionsService>(OpenAIPlatformOptions
+            .PlatformCode);
 
         services.AddKeyedSingleton<IThorTextEmbeddingService, OpenAITextEmbeddingService>(
             OpenAIPlatformOptions.PlatformCode);
@@ -57,11 +59,17 @@ public static class OpenAIServiceCollectionExtensions
             .PlatformCode);
 
         services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
-                options => { options.Timeout = TimeSpan.FromMinutes(6); })
+                options =>
+                {
+                    options.Timeout = TimeSpan.FromMinutes(6);
+                    // 伪装成谷歌浏览器
+                    options.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
+                })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
-                AutomaticDecompression = DecompressionMethods.GZip,
-                EnableMultipleHttp2Connections = true,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(6),
+                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(6),
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             });
 
         return services;

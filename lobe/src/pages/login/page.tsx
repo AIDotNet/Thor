@@ -65,6 +65,47 @@ const Login = memo(() => {
         window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${location.origin}/auth&response_type=code`;
     }
 
+    async function handleLogin() {
+        
+        try {
+            setLoading(true);
+            const token = await login({
+                account: user,
+                pass: password,
+            });
+
+            if (token.success) {
+                localStorage.setItem('token', token.data.token);
+                localStorage.setItem('role', token.data.role);
+                message.success({
+                    title: '登录成功',
+                    content: '即将跳转到首页'
+                } as any);
+
+                if (redirect_uri && redirect_uri.startsWith('http')) {
+                    const url = new URL(redirect_uri);
+                    url.searchParams.append('token', token.data.token);
+                    window.location.href = url.toString();
+                    return;
+                }
+
+                setTimeout(() => {
+                    navigate('/panel');
+                }, 1000);
+            } else {
+                message.error({
+                    title: '登录失败',
+                    content: token.message
+                } as any);
+                setLoading(false);
+            }
+
+        } catch (e) {
+
+        }
+        setLoading(false);
+    }
+
 
     return (
         <GridShowcase>
@@ -99,6 +140,10 @@ const Login = memo(() => {
                         onChange={(e) => setPassword(e.target.value)}
                         size='large'
                         placeholder="请输入密码"
+                        // 按下回车键
+                        onPressEnter={async () => {
+                            await handleLogin();
+                        }}
                         iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                     />
                 </div>
@@ -113,44 +158,7 @@ const Login = memo(() => {
                     <Button
                         loading={loading}
                         onClick={async () => {
-                            try {
-                                setLoading(true);
-                                const token = await login({
-                                    account: user,
-                                    pass: password,
-                                });
-
-                                if (token.success) {
-                                    localStorage.setItem('token', token.data.token);
-                                    localStorage.setItem('role', token.data.role);
-                                    message.success({
-                                        title: '登录成功',
-                                        content: '即将跳转到首页'
-                                    } as any);
-
-                                    if (redirect_uri && redirect_uri.startsWith('http')) {
-                                        const url = new URL(redirect_uri);
-                                        url.searchParams.append('token', token.data.token);
-                                        window.location.href = url.toString();
-                                        return;
-                                    }
-
-                                    setTimeout(() => {
-                                        navigate('/panel');
-                                    }, 1000);
-                                } else {
-                                    message.error({
-                                        title: '登录失败',
-                                        content: token.message
-                                    } as any);
-                                    setLoading(false);
-                                }
-
-                            } catch (e) {
-
-                            }
-                            setLoading(false);
-
+                            await handleLogin();
                         }}
                         size='large'
                         type="primary"

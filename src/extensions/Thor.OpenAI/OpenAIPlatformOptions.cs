@@ -3,12 +3,12 @@ namespace Thor.OpenAI;
 public class OpenAIPlatformOptions
 {
     /// <summary>
-    /// 平台名称
+    /// 骞冲彴鍚嶇О
     /// </summary>
     public const string PlatformName = "OpenAI";
 
     /// <summary>
-    /// 平台编码
+    /// 骞冲彴缂栫爜
     /// </summary>
     public const string PlatformCode = "OpenAI";
 }
