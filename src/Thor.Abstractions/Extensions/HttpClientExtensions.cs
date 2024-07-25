@@ -92,7 +92,7 @@ public static class HttpClientExtensions
         return response;
     }
 
-    public static Task<HttpResponseMessage> PostJsonAsync(this HttpClient httpClient, string url, object? postData,
+    public static async Task<HttpResponseMessage> PostJsonAsync(this HttpClient httpClient, string url, object? postData,
         string token)
     {
         HttpRequestMessage req = new(HttpMethod.Post, url);
@@ -116,7 +116,7 @@ public static class HttpClientExtensions
             req.Headers.Add("Authorization", $"Bearer {token}");
         }
 
-        return httpClient.SendAsync(req);
+        return await httpClient.SendAsync(req);
     }
 
     public static Task<HttpResponseMessage> PostJsonAsync(this HttpClient httpClient, string url, object? postData,

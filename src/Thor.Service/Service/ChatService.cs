@@ -10,6 +10,7 @@ using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Core;
 using Thor.Service.Extensions;
 
 namespace Thor.Service.Service;
@@ -507,7 +508,12 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(request, platformOptions);
+            var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
+
+            ThorChatCompletionsResponse result = null;
+
+            await circuitBreaker.ExecuteAsync(
+                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3, 50);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -523,7 +529,12 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var result = await openService.ChatCompletionsAsync(request, platformOptions);
+            var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
+
+            ThorChatCompletionsResponse result = null;
+
+            await circuitBreaker.ExecuteAsync(
+                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3, 50);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -611,37 +622,42 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
         }
 
-        await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
-        {
-            if (item.Error != null)
+        var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
+        await circuitBreaker.ExecuteAsync(
+            async () =>
             {
-                await context.WriteStreamErrorAsync(item.Error.Message);
-            }
-            else
-            {
-                foreach (var response in item.Choices)
+                await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
                 {
-                    if (response.Delta.Role.IsNullOrEmpty())
+                    if (item.Error != null)
                     {
-                        response.Delta.Role = "assistant";
+                        await context.WriteStreamErrorAsync(item.Error.Message);
+                    }
+                    else
+                    {
+                        foreach (var response in item.Choices)
+                        {
+                            if (response.Delta.Role.IsNullOrEmpty())
+                            {
+                                response.Delta.Role = "assistant";
+                            }
+
+                            if (response.Message.Role.IsNullOrEmpty())
+                            {
+                                response.Message.Role = "assistant";
+                            }
+
+                            if (string.IsNullOrEmpty(response.Delta.Content))
+                            {
+                                response.Delta.Content = null;
+                                response.Message.Content = null;
+                            }
+                        }
                     }
 
-                    if (response.Message.Role.IsNullOrEmpty())
-                    {
-                        response.Message.Role = "assistant";
-                    }
-
-                    if (string.IsNullOrEmpty(response.Delta.Content))
-                    {
-                        response.Delta.Content = null;
-                        response.Message.Content = null;
-                    }
+                    responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
+                    await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
                 }
-            }
-
-            responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-            await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
-        }
+            }, 3, 50);
 
         await context.WriteAsEventStreamEndAsync();
 

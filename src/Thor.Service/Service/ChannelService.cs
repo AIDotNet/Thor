@@ -6,6 +6,7 @@ using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Claudia;
+using Thor.Core;
 using Thor.Hunyuan;
 using Thor.OpenAI;
 using Thor.SparkDesk;
@@ -176,9 +177,9 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         var chatRequest = new ThorChatCompletionsRequest()
         {
-            TopP=0.7f,
-            Temperature=0.95f,
-            Messages=new List<ThorChatMessage>()
+            TopP = 0.7f,
+            Temperature = 0.95f,
+            Messages = new List<ThorChatMessage>()
             {
                 ThorChatMessage.CreateUserMessage("hello")
             }
@@ -229,7 +230,18 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         // token.CancelAfter(20000);
 
         var sw = Stopwatch.StartNew();
-        var response = await chatCompletionsService.ChatCompletionsAsync(chatRequest, platformOptions, token.Token);
+
+
+        var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
+
+        ThorChatCompletionsResponse response = null;
+
+        await circuitBreaker.ExecuteAsync(async () =>
+        {
+            response = await chatCompletionsService.ChatCompletionsAsync(chatRequest, platformOptions,
+                token.Token);
+        }, 3, 500);
+
         sw.Stop();
 
         // 更新渠道测试响应时间
@@ -242,6 +254,6 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
             throw new ChannelException(response.Error?.Message);
         }
 
-        return (response.Choices?.Count > 0,(int)sw.ElapsedMilliseconds);
+        return (response.Choices?.Count > 0, (int)sw.ElapsedMilliseconds);
     }
 }

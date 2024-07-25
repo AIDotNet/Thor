@@ -51,6 +51,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.RedisMemory.Cache", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Moonshot", "src\extensions\Thor.Moonshot\Thor.Moonshot.csproj", "{4D98C74B-D071-430C-9956-3A9B8CF642DD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Core", "src\framework\Thor.Core\Thor.Core.csproj", "{88790F95-50F1-4A17-8BE8-287D68E433CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,10 @@ Global
 		{4D98C74B-D071-430C-9956-3A9B8CF642DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D98C74B-D071-430C-9956-3A9B8CF642DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D98C74B-D071-430C-9956-3A9B8CF642DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88790F95-50F1-4A17-8BE8-287D68E433CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88790F95-50F1-4A17-8BE8-287D68E433CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88790F95-50F1-4A17-8BE8-287D68E433CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88790F95-50F1-4A17-8BE8-287D68E433CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -149,6 +155,7 @@ Global
 		{42402B28-DDC4-4294-A444-6D8B3C43B934} = {1035B36B-8194-43D4-8A4A-992D962CD1D8}
 		{84C27CF3-BD3C-46D6-A774-967DB5D3F060} = {1035B36B-8194-43D4-8A4A-992D962CD1D8}
 		{4D98C74B-D071-430C-9956-3A9B8CF642DD} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{88790F95-50F1-4A17-8BE8-287D68E433CD} = {1035B36B-8194-43D4-8A4A-992D962CD1D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}
