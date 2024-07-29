@@ -28,6 +28,8 @@ public static class EntityConfigExtensions
 
             options.HasIndex(x => x.Creator);
 
+            options.HasIndex(x => x.Key);
+
             options.Property(x => x.Key).HasMaxLength(42);
         });
 
@@ -96,7 +98,7 @@ public static class EntityConfigExtensions
             options.HasIndex(x => x.Model);
 
             options.HasIndex(x => x.Creator);
-            
+
             options.Property(x => x.WhiteList)
                 .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
                     item => JsonSerializer.Deserialize<List<string>>(item, new JsonSerializerOptions()));
@@ -108,8 +110,6 @@ public static class EntityConfigExtensions
             options.Property(x => x.Model)
                 .HasConversion(item => JsonSerializer.Serialize(item, new JsonSerializerOptions()),
                     item => JsonSerializer.Deserialize<string[]>(item, new JsonSerializerOptions()));
-
-            
         });
 
         return modelBuilder;

@@ -2,7 +2,10 @@
 
 namespace Thor.Service.Service;
 
-public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache memoryCache)
+public sealed class TokenService(
+    IServiceProvider serviceProvider,
+    IServiceCache memoryCache,
+    ILogger<TokenService> logger)
     : ApplicationService(serviceProvider)
 {
     public async ValueTask CreateAsync(TokenInput input, string? createId = null)
@@ -115,6 +118,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
 
             if (token == null)
             {
+                logger.LogWarning("Token 不存在");
                 context.Response.StatusCode = 401;
                 throw new UnauthorizedAccessException();
             }
@@ -122,6 +126,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
             // token过期
             if (token.ExpiredTime < DateTimeOffset.Now)
             {
+                logger.LogWarning("Token 过期");
                 context.Response.StatusCode = 401;
                 throw new UnauthorizedAccessException();
             }
@@ -129,6 +134,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
             // 余额不足
             if (token is { UnlimitedQuota: false } && token.RemainQuota < requestQuota)
             {
+                logger.LogWarning("Token 额度不足");
                 context.Response.StatusCode = 402;
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
             }
@@ -138,12 +144,14 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
 
         if (user == null)
         {
+            logger.LogWarning("用户不存在");
             context.Response.StatusCode = 401;
             throw new UnauthorizedAccessException();
         }
 
         if (user.IsDisabled)
         {
+            logger.LogWarning("用户已禁用");
             context.Response.StatusCode = 401;
             throw new UnauthorizedAccessException("账号已禁用");
         }
@@ -151,6 +159,7 @@ public sealed class TokenService(IServiceProvider serviceProvider, IServiceCache
         // 判断额度是否足够
         if (user.ResidualCredit < requestQuota)
         {
+            logger.LogWarning("用户额度不足");
             context.Response.StatusCode = 402;
             throw new InsufficientQuotaException("额度不足");
         }
