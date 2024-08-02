@@ -6,13 +6,8 @@ import styled from "styled-components"
 import { Row, Col, Card, Divider, Tabs,Tag } from 'antd'
 
 const Dashboard = styled.div` 
-  display: grid;
-  margin: 20px;
-  height: 100% !important;
   width: 100%;
-  grid-gap: 20px;
   overflow: auto;
-  height: max-content;
 `;
 
 export default function PanelPage() {
@@ -224,15 +219,17 @@ export default function PanelPage() {
         formatter: function (params: any) {
           let res = `${params[0].name}<br/>`;
 
-          // total params.map((x: any) => x.value)
           const total = params.map((x: any) => x.value).reduce((a: number, b: number) => a + b, 0);
 
-          // 第一个是总计
           res += `${params[0].marker} 总计：${renderQuota(total, 6)}<br/>`;
 
           for (let i = 0; i < params.length; i++) {
+            if (params[i].value === 0) {
+              continue;
+            }
             res += `${params[i].marker} ${params[i].seriesName}：${renderQuota(params[i].value, 6)}<br/>`;
           }
+          
           return res;
         },
       },

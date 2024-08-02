@@ -111,13 +111,22 @@ builder.Services
 // 获取环境变量
 var dbType = Environment.GetEnvironmentVariable("DBType");
 
-dbType ??= builder.Configuration["ConnectionStrings:DBType"];
+if (string.IsNullOrEmpty(dbType))
+{
+    dbType = builder.Configuration.GetConnectionString("DBType");
+}
 
 var connectionString = Environment.GetEnvironmentVariable("ConnectionString");
 var loggerConnectionString = Environment.GetEnvironmentVariable("LoggerConnectionString");
+if (string.IsNullOrEmpty(connectionString))
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+}
 
-connectionString ??= builder.Configuration.GetConnectionString("DefaultConnection");
-loggerConnectionString ??= builder.Configuration.GetConnectionString("LoggerConnection");
+if (string.IsNullOrEmpty(loggerConnectionString))
+{
+    loggerConnectionString = builder.Configuration.GetConnectionString("LoggerConnection");
+}
 
 if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
 {
@@ -189,32 +198,37 @@ builder.Services.AddResponseCompression();
 
 var app = builder.Build();
 
+
 using var scope = app.Services.CreateScope();
 
 if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+    await RateLimitModelService.LoadAsync(dbContext);
+
     // 不使用迁移记录生成
     await dbContext.Database.EnsureCreatedAsync();
 
-    await RateLimitModelService.LoadAsync(dbContext);
 
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
     await loggerDbContext.Database.EnsureCreatedAsync();
 }
 // 由于没有生成迁移记录，所以使用EnsureCreated
-else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") || string.Equals(dbType, "sqlserver") ||
+else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") ||
+         string.Equals(dbType, "sqlserver") ||
          string.Equals(dbType, "mssql"))
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+    await RateLimitModelService.LoadAsync(dbContext);
+
     // 不使用迁移记录生成
     await dbContext.Database.EnsureCreatedAsync();
 
-    await RateLimitModelService.LoadAsync(dbContext);
 
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
     await loggerDbContext.Database.EnsureCreatedAsync();
 }
+
 
 await SettingService.LoadingSettings(app);
 
@@ -399,7 +413,7 @@ model.MapGet("/types", ModelService.GetPlatformNames)
     .WithDescription("获取渠道平台类型")
     .WithOpenApi();
 
-model.MapGet("/models",ModelService.GetModels)
+model.MapGet("/models", ModelService.GetModels)
     .WithDescription("获取模型")
     .WithOpenApi();
 
@@ -419,7 +433,8 @@ var log = app.MapGroup("/api/v1/logger")
     .RequireAuthorization();
 
 log.MapGet(string.Empty,
-        async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model, DateTime? startTime,
+        async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model,
+                DateTime? startTime,
                 DateTime? endTime, string? keyword) =>
             await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword))
     .WithDescription("获取日志")

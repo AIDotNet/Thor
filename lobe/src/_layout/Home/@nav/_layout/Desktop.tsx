@@ -22,7 +22,9 @@ const Nav = memo(() => {
             setKey(key);
         }}
         activeKey={key}
-
+        style={{
+            height: '100%',
+        }}
         items={[
             {
                 key: 'panel',
