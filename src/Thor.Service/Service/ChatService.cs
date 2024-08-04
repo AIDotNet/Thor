@@ -139,7 +139,7 @@ public sealed class ChatService(
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), request.Model,
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
-                channel.Name);
+                channel.Name, context.GetIpAddress(), context.GetUserAgent());
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
         }
@@ -233,7 +233,7 @@ public sealed class ChatService(
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     module.Model,
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                    channel.Name);
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent());
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     module.Model);
@@ -301,7 +301,7 @@ public sealed class ChatService(
                     await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                         module.Model,
                         requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                        channel.Name);
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent());
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                         module.Model);
@@ -406,7 +406,7 @@ public sealed class ChatService(
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     request.Model,
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                    channel.Name);
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent());
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     request.Model);

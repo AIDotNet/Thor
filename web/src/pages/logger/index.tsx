@@ -66,6 +66,16 @@ export default function Logger() {
             key: 'completionTokens'
         },
         {
+          title: '请求IP地址',
+          dataIndex: 'iP',
+          key: 'iP'
+        },
+        {
+          title: '客户端信息',
+          dataIndex: 'userAgent',
+          key: 'userAgent'
+        },
+        {
             title: '额度',
             dataIndex: 'quota',
             key: 'quota',

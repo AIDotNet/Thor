@@ -71,8 +71,8 @@ public static class HttpContextExtensions
             {
                 new()
                 {
-                    Message =assistantMessage,
-                    Delta =assistantMessage,
+                    Message = assistantMessage,
+                    Delta = assistantMessage,
                     FinishReason = "error",
                     FinishDetails = new()
                     {
@@ -101,8 +101,8 @@ public static class HttpContextExtensions
             {
                 new()
                 {
-                    Message =assistantMessage,
-                    Delta =assistantMessage,
+                    Message = assistantMessage,
+                    Delta = assistantMessage,
                     FinishReason = "error",
                     FinishDetails = new()
                     {
@@ -129,5 +129,33 @@ public static class HttpContextExtensions
             }
         };
         await context.Response.WriteAsJsonAsync(error);
+    }
+
+    /// <summary>
+    /// 获取IP地址
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static string GetIpAddress(this HttpContext context)
+    {
+        var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (string.IsNullOrEmpty(ip))
+        {
+            ip = context.Connection.RemoteIpAddress?.ToString();
+        }
+
+        return ip;
+    }
+
+    /// <summary>
+    /// 获取userAgent
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static string GetUserAgent(this HttpContext context)
+    {
+        // 获取UserAgent，提取有用信息
+        var userAgent = context.Request.Headers.UserAgent.FirstOrDefault();
+        return userAgent ?? "未知";
     }
 }
