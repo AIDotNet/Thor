@@ -77,8 +77,8 @@ export default function LoggerPage() {
     },
     {
       title: '请求IP地址',
-      dataIndex: 'iP',
-      key: 'iP'
+      dataIndex: 'ip',
+      key: 'ip'
     },
     {
       title: '客户端信息',

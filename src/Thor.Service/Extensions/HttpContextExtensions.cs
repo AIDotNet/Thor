@@ -138,10 +138,10 @@ public static class HttpContextExtensions
     /// <returns></returns>
     public static string GetIpAddress(this HttpContext context)
     {
-        var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (string.IsNullOrEmpty(ip))
+        var ip = context.Connection.RemoteIpAddress?.ToString();
+        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var ips) && string.IsNullOrWhiteSpace(ips))
         {
-            ip = context.Connection.RemoteIpAddress?.ToString();
+            ip = ips.ToString();
         }
 
         return ip;
@@ -156,6 +156,17 @@ public static class HttpContextExtensions
     {
         // 获取UserAgent，提取有用信息
         var userAgent = context.Request.Headers.UserAgent.FirstOrDefault();
+        
+        // 提取有用信息
+        if (userAgent != null)
+        {
+            var index = userAgent.IndexOf("(", StringComparison.Ordinal);
+            if (index > 0)
+            {
+                userAgent = userAgent.Substring(0, index);
+            }
+        }
+        
         return userAgent ?? "未知";
     }
 }
