@@ -49,7 +49,7 @@ export default function Channel() {
       ]}
       style={{
         margin: '20px',
-        height: '100%',
+        height: 'calc(100vh - 200px)',
         width: '100%',
         overflow: 'auto',
 

@@ -13,6 +13,7 @@ const Header = styled.header`
 export default function LoggerPage() {
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
+  const [y, setY] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [input, setInput] = useState({
     page: 1,
@@ -83,6 +84,7 @@ export default function LoggerPage() {
     {
       title: '客户端信息',
       dataIndex: 'userAgent',
+      width: '80px',
       key: 'userAgent'
     },
     {
@@ -122,6 +124,17 @@ export default function LoggerPage() {
   useEffect(() => {
     loadData()
   }, [input.page, input.pageSize]);
+
+  useEffect(() => {
+    // 监听屏幕宽度
+    const handleResize = () => {
+      setY(window.innerHeight);
+    }
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   return (
     <div style={{
@@ -232,24 +245,28 @@ export default function LoggerPage() {
           }} placeholder='结束时间' />
 
       </Header>
-      <Table loading={loading} style={{
-        marginTop: '1rem',
-      }} columns={columns
-        .filter((item) => item.disable == false || item.disable == undefined)
-      } dataSource={data} pagination={{
-        total: total,
-        pageSize: input.pageSize,
-        defaultPageSize: input.page,
-        onChange: (page, pageSize) => {
-          // 修改input以后获取数据
-          setInput({
-            ...input,
-            page,
-            pageSize,
-          });
-        },
+      <Table
+        scroll={{
+          y: y - 300,
+        }}
+        loading={loading} style={{
+          marginTop: '1rem',
+        }} columns={columns
+          .filter((item) => item.disable == false || item.disable == undefined)
+        } dataSource={data} pagination={{
+          total: total,
+          pageSize: input.pageSize,
+          defaultPageSize: input.page,
+          onChange: (page, pageSize) => {
+            // 修改input以后获取数据
+            setInput({
+              ...input,
+              page,
+              pageSize,
+            });
+          },
 
-      }} />
+        }} />
     </div>
   )
 }
