@@ -138,8 +138,40 @@ public static class HttpContextExtensions
     /// <returns></returns>
     public static string GetIpAddress(this HttpContext context)
     {
-        var ip = context.Connection.RemoteIpAddress?.ToString();
-        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var ips) && string.IsNullOrWhiteSpace(ips))
+        var address = context.Connection.RemoteIpAddress;
+        // 获取具体IP地址，不包括:ffff:，可能是IPv6
+        if (address?.IsIPv4MappedToIPv6 == true)
+        {
+            address = address.MapToIPv4();
+        }
+        else if (address?.IsIPv6SiteLocal == true)
+        {
+            address = address.MapToIPv4();
+        }
+        else if (address?.IsIPv6Teredo == true)
+        {
+            address = address.MapToIPv4();
+        }
+        else if (address?.IsIPv6Multicast == true)
+        {
+            address = address.MapToIPv6();
+        }
+        else if (address?.IsIPv6UniqueLocal == true)
+        {
+            address = address.MapToIPv6();
+        }
+        else if (address?.IsIPv6LinkLocal == true)
+        {
+            address = address.MapToIPv6();
+        }
+        else
+        {
+            address = address?.MapToIPv4();
+        }
+
+        var ip = address?.ToString();
+
+        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var ips) && !string.IsNullOrWhiteSpace(ips))
         {
             ip = ips.ToString();
         }
@@ -156,7 +188,7 @@ public static class HttpContextExtensions
     {
         // 获取UserAgent，提取有用信息
         var userAgent = context.Request.Headers.UserAgent.FirstOrDefault();
-        
+
         // 提取有用信息
         if (userAgent != null)
         {
@@ -166,7 +198,7 @@ public static class HttpContextExtensions
                 userAgent = userAgent.Substring(0, index);
             }
         }
-        
+
         return userAgent ?? "未知";
     }
 }
