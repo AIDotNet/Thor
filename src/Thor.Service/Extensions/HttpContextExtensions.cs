@@ -192,10 +192,23 @@ public static class HttpContextExtensions
         // 提取有用信息
         if (userAgent != null)
         {
-            var index = userAgent.IndexOf("(", StringComparison.Ordinal);
+            var index = userAgent.IndexOf('(');
             if (index > 0)
             {
-                userAgent = userAgent.Substring(0, index);
+                userAgent = userAgent[..index];
+            }
+            else
+            {
+                userAgent = userAgent switch
+                {
+                    not null when userAgent.Contains("Windows") => "Windows",
+                    not null when userAgent.Contains("Mac") => "Mac",
+                    not null when userAgent.Contains("Linux") => "Linux",
+                    not null when userAgent.Contains("Android") => "Android",
+                    not null when userAgent.Contains("iPhone") => "iPhone",
+                    not null when userAgent.Contains("iPad") => "iPad",
+                    _ => "未知"
+                };
             }
         }
 
