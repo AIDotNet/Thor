@@ -17,7 +17,8 @@ public sealed class LoggerService(
     }
 
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
-        int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName)
+        int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName,
+        string ip, string userAgent)
     {
         if (ChatCoreOptions.FreeModel?.EnableFree == true)
         {
@@ -33,7 +34,7 @@ public sealed class LoggerService(
                 }
             }
         }
-        
+
         var logger = new ChatLogger
         {
             Type = ThorChatLoggerType.Consume,
@@ -41,6 +42,8 @@ public sealed class LoggerService(
             ModelName = model,
             PromptTokens = promptTokens,
             CompletionTokens = completionTokens,
+            IP = ip,
+            UserAgent = userAgent,
             Quota = quota,
             TokenName = tokenName,
             UserName = userName,
@@ -77,7 +80,8 @@ public sealed class LoggerService(
     }
 
 
-    public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ThorChatLoggerType? type, string? model,
+    public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ThorChatLoggerType? type,
+        string? model,
         DateTime? startTime, DateTime? endTime, string? keyword)
     {
         var query = LoggerDbContext.Loggers

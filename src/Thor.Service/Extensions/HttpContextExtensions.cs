@@ -71,8 +71,8 @@ public static class HttpContextExtensions
             {
                 new()
                 {
-                    Message =assistantMessage,
-                    Delta =assistantMessage,
+                    Message = assistantMessage,
+                    Delta = assistantMessage,
                     FinishReason = "error",
                     FinishDetails = new()
                     {
@@ -101,8 +101,8 @@ public static class HttpContextExtensions
             {
                 new()
                 {
-                    Message =assistantMessage,
-                    Delta =assistantMessage,
+                    Message = assistantMessage,
+                    Delta = assistantMessage,
                     FinishReason = "error",
                     FinishDetails = new()
                     {
@@ -129,5 +129,89 @@ public static class HttpContextExtensions
             }
         };
         await context.Response.WriteAsJsonAsync(error);
+    }
+
+    /// <summary>
+    /// 获取IP地址
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static string GetIpAddress(this HttpContext context)
+    {
+        var address = context.Connection.RemoteIpAddress;
+        // 获取具体IP地址，不包括:ffff:，可能是IPv6
+        if (address?.IsIPv4MappedToIPv6 == true)
+        {
+            address = address.MapToIPv4();
+        }
+        else if (address?.IsIPv6SiteLocal == true)
+        {
+            address = address.MapToIPv4();
+        }
+        else if (address?.IsIPv6Teredo == true)
+        {
+            address = address.MapToIPv4();
+        }
+        else if (address?.IsIPv6Multicast == true)
+        {
+            address = address.MapToIPv6();
+        }
+        else if (address?.IsIPv6UniqueLocal == true)
+        {
+            address = address.MapToIPv6();
+        }
+        else if (address?.IsIPv6LinkLocal == true)
+        {
+            address = address.MapToIPv6();
+        }
+        else
+        {
+            address = address?.MapToIPv4();
+        }
+
+        var ip = address?.ToString();
+
+        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var ips) && !string.IsNullOrWhiteSpace(ips))
+        {
+            ip = ips.ToString();
+        }
+
+        return ip;
+    }
+
+    /// <summary>
+    /// 获取userAgent
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static string GetUserAgent(this HttpContext context)
+    {
+        // 获取UserAgent，提取有用信息
+        var userAgent = context.Request.Headers.UserAgent.FirstOrDefault();
+
+        // 提取有用信息
+        if (userAgent != null)
+        {
+            var index = userAgent.IndexOf('(');
+            if (index > 0)
+            {
+                userAgent = userAgent[..index];
+            }
+            else
+            {
+                userAgent = userAgent switch
+                {
+                    not null when userAgent.Contains("Windows") => "Windows",
+                    not null when userAgent.Contains("Mac") => "Mac",
+                    not null when userAgent.Contains("Linux") => "Linux",
+                    not null when userAgent.Contains("Android") => "Android",
+                    not null when userAgent.Contains("iPhone") => "iPhone",
+                    not null when userAgent.Contains("iPad") => "iPad",
+                    _ => "未知"
+                };
+            }
+        }
+
+        return userAgent ?? "未知";
     }
 }

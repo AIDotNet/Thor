@@ -47,4 +47,8 @@ public sealed class ChatLogger : Entity<string>
     /// 渠道名称
     /// </summary>
     public string? ChannelName { get; set; }
+
+    public string? IP { get; set; }
+
+    public string? UserAgent { get; set; }
 }
