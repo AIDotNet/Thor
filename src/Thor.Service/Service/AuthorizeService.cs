@@ -136,7 +136,7 @@ public sealed class AuthorizeService(
 
         var key = "su-" + StringHelper.GenerateRandomString(38);
 
-        await memoryCache.CreateAsync(key, user, TimeSpan.FromDays(7));
+        await memoryCache.CreateAsync(key, user, TimeSpan.FromDays(30));
 
         return new
         {
@@ -144,5 +144,4 @@ public sealed class AuthorizeService(
             role = user.Role
         };
     }
-
 }

@@ -438,7 +438,7 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
-            GetLogger<ChatService>().LogError(e.Message);
+            GetLogger<ChatService>().LogError("服务异常：{e}", e);
             if (request.Stream == true)
                 await context.WriteStreamErrorAsync(e.Message);
             else

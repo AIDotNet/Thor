@@ -62,7 +62,6 @@ else if (CacheOptions.Type.Equals("Redis", StringComparison.OrdinalIgnoreCase))
 }
 
 builder.Services.AddMvcCore().AddApiExplorer();
-
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen()
