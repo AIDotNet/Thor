@@ -1,7 +1,7 @@
 import { Modal } from "@lobehub/ui";
 import { Button, Form, Input, InputNumber, message, Select } from "antd";
 import { CreateModelManager } from "../../../services/ModelManagerService";
-import { getIconByName, getIconByNames } from "../../../utils/iconutils";
+import {  getIconByNames } from "../../../utils/iconutils";
 
 
 interface CreateModelManagerProps {
@@ -47,7 +47,7 @@ export default function CreateModelManagerPage({
                 },
                 // 不能小于0
                 {
-                    validator: (rule, value) => {
+                    validator: (_, value) => {
                         if (value < 0) {
                             return Promise.reject('提示倍率不能小于0');
                         }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Header, Input, Tag, } from "@lobehub/ui";
 import { IconAvatar, OpenAI } from "@lobehub/icons";
 import { Button, Switch, Table } from "antd";
-import { renderQuota } from "../../utils/render";
+import { getCompletionRatio, renderQuota } from "../../utils/render";
 import { getIconByName } from "../../utils/iconutils";
 import { GetModelManagerList } from "../../services/ModelManagerService";
 import { Search } from "lucide-react";
@@ -21,7 +21,7 @@ export default function DesktopLayout() {
 
     function loadData() {
         setLoading(true);
-        GetModelManagerList(input.model, input.page, input.pageSize)
+        GetModelManagerList(input.model, input.page, input.pageSize, true)
             .then((res) => {
                 setData(res.data.items);
                 setTotal(res.data.total);
@@ -32,7 +32,7 @@ export default function DesktopLayout() {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [input.page, input.pageSize]);
 
     return (
         <>
@@ -110,19 +110,22 @@ export default function DesktopLayout() {
                         dataIndex: 'price',
                         render: (_: any, item: any) => {
                             if (isK) {
-
                                 return (<div>
-                                    <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000)}/1K tokens</Tag>
-                                    {item.completionRate && <><Tag style={{
+                                    <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000,6)}/1K tokens</Tag>
+                                    {item.completionRate ?<><Tag style={{
                                         marginTop: 8
-                                    }} color='geekblue'>完成{renderQuota(item.completionRate * 1000)}/1K tokens</Tag></>}
+                                    }} color='geekblue'>完成{renderQuota(item.completionRate * 1000,6)}/1K tokens</Tag></>:<><Tag style={{
+                                        marginTop: 8
+                                    }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000,6)}/1K tokens</Tag></>}
                                 </div>)
                             } else {
                                 return (<div>
                                     <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000000)}/1M tokens</Tag>
-                                    {item.completionRate && <><Tag style={{
+                                    {item.completionRate ?<><Tag style={{
                                         marginTop: 8
-                                    }} color='geekblue'>完成{renderQuota(item.completionRate * 1000000)}/1M tokens</Tag></>}
+                                    }} color='geekblue'>完成{renderQuota(item.completionRate * 1000000)}/1M tokens</Tag></>:<><Tag style={{
+                                        marginTop: 8
+                                    }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
                                 </div>)
                             }
                         }

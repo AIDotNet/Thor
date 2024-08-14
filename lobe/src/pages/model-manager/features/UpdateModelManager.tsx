@@ -50,7 +50,7 @@ export default function UpdateModelManagerPage({
             },
             // 不能小于0
             {
-                validator: (rule, value) => {
+                validator: (_, value) => {
                     if (value < 0) {
                         return Promise.reject('提示倍率不能小于0');
                     }

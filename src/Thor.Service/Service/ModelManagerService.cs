@@ -82,13 +82,18 @@ public class ModelManagerService(IServiceProvider serviceProvider) : Application
         await LoadingSettings(DbContext);
     }
 
-    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize)
+    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic)
     {
         var query = DbContext.ModelManagers.AsQueryable();
 
         if (!string.IsNullOrEmpty(model))
         {
             query = query.Where(x => x.Model.StartsWith(model) || x.Description.Contains(model));
+        }
+
+        if (isPublic)
+        {
+            query = query.Where(x => x.Enable);
         }
 
         var total = await query.CountAsync();

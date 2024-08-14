@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 import { Layout, theme } from "antd";
 import { Logo } from "@lobehub/ui";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 const LayoutPage = memo<LayoutProps>(({ nav }) => {
   const {
     token: { colorBgContainer, borderRadiusLG },

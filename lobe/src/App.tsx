@@ -1,88 +1,130 @@
-
 import './App.css'
+import FullscreenLoading from './components/Loading'
 import { ThemeProvider } from '@lobehub/ui'
 import MainLayout from './_layout'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import PanelPage from './pages/panel/page'
+import { lazy, Suspense } from 'react'
+
 import Nav from './components/@nav/default'
-import ChannelPage from './pages/channel/page'
-import TokenPage from './pages/token/page'
-import ProductPage from './pages/product/page'
-import LoggerPage from './pages/logger/page'
-import RedeemCodePage from './pages/redeem-code/page'
-import UserPage from './pages/user/page'
-import CurrentPage from './pages/current/page'
-import SettingPage from './pages/setting/page'
-import LoginPage from './pages/login/page'
-import RegisterPage from './pages/register/page'
-import DocPage from './pages/doc/page'
-import ModelPage from './pages/model/page'
-import Auth from './pages/auth/page'
-import RateLimit from './pages/rate-limit/page'
-import SharePage from './pages/share'
-import ModelManager from './pages/model-manager/page'
-import WelcomePage from './pages/welcome/page'
-import DefaultLayout from './_layout/Default/page'
+
+const ProductPage = lazy(() => import('./pages/product/page'))
+const LoggerPage = lazy(() => import('./pages/logger/page'))
+const RedeemCodePage = lazy(() => import('./pages/redeem-code/page'))
+const UserPage = lazy(() => import('./pages/user/page'))
+const CurrentPage = lazy(() => import('./pages/current/page'))
+const SettingPage = lazy(() => import('./pages/setting/page'))
+const LoginPage = lazy(() => import('./pages/login/page'))
+const RegisterPage = lazy(() => import('./pages/register/page'))
+const DocPage = lazy(() => import('./pages/doc/page'))
+const ModelPage = lazy(() => import('./pages/model/page'))
+const Auth = lazy(() => import('./pages/auth/page'))
+const RateLimit = lazy(() => import('./pages/rate-limit/page'))
+const SharePage = lazy(() => import('./pages/share'))
+const WelcomePage = lazy(() => import('./pages/welcome/page'))
+const DefaultLayout = lazy(() => import('./_layout/Default/page'))
+const ChannelPage = lazy(() => import('./pages/channel/page'))
+const TokenPage = lazy(() => import('./pages/token/page'))
+const ModelManager = lazy(() => import('./pages/model-manager/page'))
+const PanelPage = lazy(() => import('./pages/panel/page'))
 
 const router = createBrowserRouter([{
   element: <MainLayout nav={<Nav />} />,
   children: [
-    { path: 'panel', element: <PanelPage /> },
-    { path: 'channel', element: <ChannelPage /> },
-    { path: 'token', element: <TokenPage /> },
-    { path: 'model-manager', element: <ModelManager /> },
     {
-      path: 'product',
-      element: <ProductPage />
+      path: 'panel', element: <Suspense fallback={<FullscreenLoading title='加载面板中' />}>
+        <PanelPage />
+      </Suspense>
     },
     {
-      path: 'logger',
-      element: <LoggerPage />
+      path: 'channel', element: <Suspense fallback={<FullscreenLoading title='加载渠道中' />}>
+        <ChannelPage />
+      </Suspense>
     },
     {
-      path: 'redeem-code',
-      element: <RedeemCodePage />
+      path: 'token', element: <Suspense fallback={<FullscreenLoading title='加载Token管理中' />}>
+        <TokenPage />
+      </Suspense>
     },
     {
-      path: 'user',
-      element: <UserPage />
+      path: 'model-manager', element: <Suspense fallback={<FullscreenLoading title='加载模型管理中' />}>
+        <ModelManager />
+      </Suspense>
     },
     {
-      path: 'current',
-      element: <CurrentPage />
+      path: 'product', element: <Suspense fallback={<FullscreenLoading title='加载产品页面中' />}>
+        <ProductPage />
+      </Suspense>
     },
     {
-      path: 'setting',
-      element: <SettingPage />
+      path: 'logger', element: <Suspense fallback={<FullscreenLoading title='加载日志页面中' />}>
+        <LoggerPage />
+      </Suspense>
     },
     {
-      path: 'rate-limit',
-      element: <RateLimit />
+      path: 'redeem-code', element: <Suspense fallback={<FullscreenLoading title='加载兑换码页面中' />}>
+        <RedeemCodePage />
+      </Suspense>
+    },
+    {
+      path: 'user', element: <Suspense fallback={<FullscreenLoading title='加载用户页面中' />}>
+        <UserPage />
+      </Suspense>
+    },
+    {
+      path: 'current', element: <Suspense fallback={<FullscreenLoading title='加载当前页面中' />}>
+        <CurrentPage />
+      </Suspense>
+    },
+    {
+      path: 'setting', element: <Suspense fallback={<FullscreenLoading title='加载设置页面中' />}>
+        <SettingPage />
+      </Suspense>
+    },
+    {
+      path: 'rate-limit', element: <Suspense fallback={<FullscreenLoading title='加载限速页面中' />}>
+        <RateLimit />
+      </Suspense>
     }
   ]
 }, {
   path: "/login",
-  element: <LoginPage />
+  element: <Suspense fallback={<FullscreenLoading title='加载登录页面中' />}>
+    <LoginPage />
+  </Suspense>
 }, {
   path: "/register",
-  element: <RegisterPage />
+  element: <Suspense fallback={<FullscreenLoading title='加载注册页面中' />}>
+    <RegisterPage />
+  </Suspense>
 }, {
   path: "/auth",
-  element: <Auth />
+  element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
+    <Auth />
+  </Suspense>
 }, {
   path: "/share",
-  element: <SharePage />
+  element: <Suspense fallback={<FullscreenLoading title='加载分享页面中' />}>
+    <SharePage />
+  </Suspense>
 },
 {
-  element: <DefaultLayout />,
+  element: <Suspense fallback={<FullscreenLoading title='加载默认布局中' />}>
+    <DefaultLayout />
+  </Suspense>,
   children: [
-    { path: '', element: <WelcomePage /> }, 
+    { path: '', element: <Suspense fallback={<FullscreenLoading title='加载欢迎页面中' />}>
+      <WelcomePage />
+    </Suspense> },
     {
       path: "/doc",
-      element: <DocPage  />
+      element: <Suspense fallback={<FullscreenLoading title='加载文档页面中' />}>
+        <DocPage />
+      </Suspense>
     }, {
       path: "/model",
-      element: <ModelPage  />
+      element: <Suspense fallback={<FullscreenLoading title='加载模型页面中' />}>
+        <ModelPage />
+      </Suspense>
     },
   ]
 },

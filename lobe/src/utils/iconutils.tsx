@@ -4,7 +4,6 @@ import {
     OpenAI,
     ChatGLM,
     Claude,
-    CodeGeeX,
     Baichuan,
     Ai21,
     Doubao,
@@ -26,7 +25,6 @@ export function getIconByNames(size: number = 24) {
         'OpenAI',
         'ChatGLM',
         'Claude',
-        'CodeGeeX',
         'Baichuan',
         'Ai21',
         'Doubao',
@@ -78,11 +76,6 @@ export function getIconByName(name: string, size: number = 36) {
             return {
                 icon: <IconAvatar Icon={Claude} size={size} />,
                 label: 'Claude'
-            };
-        case 'CodeGeeX':
-            return {
-                icon: <IconAvatar Icon={CodeGeeX} size={size} />,
-                label: 'CodeGeeX'
             };
         case 'Baichuan':
             return {
@@ -149,7 +142,15 @@ export function getIconByName(name: string, size: number = 36) {
                 icon: <IconAvatar Icon={Zhipu} size={size} />,
                 label: 'Zhipu'
             };
+        case 'Moonshot':
+            return {
+                icon: <IconAvatar Icon={Moonshot} size={size} />,
+                label: 'Moonshot'
+            };
         default:
-            return null;
+            return {
+                icon: <IconAvatar Icon={OpenAI} size={size} />,
+                label: 'OpenAI'
+            };
     }
 }

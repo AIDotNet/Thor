@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { DeleteModelManager, EnableModelManager, GetModelManagerList } from "../../services/ModelManagerService";
 import { Button, Dropdown, message, Table } from "antd";
 import { Header, Input, Tag } from "@lobehub/ui";
-import { renderQuota } from "../../utils/render";
+import { getCompletionRatio, renderQuota } from "../../utils/render";
 import CreateModelManagerPage from "./features/CreateModelManager";
 import { getIconByName } from "../../utils/iconutils";
 import { IconAvatar, OpenAI } from "@lobehub/icons";
@@ -106,9 +106,11 @@ export default function ModelManager() {
                         render: (_: any, item: any) => {
                             return (<div>
                                 <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000)}/1k tokens</Tag>
-                                {item.completionRate && <><Tag style={{
-                                    marginTop: 8
-                                }} color='geekblue'>完成{renderQuota(item.completionRate * 1000)}/1k tokens</Tag></>}
+                                    {item.completionRate ?<><Tag style={{
+                                        marginTop: 8
+                                    }} color='geekblue'>完成{renderQuota(item.completionRate * 1000)}/1M tokens</Tag></>:<><Tag style={{
+                                        marginTop: 8
+                                    }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1M tokens</Tag></>}
                             </div>)
                         }
                     },
