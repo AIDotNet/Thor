@@ -6,13 +6,15 @@ import {
   BarChart,
   KeyRound,
   ShipWheel,
-  Ghost,
+  Brain,
   FileText,
   BotMessageSquare,
   Code,
   User,
   CircleUserRound,
   Settings,
+  Handshake,
+  BrainCog
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
@@ -33,9 +35,6 @@ const Nav = memo(() => {
   const chatDisabled = InitSetting.find(
     (item: any) => item.key === GeneralSetting.ChatLink
   );
-  const vidolDisabled = InitSetting.find(
-    (item: any) => item.key === GeneralSetting.VidolLink
-  );
 
   const [items, setItems] = useState<any[]>([
     {
@@ -47,103 +46,87 @@ const Nav = memo(() => {
       onClick: () => {
         navigate("/panel");
       },
-    },
-    {
-      icon: <BarChart />,
-      label: "渠道",
+    }, {
+      key: SidebarTabKey.AI,
+      label: "AI服务",
       enable: true,
-      key: SidebarTabKey.Channel,
-      onClick: () => {
-        navigate("/channel");
-      },
-      role: "admin",
-    },
-    {
-      disabled: chatDisabled.value === undefined || chatDisabled.value === "",
-      icon: <BotMessageSquare />,
-      label: "对话",
-      enable: false,
-      key: SidebarTabKey.Chat,
-      onClick: () => {
-        // 给chatDisabled.value url添加query
-        const url = new URL(chatDisabled.value);
-        url.searchParams.append("token", localStorage.getItem("token") || "");
-        window.open(url.href, "_blank");
-      },
+      icon: <Brain />,
       role: "user,admin",
+      children: [
+        {
+          icon: <BarChart />,
+          label: "渠道",
+          enable: true,
+          key: SidebarTabKey.Channel,
+          onClick: () => {
+            navigate("/channel");
+          },
+          role: "admin",
+        },
+        {
+          disabled: chatDisabled.value === undefined || chatDisabled.value === "",
+          icon: <BotMessageSquare />,
+          label: "对话",
+          enable: false,
+          key: SidebarTabKey.Chat,
+          onClick: () => {
+            // 给chatDisabled.value url添加query
+            const url = new URL(chatDisabled.value);
+            url.searchParams.append("token", localStorage.getItem("token") || "");
+            window.open(url.href, "_blank");
+          },
+          role: "user,admin",
+        },
+        {
+          icon: <BrainCog />,
+          enable: true,
+          label: "模型管理",
+          key: SidebarTabKey.ModelManager,
+          onClick: () => {
+            navigate("/model-manager");
+          },
+          role: "admin",
+        },
+        {
+          icon: <KeyRound />,
+          enable: true,
+          label: "令牌",
+          key: SidebarTabKey.Token,
+          onClick: () => {
+            navigate("/token");
+          },
+          role: "user,admin",
+        }
+      ]
     },
     {
-      disabled: vidolDisabled.value === undefined || vidolDisabled.value === "",
-      icon: <Ghost />,
-      label: "数字人",
-      enable: false,
-      key: SidebarTabKey.Vidol,
-      onClick: () => {
-        const url = new URL(vidolDisabled.value);
-        url.searchParams.append("token", localStorage.getItem("token") || "");
-        window.open(url.href, "_blank");
-      },
-      role: "user,admin",
-    },
-    {
-      icon: <KeyRound />,
+      key: SidebarTabKey.Business,
+      label: "运营服务",
+      icon: <Handshake />,
       enable: true,
-      label: "令牌",
-      key: SidebarTabKey.Token,
-      onClick: () => {
-        navigate("/token");
-      },
-      role: "user,admin",
-    },
-    {
-      icon: <ShipWheel />,
-      label: "产品",
-      enable: true,
-      key: SidebarTabKey.Product,
-      onClick: () => {
-        navigate("/product");
-      },
       role: "admin",
-    },
-    {
-      icon: <FileText />,
-      label: "日志",
-      enable: true,
-      key: SidebarTabKey.Logger,
-      onClick: () => {
-        navigate("/logger");
-      },
-      role: "user,admin",
-    },
-    {
-      icon: <Code />,
-      enable: true,
-      label: "兑换码",
-      key: SidebarTabKey.RedeemCode,
-      onClick: () => {
-        navigate("/redeem-code");
-      },
-      role: "admin",
-    },
-    {
-      icon: <SlidersOutlined />,
-      enable: true,
-      label: "限流",
-      key: SidebarTabKey.RateLimit,
-      onClick: () => {
-        navigate("/rate-limit");
-      },
-      role: "admin",
-    },
-    {
-      icon: <User />,
-      label: "用户管理",
-      enable: true,
-      key: SidebarTabKey.User,
-      onClick: () => {
-        navigate("/user");
-      },
-      role: "admin",
+      children: [
+        {
+          icon: <Code />,
+          enable: true,
+          label: "兑换码",
+          key: SidebarTabKey.RedeemCode,
+          onClick: () => {
+            navigate("/redeem-code");
+          },
+          role: "admin",
+        },
+        {
+          icon: <ShipWheel />,
+          label: "产品",
+          enable: true,
+          key: SidebarTabKey.Product,
+          onClick: () => {
+            navigate("/product");
+          },
+          role: "admin",
+        },
+      ]
     },
     {
       icon: <CircleUserRound />,
@@ -157,14 +140,53 @@ const Nav = memo(() => {
     },
     {
       icon: <Settings />,
-      label: "系统设置",
+      label: "系统服务",
       enable: true,
       key: SidebarTabKey.Setting,
-      onClick: () => {
-        navigate("/setting");
-      },
-      role: "admin",
-    },
+      children: [
+        {
+          icon: <FileText />,
+          label: "日志",
+          enable: true,
+          key: SidebarTabKey.Logger,
+          onClick: () => {
+            navigate("/logger");
+          },
+          role: "user,admin",
+        },
+        {
+          icon: <SlidersOutlined />,
+          enable: true,
+          label: "限流",
+          key: SidebarTabKey.RateLimit,
+          onClick: () => {
+            navigate("/rate-limit");
+          },
+          role: "admin",
+        },
+        {
+          icon: <User />,
+          label: "用户管理",
+          enable: true,
+          key: SidebarTabKey.User,
+          onClick: () => {
+            navigate("/user");
+          },
+          role: "admin",
+        },
+        {
+          icon: <Settings />,
+          label: "系统设置",
+          enable: true,
+          key: SidebarTabKey.Setting,
+          onClick: () => {
+            navigate("/setting");
+          },
+          role: "admin",
+        }
+      ],
+      role: "user,admin",
+    }
   ]);
 
   useEffect(() => {
@@ -183,26 +205,25 @@ const Nav = memo(() => {
     )?.value;
 
     if (chatLink) {
-      // 修改 Chat
       items.forEach((item) => {
-        if (item.key === SidebarTabKey.Chat) {
-          item.enable = true;
+        if (item.children) {
+          item.children.forEach((child: any) => {
+            if (child.key === SidebarTabKey.Chat) {
+              child.enable = chatLink !== "";
+            }
+          });
         }
       });
     }
 
-    const vidolLink = InitSetting?.find(
-      (x) => x.key === GeneralSetting.VidolLink
-    )?.value;
+    // 过滤items
+    items.forEach((item) => {
+      if (item.children) {
+        item.children = item.children.filter((child: any) =>
+          child.role.includes(role) && child.enable);
+      }
+    });
 
-    if (vidolLink) {
-      // 修改 Vidol
-      items.forEach((item) => {
-        if (item.key === SidebarTabKey.Vidol) {
-          item.enable = true;
-        }
-      });
-    }
 
     setItems(items.filter((item) => item.enable && item.role.includes(role)));
 

@@ -10,22 +10,14 @@ public static class SettingService
     // 超级轻量级的集合，高性能查询
     private static ImmutableList<Setting> Settings { get; set; } = ImmutableList<Setting>.Empty;
 
-    public static Dictionary<string, decimal> PromptRate { get; private set; } = new();
-    public static Dictionary<string, decimal> CompletionRate { get; private set; } = new();
-
     public static async Task LoadingSettings(WebApplication app)
     {
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
         var settings = await dbContext.Settings.ToListAsync();
         Settings = settings.ToImmutableList();
-
-        PromptRate.Clear();
-        CompletionRate.Clear();
-
-        PromptRate = GetSetting<Dictionary<string, decimal>>(SettingExtensions.GeneralSetting.ModelPromptRate);
-
-        CompletionRate = GetSetting<Dictionary<string, decimal>>(SettingExtensions.GeneralSetting.ModelCompletionRate);
+        
+        await ModelManagerService.LoadingSettings(dbContext);
     }
 
     public static string GetSetting(string key)
@@ -83,12 +75,5 @@ public static class SettingService
         await dbContext.SaveChangesAsync();
 
         Settings = dbSettings.ToImmutableList();
-
-        PromptRate.Clear();
-        CompletionRate.Clear();
-
-        PromptRate = GetSetting<Dictionary<string, decimal>>(SettingExtensions.GeneralSetting.ModelPromptRate);
-
-        CompletionRate = GetSetting<Dictionary<string, decimal>>(SettingExtensions.GeneralSetting.ModelCompletionRate);
     }
 }

@@ -102,7 +102,7 @@ public sealed class ChatService(
 
             var imageCostRatio = GetImageCostRatio(request);
 
-            var rate = SettingService.PromptRate[request.Model];
+            var rate = ModelManagerService.PromptRate[request.Model];
 
             request.N ??= 1;
 
@@ -219,7 +219,7 @@ public sealed class ChatService(
                 Other = channel.Other
             }, context.RequestAborted);
 
-            if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(module.Model, out var rate))
             {
                 var quota = requestToken * rate;
 
@@ -282,7 +282,7 @@ public sealed class ChatService(
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
-            if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(module.Model, out var rate))
             {
                 if (module.Stream == false)
                 {
@@ -380,7 +380,7 @@ public sealed class ChatService(
                 throw new Exception($"并未实现：{channel.Type} 的服务");
             }
 
-            if (SettingService.PromptRate.TryGetValue(model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
                 int requestToken;
                 var responseToken = 0;
@@ -706,7 +706,7 @@ public sealed class ChatService(
     /// <returns></returns>
     private decimal GetCompletionRatio(string name)
     {
-        if (SettingService.CompletionRate?.TryGetValue(name, out var ratio) == true) return ratio;
+        if (ModelManagerService.CompletionRate?.TryGetValue(name, out var ratio) == true) return ratio;
 
         if (name.StartsWith("gpt-3.5"))
         {

@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    
     public static WebApplicationBuilder HostEnvironment(this WebApplicationBuilder builder)
     {
         builder.Configuration.GetSection(JwtOptions.Name)

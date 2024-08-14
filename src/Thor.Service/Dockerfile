@@ -7,15 +7,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM node as builder
-WORKDIR /src
-COPY web .
-RUN yarn config set strict-ssl false
-RUN npm config set registry https://registry.npmmirror.com
-RUN yarn
-RUN yarn run build
-
-
 FROM node as lobe
 WORKDIR /src
 COPY lobe .
@@ -55,6 +46,5 @@ RUN dotnet publish "Thor.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-COPY --from=builder /src/dist ./wwwroot
-COPY --from=lobe /src/dist ./lobe
+COPY --from=lobe /src/dist ./wwwroot
 ENTRYPOINT ["dotnet", "Thor.Service.dll"]

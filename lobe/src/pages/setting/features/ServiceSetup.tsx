@@ -22,24 +22,6 @@ export default function ServiceSetup({
     }, [settings])
 
     function handleSubmit() {
-        const { ModelPromptRate, ModelCompletionRate } = GeneralSetting;
-
-        // 校验 模型倍率Prompt 和 模型倍率Completion
-        try {
-            JSON.parse(input[ModelPromptRate]);
-        } catch (e) {
-            return notification.error({
-                message: '模型倍率Prompt 格式错误',
-            });
-        }
-
-        try {
-            JSON.parse(input[ModelCompletionRate]);
-        } catch (e) {
-            return notification.error({
-                message: '模型倍率Completion 格式错误'
-            });
-        }
 
         UpdateSetting(settings)
             .then((res) => {
@@ -81,13 +63,6 @@ export default function ServiceSetup({
                                 value={input[GeneralSetting.ChatLink]}
                                 onChange={(e) => handleInputChange(GeneralSetting.ChatLink, e.target.value)}
                                 placeholder='请输入对话链接'
-                            />
-                        </Form.Item>
-                        <Form.Item label='Vidol链接'>
-                            <Input
-                                value={input[GeneralSetting.VidolLink]}
-                                onChange={(e) => handleInputChange(GeneralSetting.VidolLink, e.target.value)}
-                                placeholder='请输入Vidol链接'
                             />
                         </Form.Item>
                     </Collapse.Panel>
@@ -156,27 +131,6 @@ export default function ServiceSetup({
                             <Switch
                                 checked={input[GeneralSetting.AutoDisableChannel] === 'true'}
                                 onChange={(value) => handleInputChange(GeneralSetting.AutoDisableChannel, value ? 'true' : 'false')}
-                            />
-                        </Form.Item>
-                    </Collapse.Panel>
-                </Collapse>
-
-                <Collapse>
-                    <Collapse.Panel key={1} header="倍率设置">
-                        <Form.Item label='模型倍率Prompt'>
-                            <Input.TextArea
-                                rows={10}
-                                value={input[GeneralSetting.ModelPromptRate]}
-                                onChange={(e) => handleInputChange(GeneralSetting.ModelPromptRate, e.target.value)}
-                                placeholder='请输入模型倍率Prompt'
-                            />
-                        </Form.Item>
-                        <Form.Item label='模型倍率Completion'>
-                            <Input.TextArea
-                                rows={10}
-                                value={input[GeneralSetting.ModelCompletionRate]}
-                                onChange={(e) => handleInputChange(GeneralSetting.ModelCompletionRate, e.target.value)}
-                                placeholder='请输入模型倍率Completion'
                             />
                         </Form.Item>
                     </Collapse.Panel>

@@ -13,7 +13,6 @@ const Header = styled.header`
 export default function LoggerPage() {
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
-  const [y, setY] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [input, setInput] = useState({
     page: 1,
@@ -124,17 +123,6 @@ export default function LoggerPage() {
   useEffect(() => {
     loadData()
   }, [input.page, input.pageSize]);
-
-  useEffect(() => {
-    // 监听屏幕宽度
-    const handleResize = () => {
-      setY(window.innerHeight);
-    }
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    }
-  }, []);
 
   return (
     <div style={{
@@ -247,7 +235,8 @@ export default function LoggerPage() {
       </Header>
       <Table
         scroll={{
-          y: y - 300,
+          y: 800,
+          x: 800,
         }}
         loading={loading} style={{
           marginTop: '1rem',

@@ -262,6 +262,10 @@ export default function TokenPage() {
       <Table style={{
         marginTop: '1rem',
       }}
+        scroll={{ 
+          x: 800,
+          y: 500
+        }}
         columns={columns}
         dataSource={data}
         rowKey={row=>row.id}

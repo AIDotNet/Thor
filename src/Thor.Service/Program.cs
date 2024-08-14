@@ -2,7 +2,6 @@ using System.Text.Json.Serialization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 using Serilog;
 using Thor.AzureOpenAI.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
@@ -81,6 +80,7 @@ builder.Services
     .AddTransient<ChannelService>()
     .AddTransient<RedeemCodeService>()
     .AddTransient<RateLimitModelService>()
+    .AddTransient<ModelManagerService>()
     .AddHostedService<StatisticBackgroundTask>()
     .AddHostedService<LoggerBackgroundTask>()
     .AddHostedService<AutoChannelDetectionBackgroundTask>()
@@ -204,14 +204,14 @@ using var scope = app.Services.CreateScope();
 if (string.IsNullOrEmpty(dbType) || string.Equals(dbType, "sqlite"))
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
-    await RateLimitModelService.LoadAsync(dbContext);
 
     // 不使用迁移记录生成
     await dbContext.Database.EnsureCreatedAsync();
 
-
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
     await loggerDbContext.Database.EnsureCreatedAsync();
+
+    await RateLimitModelService.LoadAsync(dbContext);
 }
 // 由于没有生成迁移记录，所以使用EnsureCreated
 else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") ||
@@ -219,14 +219,14 @@ else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") |
          string.Equals(dbType, "mssql"))
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
-    await RateLimitModelService.LoadAsync(dbContext);
 
     // 不使用迁移记录生成
     await dbContext.Database.EnsureCreatedAsync();
 
-
     var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
     await loggerDbContext.Database.EnsureCreatedAsync();
+
+    await RateLimitModelService.LoadAsync(dbContext);
 }
 
 
@@ -252,7 +252,7 @@ app.Use((async (context, next) =>
         }
     }
 
-    context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.1";
+    context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.2";
     context.Response.Headers["AI-Gateway-Name"] = "AI-Gateway";
 
     await next(context);
@@ -275,29 +275,7 @@ app.Use((async (context, next) =>
 
 app.UseResponseCompression();
 
-var theme = (Environment.GetEnvironmentVariable("Theme") ??
-             SettingService.GetSetting(SettingExtensions.SystemSetting.Theme));
-if (theme == "default" || string.IsNullOrEmpty(theme))
-{
-    var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-
-    if (!Directory.Exists(path))
-    {
-        Directory.CreateDirectory(path);
-    }
-
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(path),
-    });
-}
-else
-{
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), theme))
-    });
-}
+app.UseStaticFiles();
 
 app.UseMiddleware<UnitOfWorkMiddleware>();
 
@@ -306,6 +284,7 @@ if (!Directory.Exists("/data"))
     Directory.CreateDirectory("/data");
 }
 
+app.MapModelManager();
 
 app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBody] LoginInput input) =>
     await service.TokenAsync(input))

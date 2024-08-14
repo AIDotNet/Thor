@@ -65,15 +65,6 @@ export default function SystemSetup({
                                 placeholder='请输入服务器地址'
                             />
                         </Form.Item>
-                        <Form.Item
-                            label='服务器主题'
-                        >
-                            <Input
-                                value={input[SystemSetting.Theme]}
-                                onChange={(e) => handleInputChange(SystemSetting.Theme, e.target.value)}
-                                placeholder='请输入服务器主题（重启服务生效）'
-                            />
-                        </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
                 <Collapse>

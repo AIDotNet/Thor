@@ -24,7 +24,7 @@ const BottomActions = memo(() => {
       <Tooltip title='Thor文档'>
         <Link style={{
           marginLeft: '50%',
-        }} to={'https://docs.token-ai.cn'} target={'_blank'}>
+        }} to={'/doc'} target={'_blank'}>
           <ActionIcon icon={Book} placement={'right'} title={'文档'} />
         </Link>
       </Tooltip>

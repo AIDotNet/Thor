@@ -17,19 +17,20 @@ import LoginPage from './pages/login/page'
 import RegisterPage from './pages/register/page'
 import DocPage from './pages/doc/page'
 import ModelPage from './pages/model/page'
-import DocMainLayout from './_layout/Home/@nav/default'
 import Auth from './pages/auth/page'
 import RateLimit from './pages/rate-limit/page'
 import SharePage from './pages/share'
-
+import ModelManager from './pages/model-manager/page'
+import WelcomePage from './pages/welcome/page'
+import DefaultLayout from './_layout/Default/page'
 
 const router = createBrowserRouter([{
   element: <MainLayout nav={<Nav />} />,
   children: [
-    { path: '', element: <PanelPage /> },
     { path: 'panel', element: <PanelPage /> },
     { path: 'channel', element: <ChannelPage /> },
     { path: 'token', element: <TokenPage /> },
+    { path: 'model-manager', element: <ModelManager /> },
     {
       path: 'product',
       element: <ProductPage />
@@ -66,18 +67,26 @@ const router = createBrowserRouter([{
   path: "/register",
   element: <RegisterPage />
 }, {
-  path: "/doc",
-  element: <DocPage nav={<DocMainLayout />} />
-}, {
-  path: "/model",
-  element: <ModelPage nav={<DocMainLayout />} />
-}, {
   path: "/auth",
   element: <Auth />
 }, {
   path: "/share",
   element: <SharePage />
-}
+},
+{
+  element: <DefaultLayout />,
+  children: [
+    { path: '', element: <WelcomePage /> }, 
+    {
+      path: "/doc",
+      element: <DocPage  />
+    }, {
+      path: "/model",
+      element: <ModelPage  />
+    },
+  ]
+},
+
 ])
 
 function App() {

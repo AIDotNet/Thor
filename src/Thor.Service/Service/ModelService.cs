@@ -13,7 +13,7 @@ public static class ModelService
 
     public static string[] GetModels()
     {
-        var result = SettingService.PromptRate.Select(x => x.Key).ToArray();
+        var result = ModelManagerService.PromptRate.Select(x => x.Key).ToArray();
 
         return result;
     }

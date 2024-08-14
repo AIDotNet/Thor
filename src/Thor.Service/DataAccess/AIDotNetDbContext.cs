@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using Thor.Service.Domain;
 using Thor.Service.Domain.Core;
 using Thor.Service.Infrastructure;
@@ -25,6 +27,8 @@ public class AIDotNetDbContext(
     public DbSet<ProductPurchaseRecord> ProductPurchaseRecords { get; set; }
 
     public DbSet<RateLimitModel> RateLimitModels { get; set; }
+
+    public DbSet<ModelManager> ModelManagers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -53,6 +57,36 @@ public class AIDotNetDbContext(
         modelBuilder.Entity<Token>().HasData(token);
 
         modelBuilder.InitSetting();
+
+
+        if (!File.Exists("model-manager.json")) return;
+
+        var modelManagers = new List<ModelManager>();
+        try
+        {
+            var json = File.ReadAllText("model-manager.json");
+
+            modelManagers.AddRange(JsonSerializer.Deserialize<List<ModelManager>>(json, new JsonSerializerOptions()
+            {
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                ReadCommentHandling = JsonCommentHandling.Skip
+            }) ?? []);
+            
+            modelManagers.ForEach(x =>
+            {
+                x.Id = Guid.NewGuid();
+                x.CreatedAt = DateTime.Now;
+                x.Enable = true;
+            });
+
+            modelBuilder.Entity<ModelManager>().HasData(modelManagers);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("模型默认配置文件错误：" + e);
+        }
     }
 
 
