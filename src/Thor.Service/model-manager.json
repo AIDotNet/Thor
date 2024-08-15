@@ -1,0 +1,1007 @@
+﻿[
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo 文本模型",
+    "Model": "gpt-3.5-turbo",
+    "PromptRate": 0.75,
+    "QuotaMax": "128K",
+    "Icon": "OpenAI",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo 0125 文本模型",
+    "Model": "gpt-3.5-turbo-0125",
+    "PromptRate": 0.25,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo 0301 文本模型",
+    "Model": "gpt-3.5-turbo-0301",
+    "PromptRate": 0.75,
+    "QuotaMax": "128K",
+    "Icon": "OpenAI",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "Icon": "OpenAI",
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo 0613 文本模型",
+    "Model": "gpt-3.5-turbo-0613",
+    "PromptRate": 0.75,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo 1106 文本模型",
+    "Model": "gpt-3.5-turbo-1106",
+    "PromptRate": 0.25,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo 16k 文本模型",
+    "Model": "gpt-3.5-turbo-16k",
+    "PromptRate": 0.75,
+    "QuotaMax": "16K",
+    "Icon": "OpenAI",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo 16k 0613 文本模型",
+    "Model": "gpt-3.5-turbo-16k-0613",
+    "PromptRate": 0.75,
+    "Icon": "OpenAI",
+    "QuotaMax": "16K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-3.5 Turbo Instruct 文本模型",
+    "Model": "gpt-3.5-turbo-instruct",
+    "PromptRate": 0.001,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 文本模型",
+    "Model": "gpt-4",
+    "Icon": "OpenAI",
+    "PromptRate": 15,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 0125 预览文本模型",
+    "Model": "gpt-4-0125-preview",
+    "PromptRate": 5,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 0314 文本模型",
+    "Model": "gpt-4-0314",
+    "Icon": "OpenAI",
+    "PromptRate": 15,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 0613 文本模型",
+    "Model": "gpt-4-0613",
+    "PromptRate": 15,
+    "QuotaMax": "128K",
+    "Icon": "OpenAI",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 1106 预览文本模型",
+    "Model": "gpt-4-1106-preview",
+    "PromptRate": 5,
+    "QuotaMax": "128K",
+    "Icon": "OpenAI",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 1106 视觉预览模型",
+    "Model": "gpt-4-1106-vision-preview",
+    "PromptRate": 10,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "视觉",
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 32k 文本模型",
+    "Model": "gpt-4-32k",
+    "Icon": "OpenAI",
+    "PromptRate": 30,
+    "QuotaMax": "32K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 32k 0314 文本模型",
+    "Model": "gpt-4-32k-0314",
+    "PromptRate": 30,
+    "QuotaMax": "32K",
+    "Icon": "OpenAI",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 32k 0613 文本模型",
+    "Model": "gpt-4-32k-0613",
+    "PromptRate": 30,
+    "Icon": "OpenAI",
+    "QuotaMax": "32K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 全部文本模型",
+    "Model": "gpt-4-all",
+    "Icon": "OpenAI",
+    "PromptRate": 30,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉",
+      "联网"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 Turbo 文本模型",
+    "Model": "gpt-4-turbo",
+    "PromptRate": 5,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 2,
+    "Description": "Gemini 1.5 Pro 文本模型",
+    "Icon": "Google",
+    "Model": "gemini-1.5-pro",
+    "PromptRate": 2,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 3,
+    "Description": "Gemini Pro 文本模型",
+    "Model": "gemini-pro",
+    "Icon": "Google",
+    "PromptRate": 2,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 3,
+    "Description": "Gemini Pro 视觉模型",
+    "Model": "gemini-pro-vision",
+    "Icon": "Google",
+    "PromptRate": 2,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 3,
+    "Description": "Gemini 1.5 Flash 文本模型",
+    "Model": "gemini-1.5-flash",
+    "PromptRate": 0.2,
+    "QuotaMax": "128K",
+    "Icon": "Google",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 Turbo 2024-04-09 文本模型",
+    "Model": "gpt-4-turbo-2024-04-09",
+    "Icon": "OpenAI",
+    "PromptRate": 5,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 Turbo 预览文本模型",
+    "Model": "gpt-4-turbo-preview",
+    "PromptRate": 5,
+    "Icon": "OpenAI",
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GPT-4 视觉预览模型",
+    "Model": "gpt-4-vision-preview",
+    "PromptRate": 10,
+    "Icon": "OpenAI",
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 3,
+    "Description": "GPT-4o 文本模型",
+    "Model": "gpt-4o",
+    "PromptRate": 3,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉",
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 4,
+    "Description": "ChatGPT 4o 最新文本模型",
+    "Model": "chatgpt-4o-latest",
+    "PromptRate": 3,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉",
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 4,
+    "Description": "GPT-4o Mini 文本模型",
+    "Model": "gpt-4o-mini",
+    "PromptRate": 0.07,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉",
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 4,
+    "Description": "GPT-4o Mini 2024-07-18 文本模型",
+    "Model": "gpt-4o-mini-2024-07-18",
+    "PromptRate": 0.07,
+    "QuotaMax": "128K",
+    "Icon": "OpenAI",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉",
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 4,
+    "Description": "GPT-4o 2024-05-13 文本模型",
+    "Model": "gpt-4o-2024-05-13",
+    "Icon": "OpenAI",
+    "PromptRate": 3,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉",
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 4,
+    "Description": "GPT-4o 2024-08-06 文本模型",
+    "Model": "gpt-4o-2024-08-06",
+    "PromptRate": 1.25,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本",
+      "视觉",
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Moonshot v1 128k 文本模型",
+    "Model": "moonshot-v1-128k",
+    "PromptRate": 5.06,
+    "QuotaMax": "128K",
+    "Icon": "Moonshot",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Moonshot v1 32k 文本模型",
+    "Model": "moonshot-v1-32k",
+    "Icon": "Moonshot",
+    "PromptRate": 2,
+    "QuotaMax": "32K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Moonshot v1 8k 文本模型",
+    "Model": "moonshot-v1-8k",
+    "PromptRate": 1,
+    "Icon": "Moonshot",
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Babbage 001 文本模型",
+    "Model": "text-babbage-001",
+    "PromptRate": 0.25,
+    "Icon": "OpenAI",
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Curie 001 文本模型",
+    "Model": "text-curie-001",
+    "PromptRate": 1,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Davinci 002 文本模型",
+    "Model": "text-davinci-002",
+    "PromptRate": 10,
+    "Icon": "OpenAI",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Davinci 003 文本模型",
+    "Model": "text-davinci-003",
+    "Icon": "OpenAI",
+    "PromptRate": 10,
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Davinci Edit 001 文本模型",
+    "Model": "text-davinci-edit-001",
+    "Icon": "OpenAI",
+    "PromptRate": 10,
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Embedding 3 Large 嵌入模型",
+    "Model": "text-embedding-3-large",
+    "PromptRate": 0.13,
+    "Icon": "OpenAI",
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Embedding 3 Small 嵌入模型",
+    "Model": "text-embedding-3-small",
+    "PromptRate": 0.1,
+    "Icon": "OpenAI",
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Text Embedding Ada 002 嵌入模型",
+    "Model": "text-embedding-ada-002",
+    "PromptRate": 0.1,
+    "Icon": "OpenAI",
+    "QuotaMax": "8K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "TTS 1 语音合成模型",
+    "Model": "tts-1",
+    "Icon": "OpenAI",
+    "PromptRate": 7.5,
+    "QuotaMax": null,
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "TTS 1 1106 语音合成模型",
+    "Model": "tts-1-1106",
+    "Icon": "OpenAI",
+    "PromptRate": 7.5,
+    "QuotaMax": null,
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "TTS 1 HD 语音合成模型",
+    "Model": "tts-1-hd",
+    "Icon": "OpenAI",
+    "PromptRate": 15,
+    "QuotaMax": null,
+    "QuotaType": "ByCount",
+    "Tags": [
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "TTS 1 HD 1106 语音合成模型",
+    "Model": "tts-1-hd-1106",
+    "Icon": "OpenAI",
+    "PromptRate": 15,
+    "QuotaMax": null,
+    "QuotaType": "ByCount",
+    "Tags": [
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Whisper 1 语音识别模型",
+    "Model": "whisper-1",
+    "PromptRate": 15,
+    "Icon": "OpenAI",
+    "QuotaMax": null,
+    "QuotaType": "ByCount",
+    "Tags": [
+      "音频"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Hunyuan Lite 文本模型",
+    "Model": "hunyuan-lite",
+    "PromptRate": 0.75,
+    "Icon": "Hunyuan",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 2,
+    "Description": "通用文本模型",
+    "Model": "general",
+    "PromptRate": 2,
+    "Icon": "Spark",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 2,
+    "Description": "通用文本模型 v3",
+    "Icon": "Spark",
+    "Model": "generalv3",
+    "PromptRate": 2,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 2,
+    "Description": "通用文本模型 v3.5",
+    "Model": "generalv3.5",
+    "PromptRate": 2,
+    "QuotaMax": "128K",
+    "Icon": "Spark",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 3,
+    "Description": "4.0 超级文本模型",
+    "Model": "4.0Ultra",
+    "PromptRate": 5,
+    "Icon": "Spark",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "ChatGLM Lite 文本模型",
+    "Model": "chatglm_lite",
+    "Icon": "ChatGLM",
+    "PromptRate": 0.1429,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "ChatGLM Pro 文本模型",
+    "Model": "chatglm_pro",
+    "Icon": "ChatGLM",
+    "PromptRate": 0.7143,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "ChatGLM 标准文本模型",
+    "Model": "chatglm_std",
+    "Icon": "ChatGLM",
+    "PromptRate": 0.3572,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "ChatGLM Turbo 文本模型",
+    "Model": "chatglm_turbo",
+    "PromptRate": 0.3572,
+    "Icon": "ChatGLM",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Claude 2 文本模型",
+    "Model": "claude-2",
+    "PromptRate": 7.5,
+    "Icon": "Claude",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Claude 2.0 文本模型",
+    "Model": "claude-2.0",
+    "Icon": "Claude",
+    "PromptRate": 7.5,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Claude 2.1 文本模型",
+    "Model": "claude-2.1",
+    "PromptRate": 7.5,
+    "QuotaMax": "128K",
+    "Icon": "Claude",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 5,
+    "Description": "Claude 3 Haiku 文本模型",
+    "Model": "claude-3-haiku",
+    "Icon": "Claude",
+    "PromptRate": 0.5,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 5,
+    "Description": "Claude 3 Haiku 20240307 文本模型",
+    "Model": "claude-3-haiku-20240307",
+    "PromptRate": 0.5,
+    "Icon": "Claude",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 5,
+    "Description": "Claude 3.5 Sonnet 20240620 文本模型",
+    "Model": "claude-3-5-sonnet-20240620",
+    "PromptRate": 3,
+    "QuotaMax": "128K",
+    "Icon": "Claude",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 5,
+    "Description": "Claude 3 Sonnet 20240229 文本模型",
+    "Model": "claude-3-sonnet-20240229",
+    "Icon": "Claude",
+    "PromptRate": 3,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": 5,
+    "Description": "Claude 3 Opus 20240229 文本模型",
+    "Model": "claude-3-opus-20240229",
+    "Icon": "Claude",
+    "PromptRate": 30,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Claude Instant 1 文本模型",
+    "Model": "claude-instant-1",
+    "Icon": "Claude",
+    "PromptRate": 0.815,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Claude Instant 1.2 文本模型",
+    "Model": "claude-instant-1.2",
+    "Icon": "Claude",
+    "PromptRate": 0.4,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "DALL-E 2 图像生成模型",
+    "Model": "dall-e-2",
+    "Icon": "OpenAI",
+    "PromptRate": 8,
+    "QuotaMax": null,
+    "QuotaType": "ByCount",
+    "Tags": [
+      "图片"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "DALL-E 3 图像生成模型",
+    "Model": "dall-e-3",
+    "PromptRate": 20,
+    "Icon": "OpenAI",
+    "QuotaMax": null,
+    "QuotaType": "ByCount",
+    "Tags": [
+      "图片"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Embedding 2 嵌入模型",
+    "Model": "embedding-2",
+    "Icon": "OpenAI",
+    "PromptRate": 0.0355,
+    "QuotaMax": "",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "嵌入模型"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Embedding BERT 512 v1 嵌入模型",
+    "Model": "embedding-bert-512-v1",
+    "Icon": "OpenAI",
+    "PromptRate": 0.1,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "嵌入模型"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "Embedding S1 v1 嵌入模型",
+    "Model": "embedding_s1_v1",
+    "PromptRate": 0.1,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "嵌入模型"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GLM 3 Turbo 文本模型",
+    "Model": "glm-3-turbo",
+    "PromptRate": 0.355,
+    "Icon": "ChatGLM",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GLM 4 文本模型",
+    "Model": "glm-4",
+    "Icon": "ChatGLM",
+    "PromptRate": 15,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GLM 4 全部文本模型",
+    "Model": "glm-4-all",
+    "Icon": "ChatGLM",
+    "PromptRate": 30,
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  },
+  {
+    "Available": true,
+    "CompletionRate": null,
+    "Description": "GLM 4v 文本模型",
+    "Model": "glm-4v",
+    "PromptRate": 15,
+    "Icon": "ChatGLM",
+    "QuotaMax": "128K",
+    "QuotaType": "OnDemand",
+    "Tags": [
+      "文本"
+    ]
+  }
+]

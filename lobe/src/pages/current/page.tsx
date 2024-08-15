@@ -60,7 +60,7 @@ export default function ProfileForm() {
         style={{
           width: '100%',
         }}
-        tabPosition="left"
+        tabPosition="top"
         items={[
           {
             key: '1',

@@ -352,6 +352,10 @@ export default function ChannelPage() {
         }}
         columns={columns}
         dataSource={data}
+        scroll={{
+          y: 800,
+          x: 800,
+        }}
         rowKey={row=>row.id}
         pagination={{
           total: total,

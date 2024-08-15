@@ -5,7 +5,7 @@ import { Outlet } from "react-router-dom";
 import { Layout, theme } from "antd";
 import { Logo } from "@lobehub/ui";
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content, Footer, Sider } = Layout;
 const LayoutPage = memo<LayoutProps>(({ nav }) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -19,7 +19,7 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
           paddingTop: "16px",
         }}
       >
-        <Logo extra={"TokenAI"} style={{
+        <Logo extra={"Thor"} style={{
             textAlign: 'center',
             marginLeft: '8px',
             marginTop: '8px',
@@ -27,7 +27,6 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
         {nav}
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer }} />
         <Content style={{ margin: "16px" }}>
           <div
             style={{
@@ -41,7 +40,7 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
           </div>
         </Content>
         <Footer style={{ textAlign: "center" }}>
-          TokenAI ©{new Date().getFullYear()} Created by TokenAI
+          Thor ©{new Date().getFullYear()} Created by Thor
         </Footer>
       </Layout>
     </Layout>

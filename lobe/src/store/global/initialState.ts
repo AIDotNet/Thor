@@ -2,6 +2,8 @@
 export enum SidebarTabKey {
   Panel = "panel",
 
+  AI = "ai",
+
   Channel = "channel",
 
   Chat = "chat",
@@ -9,6 +11,8 @@ export enum SidebarTabKey {
   Vidol = "vidol",
 
   Token = "token",
+
+  ModelManager = "model-manager",
 
   Product = "product",
 
@@ -23,4 +27,7 @@ export enum SidebarTabKey {
   Setting = "setting",
 
   RateLimit = "rate-limit",
+
+  // 业务模块
+  Business = "business",
 }

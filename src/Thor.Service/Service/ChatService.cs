@@ -1,8 +1,7 @@
-﻿using MapsterMapper;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
+using MapsterMapper;
 using Thor.Abstractions.Chats;
-using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Embeddings.Dtos;
@@ -35,7 +34,7 @@ public sealed class ChatService(
     RateLimitModelService rateLimitModelService,
     IServiceCache serviceCache,
     UserService userService,
-    IMapper mapper,
+    ILogger<ChatService> logger,
     LoggerService loggerService)
     : ApplicationService(serviceProvider)
 {
@@ -103,7 +102,7 @@ public sealed class ChatService(
 
             var imageCostRatio = GetImageCostRatio(request);
 
-            var rate = SettingService.PromptRate[request.Model];
+            var rate = ModelManagerService.PromptRate[request.Model];
 
             request.N ??= 1;
 
@@ -153,7 +152,7 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
-            GetLogger<ChatService>().LogError(e.Message);
+            logger.LogError("对话模型请求异常：{e}", e);
             await context.WriteErrorAsync(e.Message);
         }
     }
@@ -220,7 +219,7 @@ public sealed class ChatService(
                 Other = channel.Other
             }, context.RequestAborted);
 
-            if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(module.Model, out var rate))
             {
                 var quota = requestToken * rate;
 
@@ -283,7 +282,7 @@ public sealed class ChatService(
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
-            if (SettingService.PromptRate.TryGetValue(module.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(module.Model, out var rate))
             {
                 if (module.Stream == false)
                 {
@@ -357,17 +356,21 @@ public sealed class ChatService(
     {
         try
         {
-            await rateLimitModelService.CheckAsync(request!.Model, context, serviceCache);
+            var model = request.Model;
+            await rateLimitModelService.CheckAsync(model, context, serviceCache);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model));
 
             if (channel == null)
             {
-                throw new NotModelException(request.Model);
+                throw new NotModelException(model);
             }
+
+            // 记录请求模型 / 请求用户
+            logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
 
             // 获取渠道指定的实现类型的服务
             var chatCompletionsService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
@@ -377,7 +380,7 @@ public sealed class ChatService(
                 throw new Exception($"并未实现：{channel.Type} 的服务");
             }
 
-            if (SettingService.PromptRate.TryGetValue(request.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
                 int requestToken;
                 var responseToken = 0;
@@ -397,19 +400,19 @@ public sealed class ChatService(
 
                 var quota = requestToken * rate;
 
-                var completionRatio = GetCompletionRatio(request.Model);
+                var completionRatio = GetCompletionRatio(model);
                 quota += responseToken * rate * completionRatio;
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
-                    request.Model,
+                    model,
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent());
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                    request.Model);
+                    model);
             }
             else
             {
@@ -438,7 +441,7 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
-            GetLogger<ChatService>().LogError("服务异常：{e}", e);
+            logger.LogError("对话模型请求异常：{e}", e);
             if (request.Stream == true)
                 await context.WriteStreamErrorAsync(e.Message);
             else
@@ -701,9 +704,9 @@ public sealed class ChatService(
     /// </summary>
     /// <param name="name"></param>
     /// <returns></returns>
-    private static decimal GetCompletionRatio(string name)
+    private decimal GetCompletionRatio(string name)
     {
-        if (SettingService.CompletionRate.TryGetValue(name, out var ratio)) return ratio;
+        if (ModelManagerService.CompletionRate?.TryGetValue(name, out var ratio) == true) return ratio;
 
         if (name.StartsWith("gpt-3.5"))
         {

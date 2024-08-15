@@ -24,12 +24,6 @@ class GeneralSetting {
     static readonly ChatLink: string = GeneralSetting.Default + ":ChatLink";
 
     /**
-     * Vidol链接
-     * @type {string}
-     */
-    static readonly VidolLink: string = GeneralSetting.Default + ":VidolLink";
-
-    /**
      * 新用户初始额度
      * @type {string}
      */
@@ -76,18 +70,6 @@ class GeneralSetting {
      * @type {string}
      */
     static readonly AutoDisableChannel: string = GeneralSetting.Default + ":AutoDisableChannel";
-
-    /**
-     * 模型倍率Prompt
-     * @type {string}
-     */
-    static readonly ModelPromptRate: string = GeneralSetting.Default + ":ModelPromptRate";
-
-    /**
-     * 模型倍率Completion
-     * @type {string}
-     */
-    static readonly ModelCompletionRate: string = GeneralSetting.Default + ":ModelCompletionRate";
 
     /**
      * 支付宝回调地址
