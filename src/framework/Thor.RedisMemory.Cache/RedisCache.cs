@@ -15,6 +15,11 @@ public sealed class RedisCache(RedisClient redis) : IServiceCache
         }
     }
 
+    public async Task<bool> ExistsAsync(string key)
+    {
+        return await redis.ExistsAsync(key);
+    }
+
     public async ValueTask<T?> GetAsync<T>(string key)
     {
         return await redis.GetAsync<T>(key);

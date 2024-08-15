@@ -84,6 +84,7 @@ builder.Services
     .AddHostedService<LoggerBackgroundTask>()
     .AddHostedService<AutoChannelDetectionBackgroundTask>()
     .AddSingleton<UnitOfWorkMiddleware>()
+    .AddSingleton<EmailService>()
     .AddSingleton<IUserContext, DefaultUserContext>()
     .AddOpenAIService()
     .AddMoonshotService()
@@ -430,6 +431,10 @@ var user = app.MapGroup("/api/v1/user")
 
 user.MapPost(string.Empty, async (UserService service, CreateUserInput input) =>
         await service.CreateAsync(input))
+    .AllowAnonymous();
+
+user.MapGet("email-code", async (UserService service, string email) =>
+        await service.GetEmailCodeAsync(email))
     .AllowAnonymous();
 
 user.MapGet(string.Empty, async (UserService service, int page, int pageSize, string? keyword) =>

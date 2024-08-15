@@ -47,7 +47,7 @@ public sealed class AuthorizeService(
             role = user.Role
         };
     }
-
+    
     public async Task<object> GithubAsync(string code)
     {
         var isGithub = SettingService.GetBoolSetting(SettingExtensions.SystemSetting.EnableGithubLogin);

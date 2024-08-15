@@ -23,6 +23,11 @@ public sealed class MemoryCache(IMemoryCache memoryCache) : IServiceCache
         await ValueTask.CompletedTask;
     }
 
+    public Task<bool> ExistsAsync(string key)
+    {
+        return Task.FromResult(memoryCache.TryGetValue(key, out _));
+    }
+
     public ValueTask<T?> GetAsync<T>(string key)
     {
         if (memoryCache.TryGetValue(key, out T value))

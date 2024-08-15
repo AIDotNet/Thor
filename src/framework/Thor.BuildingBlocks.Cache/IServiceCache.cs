@@ -10,6 +10,13 @@ public interface IServiceCache
     /// <param name="ttl"></param>
     /// <returns></returns>
     ValueTask CreateAsync(string key, object value, TimeSpan? ttl = null);
+    
+    /// <summary>
+    /// 判断缓存是否存在
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    Task<bool> ExistsAsync(string key);
 
     /// <summary>
     /// 获取指定缓存

@@ -155,6 +155,31 @@ class SystemSetting {
      * @type {string}
      */
     static readonly GithubClientSecret: string = SystemSetting.Default + ":GithubClientSecret";
+
+    /**
+     * 邮箱发送地址
+     * @type {string}
+     */
+    static readonly EmailAddress: string = SystemSetting.Default + ":EmailAddress";
+
+    /**
+     * 邮箱发送密码
+     * @type {string}
+     */
+    static readonly EmailPassword: string = SystemSetting.Default + ":EmailPassword";
+
+    /**
+     * 邮箱SMTP地址
+     * @type {string}
+     */
+    static readonly SmtpAddress: string = SystemSetting.Default + ":SmtpAddress";
+
+    /**
+     * 启用邮箱注册验证
+     * @type {string}
+     */
+    static readonly EnableEmailRegister: string = SystemSetting.Default + ":EnableEmailRegister";
+
 }
 
 /**
@@ -226,10 +251,16 @@ function IsEnableAlipay() {
     return v?.value !== undefined && v?.value !== "";
 }
 
+function IsEnableEmailRegister() {
+    const v = InitSetting?.find(s => s.key === SystemSetting.EnableEmailRegister);
+    return v?.value === "true";
+}
+
 export {
     GeneralSetting,
     SystemSetting,
     OtherSetting,
+    IsEnableEmailRegister,
     InitSetting,
     IsEnableAlipay
 }

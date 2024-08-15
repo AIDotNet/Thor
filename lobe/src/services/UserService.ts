@@ -64,3 +64,7 @@ export const update = (user: any) => {
 export const updatePassword = (data:any) => {
     return putJson(prefix + '/update-password', data);
 }
+
+export const GetEmailCode = (email: string) => {
+    return get(prefix + `/email-code?email=${email}`);
+}

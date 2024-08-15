@@ -105,6 +105,42 @@ export default function SystemSetup({
                                 placeholder='请输入Github Client Secret'
                             />
                         </Form.Item>
+                        <Form.Item
+                            label='是否启用邮箱注册验证'
+                            valuePropName="checked"
+                        >
+                            <Switch
+                                checked={input[SystemSetting.EnableEmailRegister] === 'true'}
+                                onChange={(checked) => handleInputChange(SystemSetting.EnableEmailRegister, checked ? 'true' : 'false')}
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='发送邮箱'
+                        >
+                            <Input
+                                value={input[SystemSetting.EmailAddress]}
+                                onChange={(e) => handleInputChange(SystemSetting.EmailAddress, e.target.value)}
+                                placeholder='请输入发送邮箱'
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='发送邮箱密码'
+                        >
+                            <Input
+                                value={input[SystemSetting.EmailPassword]}
+                                onChange={(e) => handleInputChange(SystemSetting.EmailPassword, e.target.value)}
+                                placeholder='请输入发送邮箱密码'
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='SMTP地址'
+                        >
+                            <Input
+                                value={input[SystemSetting.SmtpAddress]}
+                                onChange={(e) => handleInputChange(SystemSetting.SmtpAddress, e.target.value)}
+                                placeholder='SMTP地址'
+                            />
+                        </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
                 <Form.Item>

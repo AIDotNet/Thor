@@ -1,11 +1,14 @@
 import { memo, useState } from 'react';
-import {message, Input, Button } from 'antd';
+import { message, Input, Button } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
-import { Avatar,  LogoProps, useControls, useCreateStore } from '@lobehub/ui';
+import { Avatar, LogoProps, useControls, useCreateStore } from '@lobehub/ui';
 import styled from 'styled-components';
-import { create } from '../../services/UserService';
+import { create, GetEmailCode } from '../../services/UserService';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../services/AuthorizeService';
+import {
+    IsEnableEmailRegister
+} from '../../services/SettingService';
 
 
 const FunctionTools = styled.div`
@@ -26,10 +29,18 @@ const FunctionTools = styled.div`
 const RegisterPage = memo(() => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+
+    // 验证码的倒计时
+    const [countDown, setCountDown] = useState(0);
+
     const [userName, setUserName] = useState('');
+    const [code, setCode] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const store = useCreateStore();
+
+    const enableEmailRegister = IsEnableEmailRegister()
+
     const control: LogoProps | any = useControls(
         {
             size: {
@@ -123,10 +134,48 @@ const RegisterPage = memo(() => {
                 <div style={{ marginBottom: '20px', width: '100%' }}>
                     <Input
                         value={email}
+                        suffix={enableEmailRegister ? <Button
+                            disabled={countDown > 0}
+                            onClick={()=>{
+                            GetEmailCode(email).then((res) => {
+                                if(res.success){
+                                    message.success('发送成功');
+
+                                    setCountDown(60);
+
+                                    const timer = setInterval(() => {
+                                        setCountDown((prev) => {
+                                            if (prev <= 0) {
+                                                clearInterval(timer);
+                                                return 0;
+                                            }
+                                            return prev - 1;
+                                        });
+                                    }, 1000);
+
+                                    
+
+                                }else{
+                                    message.error(res.message);
+                                }
+                            });
+                        }}>
+                            {countDown > 0 ? `${countDown}秒后重新获取` : '获取验证码'}
+                        </Button> : null}
                         onChange={(e) => setEmail(e.target.value)}
                         size='large'
                         placeholder="请输入邮箱" />
                 </div>
+                {
+                    enableEmailRegister &&
+                    <div style={{ marginBottom: '20px', width: '100%' }}>
+                        <Input
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            size='large'
+                            placeholder="请输入验证码" />
+                    </div>
+                }
                 <Input.Password
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}

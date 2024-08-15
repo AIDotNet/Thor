@@ -7,7 +7,9 @@ namespace Thor.Service.Service;
 public partial class UserService(
     IServiceProvider serviceProvider,
     IServiceCache cache,
+    EmailService emailService,
     LoggerService loggerService,
+    IServiceCache memoryCache,
     TokenService tokenService)
     : ApplicationService(serviceProvider)
 {
@@ -17,7 +19,21 @@ public partial class UserService(
         if (input.UserName.Length < 5 || input.Password.Length < 5) throw new Exception("用户名和密码长度不能小于5位");
 
         // 使用正则表达式检测账号是否由英文和数字组成
-        if (!CheckUserName().IsMatch(input.UserName)) throw new Exception("用户名只能由英文和数字组成");
+        if (!CheckUserName().IsMatch(input.UserName))
+            throw new Exception("用户名只能由英文和数字组成");
+
+        if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
+        {
+            // 判断邮箱是否正确使用正则表达式
+            if (!CheEmail().IsMatch(input.Email))
+            {
+                throw new Exception("邮箱格式错误");
+            }
+
+            // 判断验证码是否正确
+            var code = await memoryCache.GetAsync<string>("email-" + input.Email);
+            if (code != input.Code) throw new Exception("验证码错误");
+        }
 
         // 判断是否存在
         var exist = await DbContext.Users.AnyAsync(x => x.UserName == input.UserName || x.Email == input.Email);
@@ -38,9 +54,29 @@ public partial class UserService(
             UnlimitedExpired = true
         }, user.Id);
 
-        await loggerService.CreateSystemAsync("创建用户：" + user.UserName);
+        await loggerService.CreateSystemAsync("新增用户：" + user.UserName);
+
+        if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
+        {
+            await memoryCache.RemoveAsync("email-" + input.Email);
+        }
 
         return user;
+    }
+
+    public async Task GetEmailCodeAsync(string email)
+    {
+        var code = StringHelper.GenerateRandomString(4).ToUpper();
+
+        // 判断是否已经发送过验证码
+        if (await memoryCache.ExistsAsync("email-" + email))
+        {
+            throw new Exception("请勿频繁发送验证码");
+        }
+
+        await memoryCache.CreateAsync("email-" + email, code, TimeSpan.FromMinutes(5));
+
+        await emailService.SendEmailAsync(email, "注册账号验证码", $"欢迎您注册Thor（雷神托尔），您的验证码是：{code}");
     }
 
     public async ValueTask<User?> GetAsync()
@@ -210,4 +246,7 @@ public partial class UserService(
 
     [GeneratedRegex("^[a-zA-Z0-9]+$")]
     private static partial Regex CheckUserName();
+
+    [GeneratedRegex(@"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$")]
+    private static partial Regex CheEmail();
 }
