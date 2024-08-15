@@ -171,6 +171,26 @@ public static class SettingExtensions
         /// Gitee redirect_uri
         /// </summary>
         public const string GiteeRedirectUri = Default + ":GiteeRedirectUri";
+
+        /// <summary>
+        /// 邮箱地址
+        /// </summary>
+        public const string EmailAddress = Default + ":EmailAddress";
+
+        /// <summary>
+        /// 邮箱密码
+        /// </summary>
+        public const string EmailPassword = Default + ":EmailPassword";
+
+        /// <summary>
+        /// SMTP地址
+        /// </summary>
+        public const string SmtpAddress = Default + ":SmtpAddress";
+
+        /// <summary>
+        /// 启用邮箱验证注册
+        /// </summary>
+        public const string EnableEmailRegister = Default + ":EnableEmailRegister";
     }
 
     /// <summary>
@@ -436,6 +456,38 @@ public static class SettingExtensions
             Value = "",
             Description = "Gitee redirect_uri",
             Private = false
+        });
+
+        settings.Add(new Setting
+        {
+            Key = SystemSetting.EmailAddress,
+            Value = "",
+            Description = "邮箱地址",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = SystemSetting.EmailPassword,
+            Value = "",
+            Description = "邮箱密码",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = SystemSetting.SmtpAddress,
+            Value = "",
+            Description = "SMTP地址",
+            Private = true
+        });
+
+        settings.Add(new Setting
+        {
+            Key = SystemSetting.EnableEmailRegister,
+            Value = "false",
+            Description = "启用邮箱验证注册",
+            Private = false,
         });
 
         #endregion
