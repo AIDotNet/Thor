@@ -69,14 +69,17 @@ public partial class UserService(
         var code = StringHelper.GenerateRandomString(4).ToUpper();
 
         // 判断是否已经发送过验证码
-        if (await memoryCache.ExistsAsync("email-" + email))
+        if (await memoryCache.ExistsAsync("email-" + email + "-send"))
         {
             throw new Exception("请勿频繁发送验证码");
         }
 
         await memoryCache.CreateAsync("email-" + email, code, TimeSpan.FromMinutes(5));
 
-        await emailService.SendEmailAsync(email, "注册账号验证码", $"欢迎您注册Thor（雷神托尔），您的验证码是：{code}");
+        // 增加缓存标识放置频繁发送
+        await memoryCache.CreateAsync("email-" + email + "-send", "1", TimeSpan.FromMinutes(1));
+
+        await emailService.SendEmailAsync(email, "注册账号验证码", $"欢迎您注册Thor（雷神托尔），您的验证码是：{code}").ConfigureAwait(false);
     }
 
     public async ValueTask<User?> GetAsync()

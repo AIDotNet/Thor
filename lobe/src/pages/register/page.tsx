@@ -58,13 +58,17 @@ const RegisterPage = memo(() => {
     );
 
     function handleLogin() {
-        setLoading(true);
 
+        if(enableEmailRegister && code.length === 0){
+            message.error('请输入验证码');
+            return;
+        }
+        setLoading(true);
         create({
             userName: userName,
             email: email,
             password,
-
+            code
         })
             .then((res) => {
                 if (res.success) {
