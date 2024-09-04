@@ -305,6 +305,8 @@ public sealed class ChatService(
 
                     // 将quota 四舍五入
                     quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+                    
+                    sw.Stop();
 
                     await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                         module.Model,
@@ -416,6 +418,8 @@ public sealed class ChatService(
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+                
+                sw.Stop();
 
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     model,
