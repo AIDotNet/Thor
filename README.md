@@ -143,15 +143,14 @@ version: '3.8'
 
 services:
   ai-dotnet-api-service:
-    image: hejiale010426/ai-dotnet-api-service:latest
+    image: registry.token-ai.cn/thor:latest
     ports:
-      - 18080:8080
+      - 18080:5045
     container_name: ai-dotnet-api-service
     volumes:
       - ./data:/data
     environment:
       - TZ=Asia/Shanghai
-      - Theme=lobe
       - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
       - ConnectionString=data source=/data/token.db
       - LoggerConnectionString=data source=/data/logger.db
@@ -160,7 +159,7 @@ services:
 使用docker run启动服务
 
 ```sh
-docker run -d -p 18080:8080 --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=/data/token.db" -e LoggerConnectionString="data source=/data/logger.db" hejiale010426/ai-dotnet-api-service:latest
+docker run -d -p 18080:5045 --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=/data/token.db" -e LoggerConnectionString="data source=/data/logger.db" registry.token-ai.cn/thor:latest
 ```
 
 ### Sqlite构建
@@ -173,15 +172,14 @@ version: '3.8'
 
 services:
   ai-dotnet-api-service:
-    image: hejiale010426/ai-dotnet-api-service:latest
+    image: registry.token-ai.cn/thor:latest
     container_name: ai-dotnet-api-service
     ports:
-      - 18080:8080
+      - 18080:5045
     volumes:
       - ./data:/data
     environment:
       - TZ=Asia/Shanghai
-      - Theme=lobe
       - DBType=sqlite
       - ConnectionString=data source=/data/token.db
       - LoggerConnectionString=data source=/data/logger.db
@@ -201,7 +199,7 @@ sudo docker compose up -d
 docker run版本
 
 ```shell
-docker run -d -p 18080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString=data source=/data/token.db -e LoggerConnectionString=data source=/data/logger.db hejiale010426/ai-dotnet-api-service:latest
+docker run -d -p 18080:5045 --name ai-dotnet-api-service -v $(pwd)/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString=data source=/data/token.db -e LoggerConnectionString=data source=/data/logger.db registry.token-ai.cn/thor:latest
 ```
 
 然后访问 http://localhost:18080 即可看到服务启动成功。
@@ -216,16 +214,15 @@ version: '3.8'
 
 services:
   ai-dotnet-api-service:
-    image: hejiale010426/ai-dotnet-api-service:latest
+    image: registry.token-ai.cn/thor:latest
     container_name: ai-dotnet-api-service
     ports:
-      - 18080:8080
+      - 18080:5045
     volumes:
       - ./data:/data
     environment:
       - TZ=Asia/Shanghai
       - DBType=postgresql
-      - Theme=lobe
       - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
       - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
 ```
@@ -246,14 +243,13 @@ docker run版本
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
-  -p 18080:8080 \
+  -p 18080:5045 \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=postgresql \
-  -e Theme=lobe \
   -e "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666" \
   -e "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666" \
-  hejiale010426/ai-dotnet-api-service:latest
+  registry.token-ai.cn/thor:latest
 ```
 
 然后访问 http://localhost:18080 即可看到服务启动成功。
@@ -268,16 +264,15 @@ version: '3.8'
 
 services:
   ai-dotnet-api-service:
-    image: hejiale010426/ai-dotnet-api-service:latest
+    image: registry.token-ai.cn/thor:latest
     container_name: ai-dotnet-api-service
     ports:
-      - 18080:8080
+      - 18080:5045
     volumes:
       - ./data:/data
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlserver
-      - Theme=lobe
       - "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;"
       - "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;"
 ```
@@ -298,14 +293,13 @@ docker run版本
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
-  -p 18080:8080 \
+  -p 18080:5045 \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=sqlserver \
-  -e Theme=lobe  \
   -e "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;" \
   -e "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;" \
-  hejiale010426/ai-dotnet-api-service:latest
+  registry.token-ai.cn/thor:latest
 ```
 
 然后访问 http://localhost:18080 即可看到服务启动成功。
@@ -320,16 +314,15 @@ version: '3.8'
 
 services:
   ai-dotnet-api-service:
-    image: hejiale010426/ai-dotnet-api-service:latest
+    image: registry.token-ai.cn/thor:latest
     container_name: ai-dotnet-api-service
     ports:
-      - 8080
+      - 18080:5045
     volumes:
       - ./data:/data
     environment:
       - TZ=Asia/Shanghai
       - DBType=mysql
-      - Theme=lobe
       - "ConnectionString=mysql://root:dd666666@localhost:3306/token"
       - "ConnectionString=mysql://root:dd666666@localhost:3306/logger"
 ```
@@ -349,14 +342,13 @@ docker run版本
 ```shell
 docker run -d \
   --name ai-dotnet-api-service \
-  -p 18080:8080 \
+  -p 18080:5045 \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=mysql \
-  -e Theme=lobe \
   -e "ConnectionString=mysql://root:dd666666@localhost:3306/token" \
   -e "ConnectionString=mysql://root:dd666666@localhost:3306/logger" \
-  hejiale010426/ai-dotnet-api-service:latest
+  registry.token-ai.cn/thor:latest
 ```
 
 然后访问 http://localhost:18080 即可看到服务启动成功。
