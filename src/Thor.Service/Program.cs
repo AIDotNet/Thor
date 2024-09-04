@@ -27,6 +27,7 @@ using Thor.Service.Options;
 using Thor.Service.Service;
 using Thor.SparkDesk.Extensions;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.RabbitMQEvent;
 
 try
 {
@@ -62,12 +63,22 @@ try
         builder.Services.AddRedisMemory(CacheOptions.ConnectionString);
     }
 
+    var rabbitMQConnectionString = builder.Configuration["RabbitMQ:ConnectionString"];
+    if (!string.IsNullOrEmpty(rabbitMQConnectionString))
+    {
+        builder.Services.AddRabbitMQEventBus(builder.Configuration);
+    }
+    else
+    {
+        builder.Services.AddLocalEventBus();
+    }
+
+
     builder.Services.AddMvcCore().AddApiExplorer();
     builder.Services
         .AddEndpointsApiExplorer()
         .AddSwaggerGen()
         .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>()
-        .AddLocalEventBus()
         .AddCustomAuthentication()
         .AddHttpContextAccessor()
         .AddTransient<ProductService>()

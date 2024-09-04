@@ -55,6 +55,7 @@
     <ProjectReference Include="..\framework\Thor.Core\Thor.Core.csproj" />
     <ProjectReference Include="..\framework\Thor.LocalEvent\Thor.LocalEvent.csproj" />
     <ProjectReference Include="..\framework\Thor.LocalMemory.Cache\Thor.LocalMemory.Cache.csproj" />
+    <ProjectReference Include="..\framework\Thor.RabbitMQEvent\Thor.RabbitMQEvent.csproj" />
     <ProjectReference Include="..\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj" />
     <ProjectReference Include="..\Thor.Abstractions\Thor.Abstractions.csproj" />
   </ItemGroup>
