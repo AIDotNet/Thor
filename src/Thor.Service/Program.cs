@@ -422,6 +422,14 @@ try
         .WithDisplayName("获取日志")
         .WithOpenApi();
 
+    log.MapGet("view-consumption",
+            async (LoggerService service, ThorChatLoggerType? type, string? model, DateTime? startTime,
+                    DateTime? endTime, string? keyword) =>
+                await service.ViewConsumptionAsync(type, model, startTime, endTime, keyword))
+        .WithDescription("查看消耗")
+        .WithDisplayName("查看消耗")
+        .WithOpenApi();
+
     #endregion
 
     #region User

@@ -22,7 +22,7 @@ public sealed class ChatLogger : Entity<string>
     /// <summary>
     /// 消费额度
     /// </summary>
-    public int Quota { get; set; }
+    public long Quota { get; set; }
 
     /// <summary>
     /// 模型
@@ -42,6 +42,16 @@ public sealed class ChatLogger : Entity<string>
     /// 渠道Id
     /// </summary>
     public string? ChannelId { get; set; }
+
+    /// <summary>
+    /// 总耗时
+    /// </summary>
+    public int TotalTime { get; set; }
+
+    /// <summary>
+    /// 是否是流式
+    /// </summary>
+    public bool Stream { get; set; }
 
     /// <summary>
     /// 渠道名称

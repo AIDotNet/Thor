@@ -24,7 +24,8 @@ public sealed class AutoChannelDetectionBackgroundTask(
             logger.LogInformation(
                 $"AutoChannelDetectionBackgroundTask: AutoDisable: {autoDisable}, Interval: {interval}");
 
-            await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken);
+            await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             if (autoDisable)
             {
@@ -39,7 +40,7 @@ public sealed class AutoChannelDetectionBackgroundTask(
                 // 2. 对于获取的渠道进行检测
                 foreach (var channel in channels)
                 {
-                    await TestChannelAsync(channel, channelService, dbContext);
+                    await TestChannelAsync(channel, channelService, dbContext).ConfigureAwait(false);
                 }
             }
 
@@ -58,12 +59,14 @@ public sealed class AutoChannelDetectionBackgroundTask(
         var channelService = scope.ServiceProvider.GetRequiredService<ChannelService>();
         while (stoppingToken.IsCancellationRequested == false)
         {
-            // 对于异常通道，每10秒检测一次，以便渠道快速恢复。
+            // 对于异常通道，每15秒检测一次，以便渠道快速恢复。
             await Task.Delay((15000), stoppingToken);
 
             try
             {
                 foreach (var channel in await dbContext.Channels
+                             .AsNoTracking()
+                             .AsNoTracking()
                              .Where(x => x.ControlAutomatically && x.Disable)
                              .ToArrayAsync(cancellationToken: stoppingToken))
                 {
@@ -86,7 +89,6 @@ public sealed class AutoChannelDetectionBackgroundTask(
             // 如果检测成功并且通道未关闭则更新状态
             if (succeed)
             {
-                logger.LogWarning($"AutoChannelDetectionBackgroundTask: Channel {channel.Id} is succeed.");
                 await dbContext.Channels.Where(x => x.Id == channel.Id)
                     .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, false));
             }

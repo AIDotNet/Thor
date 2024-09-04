@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components"
-import { message, Dropdown, Button, Input, Select, DatePicker, Table } from "antd";
-import { getLoggers } from "../../services/LoggerService";
+import { message, Dropdown, Button, Input, Select, DatePicker, Table, Card } from "antd";
+import { getLoggers, viewConsumption } from "../../services/LoggerService";
 import { Tag } from "@lobehub/ui";
 import { renderQuota } from "../../utils/render";
 
@@ -14,6 +14,8 @@ export default function LoggerPage() {
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [consume, setConsume] = useState<number>(0);
+  const [consumeLoading, setConsumeLoading] = useState<boolean>(false);
   const [input, setInput] = useState({
     page: 1,
     pageSize: 10,
@@ -23,6 +25,14 @@ export default function LoggerPage() {
     endTime: '',
     keyword: ''
   });
+
+  function timeString(totalTime: number) {
+    // ms转换为s，并且可读，
+    let s = totalTime / 1000;
+    let m = Math.floor(s / 60);
+    s = Math.floor(s % 60);
+    return `${m}分${s}秒`
+  }
 
   const columns = [
     {
@@ -34,6 +44,7 @@ export default function LoggerPage() {
       disable: !(localStorage.getItem('role') === "admin"),
       title: '渠道',
       dataIndex: 'channelName',
+      width: '80px',
       key: 'channelName',
       render: (value: any) => {
         return value && <Tag color='blue'>{value}</Tag>
@@ -42,6 +53,7 @@ export default function LoggerPage() {
     {
       title: '用户',
       dataIndex: 'userName',
+      width: '80px',
       key: 'userName',
       render: (value: any) => {
         return value && <Tag color='blue'>{value}</Tag>
@@ -50,6 +62,7 @@ export default function LoggerPage() {
     {
       title: '模型',
       dataIndex: 'modelName',
+      width: '180px',
       key: 'modelName',
       render: (value: any) => {
         return value && <Tag onClick={() => {
@@ -63,6 +76,19 @@ export default function LoggerPage() {
             })
           });
         }}>{value}</Tag>
+      }
+    },
+    {
+      title: '用时',
+      dataIndex: 'duration',
+      key: 'duration',
+      render: (_: any, item: any) => {
+        return (<>
+          <Tag color='pink'>{timeString(item.totalTime)}ms</Tag>
+          <Tag color='gold'>
+            {item.stream ? '流式' : '非流式'}
+          </Tag>
+        </>)
       }
     },
     {
@@ -120,24 +146,59 @@ export default function LoggerPage() {
       })
   }
 
+  function loadViewConsumption() {
+    setConsumeLoading(true);
+    viewConsumption(input)
+      .then(res => {
+        if (res.success) {
+          setConsume(res.data);
+        } else {
+          message.error({
+            content: res.message
+          });
+        }
+      }).finally(() => {
+        setConsumeLoading(false)
+      })
+  }
+
   useEffect(() => {
     loadData()
   }, [input.page, input.pageSize]);
 
   return (
     <div style={{
-      margin: '20px',
-      height: '100%',
+      margin: '10px',
+      height: '80vh',
+      overflow: 'auto',
       width: '100%',
     }}>
       <Header>
-        <span style={{
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-        }}>
-          日志
-        </span>
+        <Card style={{
+          float: 'left',
+        }}
+          bodyStyle={{
+            padding: '8px',
+          }}>
+          <span>
+            区间消费: <span style={{
+              fontWeight: 'bold',
+            }}>{renderQuota(consume, 4)}</span>
+          </span>
 
+          <Button
+            type="text"
+            onClick={() => {
+              loadViewConsumption()
+            }}
+            loading={consumeLoading}
+            style={{
+              marginLeft: '0.5rem',
+            }}>
+            查看消费
+          </Button>
+
+        </Card>
         <Dropdown
           menu={{
             items: [

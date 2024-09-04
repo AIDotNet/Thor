@@ -26,3 +26,24 @@ export const getLoggers = async (params: any) => {
     }
     return get(url);
 }
+
+export const viewConsumption = async (params: any) => {
+    
+    let url = prefix + "/view-consumption?";
+    if (params.type) {
+        url += "type=" + params.type + "&";
+    }
+    if (params.model) {
+        url += "model=" + params.model + "&";
+    }
+    if (params.startTime) {
+        url += "startTime=" + params.startTime + "&";
+    }
+    if (params.endTime) {
+        url += "endTime=" + params.endTime + "&";
+    }
+    if (params.keyword) {
+        url += "keyword=" + params.keyword;
+    }
+    return get(url);
+}

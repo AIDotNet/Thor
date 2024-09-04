@@ -149,8 +149,9 @@ export default function Channel() {
 
   return (
     <div style={{
-      margin: '20px',
-      height: '100%',
+      margin: '10px',
+      height: '80vh',
+      overflow: 'auto',
       width: '100%',
     }}>
       <Header>

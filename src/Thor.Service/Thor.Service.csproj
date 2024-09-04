@@ -9,9 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AlibabaCloud.SDK.Dysmsapi20170525" Version="2.0.24" />
-    <PackageReference Include="AlipaySDKNet.Standard" Version="4.9.171" />
-    <PackageReference Include="FreeRedis" Version="1.2.15" />
+    <PackageReference Include="AlibabaCloud.SDK.Dysmsapi20170525" Version="3.0.0" />
+    <PackageReference Include="AlipaySDKNet.Standard" Version="4.9.258" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.6">
@@ -37,7 +36,7 @@
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
   </ItemGroup>
 
   <ItemGroup>

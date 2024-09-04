@@ -1,9 +1,4 @@
-﻿
-
-using Thor.Abstractions;
-using Thor.Service.DataAccess;
-using Thor.Service.Domain;
-using Thor.Service.Domain.Core;
+﻿using Thor.Service.Domain.Core;
 
 namespace Thor.Service.BackgroundTask;
 
@@ -120,7 +115,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
                             Month = (int)today.Month,
                             Day = (int)today.Day,
                             Count = model.RequestCount,
-                            Quota = model.TotalQuota,
+                            Quota = (int)model.TotalQuota,
                             TokenUsed = model.TotalTokens
                         }
                     };
@@ -131,7 +126,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider) : 
             }
 
             // 休眠一定时间或直到下一次执行周期
-            await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(30), stoppingToken);
         }
     }
 }

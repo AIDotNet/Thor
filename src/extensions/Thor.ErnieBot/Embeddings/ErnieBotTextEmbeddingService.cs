@@ -26,7 +26,7 @@ public class ErnieBotTextEmbeddingService : IThorTextEmbeddingService
         var response = await client.EmbeddingsAsync(new EmbeddingsRequest()
         {
             Input = createEmbeddingModel.InputCalculated?.ToList()
-        }, new EmbeddingModelEndpoint(createEmbeddingModel.Model));
+        }, new EmbeddingModelEndpoint(createEmbeddingModel.Model), cancellationToken);
 
         return new EmbeddingCreateResponse()
         {

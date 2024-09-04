@@ -207,9 +207,10 @@ export default function TokenPage() {
 
   return (
     <div style={{
-      margin: '20px',
+      margin: '10px',
+      height: '80vh',
+      overflow: 'auto',
       width: '100%',
-      height: '100%',
     }}>
       <Header>
         <span style={{

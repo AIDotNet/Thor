@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using MapsterMapper;
 using Thor.Abstractions.Chats;
@@ -90,7 +91,7 @@ public sealed class ChatService(
     };
 
 
-    public async ValueTask CreateImageAsync(HttpContext context, ImageCreateRequest request)
+    public async Task CreateImageAsync(HttpContext context, ImageCreateRequest request)
     {
         try
         {
@@ -122,6 +123,8 @@ public sealed class ChatService(
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
+            var sw = Stopwatch.StartNew();
+
             var response = await openService.CreateImage(request, new ThorPlatformOptions
             {
                 ApiKey = channel.Key,
@@ -136,9 +139,11 @@ public sealed class ChatService(
                 successful = response.Successful
             });
 
+            sw.Stop();
+
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), request.Model,
                 0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
-                channel.Name, context.GetIpAddress(), context.GetUserAgent());
+                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, sw.Elapsed.Milliseconds);
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
         }
@@ -212,12 +217,15 @@ public sealed class ChatService(
                 throw new Exception("输入格式错误");
             }
 
+            var sw = Stopwatch.StartNew();
+
             var stream = await embeddingService.EmbeddingAsync(embeddingCreateRequest, new ThorPlatformOptions
             {
                 ApiKey = channel.Key,
                 Address = channel.Address,
                 Other = channel.Other
             }, context.RequestAborted);
+            sw.Stop();
 
             if (ModelManagerService.PromptRate.TryGetValue(module.Model, out var rate))
             {
@@ -232,7 +240,7 @@ public sealed class ChatService(
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     module.Model,
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                    channel.Name, context.GetIpAddress(), context.GetUserAgent());
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, sw.Elapsed.Milliseconds);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     module.Model);
@@ -286,6 +294,7 @@ public sealed class ChatService(
             {
                 if (module.Stream == false)
                 {
+                    var sw = Stopwatch.StartNew();
                     var (requestToken, responseToken) =
                         await CompletionsHandlerAsync(context, module, channel, openService, user, rate);
 
@@ -300,7 +309,7 @@ public sealed class ChatService(
                     await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                         module.Model,
                         requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                        channel.Name, context.GetIpAddress(), context.GetUserAgent());
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, sw.Elapsed.Milliseconds);
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                         module.Model);
@@ -385,6 +394,8 @@ public sealed class ChatService(
                 int requestToken;
                 var responseToken = 0;
 
+                var sw = Stopwatch.StartNew();
+
                 if (request.Stream == true)
                 {
                     (requestToken, responseToken) =
@@ -409,7 +420,9 @@ public sealed class ChatService(
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     model,
                     requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                    channel.Name, context.GetIpAddress(), context.GetUserAgent());
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                    request.Stream is true,
+                    sw.Elapsed.Milliseconds);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     model);

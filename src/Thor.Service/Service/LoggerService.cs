@@ -1,4 +1,5 @@
 ﻿using Thor.BuildingBlocks.Data;
+using Thor.Service.Model;
 using Thor.Service.Options;
 
 namespace Thor.Service.Service;
@@ -16,9 +17,26 @@ public sealed class LoggerService(
         await eventBus.PublishAsync(logger);
     }
 
+    /// <summary>
+    /// 创建消费日志
+    /// </summary>
+    /// <param name="content"></param>
+    /// <param name="model"></param>
+    /// <param name="promptTokens"></param>
+    /// <param name="completionTokens"></param>
+    /// <param name="quota"></param>
+    /// <param name="tokenName"></param>
+    /// <param name="userName"></param>
+    /// <param name="userId"></param>
+    /// <param name="channelId"></param>
+    /// <param name="channelName"></param>
+    /// <param name="ip"></param>
+    /// <param name="userAgent"></param>
+    /// <param name="stream">是否Stream请求</param>
+    /// <param name="totalTime">请求总耗时</param>
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
         int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName,
-        string ip, string userAgent)
+        string ip, string userAgent, bool stream, int totalTime)
     {
         if (ChatCoreOptions.FreeModel?.EnableFree == true)
         {
@@ -42,6 +60,8 @@ public sealed class LoggerService(
             ModelName = model,
             PromptTokens = promptTokens,
             CompletionTokens = completionTokens,
+            Stream = stream,
+            TotalTime = totalTime,
             IP = ip,
             UserAgent = userAgent,
             Quota = quota,
@@ -79,6 +99,38 @@ public sealed class LoggerService(
         await CreateAsync(logger);
     }
 
+    public async Task<long> ViewConsumptionAsync(ThorChatLoggerType? type,
+        string? model,
+        DateTime? startTime, DateTime? endTime, string? keyword)
+    {
+        var query = LoggerDbContext.Loggers
+            .AsNoTracking();
+
+        if ((int)type == -1) type = null;
+
+        if (type.HasValue) query = query.Where(x => x.Type == type);
+
+        if (!string.IsNullOrWhiteSpace(model)) query = query.Where(x => x.ModelName == model);
+
+        if (startTime.HasValue) query = query.Where(x => x.CreatedAt >= startTime);
+
+        if (endTime.HasValue) query = query.Where(x => x.CreatedAt <= endTime);
+
+        if (!UserContext.IsAdmin) query = query.Where(x => x.UserId == UserContext.CurrentUserId);
+
+        if (!string.IsNullOrWhiteSpace(keyword))
+            query = query.Where(x =>
+                x.UserName!.Contains(keyword) || x.Content.Contains(keyword) || x.TokenName.Contains(keyword) ||
+                (!string.IsNullOrEmpty(x.ChannelName) && x.ChannelName.Contains(keyword)) ||
+                x.ModelName.Contains(keyword)
+            );
+
+        var result = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .SumAsync(x => x.Quota);
+
+        return result;
+    }
 
     public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ThorChatLoggerType? type,
         string? model,

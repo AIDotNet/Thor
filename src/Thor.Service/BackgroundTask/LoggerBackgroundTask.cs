@@ -4,7 +4,9 @@ using Thor.Service.Service;
 
 namespace Thor.Service.BackgroundTask;
 
-public sealed class LoggerBackgroundTask(IServiceProvider serviceProvider) : BackgroundService
+public sealed class LoggerBackgroundTask(
+    IServiceProvider serviceProvider,
+    ILogger<LoggerBackgroundTask> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -33,9 +35,11 @@ public sealed class LoggerBackgroundTask(IServiceProvider serviceProvider) : Bac
 
             var deleteDate = today.AddDays(-day);
 
-            await dbContext.Loggers
+            var result = await dbContext.Loggers
                 .Where(log => log.CreatedAt < deleteDate)
                 .ExecuteDeleteAsync(cancellationToken: stoppingToken);
+
+            logger.LogInformation($"删除日志成功，删除时间：{deleteDate} 删除数量：{result}");
         }
     }
 }

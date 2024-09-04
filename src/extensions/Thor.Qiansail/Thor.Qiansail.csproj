@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sdcb.DashScope" Version="1.0.1" />
+    <PackageReference Include="Sdcb.DashScope" Version="1.0.2" />
   </ItemGroup>
 
 </Project>
