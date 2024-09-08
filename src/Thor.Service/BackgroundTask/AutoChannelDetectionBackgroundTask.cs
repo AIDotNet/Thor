@@ -12,6 +12,9 @@ public sealed class AutoChannelDetectionBackgroundTask(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken,
+            TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
         while (!stoppingToken.IsCancellationRequested)
         {
             var autoDisable = SettingService.GetBoolSetting(SettingExtensions.GeneralSetting.AutoDisableChannel);
@@ -23,9 +26,6 @@ public sealed class AutoChannelDetectionBackgroundTask(
 
             logger.LogInformation(
                 $"AutoChannelDetectionBackgroundTask: AutoDisable: {autoDisable}, Interval: {interval}");
-
-            await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken,
-                TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             if (autoDisable)
             {
