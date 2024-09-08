@@ -194,9 +194,17 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         if (channel.Type == OpenAIPlatformOptions.PlatformCode)
         {
-            // 获取渠道是否支持gpt-3.5-turbo
-            chatRequest.Model = channel.Models.Order()
-                .FirstOrDefault(x => x.StartsWith("gpt-", StringComparison.OrdinalIgnoreCase));
+            // 如果没gpt3.5则搜索是否存在gpt4o模型
+            chatRequest.Model = channel.Models.FirstOrDefault(x =>
+                x.StartsWith("gpt-3.5", StringComparison.OrdinalIgnoreCase) ||
+                x.StartsWith("gpt-4o", StringComparison.OrdinalIgnoreCase));
+
+            if (chatRequest.Model.IsNullOrEmpty())
+            {
+                // 获取渠道是否支持gpt-3.5-turbo
+                chatRequest.Model = channel.Models.Order()
+                    .FirstOrDefault(x => x.StartsWith("gpt-", StringComparison.OrdinalIgnoreCase));
+            }
         }
         else if (channel.Type == ClaudiaPlatformOptions.PlatformCode)
         {
