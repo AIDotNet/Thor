@@ -2,7 +2,7 @@
 using Thor.Service.Filters;
 using Thor.Service.Service;
 
-namespace Thor.Service;
+namespace Thor.Service.Extensions;
 
 public static class EndpointRouteExtensions
 {

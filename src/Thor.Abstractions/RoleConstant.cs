@@ -1,4 +1,4 @@
-﻿namespace Thor.Service;
+﻿namespace Thor.Abstractions;
 
 public static class RoleConstant
 {
