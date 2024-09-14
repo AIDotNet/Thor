@@ -47,7 +47,7 @@ public record ThorChatChoiceResponse
     /// 如果模型调用了函数，则会出现这种情况。
     /// </summary>
     [JsonPropertyName("finish_reason")]
-    public string FinishReason { get; set; } = string.Empty;
+    public string? FinishReason { get; set; }
 
     /// <summary>
     /// 此指纹表示模型运行时使用的后端配置。
@@ -61,9 +61,7 @@ public record ThorChatChoiceResponse
     /// </summary>
     public class FinishDetailsResponse
     {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-        [JsonPropertyName("stop")]
-        public string Stop { get; set; }
+        [JsonPropertyName("type")] public string Type { get; set; }
+        [JsonPropertyName("stop")] public string Stop { get; set; }
     }
 }
