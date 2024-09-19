@@ -18,11 +18,11 @@ public static class TokenHelper
     /// <returns></returns>
     public static int GetTotalTokens(params string[] content)
     {
-        return content.Sum(item => GptEncoding.Encode(item).Count);
+        return content.Sum(GetTokens);
     }
 
     public static int GetTokens(string content)
     {
-        return GptEncoding.Encode(content).Count;
+        return GptEncoding.CountTokens(content);
     }
 }
