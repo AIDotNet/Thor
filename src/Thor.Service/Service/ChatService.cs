@@ -305,13 +305,14 @@ public sealed class ChatService(
 
                     // 将quota 四舍五入
                     quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
-                    
+
                     sw.Stop();
 
                     await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                         module.Model,
                         requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
-                        channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds);
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent(), false,
+                        (int)sw.ElapsedMilliseconds);
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                         module.Model);
@@ -418,7 +419,7 @@ public sealed class ChatService(
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
-                
+
                 sw.Stop();
 
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
@@ -670,6 +671,11 @@ public sealed class ChatService(
                             {
                                 response.Delta.Content = null;
                                 response.Message.Content = null;
+                            }
+
+                            if (response.FinishReason.IsNullOrEmpty())
+                            {
+                                response.FinishReason = null;
                             }
                         }
                     }

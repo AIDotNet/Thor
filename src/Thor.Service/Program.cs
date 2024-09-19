@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Aop.Api.Domain;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,8 @@ using Thor.Service.Service;
 using Thor.SparkDesk.Extensions;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.RabbitMQEvent;
+using Thor.Service.Extensions;
+using Product = Thor.Service.Domain.Product;
 
 try
 {
@@ -716,6 +719,15 @@ try
                 await imageService.CreateImageAsync(context, request))
         .WithDescription("OpenAI")
         .WithDescription("Image")
+        .WithOpenApi();
+
+
+    app.MapGet("/v1/models", async (HttpContext context) =>
+        {
+            return await ModelService.GetAsync(context);
+        })
+        .WithDescription("获取模型列表")
+        .RequireAuthorization()
         .WithOpenApi();
 
 

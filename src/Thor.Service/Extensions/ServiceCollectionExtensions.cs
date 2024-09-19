@@ -2,7 +2,7 @@
 using Thor.Service.Infrastructure;
 using Thor.Service.Options;
 
-namespace Thor.Service;
+namespace Thor.Service.Extensions;
 
 public static class ServiceCollectionExtensions
 {

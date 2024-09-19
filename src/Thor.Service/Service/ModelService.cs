@@ -1,4 +1,6 @@
-﻿namespace Thor.Service.Service;
+﻿using Thor.Service.Model;
+
+namespace Thor.Service.Service;
 
 public static class ModelService
 {
@@ -61,5 +63,30 @@ public static class ModelService
         await cache.CreateAsync("UseModels", value, TimeSpan.FromHours(5));
 
         return value;
+    }
+
+    public static async Task<ModelsListDto> GetAsync(HttpContext context)
+    {
+        var dbContext = context.RequestServices.GetRequiredService<AIDotNetDbContext>();
+
+        var models = await dbContext.ModelManagers
+            .OrderBy(x => x.CreatedAt)
+            .Where(x => x.Enable)
+            .ToListAsync();
+
+        var modelsListDto = new ModelsListDto();
+
+        foreach (var model in models)
+        {
+            modelsListDto.Data.Add(new ModelsDataDto()
+            {
+                Created = model.CreatedAt.ToUnixTimeSeconds(),
+                Id = model.Model,
+                @object = "model",
+                OwnedBy = "openai",
+            });
+        }
+
+        return modelsListDto;
     }
 }
