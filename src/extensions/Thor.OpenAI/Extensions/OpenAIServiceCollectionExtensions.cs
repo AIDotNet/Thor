@@ -65,13 +65,11 @@ public static class OpenAIServiceCollectionExtensions
                     
                     // 伪装成谷歌浏览器
                     options.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
-                    options.DefaultRequestHeaders.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
                 })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
                 PooledConnectionLifetime = TimeSpan.FromMinutes(6),
                 PooledConnectionIdleTimeout = TimeSpan.FromMinutes(6),
-                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
             });
 
         return services;
