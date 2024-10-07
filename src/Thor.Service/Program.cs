@@ -743,4 +743,5 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
-}
+}builder.AddServiceDefaults();
+builder.MapDefaultEndpoints();
