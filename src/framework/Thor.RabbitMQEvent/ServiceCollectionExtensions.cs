@@ -8,6 +8,12 @@ namespace Thor.RabbitMQEvent;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// 添加RabbitMQ事件总线
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
     public static IServiceCollection AddRabbitMQEventBus(this IServiceCollection services, IConfiguration configuration)
     {
         // 是否启用RabbitMQ

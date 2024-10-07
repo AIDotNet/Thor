@@ -1,11 +1,11 @@
 using System.Text.Json.Serialization;
-using Aop.Api.Domain;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using Thor.AzureOpenAI.Extensions;
+using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.AzureOpenAI.Extensions;
 using Thor.BuildingBlocks.Data;
 using Thor.Claudia.Extensions;
 using Thor.ErnieBot.Extensions;
@@ -17,19 +17,17 @@ using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
 using Thor.OpenAI.Extensions;
 using Thor.Qiansail.Extensions;
+using Thor.RabbitMQEvent;
 using Thor.RedisMemory.Cache;
-using Thor.Service;
 using Thor.Service.BackgroundTask;
 using Thor.Service.EventBus;
+using Thor.Service.Extensions;
 using Thor.Service.Filters;
 using Thor.Service.Infrastructure;
 using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
 using Thor.SparkDesk.Extensions;
-using Thor.Abstractions.Chats.Dtos;
-using Thor.RabbitMQEvent;
-using Thor.Service.Extensions;
 using Product = Thor.Service.Domain.Product;
 
 try
@@ -227,7 +225,6 @@ try
         var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
         await loggerDbContext.Database.EnsureCreatedAsync();
 
-        await RateLimitModelService.LoadAsync(dbContext);
     }
 // 由于没有生成迁移记录，所以使用EnsureCreated
     else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") ||
@@ -242,7 +239,6 @@ try
         var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
         await loggerDbContext.Database.EnsureCreatedAsync();
 
-        await RateLimitModelService.LoadAsync(dbContext);
     }
 
 

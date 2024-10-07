@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { login } from '../../services/AuthorizeService';
 import { InitSetting, SystemSetting } from '../../services/SettingService';
 import { useNavigate } from 'react-router-dom';
+import Divider from '@lobehub/ui/es/Form/components/FormDivider';
 
 const FunctionTools = styled.div`
     display: flex;
@@ -66,7 +67,7 @@ const Login = memo(() => {
     }
 
     async function handleLogin() {
-        
+
         try {
             setLoading(true);
             const token = await login({
@@ -121,11 +122,16 @@ const Login = memo(() => {
 
             }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 auto', width: '380px', marginBottom: '20px' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '20px'}}>
-                        <Avatar src='/logo.png' {...control} />
-                        <h2>
-                            登录账号
-                        </h2>
+                    <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                        <span style={{
+                            fontSize: '28px',
+                            fontWeight: 'bold',
+                            marginBottom: '20px',
+                            display: 'block',
+
+                        }}>
+                            TokenAI 登录系统
+                        </span>
                     </div>
                     <div style={{ marginBottom: '20px', width: '100%' }}>
                         <Input
@@ -174,8 +180,11 @@ const Login = memo(() => {
                         注册账号
                     </span>
                 </FunctionTools>
+                <Divider>
+                    第三方登录
+                </Divider>
                 <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 auto', width: '380px', paddingBottom: '8px', paddingTop: '20px' }}>
-                    <Button onClick={() => { handleGithub() }} size='large' type='text' icon={<GithubOutlined />} />
+                    <Button onClick={() => { handleGithub() }} size='large' icon={<GithubOutlined />} />
                 </div>
             </div>
         </GridShowcase>

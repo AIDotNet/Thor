@@ -99,7 +99,7 @@ public sealed class ChatService(
 
             if (request?.Model.IsNullOrEmpty() == true) request.Model = "dall-e-2";
 
-            await rateLimitModelService.CheckAsync(request.Model, context, serviceCache);
+            await rateLimitModelService.CheckAsync(request.Model, context);
 
             var imageCostRatio = GetImageCostRatio(request);
 
@@ -173,7 +173,7 @@ public sealed class ChatService(
 
             if (module == null) throw new Exception("模型校验异常");
 
-            await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
+            await rateLimitModelService.CheckAsync(module!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
@@ -277,7 +277,7 @@ public sealed class ChatService(
 
         try
         {
-            await rateLimitModelService.CheckAsync(module!.Model, context, serviceCache);
+            await rateLimitModelService.CheckAsync(module!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
@@ -369,7 +369,7 @@ public sealed class ChatService(
         try
         {
             var model = request.Model;
-            await rateLimitModelService.CheckAsync(model, context, serviceCache);
+            await rateLimitModelService.CheckAsync(model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
 

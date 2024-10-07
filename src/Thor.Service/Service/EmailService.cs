@@ -4,7 +4,7 @@ using System.Net.Mail;
 
 namespace Thor.Service.Service;
 
-public class EmailService
+public class EmailService(ILogger<EmailService> logger)
 {
     private static readonly ConcurrentDictionary<string, Lazy<SmtpClient>> Factory = new();
 
@@ -22,7 +22,7 @@ public class EmailService
             return client;
         })).Value;
 
-        MailMessage message = new MailMessage(new MailAddress(fromAddress), new MailAddress(email));
+        var message = new MailMessage(new MailAddress(fromAddress), new MailAddress(email));
 
         message.Body = value; //邮件内容
         message.Subject = subject;
@@ -33,6 +33,7 @@ public class EmailService
         }
         catch (Exception e)
         {
+            logger.LogError(e, "Send email failed");
         }
 
     }

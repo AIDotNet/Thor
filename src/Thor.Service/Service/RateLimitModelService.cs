@@ -1,16 +1,9 @@
 ﻿namespace Thor.Service.Service;
 
-public class RateLimitModelService(IServiceProvider serviceProvider) : ApplicationService(serviceProvider)
+public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCache serviceCache)
+    : ApplicationService(serviceProvider)
 {
-    private static List<RateLimitModel> _rateLimitModels = new();
-
-    public static async ValueTask LoadAsync(AIDotNetDbContext context)
-    {
-        _rateLimitModels = await context.RateLimitModels
-            .AsNoTracking()
-            .Where(x => x.Enable)
-            .ToListAsync();
-    }
+    private const string CacheKey = "CacheKey:RateLimitModel";
 
     /// <summary>
     /// 模型速率检测
@@ -21,8 +14,19 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     /// <exception cref="RateLimitException"></exception>
-    public async ValueTask CheckAsync(string model, HttpContext context, IServiceCache serviceCache)
+    public async ValueTask CheckAsync(string model, HttpContext context)
     {
+        var rateLimitModels = await serviceCache.GetOrCreateAsync(CacheKey,
+            async () =>
+            {
+                return await DbContext.RateLimitModels
+                    .AsNoTracking()
+                    .Where(x => x.Enable)
+                    .ToListAsync();
+            }).ConfigureAwait(false);
+
+        if (rateLimitModels == null || rateLimitModels?.Count == 0) return;
+
         // 获取IP
         var ip = context.Connection.RemoteIpAddress?.ToString();
 
@@ -32,7 +36,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
             ip = header;
         }
 
-        foreach (var rateLimitModel in _rateLimitModels.Where(x => x.Model.Contains(model)))
+        foreach (var rateLimitModel in rateLimitModels.Where(x => x.Model.Contains(model)))
         {
             if (rateLimitModel.WhiteList.Contains(ip)) return;
 
@@ -90,8 +94,8 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
         await DbContext.RateLimitModels.AddAsync(rateLimitModel);
 
         await DbContext.SaveChangesAsync();
-
-        await LoadAsync(DbContext);
+        
+        await serviceCache.RemoveAsync(CacheKey);
     }
 
     public async ValueTask<bool> RemoveAsync(string id)
@@ -99,7 +103,8 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
         var result = await DbContext.RateLimitModels.Where(x => x.Id == id)
             .ExecuteDeleteAsync();
 
-        await LoadAsync(DbContext);
+        await serviceCache.RemoveAsync(CacheKey);
+        
         return result > 0;
     }
 
@@ -116,7 +121,8 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
                 .SetProperty(x => x.Strategy, rateLimitModel.Strategy)
                 .SetProperty(x => x.Limit, rateLimitModel.Limit));
 
-        await LoadAsync(DbContext);
+        await serviceCache.RemoveAsync(CacheKey);
+        
         return result > 0;
     }
 
@@ -125,6 +131,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider) : Applicati
         await DbContext.RateLimitModels.Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(x => x.Enable, x => !x.Enable));
 
-        await LoadAsync(DbContext);
+        await serviceCache.RemoveAsync(CacheKey);
+        
     }
 }
