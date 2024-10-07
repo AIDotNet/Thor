@@ -1,11 +1,11 @@
 using System.Text.Json.Serialization;
-using Aop.Api.Domain;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using Thor.AzureOpenAI.Extensions;
+using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.AzureOpenAI.Extensions;
 using Thor.BuildingBlocks.Data;
 using Thor.Claudia.Extensions;
 using Thor.ErnieBot.Extensions;
@@ -17,19 +17,17 @@ using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
 using Thor.OpenAI.Extensions;
 using Thor.Qiansail.Extensions;
+using Thor.RabbitMQEvent;
 using Thor.RedisMemory.Cache;
-using Thor.Service;
 using Thor.Service.BackgroundTask;
 using Thor.Service.EventBus;
+using Thor.Service.Extensions;
 using Thor.Service.Filters;
 using Thor.Service.Infrastructure;
 using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
 using Thor.SparkDesk.Extensions;
-using Thor.Abstractions.Chats.Dtos;
-using Thor.RabbitMQEvent;
-using Thor.Service.Extensions;
 using Product = Thor.Service.Domain.Product;
 
 try
@@ -210,10 +208,13 @@ try
         throw new Exception("不支持的数据库类型");
     }
 
+    builder.AddServiceDefaults();
+
     builder.Services.AddResponseCompression();
 
     var app = builder.Build();
 
+    app.MapDefaultEndpoints();
 
     using var scope = app.Services.CreateScope();
 
@@ -657,13 +658,13 @@ try
         .WithDescription("获取限流策略")
         .WithOpenApi();
 
-    rateLimitModel.MapPost(string.Empty, async (RateLimitModelService service, RateLimitModel rateLimitModel) =>
-            await service.CreateAsync(rateLimitModel))
+    rateLimitModel.MapPost(string.Empty, async (RateLimitModelService service, RateLimitModel limitModel) =>
+            await service.CreateAsync(limitModel))
         .WithDescription("创建限流策略")
         .WithOpenApi();
 
-    rateLimitModel.MapPut(string.Empty, async (RateLimitModelService service, RateLimitModel rateLimitModel) =>
-            await service.UpdateAsync(rateLimitModel))
+    rateLimitModel.MapPut(string.Empty, async (RateLimitModelService service, RateLimitModel limitModel) =>
+            await service.UpdateAsync(limitModel))
         .WithDescription("更新限流策略")
         .WithOpenApi();
 
@@ -693,7 +694,7 @@ try
 
     #endregion
 
-// 对话补全请求
+    // 对话补全请求
     app.MapPost("/v1/chat/completions",
             async (ChatService service, HttpContext httpContext, ThorChatCompletionsRequest request) =>
                 await service.ChatCompletionsAsync(httpContext, request))
@@ -701,7 +702,7 @@ try
         .WithDescription("Get completions from OpenAI")
         .WithOpenApi();
 
-// 文本补全接口,不建议使用，使用对话补全即可
+    // 文本补全接口,不建议使用，使用对话补全即可
     app.MapPost("/v1/completions", async (ChatService service, HttpContext context) =>
             await service.CompletionsAsync(context))
         .WithGroupName("OpenAI")
@@ -743,5 +744,4 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
-}builder.AddServiceDefaults();
-builder.MapDefaultEndpoints();
+}
