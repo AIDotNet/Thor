@@ -208,10 +208,13 @@ try
         throw new Exception("不支持的数据库类型");
     }
 
+    builder.AddServiceDefaults();
+
     builder.Services.AddResponseCompression();
 
     var app = builder.Build();
 
+    app.MapDefaultEndpoints();
 
     using var scope = app.Services.CreateScope();
 
@@ -653,13 +656,13 @@ try
         .WithDescription("获取限流策略")
         .WithOpenApi();
 
-    rateLimitModel.MapPost(string.Empty, async (RateLimitModelService service, RateLimitModel rateLimitModel) =>
-            await service.CreateAsync(rateLimitModel))
+    rateLimitModel.MapPost(string.Empty, async (RateLimitModelService service, RateLimitModel limitModel) =>
+            await service.CreateAsync(limitModel))
         .WithDescription("创建限流策略")
         .WithOpenApi();
 
-    rateLimitModel.MapPut(string.Empty, async (RateLimitModelService service, RateLimitModel rateLimitModel) =>
-            await service.UpdateAsync(rateLimitModel))
+    rateLimitModel.MapPut(string.Empty, async (RateLimitModelService service, RateLimitModel limitModel) =>
+            await service.UpdateAsync(limitModel))
         .WithDescription("更新限流策略")
         .WithOpenApi();
 
@@ -689,7 +692,7 @@ try
 
     #endregion
 
-// 对话补全请求
+    // 对话补全请求
     app.MapPost("/v1/chat/completions",
             async (ChatService service, HttpContext httpContext, ThorChatCompletionsRequest request) =>
                 await service.ChatCompletionsAsync(httpContext, request))
@@ -697,7 +700,7 @@ try
         .WithDescription("Get completions from OpenAI")
         .WithOpenApi();
 
-// 文本补全接口,不建议使用，使用对话补全即可
+    // 文本补全接口,不建议使用，使用对话补全即可
     app.MapPost("/v1/completions", async (ChatService service, HttpContext context) =>
             await service.CompletionsAsync(context))
         .WithGroupName("OpenAI")
