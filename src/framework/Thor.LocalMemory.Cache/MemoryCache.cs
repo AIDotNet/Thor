@@ -13,12 +13,9 @@ public sealed class MemoryCache(IMemoryCache memoryCache) : IServiceCache
 
             var token = new CancellationTokenSource(ttl.Value);
             token.Token.Register(() => memoryCache.Remove(key));
-            memoryCache.Set(key, value);
         }
-        else
-        {
-            memoryCache.Set(key, value);
-        }
+
+        memoryCache.Set(key, value);
 
         await ValueTask.CompletedTask;
     }
@@ -30,12 +27,7 @@ public sealed class MemoryCache(IMemoryCache memoryCache) : IServiceCache
 
     public ValueTask<T?> GetAsync<T>(string key)
     {
-        if (memoryCache.TryGetValue(key, out T value))
-        {
-            return new ValueTask<T?>(value);
-        }
-
-        return new ValueTask<T?>(default(T));
+        return memoryCache.TryGetValue(key, out T value) ? new ValueTask<T?>(value) : new ValueTask<T?>(default(T));
     }
 
     public ValueTask RemoveAsync(string key)

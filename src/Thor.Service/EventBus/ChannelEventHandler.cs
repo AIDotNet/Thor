@@ -19,6 +19,7 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
 
     public async Task HandleAsync(ChatLogger @event)
     {
+        @event.Id = Guid.NewGuid().ToString("N");
         await _loggerDbContext.Loggers.AddAsync(@event);
         await _loggerDbContext.SaveChangesAsync();
 

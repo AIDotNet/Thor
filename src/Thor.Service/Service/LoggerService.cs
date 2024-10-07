@@ -12,7 +12,6 @@ public sealed class LoggerService(
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
-        logger.Id = Guid.NewGuid().ToString("N");
         logger.CreatedAt = DateTime.Now;
         await eventBus.PublishAsync(logger);
     }
