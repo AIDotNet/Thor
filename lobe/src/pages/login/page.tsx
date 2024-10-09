@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { message, Input, Button } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone, GithubOutlined } from '@ant-design/icons';
-import { Avatar, GridShowcase, LogoProps, useControls, useCreateStore } from '@lobehub/ui';
+import {  GridShowcase } from '@lobehub/ui';
 import styled from 'styled-components';
 import { login } from '../../services/AuthorizeService';
 import { InitSetting, SystemSetting } from '../../services/SettingService';
@@ -32,25 +32,7 @@ const Login = memo(() => {
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
-    const store = useCreateStore();
-    const control: LogoProps | any = useControls(
-        {
-            size: {
-                max: 240,
-                min: 16,
-                step: 4,
-                value: 64,
-            },
-            type: {
-                options: ['3d', 'flat', 'high-contrast', 'text', 'combine'],
-                value: '3d',
-            },
-        },
-        { store },
-    );
-
-
-
+    
     function handleGithub() {
 
         const clientId = InitSetting.find(s => s.key === SystemSetting.GithubClientId)?.value;
