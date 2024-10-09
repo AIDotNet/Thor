@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI.Extensions;
 using Thor.BuildingBlocks.Data;
@@ -227,7 +228,6 @@ try
 
         var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
         await loggerDbContext.Database.EnsureCreatedAsync();
-
     }
 // 由于没有生成迁移记录，所以使用EnsureCreated
     else if (string.Equals(dbType, "postgresql") || string.Equals(dbType, "pgsql") ||
@@ -241,7 +241,6 @@ try
 
         var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
         await loggerDbContext.Database.EnsureCreatedAsync();
-
     }
 
 
@@ -707,8 +706,9 @@ try
         .WithDescription("Get completions from OpenAI")
         .WithOpenApi();
 
-    app.MapPost("/v1/embeddings", async (ChatService embeddingService, HttpContext context) =>
-            await embeddingService.EmbeddingAsync(context))
+    app.MapPost("/v1/embeddings",
+            async (ChatService embeddingService, HttpContext context, ThorEmbeddingInput module) =>
+                await embeddingService.EmbeddingAsync(context, module))
         .WithDescription("OpenAI")
         .WithDescription("Embedding")
         .WithOpenApi();
@@ -721,10 +721,7 @@ try
         .WithOpenApi();
 
 
-    app.MapGet("/v1/models", async (HttpContext context) =>
-        {
-            return await ModelService.GetAsync(context);
-        })
+    app.MapGet("/v1/models", async (HttpContext context) => { return await ModelService.GetAsync(context); })
         .WithDescription("获取模型列表")
         .RequireAuthorization()
         .WithOpenApi();
