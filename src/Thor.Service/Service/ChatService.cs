@@ -162,15 +162,10 @@ public sealed class ChatService(
         }
     }
 
-    public async ValueTask EmbeddingAsync(HttpContext context)
+    public async ValueTask EmbeddingAsync(HttpContext context,ThorEmbeddingInput module)
     {
         try
         {
-            using var body = new MemoryStream();
-            await context.Request.Body.CopyToAsync(body);
-
-            var module = JsonSerializer.Deserialize<ThorEmbeddingInput>(body.ToArray());
-
             if (module == null) throw new Exception("模型校验异常");
 
             await rateLimitModelService.CheckAsync(module!.Model, context);
@@ -245,6 +240,8 @@ public sealed class ChatService(
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     module.Model);
             }
+
+            stream.ConvertEmbeddingData(module.EncodingFormat);
 
             await context.Response.WriteAsJsonAsync(stream);
         }
