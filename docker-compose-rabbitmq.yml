@@ -1,0 +1,36 @@
+﻿version: '3.8'
+
+services:
+  ai-dotnet-api-service:
+    image: registry.token-ai.cn/thor:latest
+    ports:
+      - 18080:8080
+    build:
+      context: .
+      dockerfile: src/Thor.Service/Dockerfile
+    container_name: thor
+    volumes:
+      - ./data:/data
+    environment:
+      - TZ=Asia/Shanghai
+      - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
+      - ConnectionString=data source=/data/token.db
+      - LoggerConnectionString=data source=/data/logger.db
+      - CACHE_TYPE=Redis
+      - CACHE_CONNECTION_STRING=ai-redis
+      - RabbitMQ:ConnectionString=amqp://admin:admin@ai-rabbitmq:5672
+
+  ai-redis:
+    image: redis
+    container_name: ai-redis
+    volumes:
+      - ./data/redis:/data
+    command: redis-server --appendonly yes
+        
+
+  ai-rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ai-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
