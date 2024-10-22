@@ -34,6 +34,7 @@ COPY ["src/framework/Thor.LocalEvent/Thor.LocalEvent.csproj", "src/framework/Tho
 COPY ["src/framework/Thor.BuildingBlocks.Cache/Thor.BuildingBlocks.Cache.csproj", "src/framework/Thor.BuildingBlocks.Cache/"]
 COPY ["src/framework/Thor.LocalMemory.Cache/Thor.LocalMemory.Cache.csproj", "src/framework/Thor.LocalMemory.Cache/"]
 COPY ["src/framework/Thor.RedisMemory.Cache/Thor.RedisMemory.Cache.csproj", "src/framework/Thor.RedisMemory.Cache/"]
+COPY ["src/framework/Thor.Analyzers/Thor.Analyzers.csproj", "src/framework/Thor.Analyzers/"]
 RUN dotnet restore "src/Thor.Service/Thor.Service.csproj"
 COPY . .
 WORKDIR "/src/src/Thor.Service"
