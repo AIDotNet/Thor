@@ -8,7 +8,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 namespace Thor.Service.Service;
 
 public class ProductService(IServiceProvider serviceProvider, LoggerService loggerService)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider), ITransientDependency
 {
     public async ValueTask<List<Product>> GetProductsAsync()
     {

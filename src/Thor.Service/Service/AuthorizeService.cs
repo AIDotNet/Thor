@@ -2,14 +2,15 @@
 
 namespace Thor.Service.Service;
 
-public sealed class AuthorizeService(
+public  class AuthorizeService(
     IServiceProvider serviceProvider,
     LoggerService loggerService,
     TokenService tokenService,
     ILogger<AuthorizeService> logger,
     IConfiguration configuration,
+    JwtHelper jwtHelper,
     IServiceCache memoryCache)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider), ITransientDependency
 {
     private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
     {
@@ -30,16 +31,16 @@ public sealed class AuthorizeService(
         var user = await DbContext.Users.FirstOrDefaultAsync(x =>
             x.UserName == input.account || x.Email == input.account);
 
-        if (user == null) throw new Exception("Account does not exist");
+        if (user == null) 
+            throw new Exception("账号不存在");
 
-        if (user.IsDisabled) throw new Exception("Account is disabled");
+        if (user.IsDisabled) 
+            throw new Exception("账号已被禁用");
 
         if (user.Password != StringHelper.HashPassword(input.pass, user.PasswordHas))
-            throw new Exception("Password error");
+            throw new Exception("密码错误");
 
-        var key = "su-" + StringHelper.GenerateRandomString(38);
-
-        await memoryCache.CreateAsync(key, user, TimeSpan.FromDays(7));
+        var key = jwtHelper.CreateToken(user);
 
         return new
         {
@@ -47,7 +48,7 @@ public sealed class AuthorizeService(
             role = user.Role
         };
     }
-    
+
     public async Task<object> GithubAsync(string code)
     {
         var isGithub = SettingService.GetBoolSetting(SettingExtensions.SystemSetting.EnableGithubLogin);
@@ -134,10 +135,8 @@ public sealed class AuthorizeService(
             await DbContext.SaveChangesAsync();
         }
 
-        var key = "su-" + StringHelper.GenerateRandomString(38);
-
-        await memoryCache.CreateAsync(key, user, TimeSpan.FromDays(30));
-
+        var key = jwtHelper.CreateToken(user);
+        
         return new
         {
             token = key,
@@ -145,7 +144,7 @@ public sealed class AuthorizeService(
         };
     }
 
-    public async Task<object> GiteeAsync(string code,string redirectUri)
+    public async Task<object> GiteeAsync(string code, string redirectUri)
     {
         var isGitee = SettingService.GetBoolSetting(SettingExtensions.SystemSetting.EnableGithubLogin);
 
@@ -170,7 +169,7 @@ public sealed class AuthorizeService(
         }
 
         var request = new HttpRequestMessage(HttpMethod.Get,
-            "https://gitee.com/api/v5/user?access_token="+result.access_token);
+            "https://gitee.com/api/v5/user?access_token=" + result.access_token);
 
         logger.LogInformation("Github授权：" + result.access_token);
 
@@ -222,10 +221,8 @@ public sealed class AuthorizeService(
             await DbContext.SaveChangesAsync();
         }
 
-        var key = "su-" + StringHelper.GenerateRandomString(38);
-
-        await memoryCache.CreateAsync(key, user, TimeSpan.FromDays(30));
-
+        var key = jwtHelper.CreateToken(user);
+        
         return new
         {
             token = key,

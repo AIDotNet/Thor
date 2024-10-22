@@ -1,6 +1,6 @@
 ﻿namespace Thor.Service.Infrastructure.Middlewares;
 
-public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddleware
+public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddleware,ISingletonDependency
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {

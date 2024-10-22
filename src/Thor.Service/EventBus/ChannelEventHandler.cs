@@ -1,10 +1,9 @@
-﻿using System.Threading.Channels;
-using Thor.BuildingBlocks.Data;
-using Thor.Service.Options;
+﻿using Thor.BuildingBlocks.Data;
 
 namespace Thor.Service.EventBus;
 
-public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
+[Registration(typeof(IEventHandler<ChatLogger>))]
+public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable, ISingletonDependency
 {
     private readonly ILogger<ChannelEventHandler> _logger;
     private readonly IServiceScope _scope;

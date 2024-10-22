@@ -11,6 +11,7 @@
   <ItemGroup>
     <PackageReference Include="AlibabaCloud.SDK.Dysmsapi20170525" Version="3.0.0" />
     <PackageReference Include="AlipaySDKNet.Standard" Version="4.9.296" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
@@ -51,6 +52,10 @@
     <ProjectReference Include="..\extensions\Thor.OpenAI\Thor.OpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Qiansail\Thor.Qiansail.csproj" />
     <ProjectReference Include="..\extensions\Thor.SparkDesk\Thor.SparkDesk.csproj" />
+    <ProjectReference Include="..\framework\Thor.Analyzers\Thor.Analyzers.csproj">
+      <OutputItemType>Analyzer</OutputItemType>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Cache\Thor.BuildingBlocks.Cache.csproj" />
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Event\Thor.BuildingBlocks.Event.csproj" />
     <ProjectReference Include="..\framework\Thor.Core\Thor.Core.csproj" />

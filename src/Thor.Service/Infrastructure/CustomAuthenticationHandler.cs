@@ -9,6 +9,7 @@ public class CustomAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     IServiceCache cache,
+    JwtHelper jwtHelper,
     UrlEncoder encoder)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
@@ -19,25 +20,46 @@ public class CustomAuthenticationHandler(
             return AuthenticateResult.NoResult();
         }
 
-        authorization = authorization.ToString().Replace("Bearer ", "");
+        var token = authorization.ToString().Replace("Bearer ", "");
 
-        var user = await cache.GetAsync<User>(authorization.ToString()).ConfigureAwait(false);
-
-        if (user != null)
+        if (token.StartsWith("sk-"))
         {
-            var claims = new[]
+            var user = await cache.GetAsync<User>(token).ConfigureAwait(false);
+
+            if (user != null)
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserName),
-                new Claim(ClaimTypes.Sid, user.Id),
-                new Claim(ClaimTypes.Role, user.Role)
-            };
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.UserName),
+                    new Claim(ClaimTypes.Sid, user.Id),
+                    new Claim(ClaimTypes.Role, user.Role)
+                };
 
-            var identity = new ClaimsIdentity(claims, Scheme.Name);
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+                var identity = new ClaimsIdentity(claims, Scheme.Name);
+                var principal = new ClaimsPrincipal(identity);
+                var ticket = new AuthenticationTicket(principal, Scheme.Name);
 
-            return AuthenticateResult.Success(ticket);
+                return AuthenticateResult.Success(ticket);
+            }
         }
+        else
+        {
+            try
+            {
+                var claims = jwtHelper.GetClaimsFromToken(token);
+
+                var identity = new ClaimsIdentity(claims, Scheme.Name);
+                var principal = new ClaimsPrincipal(identity);
+                var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+                return AuthenticateResult.Success(ticket);
+            }
+            catch (Exception e)
+            {
+                return AuthenticateResult.NoResult();
+            }
+        }
+
 
         return AuthenticateResult.NoResult();
     }

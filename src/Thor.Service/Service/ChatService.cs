@@ -37,7 +37,7 @@ public sealed class ChatService(
     UserService userService,
     ILogger<ChatService> logger,
     LoggerService loggerService)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider),ITransientDependency
 {
     private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
 

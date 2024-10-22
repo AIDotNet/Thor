@@ -1,7 +1,7 @@
 ﻿namespace Thor.Service.Service;
 
 public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCache serviceCache)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider) , ITransientDependency
 {
     private const string CacheKey = "CacheKey:RateLimitModel";
 
