@@ -1,4 +1,3 @@
-import { Gitee } from './../components/Icon/Gitee';
 
 import { get, putJson } from "../utils/fetch";
 
