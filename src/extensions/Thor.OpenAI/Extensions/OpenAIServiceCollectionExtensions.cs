@@ -63,7 +63,6 @@ public static class OpenAIServiceCollectionExtensions
                 {
                     options.Timeout = TimeSpan.FromMinutes(6);
                     
-                    // 伪装成谷歌浏览器
                     options.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
                 })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler

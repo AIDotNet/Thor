@@ -1,7 +1,6 @@
-﻿using System.Collections.Concurrent;
-using Azure;
+﻿using System.ClientModel;
+using System.Collections.Concurrent;
 using Azure.AI.OpenAI;
-using OpenAI;
 using Thor.Abstractions;
 
 namespace Thor.AzureOpenAI;
@@ -18,25 +17,11 @@ public static class AzureOpenAIFactory
 
     public static AzureOpenAIClient CreateClient(ThorPlatformOptions options)
     {
-        var key = $"{options.ApiKey}_{options.Address}_{options.Other}";
-        return Clients.GetOrAdd(key, (_) =>
+        return Clients.GetOrAdd($"{options.ApiKey}_{options.Address}_{options.Other}", (_) =>
         {
-            var version = AzureOpenAIClientOptions.ServiceVersion.V2024_04_01_Preview;
+            const AzureOpenAIClientOptions.ServiceVersion version = AzureOpenAIClientOptions.ServiceVersion.V2024_06_01;
 
-            switch (options.Other)
-            {
-                case "2024-05-01-preview":
-                    version = AzureOpenAIClientOptions.ServiceVersion.V2024_05_01_Preview;
-                    break;
-                case "2024_06_01":
-                    version = AzureOpenAIClientOptions.ServiceVersion.V2024_06_01;
-                    break;
-                case "2024-04-01-preview":
-                    version = AzureOpenAIClientOptions.ServiceVersion.V2024_04_01_Preview;
-                    break;
-            }
-
-            var client = new AzureOpenAIClient(new(options.Address), new AzureKeyCredential(options.ApiKey),
+            var client = new AzureOpenAIClient(new Uri(options.Address), new ApiKeyCredential(options.ApiKey),
                 new AzureOpenAIClientOptions(version));
 
             return client;

@@ -1,6 +1,4 @@
-﻿using Thor.Service.Options;
-
-namespace Thor.Service.Service;
+﻿namespace Thor.Service.Service;
 
 public sealed class TokenService(
     IServiceProvider serviceProvider,
@@ -16,7 +14,7 @@ public sealed class TokenService(
 
         var token = Mapper.Map<Token>(input);
 
-        if (!createId.IsNullOrEmpty()) token.Creator = createId;
+        if (!string.IsNullOrEmpty(createId)) token.Creator = createId;
 
         token.Id = Guid.NewGuid().ToString("N");
 

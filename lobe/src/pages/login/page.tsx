@@ -1,12 +1,13 @@
 import { memo, useState } from 'react';
 import { message, Input, Button } from 'antd';
-import { EyeInvisibleOutlined, EyeTwoTone, GithubOutlined } from '@ant-design/icons';
-import {  GridShowcase } from '@lobehub/ui';
+import { EyeInvisibleOutlined, EyeTwoTone, GithubOutlined, } from '@ant-design/icons';
+import { GridShowcase, Tooltip } from '@lobehub/ui';
 import styled from 'styled-components';
 import { login } from '../../services/AuthorizeService';
 import { InitSetting, SystemSetting } from '../../services/SettingService';
 import { useNavigate } from 'react-router-dom';
 import Divider from '@lobehub/ui/es/Form/components/FormDivider';
+import { Gitee } from '../../components/Icon/Gitee';
 
 const FunctionTools = styled.div`
     display: flex;
@@ -32,7 +33,7 @@ const Login = memo(() => {
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
-    
+
     function handleGithub() {
 
         const clientId = InitSetting.find(s => s.key === SystemSetting.GithubClientId)?.value;
@@ -89,6 +90,31 @@ const Login = memo(() => {
         setLoading(false);
     }
 
+    function handlerGitee() {
+
+        // 判断是否开启gitee登录
+        const enable = InitSetting.find(s => s.key === SystemSetting.EnableGiteeLogin)?.value;
+
+        if (!enable) {
+            message.error({
+                content: '请联系管理员开启 Gitee 登录',
+            });
+            return;
+        }
+
+        const clientId = InitSetting.find(s => s.key === SystemSetting.GiteeClientId)?.value;
+
+        if (!clientId) {
+            message.error({
+                content: '请联系管理员配置 Github ClientId',
+            });
+            return;
+        }
+
+        // 跳转 Gitee 授权页面
+        window.location.href = `https://gitee.com/oauth/authorize?client_id=${clientId}&redirect_uri=${location.origin}/auth/gitee&response_type=code`;
+
+    }
 
     return (
         <GridShowcase>
@@ -165,8 +191,24 @@ const Login = memo(() => {
                 <Divider>
                     第三方登录
                 </Divider>
-                <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '0 auto', width: '380px', paddingBottom: '8px', paddingTop: '20px' }}>
-                    <Button onClick={() => { handleGithub() }} size='large' icon={<GithubOutlined />} />
+                <div style={{
+                    // 居中并且一排
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '100%',
+                    textAlign: 'center',
+                    marginBottom: '20px',
+                    marginTop: '20px',
+                    // 两个按钮之间的间距
+                    gap: '20px',
+                }}>
+                    <Tooltip title="Github 登录">
+                        <Button onClick={() => { handleGithub() }} size='large' icon={<GithubOutlined />} />
+                    </Tooltip>
+                    <Tooltip title="Gitee 登录">
+                        <Button onClick={() => { handlerGitee() }} size='large' icon={<Gitee />} />
+                    </Tooltip>
                 </div>
             </div>
         </GridShowcase>

@@ -9,3 +9,7 @@ export const login = (value:any) => {
 export const getGithubToken = (code: string) => {
   return post(prefix + "/github?code=" + code);
 }
+
+export const getGiteeToken = (code:string,redirectUri:string) =>{
+  return post(prefix+"/gitee?code="+code+"&redirectUri="+redirectUri);
+}

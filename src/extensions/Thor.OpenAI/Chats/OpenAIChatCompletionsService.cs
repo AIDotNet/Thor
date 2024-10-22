@@ -18,9 +18,9 @@ public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFa
         CancellationToken cancellationToken = default)
     {
         var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
-
+        
         var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
-            chatCompletionCreate, options.ApiKey);
+            chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {

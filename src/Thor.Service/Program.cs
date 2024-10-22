@@ -316,6 +316,13 @@ try
         .WithTags("Authorize")
         .WithOpenApi();
 
+    app.MapPost("/api/v1/authorize/gitee", async (AuthorizeService service, string code, string redirectUri) =>
+            await service.GiteeAsync(code, redirectUri))
+        .WithGroupName("Token")
+        .AddEndpointFilter<ResultFilter>()
+        .WithDescription("Github login")
+        .WithTags("Authorize")
+        .WithOpenApi();
 
     #region Token
 
