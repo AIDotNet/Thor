@@ -23,7 +23,7 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
 
   postgres:
-    image: postgres:13
+    image: postgres:17
     container_name: ai-postgres
     ports:
       - "5432:5432"
