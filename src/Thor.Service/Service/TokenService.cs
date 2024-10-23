@@ -114,7 +114,7 @@ public sealed class TokenService(
         }
         else
         {
-            token = await DbContext.Tokens.AsNoTracking().FirstOrDefaultAsync(x => x.Key == key);
+            token = await DbContext.Tokens.AsNoTracking().FirstOrDefaultAsync(x => x.Key == key && x.Disabled == false);
 
             if (token == null)
             {
