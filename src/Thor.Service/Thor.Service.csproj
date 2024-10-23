@@ -44,6 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\extensions\Thor.AIGitee\Thor.AIGitee.csproj" />
     <ProjectReference Include="..\extensions\Thor.AzureOpenAI\Thor.AzureOpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Claudia\Thor.Claudia.csproj" />
     <ProjectReference Include="..\extensions\Thor.ErnieBot\Thor.ErnieBot.csproj" />
@@ -54,10 +55,6 @@
     <ProjectReference Include="..\extensions\Thor.OpenAI\Thor.OpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Qiansail\Thor.Qiansail.csproj" />
     <ProjectReference Include="..\extensions\Thor.SparkDesk\Thor.SparkDesk.csproj" />
-<!--    <ProjectReference Include="..\framework\Thor.Analyzers\Thor.Analyzers.csproj">-->
-<!--      <OutputItemType>Analyzer</OutputItemType>-->
-<!--      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>-->
-<!--    </ProjectReference>-->
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Cache\Thor.BuildingBlocks.Cache.csproj" />
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Event\Thor.BuildingBlocks.Event.csproj" />
     <ProjectReference Include="..\framework\Thor.Core\Thor.Core.csproj" />

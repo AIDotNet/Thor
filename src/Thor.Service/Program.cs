@@ -95,7 +95,8 @@ try
         .AddClaudiaService()
         .AddOllamaService()
         .AddAzureOpenAIService()
-        .AddErnieBotService();
+        .AddErnieBotService()
+        .AddAIGiteeService();
 
     builder.Services
         .AddCors(options =>
