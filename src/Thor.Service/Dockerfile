@@ -27,7 +27,6 @@ COPY ["src/framework/Thor.LocalMemory.Cache/Thor.LocalMemory.Cache.csproj", "src
 COPY ["src/framework/Thor.RabbitMQEvent/Thor.RabbitMQEvent.csproj", "src/framework/Thor.RabbitMQEvent/"]
 COPY ["src/framework/Thor.RedisMemory.Cache/Thor.RedisMemory.Cache.csproj", "src/framework/Thor.RedisMemory.Cache/"]
 COPY ["src/Thor.ServiceDefaults/Thor.ServiceDefaults.csproj", "src/Thor.ServiceDefaults/"]
-COPY ["src/framework/Thor.Analyzers/Thor.Analyzers.csproj", "src/framework/Thor.Analyzers/"]
 RUN dotnet restore "src/Thor.Service/Thor.Service.csproj"
 COPY . .
 WORKDIR "/src/src/Thor.Service"
