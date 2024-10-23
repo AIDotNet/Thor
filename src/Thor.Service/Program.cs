@@ -81,7 +81,6 @@ try
         .AddEndpointsApiExplorer()
         .AddAutoGnarly()
         .AddSwaggerGen()
-        .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>()
         .AddCustomAuthentication()
         .AddHttpContextAccessor()
         .AddHostedService<StatisticBackgroundTask>()
