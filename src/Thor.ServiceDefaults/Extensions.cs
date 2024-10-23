@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.Metrics;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
@@ -17,7 +19,8 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
-        builder.ConfigureOpenTelemetry();
+        builder.ConfigureOpenTelemetry()
+            .Metrics.EnableMetrics("Thor");
 
         builder.AddDefaultHealthChecks();
 
@@ -41,18 +44,24 @@ public static class Extensions
         {
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
+            logging.AddOtlpExporter();
         });
 
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
+                metrics.AddMeter("Thor")
+                    .AddOtlpExporter();
+                
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
             })
             .WithTracing(tracing =>
             {
+                tracing.AddSource("Thor");
                 tracing.AddAspNetCoreInstrumentation()
+                    
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();

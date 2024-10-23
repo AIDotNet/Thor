@@ -361,6 +361,8 @@ public sealed class ChatService(
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="NotModelException"></exception>
+    //链路追踪
+    
     public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
         try
