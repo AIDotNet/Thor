@@ -19,8 +19,7 @@ public static class Extensions
 {
     public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
-        builder.ConfigureOpenTelemetry()
-            .Metrics.EnableMetrics("Thor");
+        builder.ConfigureOpenTelemetry();
 
         builder.AddDefaultHealthChecks();
 
@@ -44,24 +43,18 @@ public static class Extensions
         {
             logging.IncludeFormattedMessage = true;
             logging.IncludeScopes = true;
-            logging.AddOtlpExporter();
         });
 
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>
             {
-                metrics.AddMeter("Thor")
-                    .AddOtlpExporter();
-                
                 metrics.AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation();
             })
             .WithTracing(tracing =>
             {
-                tracing.AddSource("Thor");
                 tracing.AddAspNetCoreInstrumentation()
-                    
                     // Uncomment the following line to enable gRPC instrumentation (requires the OpenTelemetry.Instrumentation.GrpcNetClient package)
                     //.AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
