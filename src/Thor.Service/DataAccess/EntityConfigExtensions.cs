@@ -37,6 +37,16 @@ public static class EntityConfigExtensions
             options.HasIndex(x => x.Key);
 
             options.Property(x => x.Key).HasMaxLength(42);
+
+            options.Property(x => x.LimitModels)
+                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions) ??
+                            new List<string>());
+
+            options.Property(x => x.WhiteIpList)
+                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions) ??
+                            new List<string>());
         });
 
         modelBuilder.Entity<RedeemCode>(options =>
@@ -124,8 +134,8 @@ public static class EntityConfigExtensions
             options.HasKey(x => x.Id);
 
             options.Property(x => x.Model).IsRequired();
-            
-            options.HasIndex(x=>x.Model);
+
+            options.HasIndex(x => x.Model);
 
             options.HasIndex(x => x.Creator);
 

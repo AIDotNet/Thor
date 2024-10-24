@@ -78,6 +78,8 @@ public sealed class TokenService(
         await DbContext.Tokens.Where(x => x.Id == id && UserContext.CurrentUserId == x.Creator)
             .ExecuteUpdateAsync(x => x.SetProperty(x => x.Disabled, a => !a.Disabled));
     }
+    
+    
 
     /// <summary>
     ///     校验Token 是否有效

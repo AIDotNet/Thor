@@ -48,6 +48,16 @@ public sealed class Token : Entity<string>, ISoftDeletion
     /// 是否禁用
     /// </summary>
     public bool Disabled { get; set; }
+
+    /// <summary>
+    /// 限制使用的模型
+    /// </summary>
+    public List<string> LimitModels { get; set; } = new();
+    
+    /// <summary>
+    /// IP白名单
+    /// </summary>
+    public List<string> WhiteIpList { get; set; } = new();
     
     public bool IsDelete { get; set; }
     
