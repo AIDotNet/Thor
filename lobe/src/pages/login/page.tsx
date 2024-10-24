@@ -7,7 +7,7 @@ import { login } from '../../services/AuthorizeService';
 import { InitSetting, SystemSetting } from '../../services/SettingService';
 import { useNavigate } from 'react-router-dom';
 import Divider from '@lobehub/ui/es/Form/components/FormDivider';
-import { Gitee } from '../../components/Icon/Gitee';
+import Gitee from '../../components/Icon/Gitee';
 
 const FunctionTools = styled.div`
     display: flex;
