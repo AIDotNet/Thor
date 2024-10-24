@@ -37,7 +37,7 @@ public sealed class ChatService(
     UserService userService,
     ILogger<ChatService> logger,
     LoggerService loggerService)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider),ITransientDependency
 {
     private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
 
@@ -97,7 +97,7 @@ public sealed class ChatService(
         {
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
-            if (request?.Model.IsNullOrEmpty() == true) request.Model = "dall-e-2";
+            if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
 
             await rateLimitModelService.CheckAsync(request.Model, context);
 
@@ -361,6 +361,8 @@ public sealed class ChatService(
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="NotModelException"></exception>
+    //链路追踪
+    
     public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
         try
@@ -507,7 +509,7 @@ public sealed class ChatService(
                 {
                     var url = imageUrl.Url;
                     var detail = "";
-                    if (!imageUrl.Detail.IsNullOrEmpty()) detail = imageUrl.Detail;
+                    if (!string.IsNullOrEmpty(imageUrl.Detail)) detail = imageUrl.Detail;
 
                     try
                     {
@@ -608,7 +610,7 @@ public sealed class ChatService(
                 {
                     var url = imageUrl.Url;
                     var detail = "";
-                    if (!imageUrl.Detail.IsNullOrEmpty()) detail = imageUrl.Detail;
+                    if (!string.IsNullOrEmpty(imageUrl.Detail)) detail = imageUrl.Detail;
 
                     try
                     {
@@ -654,12 +656,12 @@ public sealed class ChatService(
                     {
                         foreach (var response in item.Choices)
                         {
-                            if (response.Delta.Role.IsNullOrEmpty())
+                            if (string.IsNullOrEmpty(response.Delta.Role))
                             {
                                 response.Delta.Role = "assistant";
                             }
 
-                            if (response.Message.Role.IsNullOrEmpty())
+                            if (string.IsNullOrEmpty(response.Message.Role))
                             {
                                 response.Message.Role = "assistant";
                             }
@@ -670,7 +672,7 @@ public sealed class ChatService(
                                 response.Message.Content = null;
                             }
 
-                            if (response.FinishReason.IsNullOrEmpty())
+                            if (string.IsNullOrEmpty(response.FinishReason))
                             {
                                 response.FinishReason = null;
                             }

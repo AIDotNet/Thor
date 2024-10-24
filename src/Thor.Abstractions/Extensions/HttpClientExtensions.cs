@@ -115,7 +115,7 @@ public static class HttpClientExtensions
         {
             req.Headers.Add("Authorization", $"Bearer {token}");
         }
-
+        
         return await httpClient.SendAsync(req);
     }
 

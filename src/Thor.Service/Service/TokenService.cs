@@ -1,12 +1,11 @@
-﻿using Thor.Service.Options;
-
-namespace Thor.Service.Service;
+﻿namespace Thor.Service.Service;
 
 public sealed class TokenService(
     IServiceProvider serviceProvider,
     IServiceCache memoryCache,
+    JwtHelper jwtHelper,
     ILogger<TokenService> logger)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider), ITransientDependency
 {
     public async ValueTask CreateAsync(TokenInput input, string? createId = null)
     {
@@ -16,7 +15,7 @@ public sealed class TokenService(
 
         var token = Mapper.Map<Token>(input);
 
-        if (!createId.IsNullOrEmpty()) token.Creator = createId;
+        if (!string.IsNullOrEmpty(createId)) token.Creator = createId;
 
         token.Id = Guid.NewGuid().ToString("N");
 
@@ -98,18 +97,18 @@ public sealed class TokenService(
 
         User? user;
         Token? token;
-        // su-则是用户token
-        if (key.StartsWith("su-"))
+        // sk-是用户创建的token，否则是用户的JWT
+        if (!key.StartsWith("sk-"))
         {
-            user = await memoryCache.GetAsync<User>(key);
+            var userDto = jwtHelper.GetUserFromToken(key);
 
-            if (user == null)
+            if (userDto == null)
             {
                 context.Response.StatusCode = 401;
                 throw new UnauthorizedAccessException();
             }
 
-            user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == user.Id);
+            user = await DbContext.Users.FindAsync(userDto.Id).ConfigureAwait(false);
             token = null;
         }
         else
@@ -157,13 +156,12 @@ public sealed class TokenService(
         }
 
         // 判断额度是否足够
-        if (user.ResidualCredit < requestQuota)
-        {
-            logger.LogWarning("用户额度不足");
-            context.Response.StatusCode = 402;
-            throw new InsufficientQuotaException("额度不足");
-        }
+        if (user.ResidualCredit >= requestQuota) 
+            return (token, user);
+        
+        logger.LogWarning("用户额度不足");
+        context.Response.StatusCode = 402;
+        throw new InsufficientQuotaException("额度不足");
 
-        return (token, user);
     }
 }

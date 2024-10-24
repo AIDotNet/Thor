@@ -11,7 +11,7 @@ public partial class UserService(
     LoggerService loggerService,
     IServiceCache memoryCache,
     TokenService tokenService)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider),ITransientDependency
 {
     public async ValueTask<User> CreateAsync(CreateUserInput input)
     {

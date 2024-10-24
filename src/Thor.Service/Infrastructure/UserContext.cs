@@ -1,10 +1,10 @@
 ﻿using System.Security.Claims;
-using Thor.Service.Dto;
 
 namespace Thor.Service.Infrastructure;
 
 
-public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
+[Registration(typeof(IUserContext))]
+public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext,ISingletonDependency
 {
     public UserDto CurrentUser
     {

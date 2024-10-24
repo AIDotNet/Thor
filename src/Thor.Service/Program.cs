@@ -79,28 +79,13 @@ try
     builder.Services.AddMvcCore().AddApiExplorer();
     builder.Services
         .AddEndpointsApiExplorer()
+        .AddAutoGnarly()
         .AddSwaggerGen()
-        .AddSingleton<IEventHandler<ChatLogger>, ChannelEventHandler>()
         .AddCustomAuthentication()
         .AddHttpContextAccessor()
-        .AddTransient<ProductService>()
-        .AddTransient<ImageService>()
-        .AddTransient<AuthorizeService>()
-        .AddTransient<TokenService>()
-        .AddTransient<SystemService>()
-        .AddTransient<ChatService>()
-        .AddTransient<LoggerService>()
-        .AddTransient<UserService>()
-        .AddTransient<ChannelService>()
-        .AddTransient<RedeemCodeService>()
-        .AddTransient<RateLimitModelService>()
-        .AddTransient<ModelManagerService>()
         .AddHostedService<StatisticBackgroundTask>()
         .AddHostedService<LoggerBackgroundTask>()
         .AddHostedService<AutoChannelDetectionBackgroundTask>()
-        .AddSingleton<UnitOfWorkMiddleware>()
-        .AddSingleton<EmailService>()
-        .AddSingleton<IUserContext, DefaultUserContext>()
         .AddOpenAIService()
         .AddMoonshotService()
         .AddSparkDeskService()
@@ -110,7 +95,8 @@ try
         .AddClaudiaService()
         .AddOllamaService()
         .AddAzureOpenAIService()
-        .AddErnieBotService();
+        .AddErnieBotService()
+        .AddAIGiteeService();
 
     builder.Services
         .AddCors(options =>
@@ -316,6 +302,13 @@ try
         .WithTags("Authorize")
         .WithOpenApi();
 
+    app.MapPost("/api/v1/authorize/gitee", async (AuthorizeService service, string code, string redirectUri) =>
+            await service.GiteeAsync(code, redirectUri))
+        .WithGroupName("Token")
+        .AddEndpointFilter<ResultFilter>()
+        .WithDescription("Github login")
+        .WithTags("Authorize")
+        .WithOpenApi();
 
     #region Token
 

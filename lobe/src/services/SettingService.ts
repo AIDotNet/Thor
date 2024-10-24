@@ -155,6 +155,34 @@ class SystemSetting {
      * @type {string}
      */
     static readonly GithubClientSecret: string = SystemSetting.Default + ":GithubClientSecret";
+    
+    /**
+     * 启用Gitee登录
+     * @type {string}
+     */
+    static readonly EnableGiteeLogin: string = SystemSetting.Default + ":EnableGiteeLogin";
+
+    /**
+     * Gitee Client Id
+     * @type {string}
+     */
+    static readonly GiteeClientId: string = SystemSetting.Default + ":GiteeClientId";
+
+    /**
+     * Gitee Client Secret
+     * @type {string}
+     * @static
+     * @memberof SystemSetting
+     */
+    static readonly GiteeClientSecret: string = SystemSetting.Default + ":GiteeClientSecret";
+
+    /**
+     * Gitee redirect_uri
+     * @type {string}
+     * @static
+     * @memberof SystemSetting
+     */
+    static readonly GiteeRedirectUri: string = SystemSetting.Default + ":GiteeRedirectUri";
 
     /**
      * 邮箱发送地址

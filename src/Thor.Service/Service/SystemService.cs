@@ -11,7 +11,7 @@ public sealed class SystemService(
     IServiceProvider serviceProvider,
     IServiceCache serviceCache,
     LoggerService loggerService)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider) ,ITransientDependency
 {
     /// <summary>
     /// 触发分享获取奖励

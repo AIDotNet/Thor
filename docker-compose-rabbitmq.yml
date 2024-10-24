@@ -13,14 +13,26 @@ services:
       - ./data:/data
     environment:
       - TZ=Asia/Shanghai
-      - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionString=data source=/data/token.db
-      - LoggerConnectionString=data source=/data/logger.db
+      - DBType=postgresql # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
+      - ConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet;Username=aidotnet;Password=aidotnet
+      - LoggerConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet-log;Username=aidotnet;Password=aidotnet
       - CACHE_TYPE=Redis
       - CACHE_CONNECTION_STRING=ai-redis
       - RabbitMQ:ConnectionString=amqp://admin:admin@ai-rabbitmq:5672
       - OTEL_SERVICE_NAME=Thor
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
+
+  postgres:
+    image: postgres:17
+    container_name: ai-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: aidotnet
+      POSTGRES_PASSWORD: aidotnet
+      POSTGRES_DB: aidotnet
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
 
   ai-redis:
     image: redis

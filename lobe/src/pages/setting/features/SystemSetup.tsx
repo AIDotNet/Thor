@@ -106,6 +106,33 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
+                            label='允许Gitee登录'
+                            valuePropName="checked"
+                        >
+                            <Switch
+                                checked={input[SystemSetting.EnableGiteeLogin] === 'true'}
+                                onChange={(checked) => handleInputChange(SystemSetting.EnableGiteeLogin, checked ? 'true' : 'false')}
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='Gitee Client Id'
+                        >
+                            <Input
+                                value={input[SystemSetting.GiteeClientId]}
+                                onChange={(e) => handleInputChange(SystemSetting.GiteeClientId, e.target.value)}
+                                placeholder='请输入Gitee Client Id'
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='Gitee Client Secret'
+                        >
+                            <Input
+                                value={input[SystemSetting.GiteeClientSecret]}
+                                onChange={(e) => handleInputChange(SystemSetting.GiteeClientSecret, e.target.value)}
+                                placeholder='请输入Gitee Client Secret'
+                            />
+                        </Form.Item>
+                        <Form.Item
                             label='是否启用邮箱注册验证'
                             valuePropName="checked"
                         >

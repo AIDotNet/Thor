@@ -6,13 +6,11 @@ import {
     Claude,
     Baichuan,
     Ai21,
-    Doubao,
     Google,
     Grok,
     Hunyuan,
     Minimax,
     Spark,
-    Stepfun,
     Tongyi,
     Moonshot,
     Wenxin,
@@ -27,13 +25,11 @@ export function getIconByNames(size: number = 24) {
         'Claude',
         'Baichuan',
         'Ai21',
-        'Doubao',
         'Google',
         'Grok',
         'Hunyuan',
         'Minimax',
         'Spark',
-        'Stepfun',
         'Tongyi',
         'Wenxin',
         'Yi',
@@ -87,11 +83,6 @@ export function getIconByName(name: string, size: number = 36) {
                 icon: <IconAvatar Icon={Ai21} size={size} />,
                 label: 'Ai21'
             };
-        case 'Doubao':
-            return {
-                icon: <IconAvatar Icon={Doubao} size={size} />,
-                label: '豆包'
-            };
         case 'Google':
             return {
                 icon: <IconAvatar Icon={Google} size={size} />,
@@ -116,11 +107,6 @@ export function getIconByName(name: string, size: number = 36) {
             return {
                 icon: <IconAvatar Icon={Spark} size={size} />,
                 label: 'Spark'
-            };
-        case 'Stepfun':
-            return {
-                icon: <IconAvatar Icon={Stepfun} size={size} />,
-                label: 'Stepfun'
             };
         case 'Tongyi':
             return {

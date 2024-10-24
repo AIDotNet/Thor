@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
@@ -11,15 +10,24 @@ using Thor.Abstractions.Extensions;
 
 namespace Thor.OpenAI.Chats;
 
-public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
+public class AIGiteeChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
 {
+    private const string baseUrl = "https://ai.gitee.com/api/serverless/{0}/chat/completions";
+    
+    private string GetBaseUrl(string model)
+    {
+        return string.Format(baseUrl, model);
+    }
+    
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
+        var client = httpClientFactory.CreateClient(AIGiteePlatformOptions.PlatformCode);
+
+        var url = GetBaseUrl(chatCompletionCreate.Model);
         
-        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await client.PostJsonAsync(url,
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -45,9 +53,10 @@ public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFa
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
+        var client = httpClientFactory.CreateClient(AIGiteePlatformOptions.PlatformCode);
 
-        var response = await client.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var url = GetBaseUrl(chatCompletionCreate.Model);
+        var response = await client.HttpRequestRaw(url,
             chatCompletionCreate, options.ApiKey);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)

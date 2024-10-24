@@ -7,3 +7,4 @@ global using Thor.Service.Exceptions;
 global using Thor.Service.Infrastructure.Helper;
 global using Thor.Abstractions;
 global using Thor.BuildingBlocks.Cache;
+global using Gnarly.Data;

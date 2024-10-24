@@ -31,8 +31,9 @@ public class AzureOpenAIServiceImageService : IThorImageService
             Style = imageCreate.Style == "vivid" ? GeneratedImageStyle.Vivid : GeneratedImageStyle.Natural,
             ResponseFormat =
                 imageCreate.ResponseFormat == "url" ? GeneratedImageFormat.Uri : GeneratedImageFormat.Bytes,
-            User = imageCreate.User
-        });
+            // User = imageCreate.User
+            EndUserId = imageCreate.User
+        }, cancellationToken);
 
         var ret = new ImageCreateResponse()
         {

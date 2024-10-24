@@ -1,5 +1,4 @@
-**/.classpath
-**/.dockerignore
+﻿**/.dockerignore
 **/.env
 **/.git
 **/.gitignore
@@ -8,6 +7,7 @@
 **/.toolstarget
 **/.vs
 **/.vscode
+**/.idea
 **/*.*proj.user
 **/*.dbmdl
 **/*.jfm
@@ -19,13 +19,7 @@
 **/node_modules
 **/npm-debug.log
 **/obj
-**/*lock.json
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE
 README.md
-!**/.gitignore
-!.git/HEAD
-!.git/config
-!.git/packed-refs
-!.git/refs/heads/**

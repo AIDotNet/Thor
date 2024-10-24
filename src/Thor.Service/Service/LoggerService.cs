@@ -8,7 +8,7 @@ public sealed class LoggerService(
     IServiceProvider serviceProvider,
     IEventBus<ChatLogger> eventBus,
     IServiceCache serviceCache)
-    : ApplicationService(serviceProvider)
+    : ApplicationService(serviceProvider),ITransientDependency
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
