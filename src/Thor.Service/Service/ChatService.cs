@@ -96,6 +96,8 @@ public sealed class ChatService(
         try
         {
             var (token, user) = await tokenService.CheckTokenAsync(context);
+            
+            TokenService.CheckModel(request.Model, token, context);
 
             if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
 
@@ -162,20 +164,21 @@ public sealed class ChatService(
         }
     }
 
-    public async ValueTask EmbeddingAsync(HttpContext context,ThorEmbeddingInput module)
+    public async ValueTask EmbeddingAsync(HttpContext context,ThorEmbeddingInput input)
     {
         try
         {
-            if (module == null) throw new Exception("模型校验异常");
+            if (input == null) throw new Exception("模型校验异常");
 
-            await rateLimitModelService.CheckAsync(module!.Model, context);
+            await rateLimitModelService.CheckAsync(input!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
+            TokenService.CheckModel(input.Model, token, context);
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model),module.Model);
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model),input.Model);
 
-            if (channel == null) throw new NotModelException(module.Model);
+            if (channel == null) throw new NotModelException(input.Model);
 
             // 获取渠道指定的实现类型的服务
             var embeddingService = GetKeyedService<IThorTextEmbeddingService>(channel.Type);
@@ -184,12 +187,12 @@ public sealed class ChatService(
 
             var embeddingCreateRequest = new EmbeddingCreateRequest
             {
-                Model = module.Model,
-                EncodingFormat = module.EncodingFormat
+                Model = input.Model,
+                EncodingFormat = input.EncodingFormat
             };
 
             int requestToken;
-            if (module.Input is JsonElement str)
+            if (input.Input is JsonElement str)
             {
                 if (str.ValueKind == JsonValueKind.String)
                 {
@@ -222,26 +225,26 @@ public sealed class ChatService(
             }, context.RequestAborted);
             sw.Stop();
 
-            if (ModelManagerService.PromptRate.TryGetValue(module.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
                 var quota = requestToken * rate;
 
-                var completionRatio = GetCompletionRatio(module.Model);
+                var completionRatio = GetCompletionRatio(input.Model);
                 quota += rate * completionRatio;
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
-                    module.Model,
+                    input.Model,
                     requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                    module.Model);
+                    input.Model);
             }
 
-            stream.ConvertEmbeddingData(module.EncodingFormat);
+            stream.ConvertEmbeddingData(input.EncodingFormat);
 
             await context.Response.WriteAsJsonAsync(stream);
         }
@@ -265,39 +268,40 @@ public sealed class ChatService(
         using var body = new MemoryStream();
         await context.Request.Body.CopyToAsync(body);
 
-        var module = JsonSerializer.Deserialize<CompletionCreateRequest>(body.ToArray());
+        var input = JsonSerializer.Deserialize<CompletionCreateRequest>(body.ToArray());
 
-        if (module == null)
+        if (input == null)
         {
             throw new Exception("模型校验异常");
         }
 
         try
         {
-            await rateLimitModelService.CheckAsync(module!.Model, context);
+            await rateLimitModelService.CheckAsync(input!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
+            TokenService.CheckModel(input.Model, token, context);
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model),module.Model);
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model),input.Model);
 
-            if (channel == null) throw new NotModelException(module.Model);
+            if (channel == null) throw new NotModelException(input.Model);
 
             var openService = GetKeyedService<IThorCompletionsService>(channel.Type);
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
-            if (ModelManagerService.PromptRate.TryGetValue(module.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
-                if (module.Stream == false)
+                if (input.Stream == false)
                 {
                     var sw = Stopwatch.StartNew();
                     var (requestToken, responseToken) =
-                        await CompletionsHandlerAsync(context, module, channel, openService, user, rate);
+                        await CompletionsHandlerAsync(context, input, channel, openService, user, rate);
 
                     var quota = requestToken * rate;
 
-                    var completionRatio = GetCompletionRatio(module.Model);
+                    var completionRatio = GetCompletionRatio(input.Model);
                     quota += responseToken * rate * completionRatio;
 
                     // 将quota 四舍五入
@@ -306,19 +310,19 @@ public sealed class ChatService(
                     sw.Stop();
 
                     await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
-                        module.Model,
+                        input.Model,
                         requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(), false,
                         (int)sw.ElapsedMilliseconds);
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                        module.Model);
+                        input.Model);
                 }
             }
             else
             {
                 context.Response.StatusCode = 200;
-                if (module.Stream == true)
+                if (input.Stream == true)
                     await context.WriteStreamErrorAsync("当前模型未设置倍率");
                 else
                     await context.WriteErrorAsync("当前模型未设置倍率");
@@ -361,8 +365,6 @@ public sealed class ChatService(
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="NotModelException"></exception>
-    //链路追踪
-    
     public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
         try
@@ -372,6 +374,8 @@ public sealed class ChatService(
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
+            TokenService.CheckModel(request.Model, token, context);
+            
             // 获取渠道通过算法计算权重
             var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model),model);
 

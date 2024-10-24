@@ -1,4 +1,7 @@
-﻿namespace Thor.Service.Service;
+﻿using System.Runtime.CompilerServices;
+using Thor.Service.Extensions;
+
+namespace Thor.Service.Service;
 
 public sealed class TokenService(
     IServiceProvider serviceProvider,
@@ -78,8 +81,26 @@ public sealed class TokenService(
         await DbContext.Tokens.Where(x => x.Id == id && UserContext.CurrentUserId == x.Creator)
             .ExecuteUpdateAsync(x => x.SetProperty(x => x.Disabled, a => !a.Disabled));
     }
-    
-    
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void CheckModel(string model, Token? token, HttpContext context)
+    {
+        if (token == null) return;
+        
+        if (token.LimitModels.Count > 0 && !token.LimitModels.Contains(model))
+        {
+            throw new Exception("当前 Token 无权访问该模型");
+        }
+
+        if (token.WhiteIpList.Count <= 0) return;
+        
+        var ip = context.GetIpAddress();
+
+        if (string.IsNullOrEmpty(ip) || !token.WhiteIpList.Contains(ip))
+        {
+            throw new Exception("当前IP: " + ip + " 无权访问该模型");
+        }
+    }
 
     /// <summary>
     ///     校验Token 是否有效
@@ -167,12 +188,11 @@ public sealed class TokenService(
         }
 
         // 判断额度是否足够
-        if (user.ResidualCredit >= requestQuota) 
+        if (user.ResidualCredit >= requestQuota)
             return (token, user);
-        
+
         logger.LogWarning("用户额度不足");
         context.Response.StatusCode = 402;
         throw new InsufficientQuotaException("额度不足");
-
     }
 }
