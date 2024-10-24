@@ -1,0 +1,17 @@
+name: 构建Thor镜像
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file src/Thor.Service/Dockerfile --tag registry.token-ai.cn/thor:latest && docker push registry.token-ai.cn/thor:latest
+      
