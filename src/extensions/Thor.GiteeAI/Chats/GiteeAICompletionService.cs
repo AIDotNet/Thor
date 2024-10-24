@@ -1,5 +1,7 @@
-﻿using Thor.Abstractions;
+﻿using System.Net.Http.Json;
+using Thor.Abstractions;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
