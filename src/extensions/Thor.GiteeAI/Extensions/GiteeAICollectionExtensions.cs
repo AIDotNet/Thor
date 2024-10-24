@@ -9,28 +9,28 @@ using Thor.OpenAI.Embeddings;
 
 namespace Thor.OpenAI.Extensions;
 
-public static class AIGiteeCollectionExtensions
+public static class GiteeAICollectionExtensions
 {
-    public static IServiceCollection AddAIGiteeService(this IServiceCollection services)
+    public static IServiceCollection AddGiteeAIService(this IServiceCollection services)
     {
-        ThorGlobal.PlatformNames.Add(AIGiteePlatformOptions.PlatformName, AIGiteePlatformOptions.PlatformCode);
+        ThorGlobal.PlatformNames.Add(GiteeAIPlatformOptions.PlatformName, GiteeAIPlatformOptions.PlatformCode);
 
-        ThorGlobal.ModelNames.Add(AIGiteePlatformOptions.PlatformCode, [
+        ThorGlobal.ModelNames.Add(GiteeAIPlatformOptions.PlatformCode, [
             "deepseek-coder-33B-instruct"
         ]);
 
-        services.AddKeyedSingleton<IThorChatCompletionsService, AIGiteeChatCompletionsService>(AIGiteePlatformOptions
+        services.AddKeyedSingleton<IThorChatCompletionsService, GiteeAIChatCompletionsService>(GiteeAIPlatformOptions
             .PlatformCode);
 
-        services.AddKeyedSingleton<IThorTextEmbeddingService, AIGiteeTextEmbeddingService>(
-            AIGiteePlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorTextEmbeddingService, GiteeAITextEmbeddingService>(
+            GiteeAIPlatformOptions.PlatformCode);
         
         // services.AddKeyedSingleton<IThorImageService, OpenAIImageService>(AIGiteePlatformOptions.PlatformCode);
         //
-        services.AddKeyedSingleton<IThorCompletionsService, AIGiteeCompletionService>(AIGiteePlatformOptions
+        services.AddKeyedSingleton<IThorCompletionsService, GiteeAICompletionService>(GiteeAIPlatformOptions
             .PlatformCode);
 
-        services.AddHttpClient(AIGiteePlatformOptions.PlatformCode,
+        services.AddHttpClient(GiteeAIPlatformOptions.PlatformCode,
                 options =>
                 {
                     options.Timeout = TimeSpan.FromMinutes(6);

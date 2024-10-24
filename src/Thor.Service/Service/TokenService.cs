@@ -100,16 +100,25 @@ public sealed class TokenService(
         // sk-是用户创建的token，否则是用户的JWT
         if (!key.StartsWith("sk-"))
         {
-            var userDto = jwtHelper.GetUserFromToken(key);
-
-            if (userDto == null)
+            try
             {
+                var userDto = jwtHelper.GetUserFromToken(key);
+
+                if (userDto == null)
+                {
+                    context.Response.StatusCode = 401;
+                    throw new UnauthorizedAccessException();
+                }
+
+                user = await DbContext.Users.FindAsync(userDto.Id).ConfigureAwait(false);
+                token = null;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "解析Token 失败");
                 context.Response.StatusCode = 401;
                 throw new UnauthorizedAccessException();
             }
-
-            user = await DbContext.Users.FindAsync(userDto.Id).ConfigureAwait(false);
-            token = null;
         }
         else
         {

@@ -114,7 +114,7 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model),request.Model);
 
             if (channel == null) throw new NotModelException(request.Model);
 
@@ -173,7 +173,7 @@ public sealed class ChatService(
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model),module.Model);
 
             if (channel == null) throw new NotModelException(module.Model);
 
@@ -279,7 +279,7 @@ public sealed class ChatService(
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(module.Model),module.Model);
 
             if (channel == null) throw new NotModelException(module.Model);
 
@@ -373,7 +373,7 @@ public sealed class ChatService(
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             // 获取渠道通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model));
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model),model);
 
             if (channel == null)
             {
@@ -695,13 +695,14 @@ public sealed class ChatService(
     /// 权重算法
     /// </summary>
     /// <param name="channel"></param>
+    /// <param name="model"></param>
     /// <returns></returns>
-    private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel)
+    private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel, string model)
     {
         var chatChannels = channel.ToList();
         if (chatChannels.Count == 0)
         {
-            throw new NotModelException("模型未找到可用的渠道");
+            throw new NotModelException($"{model} 模型未找到可用的渠道");
         }
 
         // 所有权重值之和

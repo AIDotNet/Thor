@@ -44,10 +44,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\extensions\Thor.AIGitee\Thor.AIGitee.csproj" />
     <ProjectReference Include="..\extensions\Thor.AzureOpenAI\Thor.AzureOpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Claudia\Thor.Claudia.csproj" />
     <ProjectReference Include="..\extensions\Thor.ErnieBot\Thor.ErnieBot.csproj" />
+    <ProjectReference Include="..\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Hunyuan\Thor.Hunyuan.csproj" />
     <ProjectReference Include="..\extensions\Thor.MetaGLM\Thor.MetaGLM.csproj" />
     <ProjectReference Include="..\extensions\Thor.Moonshot\Thor.Moonshot.csproj" />

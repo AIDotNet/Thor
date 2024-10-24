@@ -1,16 +1,11 @@
-﻿using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
-using Thor.Abstractions;
+﻿using Thor.Abstractions;
 using Thor.Abstractions.Embeddings;
-using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.OpenAI.Embeddings;
 
-public sealed class AIGiteeTextEmbeddingService(IHttpClientFactory httpClientFactory)
+public sealed class GiteeAITextEmbeddingService(IHttpClientFactory httpClientFactory)
     : IThorTextEmbeddingService
 {
     private const string baseUrl = "https://ai.gitee.com/api/serverless/{0}/v1/embeddings";
@@ -26,7 +21,7 @@ public sealed class AIGiteeTextEmbeddingService(IHttpClientFactory httpClientFac
     {
         var url = GetBaseUrl(createEmbeddingModel.Model);
         
-        var client = httpClientFactory.CreateClient(AIGiteePlatformOptions.PlatformCode);
+        var client = httpClientFactory.CreateClient(GiteeAIPlatformOptions.PlatformCode);
 
         var response = await client.PostJsonAsync(url,
             createEmbeddingModel, options!.ApiKey);

@@ -1,13 +1,11 @@
-﻿using System.Net.Http.Json;
-using Thor.Abstractions;
+﻿using Thor.Abstractions;
 using Thor.Abstractions.Chats;
-using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.OpenAI.Chats;
 
-public sealed class AIGiteeCompletionService(IHttpClientFactory httpClientFactory) : IThorCompletionsService
+public sealed class GiteeAICompletionService(IHttpClientFactory httpClientFactory) : IThorCompletionsService
 {
     private const string baseUrl = "https://ai.gitee.com/api/serverless/{0}/completions";
     
@@ -20,7 +18,7 @@ public sealed class AIGiteeCompletionService(IHttpClientFactory httpClientFactor
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(AIGiteePlatformOptions.PlatformCode);
+        var client = httpClientFactory.CreateClient(GiteeAIPlatformOptions.PlatformCode);
 
         var url = GetBaseUrl(createCompletionModel.Model);
         
