@@ -35,8 +35,12 @@ export default function DesktopLayout() {
     }, [input.page, input.pageSize]);
 
     return (
-        <>
-
+        <div 
+        style={{
+            padding: '20px',
+            overflow: 'auto',
+            height: 'calc(100vh - 220px - 64px)',
+        }}> 
             <Header
                 nav={'模型列表'}
 
@@ -170,6 +174,6 @@ export default function DesktopLayout() {
                     }
                 ]}
             />
-        </>
+        </div>
     );
 }

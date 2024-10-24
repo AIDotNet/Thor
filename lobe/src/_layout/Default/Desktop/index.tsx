@@ -5,11 +5,12 @@ import ThorHeader from "../../../components/Header";
 
 export default function DesktopPage() {
     return (
-        <div style={{  overflow: 'auto' }}>
+        <div style={{ overflow: 'auto' }}>
             <Layout
                 footer={
-                    <ThorFooter/>
+                    <ThorFooter />
                 }
+
                 header={
                     <ThorHeader />
                 }

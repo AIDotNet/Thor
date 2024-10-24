@@ -39,7 +39,7 @@ public class AIDotNetDbContext(
             CreatedAt = DateTime.Now
         };
         user.SetAdmin();
-        user.SetResidualCredit(10000000);
+        user.SetResidualCredit(1000000000);
 
         modelBuilder.Entity<User>().HasData(user);
 

@@ -125,6 +125,11 @@ const router = createBrowserRouter([{
       element: <Suspense fallback={<FullscreenLoading title='加载文档页面中' />}>
         <DocPage />
       </Suspense>
+    },{
+      path: "/doc/*",
+      element: <Suspense fallback={<FullscreenLoading title='加载文档页面中' />}>
+        <DocPage />
+      </Suspense>
     }, {
       path: "/model",
       element: <Suspense fallback={<FullscreenLoading title='加载模型页面中' />}>

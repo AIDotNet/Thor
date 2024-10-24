@@ -214,9 +214,9 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         if (channel.Type == OpenAIPlatformOptions.PlatformCode)
         {
             // 如果没gpt3.5则搜索是否存在gpt4o模型
-            chatRequest.Model = channel.Models.FirstOrDefault(x =>
+            chatRequest.Model = channel.Models?.FirstOrDefault(x =>
                 x.StartsWith("gpt-3.5", StringComparison.OrdinalIgnoreCase) ||
-                x.StartsWith("gpt-4o", StringComparison.OrdinalIgnoreCase));
+                x.StartsWith("gpt-4o", StringComparison.OrdinalIgnoreCase)) ?? channel.Models!.First();
 
             if (string.IsNullOrEmpty(chatRequest.Model))
             {
@@ -243,18 +243,15 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         }
         else
         {
-            chatRequest.Model = channel.Models.FirstOrDefault();
+            chatRequest.Model = channel.Models.First();
         }
-
 
         if (string.IsNullOrWhiteSpace(chatRequest.Model))
         {
-            chatRequest.Model = channel.Models.FirstOrDefault();
+            chatRequest.Model = channel.Models!.First();
         }
 
-        // 写一个10s的超时
         var token = new CancellationTokenSource();
-        // token.CancelAfter(20000);
 
         var sw = Stopwatch.StartNew();
 
