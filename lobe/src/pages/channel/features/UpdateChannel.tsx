@@ -227,9 +227,9 @@ export default function UpdateChannel({
                         placeholder="请选择模型"
                         defaultActiveFirstOption={true}
                         mode="tags"
-                        value={input.type}
+                        value={input.models}
                         onChange={(v) => {
-                            setInput({ ...input, type: v });
+                            setInput({ ...input, models: v });
                         }}
                         allowClear
                     >

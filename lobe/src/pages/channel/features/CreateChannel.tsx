@@ -163,7 +163,7 @@ export default function CreateChannel({
                 input.type === "AzureOpenAI" && <Form.Item<FieldType> name='other' label='版本' style={{ width: '100%' }}>
                     <Select
                         placeholder="请选择版本"
-                        value={input.type}
+                        value={input.other}
                         defaultValue={'2024-06-01'}
                         onChange={(v) => {
                             setInput({ ...input, other: v });
@@ -213,9 +213,9 @@ export default function CreateChannel({
                     placeholder="请选择模型"
                     defaultActiveFirstOption={true}
                     mode="tags"
-                    value={input.type}
+                    value={input.models}
                     onChange={(v) => {
-                        setInput({ ...input, type: v });
+                        setInput({ ...input, models: v });
                     }}
                     allowClear
                 >
