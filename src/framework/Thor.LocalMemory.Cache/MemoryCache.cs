@@ -58,7 +58,7 @@ public sealed class MemoryCache(IMemoryCache memoryCache) : IServiceCache
             return value;
         }
 
-        var result = await factory();
+        var result = await factory().ConfigureAwait(false);
 
         if (ttl.HasValue)
         {

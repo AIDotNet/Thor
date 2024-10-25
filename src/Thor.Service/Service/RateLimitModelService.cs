@@ -1,7 +1,10 @@
-﻿namespace Thor.Service.Service;
+﻿using System.Diagnostics;
+using Thor.Service.Infrastructure;
+
+namespace Thor.Service.Service;
 
 public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCache serviceCache)
-    : ApplicationService(serviceProvider) , ITransientDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     private const string CacheKey = "CacheKey:RateLimitModel";
 
@@ -10,12 +13,14 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
     /// </summary>
     /// <param name="model"></param>
     /// <param name="context"></param>
-    /// <param name="serviceCache"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     /// <exception cref="RateLimitException"></exception>
     public async ValueTask CheckAsync(string model, HttpContext context)
     {
+        using var check =
+            Activity.Current?.Source.StartActivity("模型速率检测");
+
         var rateLimitModels = await serviceCache.GetOrCreateAsync(CacheKey,
             async () =>
             {
@@ -94,7 +99,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
         await DbContext.RateLimitModels.AddAsync(rateLimitModel);
 
         await DbContext.SaveChangesAsync();
-        
+
         await serviceCache.RemoveAsync(CacheKey);
     }
 
@@ -104,7 +109,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
             .ExecuteDeleteAsync();
 
         await serviceCache.RemoveAsync(CacheKey);
-        
+
         return result > 0;
     }
 
@@ -122,7 +127,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
                 .SetProperty(x => x.Limit, rateLimitModel.Limit));
 
         await serviceCache.RemoveAsync(CacheKey);
-        
+
         return result > 0;
     }
 
@@ -132,6 +137,5 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
             .ExecuteUpdateAsync(x => x.SetProperty(x => x.Enable, x => !x.Enable));
 
         await serviceCache.RemoveAsync(CacheKey);
-        
     }
 }

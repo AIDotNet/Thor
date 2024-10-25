@@ -1,4 +1,5 @@
 ﻿using System.Threading.Channels;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Thor.BuildingBlocks.Data;
 
@@ -10,12 +11,15 @@ public sealed class LocalEventBus<TEvent> : IEventBus<TEvent>, IDisposable where
 
     private readonly CancellationTokenSource _cts = new();
     
-    public LocalEventBus(IEventHandler<TEvent> eventHandler, ILogger<IEventHandler<TEvent>> logger)
+    public LocalEventBus(IServiceProvider serviceProvider, ILogger<IEventHandler<TEvent>> logger)
     {
         Task.Run(async () =>
         {
+            await using  var scope = serviceProvider.CreateAsyncScope();
             while (_cts.Token.IsCancellationRequested == false)
             {
+                var eventHandler = scope.ServiceProvider.GetRequiredService<IEventHandler<TEvent>>();
+                
                 await foreach (var @event in _loggerChannel.Reader.ReadAllAsync(_cts.Token))
                 {
                     try

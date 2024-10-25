@@ -1,5 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Thor.BuildingBlocks.Data;
+using Thor.Service.Eto;
 using Thor.Service.Options;
 
 namespace Thor.Service.Service;
@@ -8,10 +10,9 @@ public partial class UserService(
     IServiceProvider serviceProvider,
     IServiceCache cache,
     EmailService emailService,
-    LoggerService loggerService,
-    IServiceCache memoryCache,
-    TokenService tokenService)
-    : ApplicationService(serviceProvider),ITransientDependency
+    IEventBus<CreateUserEto> eventBus,
+    IServiceCache memoryCache)
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     public async ValueTask<User> CreateAsync(CreateUserInput input)
     {
@@ -37,7 +38,8 @@ public partial class UserService(
 
         // 判断是否存在
         var exist = await DbContext.Users.AnyAsync(x => x.UserName == input.UserName || x.Email == input.Email);
-        if (exist) throw new Exception("用户名已存在");
+        if (exist)
+            throw new Exception("用户名已存在");
 
         var user = new User(Guid.NewGuid().ToString(), input.UserName, input.Email, input.Password);
 
@@ -47,14 +49,12 @@ public partial class UserService(
 
         await DbContext.Users.AddAsync(user);
 
-        await tokenService.CreateAsync(new TokenInput
+        // 发送创建用户事件
+        await eventBus.PublishAsync(new CreateUserEto()
         {
-            Name = "默认Token",
-            UnlimitedQuota = true,
-            UnlimitedExpired = true
-        }, user.Id);
-
-        await loggerService.CreateSystemAsync("新增用户：" + user.UserName);
+            User = user,
+            Source = CreateUserSource.System
+        });
 
         if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
         {
@@ -82,14 +82,32 @@ public partial class UserService(
         await emailService.SendEmailAsync(email, "注册账号验证码", $"欢迎您注册Thor（雷神托尔），您的验证码是：{code}").ConfigureAwait(false);
     }
 
-    public async ValueTask<User?> GetAsync()
+    public async ValueTask<User?> GetAsync(string? id = null, bool isMemory = true)
     {
-        var info = await DbContext.Users.FindAsync(UserContext.CurrentUserId);
+        User? user;
 
-        if (info == null)
+        if (isMemory)
+        {
+            user = await memoryCache.GetOrCreateAsync("User:" + (id ?? UserContext.CurrentUserId), async () =>
+            {
+                var info = await DbContext.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
+
+                return info;
+            });
+        }
+        else
+        {
+            user = await DbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
+        }
+
+        if (user == null)
             throw new UnauthorizedAccessException();
 
-        return info;
+        return user;
     }
 
     public async ValueTask<bool> RemoveAsync(string id)
@@ -97,7 +115,11 @@ public partial class UserService(
         if (UserContext.CurrentUserId == id)
             throw new Exception("不能删除自己");
 
-        var result = await DbContext.Users.Where(x => x.Id == id).ExecuteDeleteAsync();
+        var result = await DbContext.Users.Where(x => x.Id == id && x.Role != RoleConstant.Admin)
+            .ExecuteDeleteAsync();
+
+        await RefreshUserAsync(UserContext.CurrentUserId);
+
         return result > 0;
     }
 
@@ -135,7 +157,9 @@ public partial class UserService(
     public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string? token,
         string channelId, string model)
     {
-        string key = "FreeModal:" + id;
+        using var activity =
+            Activity.Current?.Source.StartActivity("用户消费扣款");
+
         if (ChatCoreOptions.FreeModel?.EnableFree == true)
         {
             var item = ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(model));
@@ -145,7 +169,7 @@ public partial class UserService(
                 var now = DateTime.Now;
                 var end = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59);
                 var remain = end - now;
-
+                var key = "FreeModal:" + id;
                 var value = await cache.GetOrCreateAsync(key, async () => await Task.FromResult(0), remain);
 
                 // 如果没有超过限制则扣除免费次数然后返回
@@ -186,6 +210,9 @@ public partial class UserService(
                     .SetProperty(y => y.RequestCount, y => y.RequestCount + 1)
                     .SetProperty(y => y.ConsumeToken, y => y.ConsumeToken + consumeToken));
 
+        activity?.SetTag("消费金额", consume);
+        activity?.SetTag("消费token", consumeToken);
+
         if (!string.IsNullOrEmpty(token))
             await DbContext
                 .Tokens.Where(x => x.Key == token)
@@ -212,18 +239,24 @@ public partial class UserService(
             .ExecuteUpdateAsync(x =>
                 x.SetProperty(y => y.Email, input.Email)
                     .SetProperty(y => y.Avatar, input.Avatar));
+
+        await RefreshUserAsync(UserContext.CurrentUserId);
     }
 
     public async ValueTask EnableAsync(string id)
     {
         await DbContext.Users.Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.IsDisabled, x => !x.IsDisabled));
+
+        await RefreshUserAsync(UserContext.CurrentUserId);
     }
 
     public async ValueTask<bool> UpdateResidualCreditAsync(string id, long residualCredit)
     {
         var result = await DbContext.Users.Where(x => x.Id == id)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResidualCredit, y => y.ResidualCredit + residualCredit));
+
+        await RefreshUserAsync(UserContext.CurrentUserId);
 
         return result > 0;
     }
@@ -233,7 +266,7 @@ public partial class UserService(
     /// </summary>
     public async ValueTask UpdatePasswordAsync(UpdatePasswordInput input)
     {
-        var user = await DbContext.Users.FindAsync(UserContext.CurrentUserId);
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == UserContext.CurrentUserId);
         if (user == null)
             throw new UnauthorizedAccessException();
 
@@ -245,6 +278,20 @@ public partial class UserService(
         await DbContext.Users.Where(x => x.Id == UserContext.CurrentUserId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Password, user.Password)
                 .SetProperty(y => y.PasswordHas, user.PasswordHas));
+
+        await RefreshUserAsync(UserContext.CurrentUserId);
+    }
+
+    public async Task<User?> RefreshUserAsync(string userId)
+    {
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
+
+        if (user != null)
+        {
+            await memoryCache.CreateAsync("User:" + userId, user);
+        }
+
+        return user;
     }
 
     [GeneratedRegex("^[a-zA-Z0-9]+$")]

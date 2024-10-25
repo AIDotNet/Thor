@@ -20,7 +20,7 @@ namespace Thor.Service.Service;
 /// <param name="serviceProvider"></param>
 /// <param name="mapper"></param>
 public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper, IServiceCache cache)
-    : ApplicationService(serviceProvider),ITransientDependency
+    : ApplicationService(serviceProvider),IScopeDependency
 {
     private const string CacheKey = "CacheKey:Channel";
 
@@ -264,7 +264,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             response = await chatCompletionsService.ChatCompletionsAsync(chatRequest, platformOptions,
                 token.Token);
-        }, 3, 500);
+        }, 3, 500).ConfigureAwait(false);
 
         sw.Stop();
 

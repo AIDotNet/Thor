@@ -3,14 +3,16 @@ import { memo } from "react";
 import { LayoutProps } from "./type";
 import { Outlet } from "react-router-dom";
 import { Layout, theme } from "antd";
-import { Logo } from "@lobehub/ui";
+import { Avatar, Header, Logo } from "@lobehub/ui";
+import { Dropdown } from "antd";
+import { useNavigate } from "react-router-dom";
 
 const { Content, Footer, Sider } = Layout;
 const LayoutPage = memo<LayoutProps>(({ nav }) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-
+  const navigate = useNavigate();
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
@@ -23,10 +25,38 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
             textAlign: 'center',
             marginLeft: '8px',
             marginTop: '8px',
-        }} size={40}/>
+            marginBottom: '8px',
+        }} size={48}/>
         {nav}
       </Sider>
       <Layout>
+        <Header actions={
+          <>
+            <Dropdown menu={{
+              items:[
+                {
+                  key: 'account',
+                  label: '账户设置',
+                  onClick: () => {
+                    navigate('/current')
+                  }
+                },
+                {
+                  key: 'logout',
+                  label: '退出登录',
+                  onClick: () => {
+                    localStorage.removeItem('token')
+                    navigate('/login')
+                  }
+                }
+              ]
+            }}>
+                <Avatar src='/logo.png' size={48} />
+            </Dropdown>
+          </>
+        }>
+          
+        </Header>
         <Content style={{ margin: "16px" }}>
           <div
             style={{

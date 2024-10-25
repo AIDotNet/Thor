@@ -1,4 +1,6 @@
-﻿namespace Thor.Service.Infrastructure.Middlewares;
+﻿using System.Diagnostics;
+
+namespace Thor.Service.Infrastructure.Middlewares;
 
 public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddleware,ISingletonDependency
 {
@@ -9,6 +11,10 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
             context.Request.Method != "HEAD" && context.Request.Method != "TRACE" &&
             context.Request.Method != "CONNECT")
         {
+            var activity = Activity.Current;
+        
+            activity?.SetTag("UnitOfWork", "Begin");
+            
             var dbContext = context.RequestServices.GetRequiredService<AIDotNetDbContext>();
             var loggerDbContext = context.RequestServices.GetRequiredService<LoggerDbContext>();
             try
@@ -21,7 +27,11 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
             {
                 logger.LogError(exception, "An error occurred during the transaction. Message: {Message}",
                     exception.Message);
+                
+                activity?.SetTag("UnitOfWork", "Rollback");
             }
+            
+            activity?.SetTag("UnitOfWork", "End");
 
             return;
         }

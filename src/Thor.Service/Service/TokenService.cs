@@ -1,11 +1,14 @@
-﻿namespace Thor.Service.Service;
+﻿using System.Runtime.CompilerServices;
+using Thor.Service.Extensions;
+
+namespace Thor.Service.Service;
 
 public sealed class TokenService(
     IServiceProvider serviceProvider,
-    IServiceCache memoryCache,
+    UserService userService,
     JwtHelper jwtHelper,
     ILogger<TokenService> logger)
-    : ApplicationService(serviceProvider), ITransientDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     public async ValueTask CreateAsync(TokenInput input, string? createId = null)
     {
@@ -60,6 +63,8 @@ public sealed class TokenService(
                     .SetProperty(x => x.RemainQuota, input.RemainQuota)
                     .SetProperty(x => x.UnlimitedQuota, input.UnlimitedQuota)
                     .SetProperty(x => x.UnlimitedExpired, input.UnlimitedExpired)
+                    .SetProperty(x => x.LimitModels, input.LimitModels)
+                    .SetProperty(x => x.WhiteIpList, input.WhiteIpList)
             );
 
         return result > 0;
@@ -77,6 +82,26 @@ public sealed class TokenService(
     {
         await DbContext.Tokens.Where(x => x.Id == id && UserContext.CurrentUserId == x.Creator)
             .ExecuteUpdateAsync(x => x.SetProperty(x => x.Disabled, a => !a.Disabled));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void CheckModel(string model, Token? token, HttpContext context)
+    {
+        if (token == null) return;
+
+        if (token.LimitModels.Count > 0 && !token.LimitModels.Contains(model))
+        {
+            throw new Exception("当前 Token 无权访问该模型");
+        }
+
+        if (token.WhiteIpList.Count <= 0) return;
+
+        var ip = context.GetIpAddress();
+
+        if (string.IsNullOrEmpty(ip) || !token.WhiteIpList.Contains(ip))
+        {
+            throw new Exception("当前IP: " + ip + " 无权访问该模型");
+        }
     }
 
     /// <summary>
@@ -110,7 +135,7 @@ public sealed class TokenService(
                     throw new UnauthorizedAccessException();
                 }
 
-                user = await DbContext.Users.FindAsync(userDto.Id).ConfigureAwait(false);
+                user = await userService.GetAsync(userDto.Id, false).ConfigureAwait(false);
                 token = null;
             }
             catch (Exception e)
@@ -147,7 +172,7 @@ public sealed class TokenService(
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
             }
 
-            user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == token.Creator);
+            user = await userService.GetAsync(token.Creator,false).ConfigureAwait(false);
         }
 
         if (user == null)
@@ -165,12 +190,11 @@ public sealed class TokenService(
         }
 
         // 判断额度是否足够
-        if (user.ResidualCredit >= requestQuota) 
+        if (user.ResidualCredit >= requestQuota)
             return (token, user);
-        
+
         logger.LogWarning("用户额度不足");
         context.Response.StatusCode = 402;
         throw new InsufficientQuotaException("额度不足");
-
     }
 }

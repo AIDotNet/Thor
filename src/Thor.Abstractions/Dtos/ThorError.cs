@@ -44,7 +44,6 @@ namespace Thor.Abstractions.Dtos
         /// 错误信息
         /// </summary>
         [JsonPropertyName("message")]
-        [JsonConverter(typeof(ThorMessageConverter))]
         public object MessageObject
         {
             set
@@ -60,6 +59,16 @@ namespace Thor.Abstractions.Dtos
                         Message = string.Join(Environment.NewLine, Messages);
                         break;
                 }
+            }
+            
+            get
+            {
+                if (Messages.Count > 1)
+                {
+                    return Messages;
+                }
+
+                return Message;
             }
         }
     }
