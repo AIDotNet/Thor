@@ -40,7 +40,7 @@ public sealed class RedisCache(RedisClient redis) : IServiceCache
         }
     }
 
-    public async ValueTask<T> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null)
+    public async ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null)
     {
         // 加分布式锁住
         using var @lock = redis.Lock(key, 3);
@@ -50,15 +50,15 @@ public sealed class RedisCache(RedisClient redis) : IServiceCache
             var result = await GetAsync<T>(key);
 
             if (result != null) return result;
-            
-            result = await factory();
+
+            result = await factory().ConfigureAwait(false);
             await CreateAsync(key, result, ttl).ConfigureAwait(false);
 
             return result;
         }
         else
         {
-            var result = await factory();
+            var result = await factory().ConfigureAwait(false);
 
             await CreateAsync(key, result, ttl).ConfigureAwait(false);
 

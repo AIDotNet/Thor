@@ -455,18 +455,18 @@ public sealed class ChatService(
         catch (OpenAIErrorException error)
         {
             context.Response.StatusCode = 400;
-            if (request.Stream == true)
-                await context.WriteStreamErrorAsync(error.Message, error.Code);
-            else
+            // if (request.Stream == true)
+            //     await context.WriteStreamErrorAsync(error.Message, error.Code);
+            // else
                 await context.WriteErrorAsync(error.Message, error.Code);
         }
         catch (Exception e)
         {
             logger.LogError("对话模型请求异常：{e}", e);
-            if (request.Stream == true)
-                await context.WriteStreamErrorAsync(e.Message);
-            else
-                await context.WriteErrorAsync(e.Message);
+            // if (request.Stream == true)
+            //     await context.WriteStreamErrorAsync(e.Message);
+            // else
+                await context.WriteErrorAsync(e.Message,"500");
         }
     }
 

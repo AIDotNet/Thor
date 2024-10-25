@@ -5,7 +5,7 @@ namespace Thor.Service.Service;
 
 public sealed class TokenService(
     IServiceProvider serviceProvider,
-    IServiceCache memoryCache,
+    UserService userService,
     JwtHelper jwtHelper,
     ILogger<TokenService> logger)
     : ApplicationService(serviceProvider), ITransientDependency
@@ -63,6 +63,8 @@ public sealed class TokenService(
                     .SetProperty(x => x.RemainQuota, input.RemainQuota)
                     .SetProperty(x => x.UnlimitedQuota, input.UnlimitedQuota)
                     .SetProperty(x => x.UnlimitedExpired, input.UnlimitedExpired)
+                    .SetProperty(x => x.LimitModels, input.LimitModels)
+                    .SetProperty(x => x.WhiteIpList, input.WhiteIpList)
             );
 
         return result > 0;
@@ -86,14 +88,14 @@ public sealed class TokenService(
     public static void CheckModel(string model, Token? token, HttpContext context)
     {
         if (token == null) return;
-        
+
         if (token.LimitModels.Count > 0 && !token.LimitModels.Contains(model))
         {
             throw new Exception("当前 Token 无权访问该模型");
         }
 
         if (token.WhiteIpList.Count <= 0) return;
-        
+
         var ip = context.GetIpAddress();
 
         if (string.IsNullOrEmpty(ip) || !token.WhiteIpList.Contains(ip))
@@ -133,7 +135,7 @@ public sealed class TokenService(
                     throw new UnauthorizedAccessException();
                 }
 
-                user = await DbContext.Users.FindAsync(userDto.Id).ConfigureAwait(false);
+                user = await userService.GetAsync(userDto.Id).ConfigureAwait(false);
                 token = null;
             }
             catch (Exception e)
@@ -170,7 +172,7 @@ public sealed class TokenService(
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
             }
 
-            user = await DbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == token.Creator);
+            user = await userService.GetAsync(token.Creator);
         }
 
         if (user == null)

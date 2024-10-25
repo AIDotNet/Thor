@@ -128,7 +128,7 @@ public static class HttpContextExtensions
                 Code = code
             }
         };
-        await context.Response.WriteAsJsonAsync(error);
+        await context.Response.WriteAsJsonAsync(error,ThorJsonSerializer.DefaultOptions);
     }
 
     /// <summary>

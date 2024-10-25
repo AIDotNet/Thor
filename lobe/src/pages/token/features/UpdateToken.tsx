@@ -1,7 +1,10 @@
-import { Drawer, Form, Button, Switch, message, Input, DatePicker, InputNumber } from 'antd';
-import {  Update } from '../../../services/TokenService'
+import { Drawer, Form, Button, Switch, message, Input, DatePicker, InputNumber, Select } from 'antd';
+import { Update } from '../../../services/TokenService'
 import { useEffect, useState } from 'react';
 import { renderQuota } from '../../../utils/render';
+import { getModels } from '../../../services/ModelService';
+
+const { Option } = Select;
 
 interface UpdateTokenProps {
     onSuccess: () => void;
@@ -23,7 +26,10 @@ export default function UpdateToken({
         remainQuota?: number;
         unlimitedExpired: boolean;
         expiredTime?: Date;
+        limitModels: string[];
+        whiteIpList: string[];
     };
+    const [models, setModels] = useState<any>();
 
     const [input, setInput] = useState<any>({
         name: '',
@@ -65,7 +71,25 @@ export default function UpdateToken({
 
     }, [value])
 
-    console.log(input);
+    function loadModel() {
+
+        getModels()
+            .then(res => {
+                if (res.success) {
+                    setModels(res.data);
+                } else {
+                    message.error({
+                        content: res.message
+                    });
+                }
+            })
+    }
+
+    useEffect(() => {
+        if (visible) {
+            loadModel();
+        }
+    }, [visible]);
 
     return <Drawer
         width={500}
@@ -106,6 +130,38 @@ export default function UpdateToken({
                     }} />
                 </Form.Item>
             }
+            <Form.Item<FieldType> name='limitModels' label='模型' style={{ width: '100%' }}>
+                <Select
+                    placeholder="请选择可用模型"
+                    defaultActiveFirstOption={true}
+                    mode="tags"
+                    value={input.limitModels}
+                    onChange={(v) => {
+                        setInput({ ...input, limitModels: v });
+                    }}
+                    allowClear
+                >
+                    {
+
+                        models && models.map((model: any) => {
+                            return <Option key={model} value={model}>{model}</Option>
+                        })
+                    }
+                </Select>
+            </Form.Item>
+            <Form.Item<FieldType> name='whiteIpList' label='IP白名单' style={{ width: '100%' }}>
+                <Select
+                    placeholder="请选择IP白名单"
+                    defaultActiveFirstOption={true}
+                    mode="tags"
+                    value={input.whiteIpList}
+                    onChange={(v) => {
+                        setInput({ ...input, whiteIpList: v });
+                    }}
+                    allowClear
+                >
+                </Select>
+            </Form.Item>
             <Form.Item<FieldType>
                 label="永不过期"
             >

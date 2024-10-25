@@ -8,8 +8,7 @@ public  class AuthorizeService(
     TokenService tokenService,
     ILogger<AuthorizeService> logger,
     IConfiguration configuration,
-    JwtHelper jwtHelper,
-    IServiceCache memoryCache)
+    JwtHelper jwtHelper)
     : ApplicationService(serviceProvider), ITransientDependency
 {
     private static readonly HttpClient HttpClient = new(new SocketsHttpHandler

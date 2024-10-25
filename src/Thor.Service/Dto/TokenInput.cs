@@ -27,4 +27,13 @@ public sealed class TokenInput
     /// </summary>
     public bool UnlimitedExpired { get; set; }
 
+    /// <summary>
+    /// 限制使用的模型
+    /// </summary>
+    public List<string> LimitModels { get; set; } = new();
+    
+    /// <summary>
+    /// IP白名单
+    /// </summary>
+    public List<string> WhiteIpList { get; set; } = new();
 }

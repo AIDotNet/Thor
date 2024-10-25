@@ -1,7 +1,11 @@
-import { Drawer, Form, Button, Switch, message, Input, DatePicker, InputNumber } from 'antd';
+import { Drawer, Form, Button, Switch, message, Input, DatePicker, InputNumber, Select } from 'antd';
 import { Add } from '../../../services/TokenService'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { renderQuota } from '../../../utils/render';
+import { getModels } from '../../../services/ModelService';
+
+const { Option } = Select;
+
 
 interface CreateTokenProps {
     onSuccess: () => void;
@@ -14,6 +18,7 @@ export default function CreateToken({
     visible,
     onCancel
 }: CreateTokenProps) {
+    const [models, setModels] = useState<any>();
 
     type FieldType = {
         name?: string;
@@ -21,14 +26,38 @@ export default function CreateToken({
         remainQuota?: number;
         unlimitedExpired: boolean;
         expiredTime?: Date;
+        limitModels: string[];
+        whiteIpList: string[];
     };
+
+    function loadModel() {
+
+        getModels()
+            .then(res => {
+                if (res.success) {
+                    setModels(res.data);
+                } else {
+                    message.error({
+                        content: res.message
+                    });
+                }
+            })
+    }
+
+    useEffect(() => {
+        if (visible) {
+            loadModel();
+        }
+    }, [visible]);
 
     const [input, setInput] = useState<FieldType>({
         name: '',
         unlimitedQuota: false,
         remainQuota: 0,
         unlimitedExpired: false,
-        expiredTime: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
+        limitModels: [],
+        expiredTime: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+        whiteIpList: []
     });
 
     function handleSubmit(values: any) {
@@ -50,11 +79,11 @@ export default function CreateToken({
 
     return <Drawer
         width={500}
-        
+
         title="创建Token" open={visible} onClose={onCancel}>
         <Form
-         
-        onFinish={values => handleSubmit(values)} style={{ width: 400 }}>
+
+            onFinish={values => handleSubmit(values)} style={{ width: 400 }}>
             <Form.Item<FieldType>
                 label="Token名称"
                 name="name"
@@ -93,6 +122,38 @@ export default function CreateToken({
                     }} />
                 </Form.Item>
             }
+            <Form.Item<FieldType> name='limitModels' label='模型'style={{ width: '100%' }}>
+                <Select
+                    placeholder="请选择可用模型"
+                    defaultActiveFirstOption={true}
+                    mode="tags"
+                    value={input.limitModels}
+                    onChange={(v) => {
+                        setInput({ ...input, limitModels: v });
+                    }}
+                    allowClear
+                >
+                    {
+
+                        models && models.map((model: any) => {
+                            return <Option key={model} value={model}>{model}</Option>
+                        })
+                    }
+                </Select>
+            </Form.Item>
+            <Form.Item<FieldType> name='whiteIpList' label='IP白名单' style={{ width: '100%' }}>
+                <Select
+                    placeholder="请选择IP白名单"
+                    defaultActiveFirstOption={true}
+                    mode="tags"
+                    value={input.whiteIpList}
+                    onChange={(v) => {
+                        setInput({ ...input, whiteIpList: v });
+                    }}
+                    allowClear
+                >
+                </Select>
+            </Form.Item>
             <Form.Item<FieldType>
                 label="永不过期"
                 name="unlimitedExpired"
