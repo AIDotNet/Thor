@@ -489,3 +489,4 @@ $RECYCLE.BIN/
 /src/Thor.Service/logger.db
 /src/Thor.Service/logger.db-shm
 /src/Thor.Service/logger.db-wal
+/data
