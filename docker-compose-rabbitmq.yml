@@ -50,7 +50,6 @@ services:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:8.2
     container_name: aspire-dashboard
     ports:
-      - "4317:18889"
       - "18888:18888"
     environment:
       - TZ=Asia/Shanghai

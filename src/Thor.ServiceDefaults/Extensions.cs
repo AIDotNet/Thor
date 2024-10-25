@@ -72,6 +72,7 @@ public static class Extensions
         if (useOtlpExporter)
         {
             builder.Services.AddOpenTelemetry()
+                .WithTracing()
                 .UseOtlpExporter();
         }
 
