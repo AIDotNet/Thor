@@ -9,6 +9,10 @@ services:
       context: .
       dockerfile: src/Thor.Service/Dockerfile
     container_name: thor
+    depends_on:
+      - ai-rabbitmq
+      - ai-redis
+      - postgres
     volumes:
       - ./data:/data
     environment:
@@ -20,6 +24,7 @@ services:
       - CACHE_CONNECTION_STRING=ai-redis
       - RabbitMQ:ConnectionString=amqp://admin:admin@ai-rabbitmq:5672
       - OTEL_SERVICE_NAME=Thor
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
 
   postgres:
@@ -42,10 +47,11 @@ services:
     command: redis-server --appendonly yes
 
   aspire-dashboard:
-    image: mcr.microsoft.com/dotnet/aspire-dashboard:8.1.0
+    image: mcr.microsoft.com/dotnet/aspire-dashboard:8.2
     container_name: aspire-dashboard
     ports:
       - "4317:18889"
+      - "18888:18888"
     environment:
       - TZ=Asia/Shanghai
       - Dashboard:ApplicationName=Aspire
