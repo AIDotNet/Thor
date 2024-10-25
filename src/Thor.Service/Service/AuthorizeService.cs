@@ -1,15 +1,16 @@
 ﻿using System.Net.Http.Headers;
+using Thor.BuildingBlocks.Data;
+using Thor.Service.Eto;
 
 namespace Thor.Service.Service;
 
 public  class AuthorizeService(
     IServiceProvider serviceProvider,
-    LoggerService loggerService,
-    TokenService tokenService,
+    IEventBus<CreateUserEto> eventBus,
     ILogger<AuthorizeService> logger,
     IConfiguration configuration,
     JwtHelper jwtHelper)
-    : ApplicationService(serviceProvider), ITransientDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
     {
@@ -119,17 +120,13 @@ public  class AuthorizeService(
             user.SetResidualCredit(userQuota);
 
             await DbContext.Users.AddAsync(user);
-
-            await tokenService.CreateAsync(new TokenInput
+            
+            // 发送创建用户事件
+            await eventBus.PublishAsync(new CreateUserEto()
             {
-                Name = "默认Token",
-                UnlimitedQuota = true,
-                UnlimitedExpired = true
-            }, user.Id);
-
-            await loggerService.CreateSystemAsync("Github来源 创建用户：" + user.UserName);
-
-            logger.LogInformation("Github来源 创建用户：" + user.UserName);
+                User = user,
+                Source = CreateUserSource.Github
+            });
 
             await DbContext.SaveChangesAsync();
         }
@@ -206,17 +203,12 @@ public  class AuthorizeService(
 
             await DbContext.Users.AddAsync(user);
 
-            await tokenService.CreateAsync(new TokenInput
+            await eventBus.PublishAsync(new CreateUserEto()
             {
-                Name = "默认Token",
-                UnlimitedQuota = true,
-                UnlimitedExpired = true
-            }, user.Id);
-
-            await loggerService.CreateSystemAsync("Gitee来源 创建用户：" + user.UserName);
-
-            logger.LogInformation("Gitee来源 创建用户：" + user.UserName);
-
+                User = user,
+                Source = CreateUserSource.Gitee
+            });
+            
             await DbContext.SaveChangesAsync();
         }
 

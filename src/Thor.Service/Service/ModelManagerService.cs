@@ -7,7 +7,7 @@ namespace Thor.Service.Service;
 /// </summary>
 /// <param name="serviceProvider"></param>
 public class ModelManagerService(IServiceProvider serviceProvider)
-    : ApplicationService(serviceProvider), ITransientDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     public static ConcurrentDictionary<string, decimal> PromptRate { get; private set; } = new();
     public static ConcurrentDictionary<string, decimal> CompletionRate { get; private set; } = new();

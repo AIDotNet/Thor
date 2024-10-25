@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Thor.BuildingBlocks.Data;
 using Thor.Service.Eto;
 using Thor.Service.Options;
@@ -11,7 +12,7 @@ public partial class UserService(
     EmailService emailService,
     IEventBus<CreateUserEto> eventBus,
     IServiceCache memoryCache)
-    : ApplicationService(serviceProvider), ITransientDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     public async ValueTask<User> CreateAsync(CreateUserInput input)
     {
@@ -51,7 +52,8 @@ public partial class UserService(
         // 发送创建用户事件
         await eventBus.PublishAsync(new CreateUserEto()
         {
-            User = user
+            User = user,
+            Source = CreateUserSource.System
         });
 
         if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
@@ -80,17 +82,27 @@ public partial class UserService(
         await emailService.SendEmailAsync(email, "注册账号验证码", $"欢迎您注册Thor（雷神托尔），您的验证码是：{code}").ConfigureAwait(false);
     }
 
-    public async ValueTask<User?> GetAsync(string? id = null)
+    public async ValueTask<User?> GetAsync(string? id = null, bool isMemory = true)
     {
-        var user = await memoryCache.GetOrCreateAsync("User:" + (id ?? UserContext.CurrentUserId), async () =>
+        User? user;
+
+        if (isMemory)
         {
-            var info = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
+            user = await memoryCache.GetOrCreateAsync("User:" + (id ?? UserContext.CurrentUserId), async () =>
+            {
+                var info = await DbContext.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
 
-            if (info == null)
-                throw new UnauthorizedAccessException();
-
-            return info;
-        });
+                return info;
+            });
+        }
+        else
+        {
+            user = await DbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
+        }
 
         if (user == null)
             throw new UnauthorizedAccessException();
@@ -145,6 +157,9 @@ public partial class UserService(
     public async ValueTask<bool> ConsumeAsync(string id, long consume, int consumeToken, string? token,
         string channelId, string model)
     {
+        using var activity =
+            Activity.Current?.Source.StartActivity("用户消费扣款");
+
         if (ChatCoreOptions.FreeModel?.EnableFree == true)
         {
             var item = ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(model));
@@ -182,8 +197,6 @@ public partial class UserService(
                         .Where(x => x.Id == channelId)
                         .ExecuteUpdateAsync(x => x.SetProperty(y => y.Quota, y => y.Quota + consume));
 
-                    await RefreshUserAsync(UserContext.CurrentUserId);
-
                     return true;
                 }
             }
@@ -197,6 +210,9 @@ public partial class UserService(
                     .SetProperty(y => y.RequestCount, y => y.RequestCount + 1)
                     .SetProperty(y => y.ConsumeToken, y => y.ConsumeToken + consumeToken));
 
+        activity?.SetTag("消费金额", consume);
+        activity?.SetTag("消费token", consumeToken);
+
         if (!string.IsNullOrEmpty(token))
             await DbContext
                 .Tokens.Where(x => x.Key == token)
@@ -209,8 +225,6 @@ public partial class UserService(
             .Channels
             .Where(x => x.Id == channelId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Quota, y => y.Quota + consume));
-
-        await RefreshUserAsync(UserContext.CurrentUserId);
 
         return result > 0;
     }
@@ -270,8 +284,6 @@ public partial class UserService(
 
     public async Task<User?> RefreshUserAsync(string userId)
     {
-        await memoryCache.RemoveAsync("User:" + userId);
-
         var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == userId);
 
         if (user != null)

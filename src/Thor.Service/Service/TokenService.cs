@@ -8,7 +8,7 @@ public sealed class TokenService(
     UserService userService,
     JwtHelper jwtHelper,
     ILogger<TokenService> logger)
-    : ApplicationService(serviceProvider), ITransientDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     public async ValueTask CreateAsync(TokenInput input, string? createId = null)
     {
@@ -135,7 +135,7 @@ public sealed class TokenService(
                     throw new UnauthorizedAccessException();
                 }
 
-                user = await userService.GetAsync(userDto.Id).ConfigureAwait(false);
+                user = await userService.GetAsync(userDto.Id, false).ConfigureAwait(false);
                 token = null;
             }
             catch (Exception e)
@@ -172,7 +172,7 @@ public sealed class TokenService(
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
             }
 
-            user = await userService.GetAsync(token.Creator);
+            user = await userService.GetAsync(token.Creator,false).ConfigureAwait(false);
         }
 
         if (user == null)

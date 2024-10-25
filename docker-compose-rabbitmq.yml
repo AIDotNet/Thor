@@ -46,6 +46,7 @@ services:
     container_name: aspire-dashboard
     ports:
       - "4317:18889"
+      - "4318:18888"
     environment:
       - TZ=Asia/Shanghai
       - Dashboard:ApplicationName=Aspire

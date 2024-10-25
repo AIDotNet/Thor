@@ -63,8 +63,8 @@ try
         builder.Services.AddRedisMemory(CacheOptions.ConnectionString);
     }
 
-    var rabbitMQConnectionString = builder.Configuration["RabbitMQ:ConnectionString"];
-    if (!string.IsNullOrEmpty(rabbitMQConnectionString))
+    var rabbitMqConnectionString = builder.Configuration["RabbitMQ:ConnectionString"];
+    if (!string.IsNullOrEmpty(rabbitMqConnectionString))
     {
         builder.Services.AddRabbitMQEventBus(builder.Configuration);
     }
@@ -226,7 +226,6 @@ try
         var loggerDbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
         await loggerDbContext.Database.EnsureCreatedAsync();
     }
-
 
     await SettingService.LoadingSettings(app);
 
@@ -691,8 +690,8 @@ try
         .WithOpenApi();
 
     // 文本补全接口,不建议使用，使用对话补全即可
-    app.MapPost("/v1/completions", async (ChatService service, HttpContext context) =>
-            await service.CompletionsAsync(context))
+    app.MapPost("/v1/completions", async (ChatService service, HttpContext context, CompletionCreateRequest input) =>
+            await service.CompletionsAsync(context, input))
         .WithGroupName("OpenAI")
         .WithDescription("Get completions from OpenAI")
         .WithOpenApi();
@@ -717,9 +716,11 @@ try
         .RequireAuthorization()
         .WithOpenApi();
 
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
     await app.RunAsync();
 }

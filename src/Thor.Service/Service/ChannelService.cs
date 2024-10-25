@@ -20,7 +20,7 @@ namespace Thor.Service.Service;
 /// <param name="serviceProvider"></param>
 /// <param name="mapper"></param>
 public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper, IServiceCache cache)
-    : ApplicationService(serviceProvider),ITransientDependency
+    : ApplicationService(serviceProvider),IScopeDependency
 {
     private const string CacheKey = "CacheKey:Channel";
 

@@ -6,7 +6,7 @@ namespace Thor.Service.DataAccess;
 
 public static class EntityConfigExtensions
 {
-    private static JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -39,13 +39,13 @@ public static class EntityConfigExtensions
             options.Property(x => x.Key).HasMaxLength(42);
 
             options.Property(x => x.LimitModels)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions) ??
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions) ??
                             new List<string>());
 
             options.Property(x => x.WhiteIpList)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions) ??
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions) ??
                             new List<string>());
         });
 
@@ -81,12 +81,12 @@ public static class EntityConfigExtensions
             options.HasIndex(x => x.Name);
 
             options.Property(x => x.Models)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions));
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions));
 
             options.Property(x => x.Extension)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, _jsonSerializerOptions));
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, JsonSerializerOptions));
         });
 
         modelBuilder.Entity<ProductPurchaseRecord>(options =>
@@ -117,16 +117,16 @@ public static class EntityConfigExtensions
             options.HasIndex(x => x.Creator);
 
             options.Property(x => x.WhiteList)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions));
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions));
 
             options.Property(x => x.BlackList)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions));
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions));
 
             options.Property(x => x.Model)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<string[]>(item, _jsonSerializerOptions));
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<string[]>(item, JsonSerializerOptions));
         });
 
         modelBuilder.Entity<ModelManager>(options =>
@@ -140,8 +140,8 @@ public static class EntityConfigExtensions
             options.HasIndex(x => x.Creator);
 
             options.Property(x => x.Tags)
-                .HasConversion(item => JsonSerializer.Serialize(item, _jsonSerializerOptions),
-                    item => JsonSerializer.Deserialize<List<string>>(item, _jsonSerializerOptions));
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions));
         });
 
         return modelBuilder;

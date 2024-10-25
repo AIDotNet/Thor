@@ -3,7 +3,7 @@
 namespace Thor.Service.Infrastructure;
 
 [Registration(typeof(IUserContext))]
-public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext, ISingletonDependency
+public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext, IScopeDependency
 {
     public UserDto CurrentUser
     {

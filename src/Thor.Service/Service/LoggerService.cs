@@ -1,4 +1,5 @@
-﻿using Thor.BuildingBlocks.Data;
+﻿using System.Diagnostics;
+using Thor.BuildingBlocks.Data;
 using Thor.Service.Model;
 using Thor.Service.Options;
 
@@ -8,7 +9,7 @@ public sealed class LoggerService(
     IServiceProvider serviceProvider,
     IEventBus<ChatLogger> eventBus,
     IServiceCache serviceCache)
-    : ApplicationService(serviceProvider),ITransientDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
@@ -37,6 +38,12 @@ public sealed class LoggerService(
         int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName,
         string ip, string userAgent, bool stream, int totalTime)
     {
+        using var consume =
+            Activity.Current?.Source.StartActivity("创建消费日志");
+
+        consume?.SetTag("Content", content);
+        consume?.SetTag("model", model);
+
         if (ChatCoreOptions.FreeModel?.EnableFree == true)
         {
             var freeModel =
