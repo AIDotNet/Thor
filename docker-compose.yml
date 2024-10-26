@@ -4,7 +4,7 @@ services:
   ai-dotnet-api-service:
     image: registry.token-ai.cn/thor:latest
     ports:
-      - 18080:5045
+      - 18080:8080
     build:
       context: .
       dockerfile: src/Thor.Service/Dockerfile

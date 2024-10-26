@@ -20,7 +20,7 @@ namespace Thor.Service.Service;
 /// <param name="serviceProvider"></param>
 /// <param name="mapper"></param>
 public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper, IServiceCache cache)
-    : ApplicationService(serviceProvider),IScopeDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     private const string CacheKey = "CacheKey:Channel";
 
@@ -109,38 +109,33 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
     public async ValueTask<bool> UpdateAsync(string id, ChatChannelInput chatChannel)
     {
-        try
+        if (string.IsNullOrWhiteSpace(chatChannel.Key))
         {
-            if (string.IsNullOrWhiteSpace(chatChannel.Key))
-            {
-                var result = await DbContext.Channels.Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(item =>
-                        item.SetProperty(x => x.Type, chatChannel.Type)
-                            .SetProperty(x => x.Name, chatChannel.Name)
-                            .SetProperty(x => x.Address, chatChannel.Address)
-                            .SetProperty(x => x.Other, chatChannel.Other)
-                            .SetProperty(x => x.Extension, chatChannel.Extension)
-                            .SetProperty(x => x.Models, chatChannel.Models));
-                return result > 0;
-            }
-            else
-            {
-                var result = await DbContext.Channels.Where(x => x.Id == id)
-                    .ExecuteUpdateAsync(item =>
-                        item.SetProperty(x => x.Type, chatChannel.Type)
-                            .SetProperty(x => x.Name, chatChannel.Name)
-                            .SetProperty(x => x.Key, chatChannel.Key)
-                            .SetProperty(x => x.Address, chatChannel.Address)
-                            .SetProperty(x => x.Extension, chatChannel.Extension)
-                            .SetProperty(x => x.Other, chatChannel.Other)
-                            .SetProperty(x => x.Models, chatChannel.Models));
-
-                return result > 0;
-            }
-        }
-        finally
-        {
+            var result = await DbContext.Channels.Where(x => x.Id == id)
+                .ExecuteUpdateAsync(item =>
+                    item.SetProperty(x => x.Type, chatChannel.Type)
+                        .SetProperty(x => x.Name, chatChannel.Name)
+                        .SetProperty(x => x.Address, chatChannel.Address)
+                        .SetProperty(x => x.Other, chatChannel.Other)
+                        .SetProperty(x => x.Extension, chatChannel.Extension)
+                        .SetProperty(x => x.Models, chatChannel.Models));
             await cache.RemoveAsync(CacheKey);
+            return result > 0;
+        }
+        else
+        {
+            var result = await DbContext.Channels.Where(x => x.Id == id)
+                .ExecuteUpdateAsync(item =>
+                    item.SetProperty(x => x.Type, chatChannel.Type)
+                        .SetProperty(x => x.Name, chatChannel.Name)
+                        .SetProperty(x => x.Key, chatChannel.Key)
+                        .SetProperty(x => x.Address, chatChannel.Address)
+                        .SetProperty(x => x.Extension, chatChannel.Extension)
+                        .SetProperty(x => x.Other, chatChannel.Other)
+                        .SetProperty(x => x.Models, chatChannel.Models));
+            await cache.RemoveAsync(CacheKey);
+
+            return result > 0;
         }
     }
 
