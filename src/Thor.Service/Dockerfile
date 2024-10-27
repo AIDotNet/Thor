@@ -7,7 +7,6 @@ EXPOSE 8081
 FROM node as lobe
 WORKDIR /src
 COPY lobe .
-RUN npm config set registry https://registry.npmmirror.com
 RUN yarn
 RUN npm i
 RUN yarn run build
