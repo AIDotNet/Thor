@@ -94,7 +94,7 @@ public sealed class ChatService(
         {
             using var image =
                 Activity.Current?.Source.StartActivity("文字生成图片");
-            
+
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             TokenService.CheckModel(request.Model, token, context);
@@ -173,7 +173,7 @@ public sealed class ChatService(
 
             using var embedding =
                 Activity.Current?.Source.StartActivity("向量模型调用");
-            
+
             await rateLimitModelService.CheckAsync(input!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
@@ -267,12 +267,11 @@ public sealed class ChatService(
         }
     }
 
-    public async ValueTask CompletionsAsync(HttpContext context,CompletionCreateRequest input)
+    public async ValueTask CompletionsAsync(HttpContext context, CompletionCreateRequest input)
     {
-        
         using var textCompletions =
             Activity.Current?.Source.StartActivity("文本补全接口");
-        
+
         if (input == null)
         {
             throw new Exception("模型校验异常");
@@ -374,7 +373,7 @@ public sealed class ChatService(
         {
             using var chatCompletions =
                 Activity.Current?.Source.StartActivity("对话补全调用");
-            
+
             var model = request.Model;
             await rateLimitModelService.CheckAsync(model, context);
 
@@ -550,7 +549,7 @@ public sealed class ChatService(
             ThorChatCompletionsResponse result = null;
 
             await circuitBreaker.ExecuteAsync(
-                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3, 500);
+                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -571,7 +570,7 @@ public sealed class ChatService(
             ThorChatCompletionsResponse result = null;
 
             await circuitBreaker.ExecuteAsync(
-                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3, 50);
+                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -699,7 +698,7 @@ public sealed class ChatService(
                     responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
                     await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
                 }
-            }, 3, 50);
+            }, 3);
 
         await context.WriteAsEventStreamEndAsync();
 

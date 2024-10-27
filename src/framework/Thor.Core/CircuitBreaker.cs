@@ -2,25 +2,21 @@
 
 public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
 {
-    private readonly object _syncLock = new();
     private int _failureCount;
 
     private CircuitBreakerState _state = CircuitBreakerState.Closed;
     private DateTime _nextRetryTime = DateTime.MinValue;
 
-    public async ValueTask ExecuteAsync(Func<Task> action, int maxAttempts,int delay = 500)
+    public async ValueTask ExecuteAsync(Func<Task> action, int maxAttempts, int delay = 500)
     {
-        lock (_syncLock)
+        if (_state == CircuitBreakerState.Open && DateTime.UtcNow >= _nextRetryTime)
         {
-            if (_state == CircuitBreakerState.Open && DateTime.UtcNow >= _nextRetryTime)
-            {
-                _state = CircuitBreakerState.HalfOpen;
-            }
+            _state = CircuitBreakerState.HalfOpen;
+        }
 
-            if (_state == CircuitBreakerState.Open)
-            {
-                throw new CircuitBreakerOpenException("Circuit breaker is open and requests are not allowed.");
-            }
+        if (_state == CircuitBreakerState.Open)
+        {
+            throw new CircuitBreakerOpenException("Circuit breaker is open and requests are not allowed.");
         }
 
         int attempts = 0;
@@ -30,15 +26,12 @@ public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
             attempts++;
             try
             {
-                await action();
+                await action().ConfigureAwait(false);
 
-                lock (_syncLock)
+                _failureCount = 0; // Reset the failure count
+                if (_state == CircuitBreakerState.HalfOpen)
                 {
-                    _failureCount = 0; // Reset the failure count
-                    if (_state == CircuitBreakerState.HalfOpen)
-                    {
-                        _state = CircuitBreakerState.Closed;
-                    }
+                    _state = CircuitBreakerState.Closed;
                 }
 
                 return; // Exit if action is successful
@@ -47,23 +40,20 @@ public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
             {
                 Console.WriteLine($"Attempt {attempts} failed: {ex.Message}");
 
-                lock (_syncLock)
+                _failureCount++;
+                if (_failureCount >= failureThreshold)
                 {
-                    _failureCount++;
-                    if (_failureCount >= failureThreshold)
-                    {
-                        _state = CircuitBreakerState.Open;
-                        _nextRetryTime = DateTime.UtcNow.Add(openTimeSpan);
-                    }
+                    _state = CircuitBreakerState.Open;
+                    _nextRetryTime = DateTime.UtcNow.Add(openTimeSpan);
                 }
 
                 if (attempts >= maxAttempts)
                 {
-                    throw; // Re-throw the last exception after max attempts reached
+                    throw; // 
                 }
             }
 
-            await Task.Delay(delay); // Optionally wait before retrying, adjust as necessary
+            await Task.Delay(delay); // 重试延迟，避免瞬间大量请求
         }
     }
 

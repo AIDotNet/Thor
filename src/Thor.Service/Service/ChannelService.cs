@@ -259,7 +259,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             response = await chatCompletionsService.ChatCompletionsAsync(chatRequest, platformOptions,
                 token.Token);
-        }, 3, 500).ConfigureAwait(false);
+        }, 3).ConfigureAwait(false);
 
         sw.Stop();
 
