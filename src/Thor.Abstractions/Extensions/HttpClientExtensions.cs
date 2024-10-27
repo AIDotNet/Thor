@@ -33,7 +33,6 @@ public static class HttpClientExtensions
             req.Headers.Add("Authorization", $"Bearer {token}");
         }
 
-
         var response = await httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
 
         return response;
