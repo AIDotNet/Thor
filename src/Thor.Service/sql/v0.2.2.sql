@@ -1,10 +1,10 @@
 ﻿alter table "Tokens"
-    add LimitModels TEXT not null;
+    add "LimitModels"TEXT  null;
 
 alter table "Tokens"
-    add WhiteIpList TEXT not null;
+    add "WhiteIpList" TEXT  null;
 
 -- 需要给 表提供默认值
-update from "Tokens"
-set "LimitModels" = '[]', WhiteIpList = '[]'
+update  "Tokens"
+set "LimitModels" = '[]', "WhiteIpList" = '[]'
 where "LimitModels" is null or "LimitModels" is null;
