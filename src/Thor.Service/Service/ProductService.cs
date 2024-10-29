@@ -7,7 +7,7 @@ using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Thor.Service.Service;
 
-public class ProductService(IServiceProvider serviceProvider, LoggerService loggerService)
+public class ProductService(IServiceProvider serviceProvider, LoggerService loggerService, UserService userService)
     : ApplicationService(serviceProvider), IScopeDependency
 {
     public async ValueTask<List<Product>> GetProductsAsync()
@@ -128,7 +128,7 @@ public class ProductService(IServiceProvider serviceProvider, LoggerService logg
 
             logger.LogWarning("支付成功回调订单状态更新成功：{Data}", JsonSerializer.Serialize(dictionary));
 
-            var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == product.UserId);
+            var user = await userService.RefreshUserAsync(product.UserId);
 
             await loggerService.CreateRechargeAsync(
                 $"订单：{product.Description} 支付成功，充值{RenderHelper.RenderQuota(product.RemainQuota, 6)}额度，用户：{user?.UserName}",
