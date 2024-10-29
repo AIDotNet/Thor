@@ -98,7 +98,7 @@ public sealed class ChatService(
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             request.Model = TokenService.ModelMap(request.Model);
-            
+
             TokenService.CheckModel(request.Model, token, context);
 
             if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
@@ -177,7 +177,7 @@ public sealed class ChatService(
                 Activity.Current?.Source.StartActivity("向量模型调用");
 
             input.Model = TokenService.ModelMap(input.Model);
-            
+
             await rateLimitModelService.CheckAsync(input!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
@@ -284,7 +284,7 @@ public sealed class ChatService(
         try
         {
             input.Model = TokenService.ModelMap(input.Model);
-            
+
             await rateLimitModelService.CheckAsync(input!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
@@ -561,7 +561,8 @@ public sealed class ChatService(
 
             await context.Response.WriteAsJsonAsync(result);
 
-            responseToken = TokenHelper.GetTokens(result.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
+            responseToken =
+                TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray());
         }
         else
         {
