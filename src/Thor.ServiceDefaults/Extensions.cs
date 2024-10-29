@@ -77,7 +77,6 @@ public static class Extensions
                         options.Protocol = OtlpExportProtocol.Grpc;
                         options.Endpoint = url;
                     }))
-                    .AddGrpcClientInstrumentation()
                     .AddHttpClientInstrumentation();
             });
 
