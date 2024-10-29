@@ -7,7 +7,7 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.OpenAI.Chats;
 
-public sealed class GiteeAICompletionService(IHttpClientFactory httpClientFactory) : IThorCompletionsService
+public sealed class GiteeAICompletionService : IThorCompletionsService
 {
     private const string baseUrl = "https://ai.gitee.com/api/serverless/{0}/completions";
     
@@ -20,11 +20,9 @@ public sealed class GiteeAICompletionService(IHttpClientFactory httpClientFactor
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(GiteeAIPlatformOptions.PlatformCode);
-
         var url = GetBaseUrl(createCompletionModel.Model);
         
-        var response = await client.PostJsonAsync(url,
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(url,
             createCompletionModel, options.ApiKey);
 
         var result = await response.Content.ReadFromJsonAsync<CompletionCreateResponse>(

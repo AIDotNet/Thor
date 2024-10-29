@@ -136,6 +136,8 @@ admin admin
   缓存类型 Memory|Redis
 - CACHE_CONNECTION_STRING
   缓存连接字符串 如果是Redis则为Redis连接字符串，Memory则为空
+- HttpClientPoolSize
+  HttpClient连接池大小
 
 使用`docker compose`启动服务：
 

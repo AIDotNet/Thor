@@ -21,7 +21,6 @@ public static class ClaudiaFactory
             {
                 anthropic = new Anthropic(new ClaudiaClientHandler(address)
                 {
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                     MaxConnectionsPerServer = 300,
                     ServerCertificateCustomValidationCallback = (_, _, _, _) => true
                 })
@@ -33,7 +32,6 @@ public static class ClaudiaFactory
             {
                 anthropic = new Anthropic(new SocketsHttpHandler()
                 {
-                    AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
                     MaxConnectionsPerServer = 300,
                     SslOptions = new SslClientAuthenticationOptions()
                     {

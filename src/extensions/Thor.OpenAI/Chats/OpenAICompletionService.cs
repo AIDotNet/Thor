@@ -13,9 +13,7 @@ public sealed class OpenAICompletionService(IHttpClientFactory httpClientFactory
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
-
-        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             createCompletionModel, options.ApiKey);
 
         var result = await response.Content.ReadFromJsonAsync<CompletionCreateResponse>(

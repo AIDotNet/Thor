@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Thor.Abstractions;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.ResponseModels;
 
@@ -12,8 +13,6 @@ public class Chat
     /// 
     /// </summary>
     private const int API_TOKEN_TTL_SECONDS = 60 * 5;
-
-    private static readonly HttpClient Client = new();
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -60,7 +59,7 @@ public class Chat
             request.Headers.Add("Authorization",$"Bearer {token}");
         }
 
-        var response = await Client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+        var response = await HttpClientFactory.HttpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
         var stream = await response.Content.ReadAsStreamAsync();
         var buffer = new byte[8192];
         int bytesRead;

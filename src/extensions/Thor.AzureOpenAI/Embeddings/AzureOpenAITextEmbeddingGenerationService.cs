@@ -17,6 +17,7 @@ public class AzureOpenAITextEmbeddingGenerationService : IThorTextEmbeddingServi
         var client = createClient.GetEmbeddingClient(createEmbeddingModel.Model);
         if (createEmbeddingModel.InputCalculated is string)
         {
+            
         }
 
         var response = await client.GenerateEmbeddingsAsync(createEmbeddingModel.InputCalculated?.ToArray(),

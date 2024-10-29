@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using Thor.Abstractions;
 using Thor.MetaGLM.Models.RequestModels;
 using Thor.MetaGLM.Models.ResponseModels.ImageGenerationModels;
 
@@ -8,8 +9,6 @@ namespace Thor.MetaGLM.Modules
     public class Images()
     {
         private static readonly int API_TOKEN_TTL_SECONDS = 60 * 5;
-        static readonly HttpClient client = new HttpClient();
-
         private IEnumerable<string> GenerateBase(ImageRequestBase requestBody, string apiKey)
         {
             var json = JsonSerializer.Serialize(requestBody);
@@ -28,7 +27,7 @@ namespace Thor.MetaGLM.Modules
 
             };
 
-            var response = client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
+            var response = HttpClientFactory.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
             var stream = response.Content.ReadAsStreamAsync().Result;
             byte[] buffer = new byte[8192];
             int bytesRead;

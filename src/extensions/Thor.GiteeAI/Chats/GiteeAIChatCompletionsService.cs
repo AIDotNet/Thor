@@ -10,7 +10,7 @@ using Thor.Abstractions.Extensions;
 
 namespace Thor.OpenAI.Chats;
 
-public class GiteeAIChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
+public class GiteeAIChatCompletionsService : IThorChatCompletionsService
 {
     private const string baseUrl = "https://ai.gitee.com/api/serverless/{0}/chat/completions";
     
@@ -23,11 +23,9 @@ public class GiteeAIChatCompletionsService(IHttpClientFactory httpClientFactory)
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(GiteeAIPlatformOptions.PlatformCode);
-
         var url = GetBaseUrl(chatCompletionCreate.Model);
         
-        var response = await client.PostJsonAsync(url,
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(url,
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -53,10 +51,8 @@ public class GiteeAIChatCompletionsService(IHttpClientFactory httpClientFactory)
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(GiteeAIPlatformOptions.PlatformCode);
-
         var url = GetBaseUrl(chatCompletionCreate.Model);
-        var response = await client.HttpRequestRaw(url,
+        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(url,
             chatCompletionCreate, options.ApiKey);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)

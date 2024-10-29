@@ -17,9 +17,7 @@ public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFa
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
-        
-        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -45,9 +43,7 @@ public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFa
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
-
-        var response = await client.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)

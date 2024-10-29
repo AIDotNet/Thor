@@ -17,9 +17,7 @@ public sealed class OpenAITextEmbeddingService(IHttpClientFactory httpClientFact
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(OpenAIPlatformOptions.PlatformCode);
-
-        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
             createEmbeddingModel, options!.ApiKey);
 
         var result =
