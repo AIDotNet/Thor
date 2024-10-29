@@ -7,7 +7,7 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.OpenAI.Chats;
 
-public sealed class OpenAICompletionService(IHttpClientFactory httpClientFactory) : IThorCompletionsService
+public sealed class OpenAICompletionService : IThorCompletionsService
 {
     public async Task<CompletionCreateResponse> CompletionAsync(CompletionCreateRequest createCompletionModel,
         ThorPlatformOptions? options = null,

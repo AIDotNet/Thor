@@ -11,26 +11,20 @@ using Thor.Abstractions.Extensions;
 
 namespace Thor.OpenAI.Chats;
 
-public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
+public sealed class OpenAIChatCompletionsService : IThorChatCompletionsService
 {
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(
+            options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
-            throw new UnauthorizedAccessException();
+            throw new BusinessException("渠道未登录,请联系管理人员", "401");
         }
-
-        if (response.StatusCode == HttpStatusCode.PaymentRequired)
-        {
-            throw new PaymentRequiredException();
-        }
-
-        response.EnsureSuccessStatusCode();
 
         var result =
             await response.Content.ReadFromJsonAsync<ThorChatCompletionsResponse>(
@@ -43,7 +37,8 @@ public sealed class OpenAIChatCompletionsService(IHttpClientFactory httpClientFa
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(
+            options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)

@@ -97,6 +97,8 @@ public sealed class ChatService(
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
+            request.Model = TokenService.ModelMap(request.Model);
+            
             TokenService.CheckModel(request.Model, token, context);
 
             if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
@@ -174,6 +176,8 @@ public sealed class ChatService(
             using var embedding =
                 Activity.Current?.Source.StartActivity("向量模型调用");
 
+            input.Model = TokenService.ModelMap(input.Model);
+            
             await rateLimitModelService.CheckAsync(input!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
@@ -279,6 +283,8 @@ public sealed class ChatService(
 
         try
         {
+            input.Model = TokenService.ModelMap(input.Model);
+            
             await rateLimitModelService.CheckAsync(input!.Model, context);
 
             var (token, user) = await tokenService.CheckTokenAsync(context);
@@ -373,6 +379,8 @@ public sealed class ChatService(
         {
             using var chatCompletions =
                 Activity.Current?.Source.StartActivity("对话补全调用");
+
+            request.Model = TokenService.ModelMap(request.Model);
 
             var model = request.Model;
             await rateLimitModelService.CheckAsync(model, context);

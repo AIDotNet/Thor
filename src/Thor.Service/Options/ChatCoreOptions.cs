@@ -11,10 +11,15 @@ public class ChatCoreOptions
     public static string Master { get; set; }
 
     public static Shared? Shared { get; set; }
-    
+
     public static FreeModel? FreeModel { get; set; }
+
+    public static ModelMapping ModelMapping { get; set; }
 }
 
+/// <summary>
+/// 免费模型
+/// </summary>
 public sealed class FreeModel
 {
     /// <summary>
@@ -28,19 +33,25 @@ public sealed class FreeModel
     public FreeModelItem[]? Items { get; set; }
 }
 
+/// <summary>
+/// 免费模型列表
+/// </summary>
 public sealed class FreeModelItem
 {
     /// <summary>
     /// 模型
     /// </summary>
     public string[] Model { get; set; }
-    
+
     /// <summary>
     /// 免费次数（超出免费额度则按照收费）
     /// </summary>
     public int Limit { get; set; }
 }
 
+/// <summary>
+/// 分享配置
+/// </summary>
 public sealed class Shared
 {
     /// <summary>
@@ -57,4 +68,29 @@ public sealed class Shared
     /// 分享领取限制（每个人每天的限制）
     /// </summary>
     public int ShareLimit { get; set; }
+}
+
+public sealed class ModelMapping
+{
+    /// <summary>
+    /// 是否启用模型映射
+    /// </summary>
+    public bool Enable { get; set; }
+
+    /// <summary>
+    /// 模型映射配置
+    /// 映射规则，
+    /// 请求model:["",""] // value则是需要映射的模型，可以配置多个，自动负载均衡
+    /// </summary>
+    public Dictionary<string, ModelMappingItem[]> Models { get; set; } = new();
+}
+
+public sealed class ModelMappingItem
+{
+    public string Model { get; set; }
+
+    /// <summary>
+    /// 权重，数值越大使用概率越大
+    /// </summary>
+    public int Order { get; set; } = 1;
 }

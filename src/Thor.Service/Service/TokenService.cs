@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Thor.Service.Extensions;
+using Thor.Service.Options;
 
 namespace Thor.Service.Service;
 
@@ -172,7 +173,7 @@ public sealed class TokenService(
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
             }
 
-            user = await userService.GetAsync(token.Creator,false).ConfigureAwait(false);
+            user = await userService.GetAsync(token.Creator, false).ConfigureAwait(false);
         }
 
         if (user == null)
@@ -196,5 +197,35 @@ public sealed class TokenService(
         logger.LogWarning("用户额度不足");
         context.Response.StatusCode = 402;
         throw new InsufficientQuotaException("额度不足");
+    }
+
+    /// <summary>
+    /// 模型转换映射
+    /// </summary>
+    /// <returns></returns>
+    public static string ModelMap(string model)
+    {
+        if (ChatCoreOptions.ModelMapping?.Enable == true &&
+            ChatCoreOptions.ModelMapping.Models.TryGetValue(model, out var models) && models.Length > 0)
+        {
+            // 随机字符串
+            // 所有权重值之和
+            var total = models.Sum(x => x.Order);
+
+            var value = Convert.ToInt32(Random.Shared.NextDouble() * total);
+
+            foreach (var chatChannel in models)
+            {
+                value -= chatChannel.Order;
+                if (value <= 0)
+                {
+                    return chatChannel.Model;
+                }
+            }
+
+            return models.Last().Model;
+        }
+
+        return model;
     }
 }
