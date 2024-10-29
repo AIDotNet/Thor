@@ -73,7 +73,8 @@ public static class Extensions
         {
             builder.Services.AddOpenTelemetry()
                 .WithTracing()
-                .UseOtlpExporter();
+                .UseOtlpExporter(OtlpExportProtocol.Grpc,
+                    new Uri(builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"]));
         }
 
         // Uncomment the following lines to enable the Azure Monitor exporter (requires the Azure.Monitor.OpenTelemetry.AspNetCore package)
