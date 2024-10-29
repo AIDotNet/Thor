@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Primitives;
 using Thor.Service.Infrastructure;
 using Thor.Service.Options;
 
@@ -21,7 +23,23 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    
+
+    public static IEndpointRouteBuilder UseOpenTelemetry(this WebApplication app)
+    {
+        app.Use((async (context, next) =>
+        {
+            context.Response.Headers.TryAdd<string, StringValues>("X-Request-Id",
+                (StringValues)Activity.Current?.TraceId.ToString());
+
+            Activity.Current?.SetTag("http.method", context.Request.Method);
+            Activity.Current?.SetTag("http.url", context.Request.Path);
+            Activity.Current?.SetTag("http.host", context.Request.Host.ToString());
+
+            await next(context);
+        }));
+        return app;
+    }
+
     public static WebApplicationBuilder HostEnvironment(this WebApplicationBuilder builder)
     {
         builder.Configuration.GetSection(JwtOptions.Name)
@@ -31,7 +49,7 @@ public static class ServiceCollectionExtensions
             .Get<CacheOptions>();
         builder.Configuration.GetSection(ChatCoreOptions.Name)
             .Get<ChatCoreOptions>();
-        
+
         var cacheType = Environment.GetEnvironmentVariable("CACHE_TYPE");
         var connectionString = Environment.GetEnvironmentVariable("CACHE_CONNECTION_STRING");
         if (!string.IsNullOrEmpty(cacheType))

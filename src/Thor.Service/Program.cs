@@ -274,6 +274,8 @@ try
 
     app.UseStaticFiles();
 
+    app.UseOpenTelemetry();
+
     app.UseMiddleware<UnitOfWorkMiddleware>();
 
     if (!Directory.Exists("/data"))
@@ -282,6 +284,7 @@ try
     }
 
     app.MapModelManager();
+
 
     app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBody] LoginInput input) =>
         await service.TokenAsync(input))
