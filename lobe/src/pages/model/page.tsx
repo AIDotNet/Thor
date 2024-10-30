@@ -6,9 +6,12 @@ import { getCompletionRatio, renderQuota } from "../../utils/render";
 import { getIconByName } from "../../utils/iconutils";
 import { GetModelManagerList } from "../../services/ModelManagerService";
 import { Search } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 
 export default function DesktopLayout() {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [isK, setIsK] = useState<boolean>(false);
@@ -29,6 +32,32 @@ export default function DesktopLayout() {
                 setLoading(false);
             });
     }
+
+    useEffect(() => {
+        // 更新url地址的query
+        const searchParams = new URLSearchParams(location.search);
+        searchParams.set('model', input.model);
+
+        navigate({
+            search: searchParams.toString(),
+        });
+
+    }, [input.model]);
+
+    useEffect(() => {
+        // 根据query更新input
+        const searchParams = new URLSearchParams(location.search);
+        const model = searchParams.get('model');
+        if (model) {
+            setInput({
+                ...input,
+                model
+            });
+            // 等待input更新完成后再加载数据
+            loadData();
+
+        }
+    }, [location.search]);
 
     useEffect(() => {
         loadData();
