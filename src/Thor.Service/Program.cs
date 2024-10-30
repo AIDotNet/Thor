@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebSockets;
 using Serilog;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Embeddings.Dtos;
@@ -197,6 +198,12 @@ try
 
     builder.Services.AddResponseCompression();
 
+    builder.Services.AddWebSockets(options =>
+    {
+        options.AllowedOrigins.Add("*");
+        options.KeepAliveInterval = TimeSpan.FromSeconds(120);
+    });
+
     var app = builder.Build();
 
     app.MapDefaultEndpoints();
@@ -230,6 +237,8 @@ try
     await SettingService.LoadingSettings(app);
 
     app.UseCors("AllowAll");
+
+    app.UseWebSockets();
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -718,6 +727,16 @@ try
         .WithDescription("获取模型列表")
         .RequireAuthorization()
         .WithOpenApi();
+
+    app.Map("/v1/realtime", (applicationBuilder =>
+    {
+        applicationBuilder.Run(async (context) =>
+        {
+            var chatService = context.RequestServices.GetRequiredService<ChatService>();
+
+            await chatService.RealtimeAsync(context).ConfigureAwait(true);
+        });
+    }));
 
     if (app.Environment.IsDevelopment())
     {

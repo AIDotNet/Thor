@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Buffers;
+using System.Diagnostics;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using MapsterMapper;
@@ -10,6 +12,8 @@ using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Abstractions.Realtime;
+using Thor.Abstractions.Realtime.Dto;
 using Thor.Core;
 using Thor.Service.Extensions;
 
@@ -487,6 +491,111 @@ public sealed class ChatService(
             //     await context.WriteStreamErrorAsync(e.Message);
             // else
             await context.WriteErrorAsync(e.Message, "500");
+        }
+    }
+
+    public async ValueTask RealtimeAsync(HttpContext context)
+    {
+        try
+        {
+            var model = context.Request.Query["model"].ToString();
+
+            using var chatCompletions =
+                Activity.Current?.Source.StartActivity("对话补全调用");
+
+            model = TokenService.ModelMap(model);
+
+            await rateLimitModelService.CheckAsync(model, context);
+
+            var (token, user) = await tokenService.CheckTokenAsync(context);
+
+            TokenService.CheckModel(model, token, context);
+
+            // 获取渠道通过算法计算权重
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model), model);
+
+            if (channel == null)
+            {
+                throw new NotModelException(model);
+            }
+
+            // 记录请求模型 / 请求用户
+            logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
+
+            // 获取渠道指定的实现类型的服务
+            var realtimeService = GetKeyedService<IThorRealtimeService>(channel.Type);
+
+            if (realtimeService == null)
+            {
+                throw new Exception($"并未实现：{channel.Type} 的服务");
+            }
+
+            if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
+            {
+                if (context.WebSockets.IsWebSocketRequest)
+                {
+                    var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
+
+                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024 * 4);
+
+                    using var websocket = await context.WebSockets.AcceptWebSocketAsync("realtime");
+
+                    using var client = realtimeService.CreateClient();
+                    await client.OpenAsync(new OpenRealtimeInput()
+                    {
+                        Model = model
+                    }, platformOptions);
+
+                    var result =
+                        await websocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                    if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        return;
+                    }
+
+                    var messageBytes = buffer.AsSpan(0, result.Count).ToArray();
+
+                    await client.SendAsync(JsonSerializer.Deserialize<RealtimeInput>(messageBytes,
+                        ThorJsonSerializer.DefaultOptions) ?? new RealtimeInput()).ConfigureAwait(false);
+
+                    await client.OnMessageAsync(websocket);
+                    
+                    while (true)
+                    {
+                        result =
+                            await websocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            break;
+                        }
+
+                        messageBytes = buffer.AsSpan(0, result.Count).ToArray();
+
+                        await client.SendAsync(JsonSerializer.Deserialize<RealtimeInput>(messageBytes,
+                            ThorJsonSerializer.DefaultOptions) ?? new RealtimeInput()).ConfigureAwait(false);
+                    }
+
+                    await websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close", CancellationToken.None);
+                }
+                else
+                {
+                    context.Response.StatusCode = 400;
+                }
+            }
+            else
+            {
+                throw new Exception("当前模型未设置倍率");
+            }
+        }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            context.Response.StatusCode = 401;
         }
     }
 

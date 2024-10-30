@@ -5,9 +5,11 @@ using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
+using Thor.Abstractions.Realtime;
 using Thor.OpenAI.Chats;
 using Thor.OpenAI.Embeddings;
 using Thor.OpenAI.Images;
+using Thor.OpenAI.Realtime;
 
 namespace Thor.OpenAI.Extensions;
 
@@ -58,11 +60,13 @@ public static class OpenAIServiceCollectionExtensions
         services.AddKeyedSingleton<IThorCompletionsService, OpenAICompletionService>(OpenAIPlatformOptions
             .PlatformCode);
 
+        services.AddKeyedTransient<IThorRealtimeService, OpenAIRealtimeService>(OpenAIPlatformOptions.PlatformCode);
+
         services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
                 options =>
                 {
                     options.Timeout = TimeSpan.FromMinutes(6);
-                    
+
                     options.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
                 })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
