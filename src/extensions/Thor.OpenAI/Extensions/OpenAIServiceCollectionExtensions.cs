@@ -60,7 +60,8 @@ public static class OpenAIServiceCollectionExtensions
         services.AddKeyedSingleton<IThorCompletionsService, OpenAICompletionService>(OpenAIPlatformOptions
             .PlatformCode);
 
-        services.AddKeyedTransient<IThorRealtimeService, OpenAIRealtimeService>(OpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedTransient<IThorRealtimeService, OpenAIRealtimeService>(OpenAIPlatformOptions
+            .PlatformCode);
 
         services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
                 options =>

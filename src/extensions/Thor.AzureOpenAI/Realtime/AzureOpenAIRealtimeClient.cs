@@ -7,9 +7,9 @@ using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
 
 
-namespace Thor.OpenAI.Realtime;
+namespace Thor.AzureOpenAI.Realtime;
 
-public class OpenAIRealtimeClient : IRealtimeClient
+public class AzureOpenAIRealtimeClient : IRealtimeClient
 {
     private readonly ClientWebSocket _socket = new();
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -25,14 +25,14 @@ public class OpenAIRealtimeClient : IRealtimeClient
     public async Task OpenAsync(OpenRealtimeInput input, ThorPlatformOptions? options = null)
     {
         _socket.Options.AddSubProtocol("realtime");
-        _socket.Options.AddSubProtocol("openai-insecure-api-key." + options!.ApiKey);
-        _socket.Options.AddSubProtocol("openai-beta.realtime-v1");
+        _socket.Options.AddSubProtocol("websocket.api_key." + options!.ApiKey);
 
         var uri = new Uri(options.Address);
         await _socket.ConnectAsync(
             new Uri(uri.Scheme == "http"
                 ? "ws"
-                : "wss" + "://" + uri.Host + "/v1/realtime?model=" + input.Model),
+                : "wss" + "://" + uri.Host + "/openai/realtime?deployment=" + input.Model + "&api-version=" +
+                  options.Other + "&api-key=" + options.ApiKey),
             _cancellationTokenSource.Token);
 
         _ = Task.Run(async () =>

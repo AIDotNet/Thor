@@ -4,8 +4,10 @@ using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
+using Thor.Abstractions.Realtime;
 using Thor.AzureOpenAI.Chats;
 using Thor.AzureOpenAI.Embeddings;
+using Thor.AzureOpenAI.Realtime;
 
 namespace Thor.AzureOpenAI.Extensions;
 
@@ -43,16 +45,21 @@ public static class AzureOpenAIServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IThorChatCompletionsService, AzureOpenAIChatCompletionsService>(AzureOpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorChatCompletionsService, AzureOpenAIChatCompletionsService>(
+            AzureOpenAIPlatformOptions.PlatformCode);
         services.AddKeyedSingleton<IThorTextEmbeddingService, AzureOpenAITextEmbeddingGenerationService>(
             AzureOpenAIPlatformOptions.PlatformCode);
-        services.AddKeyedSingleton<IThorImageService, AzureOpenAIServiceImageService>(AzureOpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorImageService, AzureOpenAIServiceImageService>(AzureOpenAIPlatformOptions
+            .PlatformCode);
+
+        services.AddKeyedSingleton<IThorRealtimeService, AzureOpenAIRealtimeService>(AzureOpenAIPlatformOptions
+            .PlatformCode);
 
         services.AddHttpClient(AzureOpenAIPlatformOptions.PlatformCode,
                 options =>
                 {
                     options.Timeout = TimeSpan.FromMinutes(6);
-                    
+
                     options.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
                 })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
