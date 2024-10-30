@@ -103,14 +103,24 @@ export default function ModelManager() {
                         key: 'price',
                         title: '模型价格',
                         dataIndex: 'price',
+                        width: 180,
                         render: (_: any, item: any) => {
                             return (<div>
                                 <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000)}/1k tokens</Tag>
-                                    {item.completionRate ?<><Tag style={{
+                                {item.completionRate ? <><Tag style={{
+                                    marginTop: 8
+                                }} color='geekblue'>完成{renderQuota(item.completionRate * 1000)}/1M tokens</Tag></> : <><Tag style={{
+                                    marginTop: 8
+                                }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1M tokens</Tag></>}
+
+                                {item.isVersion2 && <div>
+                                    <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000000)}/1M tokens</Tag>
+                                    {item.completionRate ? <><Tag style={{
                                         marginTop: 8
-                                    }} color='geekblue'>完成{renderQuota(item.completionRate * 1000)}/1M tokens</Tag></>:<><Tag style={{
+                                    }} color='geekblue'>音频完成{renderQuota(item.audioOutputRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
                                         marginTop: 8
-                                    }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1M tokens</Tag></>}
+                                    }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
+                                </div>}
                             </div>)
                         }
                     },
@@ -228,7 +238,7 @@ export default function ModelManager() {
                     open: false
                 });
             }} value={updateValue.value} />
-            
+
         </div>
     )
 }

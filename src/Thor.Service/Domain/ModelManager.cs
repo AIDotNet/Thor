@@ -38,6 +38,16 @@ public sealed class ModelManager : Entity<Guid>
     public decimal PromptRate { get; set; }
     
     /// <summary>
+    /// Audio倍率
+    /// </summary>
+    public decimal? AudioPromptRate { get; set; }
+    
+    /// <summary>
+    /// Audio输出倍率
+    /// </summary>
+    public decimal? AudioOutputRate { get; set; }
+    
+    /// <summary>
     /// quota_type
     /// </summary>
     public ModelQuotaType QuotaType { get; set; }
@@ -56,4 +66,9 @@ public sealed class ModelManager : Entity<Guid>
     /// 模型图标
     /// </summary>
     public string? Icon { get; set; }
+
+    /// <summary>
+    /// 是否v2版本
+    /// </summary>
+    public bool IsVersion2 { get; set; } = false;
 }

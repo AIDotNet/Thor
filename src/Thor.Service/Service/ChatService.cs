@@ -41,6 +41,7 @@ public sealed class ChatService(
     : ApplicationService(serviceProvider), IScopeDependency
 {
     private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
+    private const string RealtimeConsumerTemplate = "模型倍率：文本提示词倍率:{0} 文本完成倍率:{1} 音频请求倍率:{2} 音频完成倍率:{3}  实时对话";
 
 
     private static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
@@ -532,52 +533,135 @@ public sealed class ChatService(
 
             if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
+                decimal requestToken = 0;
+                decimal audioRequestToken = 0;
+                decimal responseToken = 0;
+                decimal audioResponseTokens = 0;
+
+                var sw = Stopwatch.StartNew();
+
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
+                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024 * 2);
 
-                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024 * 4);
-
-                    using var websocket = await context.WebSockets.AcceptWebSocketAsync("realtime");
-
-                    using var client = realtimeService.CreateClient();
-                    await client.OpenAsync(new OpenRealtimeInput()
+                    try
                     {
-                        Model = model
-                    }, platformOptions);
+                        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
-                    var result =
-                        await websocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                        using var websocket = await context.WebSockets.AcceptWebSocketAsync("realtime");
 
-                    if (result.MessageType == WebSocketMessageType.Close)
-                    {
-                        return;
-                    }
+                        using var client = realtimeService.CreateClient();
 
-                    var messageBytes = buffer.AsSpan(0, result.Count).ToArray();
+                        client.OnMessage += async (sender, args) =>
+                        {
+                            if (websocket is { State: WebSocketState.Open })
+                            {
+                                if (args is { Type: "response.done", Response.Usage: not null })
+                                {
+                                    requestToken = args.Response.Usage.InputTokenDetails?.TextTokens ?? 0;
+                                    audioRequestToken = args.Response.Usage.InputTokenDetails?.AudioTokens ?? 0;
+                                    responseToken = args.Response.Usage.OutputTokenDetails?.TextTokens ?? 0;
+                                    audioResponseTokens = args.Response.Usage.OutputTokenDetails?.AudioTokens ?? 0;
 
-                    await client.SendAsync(JsonSerializer.Deserialize<RealtimeInput>(messageBytes,
-                        ThorJsonSerializer.DefaultOptions) ?? new RealtimeInput()).ConfigureAwait(false);
+                                    if (args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Audio != 0 ||
+                                        args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Text != 0)
+                                    {
+                                        requestToken +=
+                                            args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Text ?? 0;
+                                        audioRequestToken += args.Response.Usage.InputTokenDetails?.CachedTokensDetails
+                                            .Audio ?? 0;
+                                    }
+                                }
 
-                    await client.OnMessageAsync(websocket);
-                    
-                    while (true)
-                    {
-                        result =
+                                await websocket?.SendAsync(
+                                    JsonSerializer.SerializeToUtf8Bytes(args, ThorJsonSerializer.DefaultOptions),
+                                    WebSocketMessageType.Text, true,
+                                    CancellationToken.None);
+                            }
+                        };
+
+                        await client.OpenAsync(new OpenRealtimeInput()
+                        {
+                            Model = model
+                        }, platformOptions);
+
+                        var result =
                             await websocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
-                            break;
+                            return;
                         }
 
-                        messageBytes = buffer.AsSpan(0, result.Count).ToArray();
+                        var messageBytes = buffer.AsSpan(0, result.Count).ToArray();
+
 
                         await client.SendAsync(JsonSerializer.Deserialize<RealtimeInput>(messageBytes,
                             ThorJsonSerializer.DefaultOptions) ?? new RealtimeInput()).ConfigureAwait(false);
+
+
+                        while (true)
+                        {
+                            result =
+                                await websocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                break;
+                            }
+
+                            await client.SendAsync(JsonSerializer.Deserialize<RealtimeInput>(
+                                buffer.AsSpan(0, result.Count).ToArray(),
+                                ThorJsonSerializer.DefaultOptions) ?? new RealtimeInput()).ConfigureAwait(false);
+                        }
+
+                        await websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close", CancellationToken.None);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError("实时对话异常：{e}", e);
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(buffer);
                     }
 
-                    await websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close", CancellationToken.None);
+                    // 如果没有请求token和响应token则直接返回
+                    if (requestToken == 0 && audioRequestToken == 0 && responseToken == 0 && audioResponseTokens == 0)
+                    {
+                        return;
+                    }
+
+                    var quota = requestToken * rate;
+
+                    var completionRatio = GetCompletionRatio(model);
+                    quota += responseToken * rate * completionRatio;
+
+                    var audioQuota = audioRequestToken * ModelManagerService.AudioPromptRate[model];
+                    var audioCompletionRatio = audioResponseTokens * ModelManagerService.AudioPromptRate[model];
+
+                    quota += audioQuota;
+                    quota += audioCompletionRatio;
+
+                    // 将quota 四舍五入
+                    quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                    sw.Stop();
+
+                    await loggerService.CreateConsumeAsync(
+                        string.Format(RealtimeConsumerTemplate, rate, completionRatio,
+                            ModelManagerService.AudioPromptRate[model], ModelManagerService.AudioPromptRate[model]),
+                        model,
+                        (int)requestToken + (int)audioRequestToken, (int)responseToken + (int)audioResponseTokens,
+                        (int)quota, token?.Name,
+                        user?.UserName, user?.Id,
+                        channel.Id,
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                        true,
+                        (int)sw.ElapsedMilliseconds);
+
+                    await userService.ConsumeAsync(user!.Id, (long)quota, (int)requestToken, token?.Key, channel.Id,
+                        model);
                 }
                 else
                 {
