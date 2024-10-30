@@ -50,6 +50,9 @@ public class AzureOpenAIRealtimeClient : IRealtimeClient
                     }
                     else
                     {
+                        string responseMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                        Console.WriteLine(responseMessage);
+                        
                         var content = JsonSerializer.Deserialize<RealtimeResult>(buffer.AsSpan(0, result.Count),
                             ThorJsonSerializer.DefaultOptions);
                         OnMessage?.Invoke(this, content);
