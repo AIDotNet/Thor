@@ -63,7 +63,7 @@ namespace Thor.Abstractions.Dtos
             
             get
             {
-                if (Messages.Count > 1)
+                if (Messages?.Count > 1)
                 {
                     return Messages;
                 }
