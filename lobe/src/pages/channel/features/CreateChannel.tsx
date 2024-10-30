@@ -164,7 +164,8 @@ export default function CreateChannel({
                     <Select
                         placeholder="请选择版本"
                         value={input.other}
-                        defaultValue={'2024-06-01'}
+                        defaultActiveFirstOption={true}
+                        defaultValue={'2024-10-01-preview'}
                         onChange={(v) => {
                             setInput({ ...input, other: v });
                         }}
@@ -173,6 +174,7 @@ export default function CreateChannel({
                         <Option key={'2024-05-01-preview'} value={'2024-05-01-preview'}>2024-05-01-preview</Option>
                         <Option key={'2024-04-01-preview'} value={'2024-04-01-preview'}>2024-04-01-preview</Option>
                         <Option key={'2024-06-01'} value={'2024-06-01'}>2024-06-01</Option>
+                        <Option key={'2024-10-01-preview'} value={'2024-10-01-preview'}>2024-10-01-preview</Option>
                     </Select>
                 </Form.Item>
 
@@ -198,9 +200,9 @@ export default function CreateChannel({
                 name="key"
 
             >
-                <Input.Password 
-                placeholder={getModelPrompt(input.type)} 
-                autoComplete="new-password"
+                <Input.Password
+                    placeholder={getModelPrompt(input.type)}
+                    autoComplete="new-password"
                 />
             </Form.Item>
             <Form.Item<FieldType> name='models' label='模型' rules={[

@@ -178,6 +178,7 @@ export default function UpdateChannel({
                     input.type === "AzureOpenAI" && <Form.Item<FieldType> name='other' label='版本' style={{ width: '100%' }}>
                         <Select
                             placeholder="请选择版本"
+                            defaultActiveFirstOption={true}
                             value={input.type}
                             onChange={(v) => {
                                 setInput({ ...input, other: v });
@@ -187,6 +188,7 @@ export default function UpdateChannel({
                             <Option key={'2024-05-01-preview'} value={'2024-05-01-preview'}>2024-05-01-preview</Option>
                             <Option key={'2024-04-01-preview'} value={'2024-04-01-preview'}>2024-04-01-preview</Option>
                             <Option key={'2024-06-01'} value={'2024-06-01'}>2024-06-01</Option>
+                            <Option key={'2024-10-01-preview'} value={'2024-10-01-preview'}>2024-10-01-preview</Option>
                         </Select>
                     </Form.Item>
 

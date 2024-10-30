@@ -53,7 +53,6 @@ export default function DesktopLayout() {
                 ...input,
                 model
             });
-            // 等待input更新完成后再加载数据
             loadData();
 
         }
