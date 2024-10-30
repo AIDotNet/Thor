@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System.Buffers;
+using System.Diagnostics;
+using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using MapsterMapper;
@@ -10,6 +12,8 @@ using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Abstractions.Realtime;
+using Thor.Abstractions.Realtime.Dto;
 using Thor.Core;
 using Thor.Service.Extensions;
 
@@ -37,6 +41,7 @@ public sealed class ChatService(
     : ApplicationService(serviceProvider), IScopeDependency
 {
     private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
+    private const string RealtimeConsumerTemplate = "模型倍率：文本提示词倍率:{0} 文本完成倍率:{1} 音频请求倍率:{2} 音频完成倍率:{3}  实时对话";
 
 
     private static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
@@ -487,6 +492,194 @@ public sealed class ChatService(
             //     await context.WriteStreamErrorAsync(e.Message);
             // else
             await context.WriteErrorAsync(e.Message, "500");
+        }
+    }
+
+    public async ValueTask RealtimeAsync(HttpContext context)
+    {
+        try
+        {
+            var model = context.Request.Query["model"].ToString();
+
+            using var chatCompletions =
+                Activity.Current?.Source.StartActivity("对话补全调用");
+
+            model = TokenService.ModelMap(model);
+
+            await rateLimitModelService.CheckAsync(model, context);
+
+            var (token, user) = await tokenService.CheckTokenAsync(context);
+
+            TokenService.CheckModel(model, token, context);
+
+            // 获取渠道通过算法计算权重
+            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model), model);
+
+            if (channel == null)
+            {
+                throw new NotModelException(model);
+            }
+
+            // 记录请求模型 / 请求用户
+            logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
+
+            // 获取渠道指定的实现类型的服务
+            var realtimeService = GetKeyedService<IThorRealtimeService>(channel.Type);
+
+            if (realtimeService == null)
+            {
+                throw new Exception($"并未实现：{channel.Type} 的服务");
+            }
+
+            if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
+            {
+                decimal requestToken = 0;
+                decimal audioRequestToken = 0;
+                decimal responseToken = 0;
+                decimal audioResponseTokens = 0;
+
+                var sw = Stopwatch.StartNew();
+
+                if (context.WebSockets.IsWebSocketRequest)
+                {
+                    var buffer = ArrayPool<byte>.Shared.Rent(1024 * 1024 * 2);
+
+                    try
+                    {
+                        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
+
+                        using var websocket = await context.WebSockets.AcceptWebSocketAsync("realtime");
+
+                        using var client = realtimeService.CreateClient();
+
+                        client.OnMessage += async (sender, args) =>
+                        {
+                            if (websocket is { State: WebSocketState.Open })
+                            {
+                                if (args is { Type: "response.done", Response.Usage: not null })
+                                {
+                                    requestToken = args.Response.Usage.InputTokenDetails?.TextTokens ?? 0;
+                                    audioRequestToken = args.Response.Usage.InputTokenDetails?.AudioTokens ?? 0;
+                                    responseToken = args.Response.Usage.OutputTokenDetails?.TextTokens ?? 0;
+                                    audioResponseTokens = args.Response.Usage.OutputTokenDetails?.AudioTokens ?? 0;
+
+                                    if (args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Audio != 0 ||
+                                        args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Text != 0)
+                                    {
+                                        requestToken +=
+                                            args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Text ?? 0;
+                                        audioRequestToken += args.Response.Usage.InputTokenDetails?.CachedTokensDetails
+                                            .Audio ?? 0;
+                                    }
+                                }
+
+                                await websocket?.SendAsync(
+                                    JsonSerializer.SerializeToUtf8Bytes(args, ThorJsonSerializer.DefaultOptions),
+                                    WebSocketMessageType.Text, true,
+                                    CancellationToken.None);
+                            }
+                        };
+
+                        await client.OpenAsync(new OpenRealtimeInput()
+                        {
+                            Model = model
+                        }, platformOptions);
+
+                        var result =
+                            await websocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            return;
+                        }
+
+                        var messageBytes = buffer.AsSpan(0, result.Count).ToArray();
+
+
+                        await client.SendAsync(JsonSerializer.Deserialize<RealtimeInput>(messageBytes,
+                            ThorJsonSerializer.DefaultOptions) ?? new RealtimeInput()).ConfigureAwait(false);
+
+
+                        while (true)
+                        {
+                            result =
+                                await websocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+                            if (result.MessageType == WebSocketMessageType.Close)
+                            {
+                                break;
+                            }
+
+                            await client.SendAsync(JsonSerializer.Deserialize<RealtimeInput>(
+                                buffer.AsSpan(0, result.Count).ToArray(),
+                                ThorJsonSerializer.DefaultOptions) ?? new RealtimeInput()).ConfigureAwait(false);
+                        }
+
+                        await websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close", CancellationToken.None);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError("实时对话异常：{e}", e);
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(buffer);
+                    }
+
+                    // 如果没有请求token和响应token则直接返回
+                    if (requestToken == 0 && audioRequestToken == 0 && responseToken == 0 && audioResponseTokens == 0)
+                    {
+                        return;
+                    }
+
+                    var quota = requestToken * rate;
+
+                    var completionRatio = GetCompletionRatio(model);
+                    quota += responseToken * rate * completionRatio;
+
+                    var audioQuota = audioRequestToken * ModelManagerService.AudioPromptRate[model];
+                    var audioCompletionRatio = audioResponseTokens * ModelManagerService.AudioPromptRate[model];
+
+                    quota += audioQuota;
+                    quota += audioCompletionRatio;
+
+                    // 将quota 四舍五入
+                    quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                    sw.Stop();
+
+                    await loggerService.CreateConsumeAsync(
+                        string.Format(RealtimeConsumerTemplate, rate, completionRatio,
+                            ModelManagerService.AudioPromptRate[model], ModelManagerService.AudioPromptRate[model]),
+                        model,
+                        (int)requestToken + (int)audioRequestToken, (int)responseToken + (int)audioResponseTokens,
+                        (int)quota, token?.Name,
+                        user?.UserName, user?.Id,
+                        channel.Id,
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                        true,
+                        (int)sw.ElapsedMilliseconds);
+
+                    await userService.ConsumeAsync(user!.Id, (long)quota, (int)requestToken, token?.Key, channel.Id,
+                        model);
+                }
+                else
+                {
+                    context.Response.StatusCode = 400;
+                }
+            }
+            else
+            {
+                throw new Exception("当前模型未设置倍率");
+            }
+        }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            context.Response.StatusCode = 401;
         }
     }
 

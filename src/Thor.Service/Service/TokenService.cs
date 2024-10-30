@@ -117,6 +117,15 @@ public sealed class TokenService(
     {
         var key = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
 
+        if (string.IsNullOrEmpty(key))
+        {
+            var protocol = context.Request.Headers.SecWebSocketProtocol.ToString().Split(",").Select(x=>x.Trim());
+            
+            var apiKey = protocol.FirstOrDefault(x => x.StartsWith("openai-insecure-api-key.", StringComparison.OrdinalIgnoreCase))?.Replace("openai-insecure-api-key.","");
+            if(!string.IsNullOrEmpty(apiKey))
+                key = apiKey;
+        }
+        
         var requestQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.RequestQuota);
 
         if (requestQuota <= 0) requestQuota = 5000;
