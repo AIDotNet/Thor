@@ -18,12 +18,12 @@ public class ModelManagerService(IServiceProvider serviceProvider)
 
     public static async ValueTask LoadingSettings(AIDotNetDbContext context)
     {
-        var settings = await context.ModelManagers.Where(x => x.Enable).ToListAsync();
+        var models = await context.ModelManagers.Where(x => x.Enable).ToListAsync();
 
         PromptRate.Clear();
         CompletionRate.Clear();
 
-        foreach (var setting in settings)
+        foreach (var setting in models)
         {
             PromptRate[setting.Model] = setting.PromptRate;
             if (setting.CompletionRate is > 0)
