@@ -552,6 +552,15 @@ public sealed class ChatService(
 
                         using var client = realtimeService.CreateClient();
 
+                        client.OnBinaryMessage += async (sender, args) =>
+                        {
+                            if (websocket is { State: WebSocketState.Open })
+                            {
+                                await websocket!.SendAsync(args.Item1, WebSocketMessageType.Text, args.Item2,
+                                    CancellationToken.None);
+                            }
+                        };
+
                         client.OnMessage += async (sender, args) =>
                         {
                             if (websocket is { State: WebSocketState.Open })
@@ -563,8 +572,8 @@ public sealed class ChatService(
                                     responseToken = args.Response.Usage.OutputTokenDetails?.TextTokens ?? 0;
                                     audioResponseTokens = args.Response.Usage.OutputTokenDetails?.AudioTokens ?? 0;
 
-                                    if (args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Audio != 0 ||
-                                        args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Text != 0)
+                                    if (args.Response.Usage.InputTokenDetails?.CachedTokensDetails?.Audio > 0 ||
+                                        args.Response.Usage.InputTokenDetails?.CachedTokensDetails?.Text > 0)
                                     {
                                         requestToken +=
                                             args.Response.Usage.InputTokenDetails?.CachedTokensDetails.Text ?? 0;

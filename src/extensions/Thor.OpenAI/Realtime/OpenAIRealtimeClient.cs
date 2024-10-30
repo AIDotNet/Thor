@@ -15,6 +15,7 @@ public class OpenAIRealtimeClient : IRealtimeClient
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     public event EventHandler<RealtimeResult>? OnMessage;
+    public event EventHandler<(Memory<byte>, bool)>? OnBinaryMessage;
 
     public void Dispose()
     {
@@ -50,9 +51,23 @@ public class OpenAIRealtimeClient : IRealtimeClient
                     }
                     else
                     {
-                        var content = JsonSerializer.Deserialize<RealtimeResult>(buffer.AsSpan(0, result.Count),
-                            ThorJsonSerializer.DefaultOptions);
-                        OnMessage?.Invoke(this, content);
+                        if (result.EndOfMessage)
+                        {
+                            var content = JsonSerializer.Deserialize<RealtimeResult>(buffer.AsSpan(0, result.Count),
+                                ThorJsonSerializer.DefaultOptions);
+                            OnMessage?.Invoke(this, content);
+                        }
+                        else
+                        {
+                            OnBinaryMessage?.Invoke(this, (buffer.AsMemory(0, result.Count), result.EndOfMessage));
+
+                            while (!result.EndOfMessage)
+                            {
+                                result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer),
+                                    CancellationToken.None);
+                                OnBinaryMessage?.Invoke(this, (buffer.AsMemory(0, result.Count), result.EndOfMessage));
+                            }
+                        }
                     }
                 }
             }

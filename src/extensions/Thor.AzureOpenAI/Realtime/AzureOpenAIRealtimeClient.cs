@@ -16,6 +16,8 @@ public class AzureOpenAIRealtimeClient : IRealtimeClient
 
     public event EventHandler<RealtimeResult>? OnMessage;
 
+    public event EventHandler<(Memory<byte>,bool)> OnBinaryMessage;
+
     public void Dispose()
     {
         _socket.Dispose();
@@ -50,12 +52,24 @@ public class AzureOpenAIRealtimeClient : IRealtimeClient
                     }
                     else
                     {
-                        string responseMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                        Console.WriteLine(responseMessage);
-                        
-                        var content = JsonSerializer.Deserialize<RealtimeResult>(buffer.AsSpan(0, result.Count),
-                            ThorJsonSerializer.DefaultOptions);
-                        OnMessage?.Invoke(this, content);
+                        // 判断result是否结束,如果false则说明还有数据
+                        if (result.EndOfMessage)
+                        {
+                            var content = JsonSerializer.Deserialize<RealtimeResult>(buffer.AsSpan(0, result.Count),
+                                ThorJsonSerializer.DefaultOptions);
+                            OnMessage?.Invoke(this, content);
+                        }
+                        else
+                        {
+                            OnBinaryMessage?.Invoke(this, (buffer.AsMemory(0,result.Count), result.EndOfMessage));
+
+                            while (!result.EndOfMessage)
+                            {
+                                result = await _socket.ReceiveAsync(new ArraySegment<byte>(buffer),
+                                    CancellationToken.None);
+                                OnBinaryMessage?.Invoke(this, (buffer.AsMemory(0,result.Count), result.EndOfMessage));
+                            }
+                        }
                     }
                 }
             }
