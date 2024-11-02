@@ -16,6 +16,9 @@ import {
     Wenxin,
     Yi,
     Zhipu,
+    DeepSeek,
+    Qingyan,
+    Qwen
 } from '@lobehub/icons';
 
 export function getIconByNames(size: number = 24) {
@@ -34,7 +37,10 @@ export function getIconByNames(size: number = 24) {
         'Wenxin',
         'Yi',
         'Zhipu',
-        "Moonshot"
+        "Moonshot",
+        'DeepSeek',
+        "Qingyan",
+        "Qwen"
     ]
 
     return models.map((name) => {
@@ -132,6 +138,21 @@ export function getIconByName(name: string, size: number = 36) {
             return {
                 icon: <IconAvatar Icon={Moonshot} size={size} />,
                 label: 'Moonshot'
+            };
+        case 'DeepSeek':
+            return {
+                icon: <IconAvatar Icon={DeepSeek} size={size} />,
+                label: 'DeepSeek'
+            };
+        case 'Qingyan':
+            return {
+                icon: <IconAvatar Icon={Qingyan} size={size} />,
+                label: 'Qingyan'
+            };
+        case 'Qwen':
+            return {
+                icon: <IconAvatar Icon={Qwen} size={size} />,
+                label: 'Qwen'
             };
         default:
             return {

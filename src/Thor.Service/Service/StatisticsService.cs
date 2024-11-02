@@ -126,7 +126,7 @@ public static class StatisticsService
                 }).ToListAsync();
 
 
-        var allDates = dateList.Select(x => x.ToString("MM-dd")).Distinct().ToList();
+        var allDates = dateList.Select(x => x.ToString("yyyy-MM-dd")).Distinct().ToList();
 
         statisticsDto.ModelDate = allDates;
 
@@ -145,7 +145,7 @@ public static class StatisticsService
 
                 statisticsDto.Models.Add(new ModelStatisticsDto
                 {
-                    CreatedAt = modelStatistic.Key.CreateAt,
+                    CreatedAt = modelStatistic.Key.CreateAt.ToString("yyyy-MM-dd"),
                     Name = modelStatistic.Key.ModelName,
                     Data = dataForAllDates
                 });
@@ -154,7 +154,7 @@ public static class StatisticsService
             var model = statisticsDto.Models.FirstOrDefault(x => x.Name == modelStatistic.Key.ModelName);
 
             // Find the index of the current date in the allDates list
-            var dateIndex = allDates.IndexOf(modelStatistic.Key.CreateAt.ToString("MM-dd"));
+            var dateIndex = allDates.IndexOf(modelStatistic.Key.CreateAt.ToString("yyyy-MM-dd"));
 
             model.TokenUsed = modelStatistic.Sum(x => x.TokenUsed);
 
@@ -169,6 +169,25 @@ public static class StatisticsService
             {
             }
         }
+
+        // 根据modelStatistics的数据，统计模型消费额度排名
+        var modelRanking = modelStatistics
+            .GroupBy(x => x.ModelName)
+            .Select(group => new
+            {
+                ModelName = group.Key,
+                Quota = group.Sum(x => x.Quota)
+            })
+            .OrderByDescending(x => x.Quota)
+            .Take(10)
+            .Select(x => new ModelRankingDto
+            {
+                Value = x.Quota,
+                Name = x.ModelName
+            })
+            .ToList();
+
+        statisticsDto.ModelRanking = modelRanking;
 
         #endregion
 
@@ -197,4 +216,5 @@ public static class StatisticsService
 
         return statisticsDto;
     }
+
 }

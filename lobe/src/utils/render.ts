@@ -35,20 +35,20 @@ export function renderNumber(num: number) {
  * @param type 
  * @returns 
  */
-export function getModelPrompt(type:string){
-        
-    if(type === "SparkDesk"){
+export function getModelPrompt(type: string) {
+
+    if (type === "SparkDesk") {
         return "密钥格式 AppId|AppKey|AppSecret";
-    }else if(type === "Hunyuan"){
+    } else if (type === "Hunyuan") {
         return "密钥格式 secretId|secretKey";
-    }else if(type === "ErnieBot"){
+    } else if (type === "ErnieBot") {
         return "密钥格式 ClientId|ClientSecret"
     }
 
     return "请输入密钥";
 }
 
-export function getCompletionRatio(name:string) {
+export function getCompletionRatio(name: string) {
     if (name.startsWith("gpt-3.5")) {
         if (name === "gpt-3.5-turbo" || name.endsWith("0125")) return 3;
         if (name.endsWith("1106")) return 2;
