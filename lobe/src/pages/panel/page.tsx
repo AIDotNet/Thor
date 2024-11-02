@@ -82,11 +82,11 @@ export default function PanelPage() {
   };
 
   const requestValueFormatter: LineChartProps['valueFormatter'] = (number: any) => {
-    return `${number}`;
+    return `${renderNumber(number)}`;
   };
 
   const tokenValueFormatter: LineChartProps['valueFormatter'] = (number: any) => {
-    return `${number}`;
+    return `${renderNumber(number)}`;
   }
 
   const labelFormatter = (value: any) => {
