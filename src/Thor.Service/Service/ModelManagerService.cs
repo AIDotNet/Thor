@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Thor.Core.DataAccess;
 
 namespace Thor.Service.Service;
 
@@ -16,7 +17,7 @@ public class ModelManagerService(IServiceProvider serviceProvider)
 
     public static ConcurrentDictionary<string, decimal> AudioOutputRate { get; private set; } = new();
 
-    public static async ValueTask LoadingSettings(AIDotNetDbContext context)
+    public static async ValueTask LoadingSettings(IThorContext context)
     {
         var models = await context.ModelManagers.Where(x => x.Enable).ToListAsync();
 

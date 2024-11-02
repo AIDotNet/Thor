@@ -1,4 +1,5 @@
-﻿using Thor.Service.Domain.Core;
+﻿using Thor.Core.DataAccess;
+using Thor.Service.Domain.Core;
 
 namespace Thor.Service.BackgroundTask;
 
@@ -29,7 +30,7 @@ public sealed class StatisticBackgroundTask(IServiceProvider serviceProvider, IL
     private async Task HandlerUserStatisticsAsync(CancellationToken stoppingToken)
     {
         using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ILoggerDbContext>();
         // 获取今天的日期范围
         var today = DateTime.Now.Date;
         var tomorrow = today.AddDays(1);

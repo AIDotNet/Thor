@@ -1,4 +1,6 @@
 ﻿using MapsterMapper;
+using Thor.Core;
+using Thor.Core.DataAccess;
 using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
@@ -7,11 +9,11 @@ public abstract class ApplicationService(IServiceProvider serviceProvider)
 {
     protected IUserContext UserContext => GetService<IUserContext>();
 
-    protected AIDotNetDbContext DbContext => GetService<AIDotNetDbContext>();
+    protected IThorContext DbContext => GetService<IThorContext>();
 
     protected IMapper Mapper => GetService<IMapper>();
 
-    protected LoggerDbContext LoggerDbContext => GetService<LoggerDbContext>();
+    protected ILoggerDbContext LoggerDbContext => GetService<ILoggerDbContext>();
 
     protected T GetService<T>()
     {

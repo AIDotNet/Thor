@@ -20,15 +20,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
     <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.1.1" />
     <PackageReference Include="SharpToken" Version="2.0.3" />
     <PackageReference Include="SkiaSharp" Version="2.88.8" />
@@ -63,7 +59,14 @@
     <ProjectReference Include="..\framework\Thor.LocalMemory.Cache\Thor.LocalMemory.Cache.csproj" />
     <ProjectReference Include="..\framework\Thor.RabbitMQEvent\Thor.RabbitMQEvent.csproj" />
     <ProjectReference Include="..\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj" />
+    <ProjectReference Include="..\Provider\Thor.Provider.MySql\Thor.Provider.MySql.csproj" />
+    <ProjectReference Include="..\Provider\Thor.Provider.PostgreSQL\Thor.Provider.PostgreSQL.csproj" />
+    <ProjectReference Include="..\Provider\Thor.Provider.Sqlite\Thor.Provider.Sqlite.csproj" />
+    <ProjectReference Include="..\Provider\Thor.Provider.SqlServer\Thor.Provider.SqlServer.csproj" />
     <ProjectReference Include="..\Thor.Abstractions\Thor.Abstractions.csproj" />
+    <ProjectReference Include="..\Thor.Core\Thor.Core.csproj" />
+    <ProjectReference Include="..\Thor.Domain.Shared\Thor.Domain.Shared.csproj" />
+    <ProjectReference Include="..\Thor.Domain\Thor.Domain.csproj" />
     <ProjectReference Include="..\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj" />
   </ItemGroup>
 

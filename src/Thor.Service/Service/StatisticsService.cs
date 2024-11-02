@@ -1,12 +1,13 @@
-﻿using Thor.Service.Domain.Core;
+﻿using Thor.Core.DataAccess;
+using Thor.Service.Domain.Core;
 using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
 public static class StatisticsService
 {
-    public static async ValueTask<StatisticsDto> GetStatisticsAsync(LoggerDbContext dbContext,
-        AIDotNetDbContext aiDotNetDbContext,
+    public static async ValueTask<StatisticsDto> GetStatisticsAsync(ILoggerDbContext dbContext,
+        IThorContext aiDotNetDbContext,
         IUserContext userContext)
     {
         var statisticsDto = new StatisticsDto

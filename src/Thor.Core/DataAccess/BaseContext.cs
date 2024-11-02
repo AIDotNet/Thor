@@ -1,26 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Thor.Service.Domain;
+using Microsoft.Extensions.DependencyInjection;
 using Thor.Service.Domain.Core;
 using Thor.Service.Infrastructure;
 
-namespace Thor.Service.DataAccess;
+namespace Thor.Core;
 
-public class LoggerDbContext(
-    DbContextOptions<LoggerDbContext> options,
-    IUserContext userContext) : DbContext(options)
+public abstract class BaseContext<TContext>(DbContextOptions<TContext> context, IServiceProvider serviceProvider)
+    : DbContext(context) where TContext : DbContext
 {
-    public DbSet<ChatLogger> Loggers { get; set; }
-
-    public DbSet<StatisticsConsumesNumber> StatisticsConsumesNumbers { get; set; }
-
-    public DbSet<ModelStatisticsNumber> ModelStatisticsNumbers { get; set; }
-
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        modelBuilder.ConfigureLogger();
-    }
-
+    private readonly IUserContext _userContext = serviceProvider.GetRequiredService<IUserContext>();
 
     public override int SaveChanges()
     {
@@ -39,18 +27,18 @@ public class LoggerDbContext(
         var entries = ChangeTracker.Entries();
         foreach (var entry in entries)
         {
-            if (userContext.IsAuthenticated)
+            if (_userContext.IsAuthenticated)
             {
                 switch (entry)
                 {
                     case { State: EntityState.Added, Entity: ICreatable creatable }:
-                        creatable.Creator ??= userContext.CurrentUserId;
+                        creatable.Creator ??= _userContext.CurrentUserId;
                         if (creatable.CreatedAt == default)
                             creatable.CreatedAt = DateTime.Now;
                         break;
                     case { State: EntityState.Modified, Entity: IUpdatable entity }:
                         entity.UpdatedAt ??= DateTime.Now;
-                        entity.Modifier ??= userContext.CurrentUserId;
+                        entity.Modifier ??= _userContext.CurrentUserId;
                         break;
                 }
             }

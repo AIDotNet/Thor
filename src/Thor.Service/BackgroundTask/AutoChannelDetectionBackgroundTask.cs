@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Thor.Core.DataAccess;
 using Thor.Service.DataAccess;
 using Thor.Service.Domain;
 using Thor.Service.Exceptions;
@@ -32,7 +33,7 @@ public sealed class AutoChannelDetectionBackgroundTask(
                 if (autoDisable)
                 {
                     await using var scope = serviceProvider.CreateAsyncScope();
-                    var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<IThorContext>();
                     var channelService = scope.ServiceProvider.GetRequiredService<ChannelService>();
                     // 自动关闭通道
                     // 1. 获取启动自动检测通道
@@ -62,7 +63,7 @@ public sealed class AutoChannelDetectionBackgroundTask(
     private async Task AutoHandleExceptionChannelAsync(CancellationToken stoppingToken)
     {
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AIDotNetDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IThorContext>();
         var channelService = scope.ServiceProvider.GetRequiredService<ChannelService>();
         while (stoppingToken.IsCancellationRequested == false)
         {
@@ -87,7 +88,7 @@ public sealed class AutoChannelDetectionBackgroundTask(
         }
     }
 
-    private async Task TestChannelAsync(ChatChannel channel, ChannelService channelService, AIDotNetDbContext dbContext)
+    private async Task TestChannelAsync(ChatChannel channel, ChannelService channelService, IThorContext dbContext)
     {
         try
         {

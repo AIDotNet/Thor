@@ -1,4 +1,5 @@
-﻿using Thor.Service.Model;
+﻿using Thor.Core.DataAccess;
+using Thor.Service.Model;
 
 namespace Thor.Service.Service;
 
@@ -27,8 +28,8 @@ public static class ModelService
         var model = await cache.GetAsync<List<UseModelDto>>("UseModels").ConfigureAwait(false);
         if (model != null) return model;
 
-        var dbContext = context.RequestServices.GetRequiredService<AIDotNetDbContext>();
-        var loggerDbContext = context.RequestServices.GetRequiredService<LoggerDbContext>();
+        var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
+        var loggerDbContext = context.RequestServices.GetRequiredService<ILoggerDbContext>();
 
         // 获取模型
         var channels = await dbContext.Channels.ToListAsync();
@@ -67,7 +68,7 @@ public static class ModelService
 
     public static async Task<ModelsListDto> GetAsync(HttpContext context)
     {
-        var dbContext = context.RequestServices.GetRequiredService<AIDotNetDbContext>();
+        var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
 
         var models = await dbContext.ModelManagers
             .OrderBy(x => x.CreatedAt)

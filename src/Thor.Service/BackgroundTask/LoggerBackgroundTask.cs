@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Thor.Core.DataAccess;
 using Thor.Service.DataAccess;
 using Thor.Service.Service;
 
@@ -25,7 +26,7 @@ public sealed class LoggerBackgroundTask(
                 await Task.Delay(1000 * 60 * 60, stoppingToken);
 
                 using var scope = serviceProvider.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<LoggerDbContext>();
+                var dbContext = scope.ServiceProvider.GetRequiredService<ILoggerDbContext>();
 
                 var today = DateTime.Now.Date;
 

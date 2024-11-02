@@ -2,8 +2,6 @@
 
 public interface IUserContext
 {
-    UserDto CurrentUser { get; }
-
     string CurrentUserId { get; }
 
     string CurrentUserName { get; }

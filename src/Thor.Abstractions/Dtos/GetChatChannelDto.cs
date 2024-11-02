@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-using Thor.Service.Model;
-using Thor.Service.Domain.Core;
+﻿using Thor.Service.Domain.Core;
 
 namespace Thor.Service.Dto;
 
