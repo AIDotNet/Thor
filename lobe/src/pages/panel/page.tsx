@@ -94,7 +94,7 @@ export default function PanelPage() {
   }
 
   const modelsValueFormatter = (value: any) => {
-    return `${renderNumber(value)}`;
+    return `${renderQuota(value)}`;
   }
 
   return (
