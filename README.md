@@ -189,6 +189,7 @@ services:
       - DBType=sqlite
       - ConnectionStrings:ConnectionString=data source=/data/token.db
       - ConnectionStrings:LoggerConnectionString=data source=/data/logger.db
+      - RunMigrationsAtStartup=true
 ```
 执行如下命令打包镜像
 ```shell
@@ -231,6 +232,7 @@ services:
       - DBType=postgresql
       - ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666
       - ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666
+      - RunMigrationsAtStartup=true
 ```
 
 执行如下命令打包镜像
