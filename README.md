@@ -103,6 +103,7 @@ Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqli
 - [x] PostgreSql 配置类型[postgresql,pgsql]
 - [x] Sqlite 配置类型[sqlite,默认]
 - [x] MySql 配置类型[mysql]
+- [x] 达梦数据库 配置类型[dm]
 
 修改`appsettings.json`的`ConnectionStrings:DBType`配置项即可切换数据库类型。请注意切换数据库不会迁移数据。
 
