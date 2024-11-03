@@ -128,9 +128,9 @@ admin admin
 
 - DBType
   sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-- ConnectionString
+- ConnectionStrings:ConnectionString
   主数据库连接字符串
-- LoggerConnectionString
+- ConnectionStrings:LoggerConnectionString
   日志数据连接字符串
 - CACHE_TYPE
   缓存类型 Memory|Redis
@@ -138,6 +138,8 @@ admin admin
   缓存连接字符串 如果是Redis则为Redis连接字符串，Memory则为空
 - HttpClientPoolSize
   HttpClient连接池大小
+- RunMigrationsAtStartup
+  是否在启动时运行迁移 如果是首次启动则需要设置为true
 
 使用`docker compose`启动服务：
 
@@ -155,14 +157,15 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionString=data source=/data/token.db
-      - LoggerConnectionString=data source=/data/logger.db
+      - ConnectionStrings:ConnectionString=data source=/data/token.db
+      - ConnectionStrings:LoggerConnectionString=data source=/data/logger.db
+      - RunMigrationsAtStartup=true
 ```
 
 使用docker run启动服务
 
 ```sh
-docker run -d -p 18080:8080 --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString="data source=/data/token.db" -e LoggerConnectionString="data source=/data/logger.db" registry.token-ai.cn/thor:latest
+docker run -d -p 18080:8080 --name ai-dotnet-api-service --network=gateway -v $PWD/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionStrings:ConnectionString="data source=/data/token.db" -e RunMigrationsAtStartup=true -e ConnectionStrings:LoggerConnectionString="data source=/data/logger.db" registry.token-ai.cn/thor:latest
 ```
 
 ### Sqlite构建
@@ -184,8 +187,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlite
-      - ConnectionString=data source=/data/token.db
-      - LoggerConnectionString=data source=/data/logger.db
+      - ConnectionStrings:ConnectionString=data source=/data/token.db
+      - ConnectionStrings:LoggerConnectionString=data source=/data/logger.db
 ```
 执行如下命令打包镜像
 ```shell
@@ -202,7 +205,7 @@ sudo docker compose up -d
 docker run版本
 
 ```shell
-docker run -d -p 18080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionString=data source=/data/token.db -e LoggerConnectionString=data source=/data/logger.db registry.token-ai.cn/thor:latest
+docker run -d -p 18080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e RunMigrationsAtStartup=true  -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionStrings:ConnectionString=data source=/data/token.db -e ConnectionStrings:LoggerConnectionString=data source=/data/logger.db registry.token-ai.cn/thor:latest
 ```
 
 然后访问 http://localhost:18080 即可看到服务启动成功。
@@ -226,8 +229,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=postgresql
-      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666"
-      - "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666"
+      - ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666
+      - ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666
 ```
 
 执行如下命令打包镜像
@@ -250,8 +253,9 @@ docker run -d \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=postgresql \
-  -e "ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666" \
-  -e "ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666" \
+  -e RunMigrationsAtStartup=true \
+  -e ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666 \
+  -e ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666 \
   registry.token-ai.cn/thor:latest
 ```
 
@@ -276,8 +280,9 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlserver
-      - "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;"
-      - "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;"
+      - ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;
+      - ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;
+      - RunMigrationsAtStartup=true
 ```
 
 执行如下命令打包镜像
@@ -299,9 +304,10 @@ docker run -d \
   -p 18080:8080 \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
+  -e RunMigrationsAtStartup=true \
   -e DBType=sqlserver \
-  -e "ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;" \
-  -e "ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;" \
+  -e ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666; \
+  -e ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666; \
   registry.token-ai.cn/thor:latest
 ```
 
@@ -326,8 +332,9 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=mysql
-      - "ConnectionString=mysql://root:dd666666@localhost:3306/token"
-      - "ConnectionString=mysql://root:dd666666@localhost:3306/logger"
+      - "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/token"
+      - "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/logger"
+      - RunMigrationsAtStartup=true
 ```
 
 执行如下命令打包镜像
@@ -349,8 +356,9 @@ docker run -d \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=mysql \
-  -e "ConnectionString=mysql://root:dd666666@localhost:3306/token" \
-  -e "ConnectionString=mysql://root:dd666666@localhost:3306/logger" \
+  -e "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/token" \
+  -e "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/logger" \
+  -e RunMigrationsAtStartup=true \
   registry.token-ai.cn/thor:latest
 ```
 

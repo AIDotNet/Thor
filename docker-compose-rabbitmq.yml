@@ -18,14 +18,15 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=postgresql # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet;Username=aidotnet;Password=aidotnet
-      - LoggerConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet-log;Username=aidotnet;Password=aidotnet
+      - ConnectionStrings:ConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet;Username=aidotnet;Password=aidotnet
+      - ConnectionStrings:LoggerConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet-log;Username=aidotnet;Password=aidotnet
       - CACHE_TYPE=Redis
       - CACHE_CONNECTION_STRING=ai-redis
       - RabbitMQ:ConnectionString=amqp://admin:admin@ai-rabbitmq:5672
       - OTEL_SERVICE_NAME=Thor
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
+      - RunMigrationsAtStartup=true
 
   postgres:
     image: postgres:17

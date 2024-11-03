@@ -19,8 +19,4 @@ public class LoggerDbContext<TContext>(DbContextOptions<TContext> options, IServ
         modelBuilder.ConfigureLogger();
     }
 
-    public Task RunMigrationsAsync(CancellationToken cancellationToken = new CancellationToken())
-    {
-        throw new NotImplementedException();
-    }
 }

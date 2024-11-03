@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Thor.Core.DataAccess;
 using Thor.Service.DataAccess;
 using Thor.Service.Domain;
@@ -86,11 +87,5 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
         {
             Console.WriteLine("模型默认配置文件错误：" + e);
         }
-    }
-
-
-    public Task RunMigrationsAsync(CancellationToken cancellationToken = new CancellationToken())
-    {
-        throw new NotImplementedException();
     }
 }

@@ -12,7 +12,7 @@ public static class SqlServerApplicationExtensions
     {
         services.AddThorDataAccess<SqlServerThorContext>(((provider, builder) =>
         {
-            builder.UseSqlServer(configuration.GetConnectionString("ConnectionString"));
+            builder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
         }));
 
 

@@ -14,7 +14,7 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionString=data source=/data/token.db
-      - LoggerConnectionString=data source=/data/logger.db
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings:ConnectionString=data source=/data/token.db
+      - ConnectionStrings:LoggerConnectionString=data source=/data/logger.db
       - ASPNETCORE_PORTS=8080
+      - RunMigrationsAtStartup=true

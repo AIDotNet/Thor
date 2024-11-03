@@ -12,13 +12,15 @@ public static class SqliteApplicationExtensions
     {
         services.AddThorDataAccess<SqliteThorContext>(((provider, builder) =>
         {
-            builder.UseSqlite(configuration.GetConnectionString("ConnectionString"));
+            builder.UseSqlite(configuration.GetConnectionString("DefaultConnection"))
+                .EnableSensitiveDataLogging();
         }));
 
 
         services.AddLocalDataAccess<SqliteLoggerContext>(((provider, builder) =>
         {
-            builder.UseSqlite(configuration.GetConnectionString("LoggerConnection"));
+            builder.UseSqlite(configuration.GetConnectionString("LoggerConnection"))
+                .EnableSensitiveDataLogging();
         }));
 
         return services;

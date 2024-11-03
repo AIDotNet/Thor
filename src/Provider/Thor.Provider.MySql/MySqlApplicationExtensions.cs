@@ -12,15 +12,15 @@ public static class MySqlApplicationExtensions
     {
         services.AddThorDataAccess<MySqlThorContext>(((provider, builder) =>
         {
-            builder.UseMySql(configuration.GetConnectionString("ConnectionString"),
-                ServerVersion.AutoDetect(configuration.GetConnectionString("ConnectionString")));
+            builder.UseMySql(configuration.GetConnectionString("DefaultConnection"),
+                ServerVersion.AutoDetect(configuration.GetConnectionString("DefaultConnection")));
         }));
 
 
         services.AddLocalDataAccess<MySqlLoggerContext>(((provider, builder) =>
         {
             builder.UseMySql(configuration.GetConnectionString("LoggerConnection"),
-                ServerVersion.AutoDetect(configuration.GetConnectionString("ConnectionString")));
+                ServerVersion.AutoDetect(configuration.GetConnectionString("LoggerConnection")));
         }));
 
         return services;

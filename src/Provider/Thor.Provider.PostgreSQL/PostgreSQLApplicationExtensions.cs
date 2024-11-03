@@ -12,7 +12,7 @@ public static class PostgreSQLApplicationExtensions
     {
         services.AddThorDataAccess<PostgreSQLThorContext>(((provider, builder) =>
         {
-            builder.UseNpgsql(configuration.GetConnectionString("ConnectionString"));
+            builder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
         }));
 
 

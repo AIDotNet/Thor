@@ -54,11 +54,11 @@
     <ProjectReference Include="..\extensions\Thor.SparkDesk\Thor.SparkDesk.csproj" />
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Cache\Thor.BuildingBlocks.Cache.csproj" />
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Event\Thor.BuildingBlocks.Event.csproj" />
-    <ProjectReference Include="..\framework\Thor.Core\Thor.Core.csproj" />
     <ProjectReference Include="..\framework\Thor.LocalEvent\Thor.LocalEvent.csproj" />
     <ProjectReference Include="..\framework\Thor.LocalMemory.Cache\Thor.LocalMemory.Cache.csproj" />
     <ProjectReference Include="..\framework\Thor.RabbitMQEvent\Thor.RabbitMQEvent.csproj" />
     <ProjectReference Include="..\framework\Thor.RedisMemory.Cache\Thor.RedisMemory.Cache.csproj" />
+    <ProjectReference Include="..\Provider\Thor.Provider.DM\Thor.Provider.DM.csproj" />
     <ProjectReference Include="..\Provider\Thor.Provider.MySql\Thor.Provider.MySql.csproj" />
     <ProjectReference Include="..\Provider\Thor.Provider.PostgreSQL\Thor.Provider.PostgreSQL.csproj" />
     <ProjectReference Include="..\Provider\Thor.Provider.Sqlite\Thor.Provider.Sqlite.csproj" />

@@ -112,33 +112,17 @@ try
                     .AllowCredentials());
         });
 
-// 获取环境变量
-    var dbType = Environment.GetEnvironmentVariable("DBType");
-
-    if (string.IsNullOrEmpty(dbType))
-    {
-        dbType = builder.Configuration.GetConnectionString("DBType");
-    }
-
-    var connectionString = Environment.GetEnvironmentVariable("ConnectionString");
-    var loggerConnectionString = Environment.GetEnvironmentVariable("LoggerConnectionString");
-    if (string.IsNullOrEmpty(connectionString))
-    {
-        connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    }
-
-    if (string.IsNullOrEmpty(loggerConnectionString))
-    {
-        loggerConnectionString = builder.Configuration.GetConnectionString("LoggerConnection");
-    }
+    // 获取环境变量
+    var dbType = builder.Configuration["DBType"];
 
     builder.Services.AddThorDataAccess((collection =>
     {
-        if(dbType.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
+        if (dbType.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) ||
+            dbType.Equals("pgsql", StringComparison.OrdinalIgnoreCase))
         {
             collection.AddThorPostgreSQLDbContext(builder.Configuration);
         }
-        else if (dbType.Equals("MySQL", StringComparison.OrdinalIgnoreCase))
+        else if (dbType.Equals("mysql", StringComparison.OrdinalIgnoreCase))
         {
             collection.AddThorMySqlDbContext(builder.Configuration);
         }
@@ -149,6 +133,14 @@ try
         else if (dbType.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
         {
             collection.AddThorSqlServerDbContext(builder.Configuration);
+        }
+        else if (dbType.Equals("dm", StringComparison.OrdinalIgnoreCase))
+        {
+            collection.AddThorDMDbContext(builder.Configuration);
+        }
+        else
+        {
+            collection.AddThorSqliteDbContext(builder.Configuration);
         }
     }));
 
@@ -164,8 +156,10 @@ try
 
     var app = builder.Build();
 
+    await app.MigrateDatabaseAsync();
+
     app.MapDefaultEndpoints();
-    
+
     await SettingService.LoadingSettings(app);
 
     app.UseCors("AllowAll");
@@ -190,8 +184,8 @@ try
             }
         }
 
-        context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.2";
-        context.Response.Headers["AI-Gateway-Name"] = "AI-Gateway";
+        context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.4";
+        context.Response.Headers["AI-Gateway-Name"] = "Thor";
 
         await next(context);
 
@@ -225,7 +219,6 @@ try
     }
 
     app.MapModelManager();
-
 
     app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBody] LoginInput input) =>
         await service.TokenAsync(input))

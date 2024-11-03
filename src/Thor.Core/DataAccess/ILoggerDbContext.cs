@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Thor.Service.Domain;
 
 namespace Thor.Core.DataAccess;
 
 public interface ILoggerDbContext
 {
+    DatabaseFacade Database { get; }
+    
     DbSet<ChatLogger> Loggers { get; set; }
 
     DbSet<StatisticsConsumesNumber> StatisticsConsumesNumbers { get; set; }
@@ -14,5 +17,4 @@ public interface ILoggerDbContext
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
 
-    Task RunMigrationsAsync(CancellationToken cancellationToken = new CancellationToken());
 }
