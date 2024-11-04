@@ -8,21 +8,18 @@ namespace Thor.Service.EventBus;
 /// 创建用户事件处理器
 /// </summary>
 [Registration(typeof(IEventHandler<CreateUserEto>))]
-public class CreateUserEventHandler : IEventHandler<CreateUserEto>, IDisposable, ISingletonDependency
+public class CreateUserEventHandler : IEventHandler<CreateUserEto>, IDisposable, IScopeDependency
 {
     private readonly ILogger<CreateUserEventHandler> _logger;
-    private readonly IServiceScope _scope;
     private readonly TokenService _tokenService;
     private readonly LoggerService _loggerService;
 
-    public CreateUserEventHandler(IServiceProvider serviceProvider, ILogger<CreateUserEventHandler> logger)
+    public CreateUserEventHandler(ILogger<CreateUserEventHandler> logger, TokenService tokenService,
+        LoggerService loggerService)
     {
         _logger = logger;
-        _scope = serviceProvider.CreateScope();
-
-        _tokenService = _scope.ServiceProvider.GetRequiredService<TokenService>();
-        _loggerService = _scope.ServiceProvider.GetRequiredService<LoggerService>();
-
+        _tokenService = tokenService;
+        _loggerService = loggerService;
         _logger.LogInformation("CreateUserEventHandler created");
     }
 
@@ -55,6 +52,6 @@ public class CreateUserEventHandler : IEventHandler<CreateUserEto>, IDisposable,
 
     public void Dispose()
     {
-        _scope.Dispose();
+        _logger.LogInformation("CreateUserEventHandler disposed");
     }
 }

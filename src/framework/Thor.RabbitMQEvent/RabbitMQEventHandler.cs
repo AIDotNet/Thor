@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Events;
@@ -10,6 +11,8 @@ namespace Thor.RabbitMQEvent;
 
 public class RabbitMQEventHandler : IRabbitHandler
 {
+    private ConcurrentDictionary<string, Type> _types = new();
+
     public bool Enable(ConsumeOptions options)
     {
         return options.Queue.Equals("Thor:EventBus", StringComparison.OrdinalIgnoreCase);
@@ -19,10 +22,17 @@ public class RabbitMQEventHandler : IRabbitHandler
     {
         var eto = JsonSerializer.Deserialize<EventEto>(args.Body.ToArray());
 
-        // type : Thor.Service.Domain.ChatLogger
+        var type = _types.GetOrAdd(eto.FullName, ((s) =>
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => x.FullName?.Contains("Thor") == true && x.GetType(eto.FullName) != null)
+                .Select(x => x).FirstOrDefault();
 
-        var type = Assembly.GetEntryAssembly()?.GetType(eto.FullName);
-        
+            var type = assembly?.GetType(eto.FullName);
+            
+            return type;
+        }));
+
         if (type == null)
         {
             return;

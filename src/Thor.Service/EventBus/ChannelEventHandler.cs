@@ -5,18 +5,10 @@ using Thor.Core.DataAccess;
 namespace Thor.Service.EventBus;
 
 [Registration(typeof(IEventHandler<ChatLogger>))]
-public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable, ISingletonDependency
+public sealed class ChannelEventHandler(IServiceProvider serviceProvider, ILogger<ChannelEventHandler> logger)
+    : IEventHandler<ChatLogger>, IDisposable, IScopeDependency
 {
-    private readonly ILogger<ChannelEventHandler> _logger;
-    private readonly IServiceScope _scope;
-    private readonly ILoggerDbContext _loggerDbContext;
-
-    public ChannelEventHandler(IServiceProvider serviceProvider, ILogger<ChannelEventHandler> logger)
-    {
-        _logger = logger;
-        _scope = serviceProvider.CreateScope();
-        _loggerDbContext = _scope.ServiceProvider.GetRequiredService<ILoggerDbContext>();
-    }
+    private readonly ILoggerDbContext _loggerDbContext = serviceProvider.GetRequiredService<ILoggerDbContext>();
 
     public async Task HandleAsync(ChatLogger @event)
     {
@@ -24,11 +16,11 @@ public sealed class ChannelEventHandler : IEventHandler<ChatLogger>, IDisposable
         await _loggerDbContext.Loggers.AddAsync(@event);
         await _loggerDbContext.SaveChangesAsync();
 
-        _logger.LogInformation("ChatLogger event received");
+        logger.LogInformation("ChatLogger event received");
     }
 
     public void Dispose()
     {
-        _scope.Dispose();
+        logger.LogInformation("ChannelEventHandler disposed");
     }
 }

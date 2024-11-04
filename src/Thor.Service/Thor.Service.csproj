@@ -11,8 +11,8 @@
   <ItemGroup>
     <PackageReference Include="AlibabaCloud.SDK.Dysmsapi20170525" Version="3.0.0" />
     <PackageReference Include="AlipaySDKNet.Standard" Version="4.9.296" />
-    <PackageReference Include="Gnarly" Version="1.0.5" />
-    <PackageReference Include="Gnarly.Data" Version="1.0.5" />
+    <PackageReference Include="Gnarly" Version="1.0.7" />
+    <PackageReference Include="Gnarly.Data" Version="1.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
