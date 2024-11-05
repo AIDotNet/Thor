@@ -10,6 +10,9 @@ public static class PostgreSQLApplicationExtensions
     public static IServiceCollection AddThorPostgreSQLDbContext(this IServiceCollection services,
         IConfiguration configuration)
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+        
         services.AddThorDataAccess<PostgreSQLThorContext>(((provider, builder) =>
         {
             builder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
