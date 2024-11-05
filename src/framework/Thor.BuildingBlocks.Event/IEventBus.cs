@@ -6,5 +6,5 @@
 /// <typeparam name="TEvent"></typeparam>
 public interface IEventBus<in TEvent> where TEvent : class
 {
-    ValueTask PublishAsync(TEvent @event);
+    ValueTask PublishAsync(TEvent eventEvent);
 }

@@ -36,9 +36,9 @@ public sealed class LocalEventBus<TEvent> : IEventBus<TEvent>, IDisposable where
         }, _cts.Token);
     }
 
-    public async ValueTask PublishAsync(TEvent @event)
+    public async ValueTask PublishAsync(TEvent eventEvent)
     {
-        await _loggerChannel.Writer.WriteAsync(@event).ConfigureAwait(false);
+        await _loggerChannel.Writer.WriteAsync(eventEvent).ConfigureAwait(false);
     }
 
     public void Dispose()

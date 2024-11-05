@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using Raccoon.Stack.Rabbit;
 using Thor.BuildingBlocks.Data;
+using Thor.Rabbit;
+using Thor.Rabbit.Handler;
 
 namespace Thor.RabbitMQEvent;
 
@@ -14,7 +15,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services"></param>
     /// <param name="configuration"></param>
     /// <returns></returns>
-    public static IServiceCollection AddRabbitMQEventBus(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddRabbitMqEventBus(this IServiceCollection services, IConfiguration configuration)
     {
         // 是否启用RabbitMQ
         var connection = configuration["RabbitMQ:ConnectionString"];
@@ -26,6 +27,11 @@ public static class ServiceCollectionExtensions
         services
             .AddSingleton(typeof(IEventBus<>), typeof(RabbitMQEventBus<>));
 
+        services.AddScoped<IRabbitHandler, RabbitMQEventHandler>();
+
+        // 设置消费并行度
+        ushort.TryParse(configuration["RabbitMQ:FetchCount"] ?? "10", out var fetchCount);
+
         services.AddRabbitBoot((options =>
         {
             options.ConnectionString = connection;
@@ -34,7 +40,7 @@ public static class ServiceCollectionExtensions
                 new ConsumeOptions
                 {
                     AutoAck = false,
-                    FetchCount = 10,
+                    FetchCount = fetchCount,
                     Queue = "Thor:EventBus",
                     Declaration = (declaration =>
                     {
@@ -44,7 +50,21 @@ public static class ServiceCollectionExtensions
                     })
                 }
             ];
-        }), typeof(RabbitMQEventBus<>).Assembly);
+        }));
+
+        return services;
+    }
+
+    public static IServiceCollection AddRabbitMqJsonSerializer(this IServiceCollection services)
+    {
+        services.AddSingleton<IHandlerSerializer, JsonHandlerSerializer>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddRabbitMqMessagePackSerializer(this IServiceCollection services)
+    {
+        services.AddSingleton<IHandlerSerializer, MessagePackHandlerSerializer>();
 
         return services;
     }

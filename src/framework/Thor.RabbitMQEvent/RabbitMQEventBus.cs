@@ -1,16 +1,18 @@
 ﻿using System.Text.Json;
-using Raccoon.Stack.Rabbit;
 using Thor.BuildingBlocks.Data;
+using Thor.Rabbit;
 
 namespace Thor.RabbitMQEvent;
 
-public class RabbitMQEventBus<TEvent>(RabbitClient rabbitClient) : IEventBus<TEvent> where TEvent : class
+public class RabbitMQEventBus<TEvent>(RabbitClient rabbitClient,IHandlerSerializer handlerSerializer) : IEventBus<TEvent> where TEvent : class
 {
-    public async ValueTask PublishAsync(TEvent @event)
+    public async ValueTask PublishAsync(TEvent eventEvent)
     {
-        var eto = new EventEto(@event.GetType().FullName, JsonSerializer.SerializeToUtf8Bytes(@event));
+        ArgumentNullException.ThrowIfNull(eventEvent);
+
+        var eto = new EventEto(eventEvent.GetType().FullName, handlerSerializer.Serialize(eventEvent));
 
         await rabbitClient.PublishAsync("Thor:EventBus:exchange", "Thor:EventBus:key",
-            JsonSerializer.SerializeToUtf8Bytes(eto));
+            handlerSerializer.Serialize(eto));
     }
 }

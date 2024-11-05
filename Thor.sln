@@ -80,6 +80,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Provider.MySql", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Provider.DM", "src\Provider\Thor.Provider.DM\Thor.Provider.DM.csproj", "{9C731BC5-C473-4113-9001-5322364B9706}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Rabbit", "src\framework\Thor.Stack.Rabbit\Thor.Rabbit.csproj", "{58C7FCA8-BC91-4066-885B-48EDE51C6192}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -206,6 +208,10 @@ Global
 		{9C731BC5-C473-4113-9001-5322364B9706}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C731BC5-C473-4113-9001-5322364B9706}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C731BC5-C473-4113-9001-5322364B9706}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58C7FCA8-BC91-4066-885B-48EDE51C6192}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58C7FCA8-BC91-4066-885B-48EDE51C6192}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58C7FCA8-BC91-4066-885B-48EDE51C6192}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58C7FCA8-BC91-4066-885B-48EDE51C6192}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -242,6 +248,7 @@ Global
 		{289E03C7-090B-4788-8760-607C54A73756} = {C64DA1C5-9D96-445C-B537-6B83C07F2E47}
 		{AB03676F-C10C-4633-9D5B-5858CF96B16A} = {C64DA1C5-9D96-445C-B537-6B83C07F2E47}
 		{9C731BC5-C473-4113-9001-5322364B9706} = {C64DA1C5-9D96-445C-B537-6B83C07F2E47}
+		{58C7FCA8-BC91-4066-885B-48EDE51C6192} = {1035B36B-8194-43D4-8A4A-992D962CD1D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

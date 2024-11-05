@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
         <EntityFrameworkCoreVersion>8.0.2</EntityFrameworkCoreVersion>
+        <MicrosoftAspNetCorePackageVersion>8.0.0</MicrosoftAspNetCorePackageVersion>
         <LangVersion>12.0</LangVersion>
         <SdcbSparkDeskVersion>3.0.0</SdcbSparkDeskVersion>
         <SemanticKernelVersion>1.6.1</SemanticKernelVersion>

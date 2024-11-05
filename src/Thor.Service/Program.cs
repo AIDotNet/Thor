@@ -9,7 +9,6 @@ using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI.Extensions;
 using Thor.Claudia.Extensions;
-using Thor.Core;
 using Thor.Core.DataAccess;
 using Thor.Core.Extensions;
 using Thor.ErnieBot.Extensions;
@@ -71,7 +70,17 @@ try
     var rabbitMqConnectionString = builder.Configuration["RabbitMQ:ConnectionString"];
     if (!string.IsNullOrEmpty(rabbitMqConnectionString))
     {
-        builder.Services.AddRabbitMQEventBus(builder.Configuration);
+        builder.Services.AddRabbitMqEventBus(builder.Configuration);
+
+        var serializerType = builder.Configuration["RabbitMQ:Serializer"];
+        if (serializerType?.Equals("MessagePack", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            builder.Services.AddRabbitMqMessagePackSerializer();
+        }
+        else
+        {
+            builder.Services.AddRabbitMqJsonSerializer();
+        }
     }
     else
     {
