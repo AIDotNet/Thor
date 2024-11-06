@@ -7,7 +7,13 @@ public class JsonHandlerSerializer : IHandlerSerializer
 {
     private readonly JsonSerializerOptions? _jsonSerializerOptions = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false,
+        Converters =
+        {
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+        }
     };
 
     public byte[] Serialize<TEvent>(TEvent eventEvent) where TEvent : class

@@ -1,4 +1,6 @@
-﻿namespace Thor.Core;
+﻿using Thor.Abstractions.Exceptions;
+
+namespace Thor.Core;
 
 public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
 {
@@ -35,6 +37,10 @@ public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
                 }
 
                 return; // Exit if action is successful
+            }
+            catch (ThorRateLimitException)
+            {
+                throw new ThorRateLimitException();
             }
             catch (Exception ex)
             {

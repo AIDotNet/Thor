@@ -380,11 +380,16 @@ public sealed class ChatService(
     /// <exception cref="NotModelException"></exception>
     public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
+        using var chatCompletions =
+            Activity.Current?.Source.StartActivity("对话补全调用");
+
+        int rateLimit = 0;
+
+        // 用于限流重试，如果限流则重试并且进行重新负载均衡计算
+        limitGoto:
+
         try
         {
-            using var chatCompletions =
-                Activity.Current?.Source.StartActivity("对话补全调用");
-
             request.Model = TokenService.ModelMap(request.Model);
 
             var model = request.Model;
@@ -467,6 +472,19 @@ public sealed class ChatService(
                     await context.WriteStreamErrorAsync("当前模型未设置倍率");
                 else
                     await context.WriteErrorAsync("当前模型未设置倍率");
+            }
+        }
+        catch (ThorRateLimitException)
+        {
+            rateLimit++;
+            // TODO：限流重试次数
+            if (rateLimit > 3)
+            {
+                context.Response.StatusCode = 429;
+            }
+            else
+            {
+                goto limitGoto;
             }
         }
         catch (RateLimitException)

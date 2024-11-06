@@ -126,6 +126,9 @@ try
 
     builder.Services.AddThorDataAccess((collection =>
     {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+        
         if (dbType.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) ||
             dbType.Equals("pgsql", StringComparison.OrdinalIgnoreCase))
         {
@@ -220,6 +223,7 @@ try
 
     app.UseOpenTelemetry();
 
+    app.UseMiddleware<OpenTelemetryMiddlewares>();
     app.UseMiddleware<UnitOfWorkMiddleware>();
 
     if (!Directory.Exists("/data"))

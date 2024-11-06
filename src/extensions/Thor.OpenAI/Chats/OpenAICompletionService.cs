@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
+using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
@@ -15,6 +16,12 @@ public sealed class OpenAICompletionService : IThorCompletionsService
     {
         var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             createCompletionModel, options.ApiKey);
+
+        // 如果限流则抛出限流异常
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            throw new ThorRateLimitException();
+        }
 
         var result = await response.Content.ReadFromJsonAsync<CompletionCreateResponse>(
             cancellationToken: cancellationToken).ConfigureAwait(false);
