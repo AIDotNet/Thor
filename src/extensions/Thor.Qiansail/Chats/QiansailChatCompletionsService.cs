@@ -1,5 +1,6 @@
 ﻿using Sdcb.DashScope;
 using Sdcb.DashScope.TextGeneration;
+using System.Text.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
@@ -31,18 +32,42 @@ namespace Thor.Qiansail.Chats
                 {
                     MaxTokens = chatCompletionCreate.MaxTokens,
                     Temperature = chatCompletionCreate.Temperature,
-                    TopP = chatCompletionCreate.TopP,
-                    ResultFormat = chatCompletionCreate.ResponseFormat?.Type,
+                    TopP = chatCompletionCreate.TopP, 
                     Stop = chatCompletionCreate.Stop,
-                }, cancellationToken);
+                    Tools = chatCompletionCreate.Tools?.Select(x => ChatTool.CreateFunction(
+                        name: x.Function?.Name,
+                        description: x.Function?.Description, 
+                        parameters: x.Function.Parameters.Items.Properties.Select( 
+                            y=> new FunctionParameter( 
+                            y.Key,
+                            y.Value.Type,
+                            y.Value.Description?? string.Empty, y.Value.Required.Contains(y.Key)
+                            )).ToArray())).ToArray()
+                    .ToArray()
+                },  cancellationToken);
 
+            var toolsResult = new List<ThorToolCall>();
+            if (result.Output.Choices[0].Message.ToolCalls != null && result.Output.Choices[0].Message.ToolCalls.Count() > 0)
+            {
+                foreach (var content in result.Output.Choices[0].Message.ToolCalls)
+                {
+                    toolsResult.Add(new ThorToolCall()
+                    {
+                        Function = new ThorChatMessageFunction()
+                        {
+                            Arguments = JsonSerializer.Serialize(content.Function?.Arguments),
+                            Name = content.Function?.Name
+                        }
+                    });
+                }
+            }
             return new ThorChatCompletionsResponse()
             {
                 Choices =
                 [
                     new()
                     {
-                        Delta =ThorChatMessage.CreateAssistantMessage(result.Output.Text),
+                        Delta =ThorChatMessage.CreateAssistantMessage(result.Output.Choices[0].Message.Content, toolCalls:toolsResult),
                         FinishReason = "stop",
                         Index = 0,
                     }
@@ -79,12 +104,36 @@ namespace Thor.Qiansail.Chats
                                    MaxTokens = chatCompletionCreate.MaxTokens,
                                    Temperature = chatCompletionCreate.Temperature,
                                    TopP = chatCompletionCreate.TopP,
-                                   ResultFormat = chatCompletionCreate.ResponseFormat?.Type,
                                    Stop = chatCompletionCreate.Stop,
+                                   Tools = chatCompletionCreate.Tools?.Select(x => ChatTool.CreateFunction(
+                        name: x.Function?.Name,
+                        description: x.Function?.Description,
+                        parameters: x.Function.Parameters.Items.Properties.Select(
+                            y => new FunctionParameter(
+                            y.Key,
+                            y.Value.Type,
+                            y.Value.Description ?? string.Empty, y.Value.Required.Contains(y.Key)
+                            )).ToArray())).ToArray()
+                    .ToArray(),
                                    IncrementalOutput = true
                                }, cancellationToken))
             {
-                var message = ThorChatMessage.CreateAssistantMessage(result.Output.Text);
+                var toolsResult = new List<ThorToolCall>();
+                if (result.Output.Choices[0].Message.ToolCalls != null && result.Output.Choices[0].Message.ToolCalls.Count() > 0)
+                {
+                    foreach (var content in result.Output.Choices[0].Message.ToolCalls)
+                    {
+                        toolsResult.Add(new ThorToolCall()
+                        {
+                            Function = new ThorChatMessageFunction()
+                            {
+                                Arguments = JsonSerializer.Serialize(content.Function?.Arguments),
+                                Name = content.Function?.Name
+                            }
+                        });
+                    }
+                }
+                var message = ThorChatMessage.CreateAssistantMessage(result.Output.Choices[0].Message.Content, toolCalls: toolsResult);
                 yield return new ThorChatCompletionsResponse()
                 {
                     Choices =
