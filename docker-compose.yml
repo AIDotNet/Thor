@@ -27,6 +27,7 @@ services:
       - OTEL_SERVICE_NAME=Thor
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://aspire-dashboard:18889
+      - HttpClientPoolSize=8
 
   postgres:
     image: postgres:13
