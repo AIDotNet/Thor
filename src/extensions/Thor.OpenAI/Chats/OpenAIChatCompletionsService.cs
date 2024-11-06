@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
@@ -11,7 +12,7 @@ using Thor.Abstractions.Extensions;
 
 namespace Thor.OpenAI.Chats;
 
-public sealed class OpenAIChatCompletionsService : IThorChatCompletionsService
+public sealed class OpenAIChatCompletionsService(ILogger logger) : IThorChatCompletionsService
 {
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
@@ -31,7 +32,14 @@ public sealed class OpenAIChatCompletionsService : IThorChatCompletionsService
         {
             throw new ThorRateLimitException();
         }
-        
+
+        // 大于等于400的状态码都认为是异常
+        if (response.StatusCode >= HttpStatusCode.BadRequest)
+        {
+            var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
+        }
+
         var result =
             await response.Content.ReadFromJsonAsync<ThorChatCompletionsResponse>(
                 cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -56,14 +64,18 @@ public sealed class OpenAIChatCompletionsService : IThorChatCompletionsService
         {
             throw new PaymentRequiredException();
         }
-        
+
         // 如果限流则抛出限流异常
         if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
         {
             throw new ThorRateLimitException();
         }
 
-        response.EnsureSuccessStatusCode();
+        // 大于等于400的状态码都认为是异常
+        if (response.StatusCode >= HttpStatusCode.BadRequest)
+        {
+            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
+        }
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 
@@ -75,6 +87,9 @@ public sealed class OpenAIChatCompletionsService : IThorChatCompletionsService
 
             if (line.StartsWith('{'))
             {
+                logger.LogInformation("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                    line);
+                
                 // 如果是json数据则直接返回
                 yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                     ThorJsonSerializer.DefaultOptions);

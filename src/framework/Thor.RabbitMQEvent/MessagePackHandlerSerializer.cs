@@ -5,27 +5,23 @@ namespace Thor.RabbitMQEvent;
 
 public class MessagePackHandlerSerializer : IHandlerSerializer
 {
-    private readonly MessagePackSerializerOptions _options = MessagePackSerializer.DefaultOptions.WithResolver(
-        CompositeResolver.Create(StandardResolver.Instance, ContractlessStandardResolver.Instance));
-
-
     public byte[] Serialize<TEvent>(TEvent eventEvent) where TEvent : class
     {
-        return MessagePackSerializer.Serialize(eventEvent, _options);
+        return MessagePackSerializer.Serialize(eventEvent, ContractlessStandardResolver.Options);
     }
 
     public TEvent? Deserialize<TEvent>(ReadOnlyMemory<byte> data) where TEvent : class
     {
-        return MessagePackSerializer.Deserialize<TEvent>(data, _options);
+        return MessagePackSerializer.Deserialize<TEvent>(data, ContractlessStandardResolver.Options);
     }
 
     public object? Deserialize(byte[] data, Type type)
     {
-        return MessagePackSerializer.Deserialize(type, data, _options);
+        return MessagePackSerializer.Deserialize(type, data, ContractlessStandardResolver.Options);
     }
 
     public byte[] Serialize(object @event)
     {
-        return MessagePackSerializer.Serialize(@event, _options);
+        return MessagePackSerializer.Serialize(@event, ContractlessStandardResolver.Options);
     }
 }
