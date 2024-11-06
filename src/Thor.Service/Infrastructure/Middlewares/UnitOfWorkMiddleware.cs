@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using Microsoft.Extensions.Logging;
-using Thor.Core;
 using Thor.Core.DataAccess;
 
 namespace Thor.Service.Infrastructure.Middlewares;
@@ -14,7 +12,8 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
             context.Request.Method != "HEAD" && context.Request.Method != "TRACE" &&
             context.Request.Method != "CONNECT")
         {
-            var activity = Activity.Current;
+            using var activity =
+                Activity.Current?.Source.StartActivity("UnitOfWork", ActivityKind.Internal);
 
             activity?.SetTag("UnitOfWork", "Begin");
 

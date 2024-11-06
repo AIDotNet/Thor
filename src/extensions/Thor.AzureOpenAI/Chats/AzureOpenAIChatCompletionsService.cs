@@ -3,6 +3,7 @@ using System.Text.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
 namespace Thor.AzureOpenAI.Chats;
@@ -19,9 +20,16 @@ public class AzureOpenAIChatCompletionsService : IThorChatCompletionsService
 
         var response = await HttpClientFactory.HttpClient.PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
 
+        // 如果限流则抛出限流异常
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            throw new ThorRateLimitException();
+        }
+        
         var result = await response.Content
             .ReadFromJsonAsync<ThorChatCompletionsResponse>(cancellationToken: cancellationToken)
             .ConfigureAwait(false);
+        
 
         return result;
     }

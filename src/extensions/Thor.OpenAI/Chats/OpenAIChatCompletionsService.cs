@@ -26,6 +26,12 @@ public sealed class OpenAIChatCompletionsService : IThorChatCompletionsService
             throw new BusinessException("渠道未登录,请联系管理人员", "401");
         }
 
+        // 如果限流则抛出限流异常
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            throw new ThorRateLimitException();
+        }
+        
         var result =
             await response.Content.ReadFromJsonAsync<ThorChatCompletionsResponse>(
                 cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -49,6 +55,12 @@ public sealed class OpenAIChatCompletionsService : IThorChatCompletionsService
         if (response.StatusCode == HttpStatusCode.PaymentRequired)
         {
             throw new PaymentRequiredException();
+        }
+        
+        // 如果限流则抛出限流异常
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            throw new ThorRateLimitException();
         }
 
         response.EnsureSuccessStatusCode();
