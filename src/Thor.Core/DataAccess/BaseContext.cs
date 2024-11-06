@@ -21,7 +21,7 @@ public abstract class BaseContext<TContext>(DbContextOptions<TContext> context, 
         OnBeforeSaveChanges();
         return await base.SaveChangesAsync(cancellationToken);
     }
-
+    
     private void OnBeforeSaveChanges()
     {
         var entries = ChangeTracker.Entries();

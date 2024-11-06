@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Thor.Core.Extensions;
 
 namespace Thor.Provider;
@@ -14,6 +15,9 @@ public static class MySqlApplicationExtensions
         {
             builder.UseMySql(configuration.GetConnectionString("DefaultConnection"),
                 ServerVersion.AutoDetect(configuration.GetConnectionString("DefaultConnection")));
+            
+            // sql日志不输出控制台
+            builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
         }));
 
 
@@ -21,6 +25,9 @@ public static class MySqlApplicationExtensions
         {
             builder.UseMySql(configuration.GetConnectionString("LoggerConnection"),
                 ServerVersion.AutoDetect(configuration.GetConnectionString("LoggerConnection")));
+            
+            // sql日志不输出控制台
+            builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
         }));
 
         return services;
