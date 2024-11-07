@@ -32,8 +32,8 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
 
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            logger.LogError("Azure对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
-                await response.Content.ReadAsStringAsync(cancellationToken));
+            logger.LogError("Azure对话异常 , StatusCode: {StatusCode} Response: {Response} Url:{Url}", response.StatusCode,
+                await response.Content.ReadAsStringAsync(cancellationToken), url);
         }
 
         var result = await response.Content
@@ -72,7 +72,7 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
             if (line.StartsWith('{'))
             {
                 logger.LogDebug("Azure对话异常返回数据: {Data}", line);
-                
+
                 // 如果是json数据则直接返回
                 yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                     ThorJsonSerializer.DefaultOptions);
