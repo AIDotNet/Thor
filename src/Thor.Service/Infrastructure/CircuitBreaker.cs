@@ -44,7 +44,7 @@ public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Attempt {attempts} failed: {ex.Message}");
+                Console.WriteLine($"Attempt {attempts} failed: {ex}");
 
                 _failureCount++;
                 if (_failureCount >= failureThreshold)

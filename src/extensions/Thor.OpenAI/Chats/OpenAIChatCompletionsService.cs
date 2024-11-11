@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -18,10 +19,17 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        using var openai =
+            Activity.Current?.Source.StartActivity("OpenAI 对话补全");
+        
         var response = await HttpClientFactory.HttpClient.PostJsonAsync(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
+        openai?.SetTag("Address",options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Model", chatCompletionCreate.Model);
+        openai?.SetTag("Response", response.StatusCode.ToString());
+        
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             throw new BusinessException("渠道未登录,请联系管理人员", "401");
@@ -51,9 +59,17 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        
+        using var openai =
+            Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
+        
         var response = await HttpClientFactory.HttpClient.HttpRequestRaw(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
+        
+        openai?.SetTag("Address",options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Model", chatCompletionCreate.Model);
+        openai?.SetTag("Response", response.StatusCode.ToString());
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {

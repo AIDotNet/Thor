@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Thor.Service.Extensions;
 using Thor.Service.Options;
 
@@ -217,6 +218,8 @@ public sealed class TokenService(
         if (ChatCoreOptions.ModelMapping?.Enable == true &&
             ChatCoreOptions.ModelMapping.Models.TryGetValue(model, out var models) && models.Length > 0)
         {
+            using var modelMap =
+                Activity.Current?.Source.StartActivity("模型映射转换");
             // 随机字符串
             // 所有权重值之和
             var total = models.Sum(x => x.Order);
@@ -228,11 +231,14 @@ public sealed class TokenService(
                 value -= chatChannel.Order;
                 if (value <= 0)
                 {
+                    modelMap?.SetTag("Model", chatChannel.Model);
                     return chatChannel.Model;
                 }
             }
+            
+            modelMap?.SetTag("Model", models.LastOrDefault()?.Model ?? model);
 
-            return models.Last().Model;
+            return models.LastOrDefault()?.Model ?? model;
         }
 
         return model;
