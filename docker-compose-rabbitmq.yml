@@ -2,7 +2,7 @@
 
 services:
   ai-dotnet-api-service:
-    image: registry.token-ai.cn/thor:latest
+    image: hejiale010426/thor:latest
     ports:
       - 18080:8080
     build:
