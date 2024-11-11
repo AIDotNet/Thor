@@ -11,7 +11,7 @@ public record ThorUsageResponse
     /// 提示中的令牌数。
     /// </summary>
     [JsonPropertyName("prompt_tokens")] 
-    public int PromptTokens { get; set; }
+    public int? PromptTokens { get; set; }
 
     /// <summary>
     /// 生成的完成中的令牌数。

@@ -778,11 +778,24 @@ public sealed class ChatService(
 
             await circuitBreaker.ExecuteAsync(
                 async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3);
-
+            
             await context.Response.WriteAsJsonAsync(result);
 
-            responseToken =
-                TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray());
+            if (result?.Usage?.PromptTokens is not null && result.Usage.PromptTokens > 0)
+            {
+                requestToken = result.Usage.PromptTokens.Value;
+            }
+            
+            // 如果存在返回的Usage则使用返回的Usage中的CompletionTokens
+            if (result?.Usage?.CompletionTokens is not null && result.Usage.CompletionTokens > 0)
+            {
+                responseToken = result.Usage.CompletionTokens.Value;
+            }
+            else
+            {
+                responseToken =
+                    TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray());
+            }
         }
         else
         {
