@@ -12,13 +12,13 @@ public static class SqlServerApplicationExtensions
     {
         services.AddThorDataAccess<SqlServerThorContext>(((provider, builder) =>
         {
-            builder.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            builder.UseSqlServer(configuration.GetConnectionString("ConnectionString"));
         }));
 
 
         services.AddLocalDataAccess<SqlServerLoggerContext>(((provider, builder) =>
         {
-            builder.UseSqlServer(configuration.GetConnectionString("LoggerConnection"));
+            builder.UseSqlServer(configuration.GetConnectionString("LoggerConnectionString"));
         }));
 
         return services;

@@ -14,7 +14,7 @@ public static class PostgreSQLApplicationExtensions
         
         services.AddThorDataAccess<PostgreSQLThorContext>(((provider, builder) =>
         {
-            builder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
+            builder.UseNpgsql(configuration.GetConnectionString("ConnectionString"));
             
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
@@ -22,7 +22,7 @@ public static class PostgreSQLApplicationExtensions
 
         services.AddLocalDataAccess<PostgreSQLLoggerContext>(((provider, builder) =>
         {
-            builder.UseNpgsql(configuration.GetConnectionString("LoggerConnection"));
+            builder.UseNpgsql(configuration.GetConnectionString("LoggerConnectionString"));
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
         }));

@@ -13,7 +13,7 @@ public static class SqliteApplicationExtensions
     {
         services.AddThorDataAccess<SqliteThorContext>(((provider, builder) =>
         {
-            builder.UseSqlite(configuration.GetConnectionString("DefaultConnection"));
+            builder.UseSqlite(configuration.GetConnectionString("ConnectionString"));
 
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
@@ -22,7 +22,7 @@ public static class SqliteApplicationExtensions
 
         services.AddLocalDataAccess<SqliteLoggerContext>(((provider, builder) =>
         {
-            builder.UseSqlite(configuration.GetConnectionString("LoggerConnection"));
+            builder.UseSqlite(configuration.GetConnectionString("LoggerConnectionString"));
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
         }));

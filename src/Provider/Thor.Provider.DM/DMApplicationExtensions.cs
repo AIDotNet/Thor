@@ -13,7 +13,7 @@ public static class DMApplicationExtensions
     {
         services.AddThorDataAccess<DMThorContext>(((provider, builder) =>
         {
-            builder.UseDm(configuration.GetConnectionString("DefaultConnection"));
+            builder.UseDm(configuration.GetConnectionString("ConnectionString"));
             
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
@@ -22,7 +22,7 @@ public static class DMApplicationExtensions
 
         services.AddLocalDataAccess<DMLoggerContext>(((provider, builder) =>
         {
-            builder.UseDm(configuration.GetConnectionString("LoggerConnection"));
+            builder.UseDm(configuration.GetConnectionString("LoggerConnectionString"));
             
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
