@@ -129,9 +129,9 @@ admin admin
 
 - DBType
   sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-- ConnectionStrings:ConnectionString
+- ConnectionStrings:DefaultConnection
   主数据库连接字符串
-- ConnectionStrings:LoggerConnectionString
+- ConnectionStrings:LoggerConnection
   日志数据连接字符串
 - CACHE_TYPE
   缓存类型 Memory|Redis
@@ -158,8 +158,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionStrings:ConnectionString=data source=/data/token.db
-      - ConnectionStrings:LoggerConnectionString=data source=/data/logger.db
+      - ConnectionStrings:DefaultConnection=data source=/data/token.db
+      - ConnectionStrings:LoggerConnection=data source=/data/logger.db
       - RunMigrationsAtStartup=true
 ```
 
@@ -188,8 +188,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlite
-      - ConnectionStrings:ConnectionString=data source=/data/token.db
-      - ConnectionStrings:LoggerConnectionString=data source=/data/logger.db
+      - ConnectionStrings:DefaultConnection=data source=/data/token.db
+      - ConnectionStrings:LoggerConnection=data source=/data/logger.db
       - RunMigrationsAtStartup=true
 ```
 执行如下命令打包镜像
@@ -207,7 +207,7 @@ sudo docker compose up -d
 docker run版本
 
 ```shell
-docker run -d -p 18080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e RunMigrationsAtStartup=true  -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionStrings:ConnectionString=data source=/data/token.db -e ConnectionStrings:LoggerConnectionString=data source=/data/logger.db hejiale010426/thor:latest
+docker run -d -p 18080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e RunMigrationsAtStartup=true  -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionStrings:DefaultConnection=data source=/data/token.db -e ConnectionStrings:LoggerConnection=data source=/data/logger.db hejiale010426/thor:latest
 ```
 
 然后访问 http://localhost:18080 即可看到服务启动成功。
@@ -231,8 +231,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=postgresql
-      - ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666
-      - ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666
+      - ConnectionStrings:DefaultConnection=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666
+      - ConnectionStrings:LoggerConnection=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666
       - RunMigrationsAtStartup=true
 ```
 
@@ -257,8 +257,8 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   -e DBType=postgresql \
   -e RunMigrationsAtStartup=true \
-  -e ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666 \
-  -e ConnectionStrings:ConnectionString=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666 \
+  -e ConnectionStrings:DefaultConnection=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666 \
+  -e ConnectionStrings:LoggerConnection=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666 \
   hejiale010426/thor:latest
 ```
 
@@ -283,8 +283,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=sqlserver
-      - ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;
-      - ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;
+      - ConnectionStrings:DefaultConnection=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;
+      - ConnectionStrings:LoggerConnection=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;
       - RunMigrationsAtStartup=true
 ```
 
@@ -309,8 +309,8 @@ docker run -d \
   -e TZ=Asia/Shanghai \
   -e RunMigrationsAtStartup=true \
   -e DBType=sqlserver \
-  -e ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666; \
-  -e ConnectionStrings:ConnectionString=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666; \
+  -e ConnectionStrings:DefaultConnection=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666; \
+  -e ConnectionStrings:LoggerConnection=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666; \
   hejiale010426/thor:latest
 ```
 
@@ -335,8 +335,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=mysql
-      - "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/token"
-      - "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/logger"
+      - "ConnectionStrings:DefaultConnection=mysql://root:dd666666@localhost:3306/token"
+      - "ConnectionStrings:LoggerConnection=mysql://root:dd666666@localhost:3306/logger"
       - RunMigrationsAtStartup=true
 ```
 
@@ -359,8 +359,8 @@ docker run -d \
   -v $(pwd)/data:/data \
   -e TZ=Asia/Shanghai \
   -e DBType=mysql \
-  -e "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/token" \
-  -e "ConnectionStrings:ConnectionString=mysql://root:dd666666@localhost:3306/logger" \
+  -e "ConnectionStrings:DefaultConnection=mysql://root:dd666666@localhost:3306/token" \
+  -e "ConnectionStrings:LoggerConnection=mysql://root:dd666666@localhost:3306/logger" \
   -e RunMigrationsAtStartup=true \
   hejiale010426/thor:latest
 ```
