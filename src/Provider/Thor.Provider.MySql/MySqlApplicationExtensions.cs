@@ -13,8 +13,8 @@ public static class MySqlApplicationExtensions
     {
         services.AddThorDataAccess<MySqlThorContext>(((provider, builder) =>
         {
-            builder.UseMySql(configuration.GetConnectionString("ConnectionString"),
-                ServerVersion.AutoDetect(configuration.GetConnectionString("ConnectionString")));
+            builder.UseMySql(configuration.GetConnectionString("DefaultConnection"),
+                ServerVersion.AutoDetect(configuration.GetConnectionString("DefaultConnection")));
             
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
@@ -23,8 +23,8 @@ public static class MySqlApplicationExtensions
 
         services.AddLocalDataAccess<MySqlLoggerContext>(((provider, builder) =>
         {
-            builder.UseMySql(configuration.GetConnectionString("LoggerConnectionString"),
-                ServerVersion.AutoDetect(configuration.GetConnectionString("LoggerConnectionString")));
+            builder.UseMySql(configuration.GetConnectionString("LoggerConnection"),
+                ServerVersion.AutoDetect(configuration.GetConnectionString("LoggerConnection")));
             
             // sql日志不输出控制台
             builder.UseLoggerFactory(LoggerFactory.Create(_ => { }));
