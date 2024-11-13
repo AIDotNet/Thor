@@ -156,9 +156,9 @@ try
         }
     }));
 
-    builder.AddServiceDefaults();
-
     builder.Services.AddResponseCompression();
+    
+    builder.AddServiceDefaults();
 
     builder.Services.AddWebSockets(options =>
     {
@@ -181,13 +181,17 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.UseResponseCompression();
+    app.UseStaticFiles();
+
     app.Use((async (context, next) =>
     {
         if (context.Request.Path == "/")
         {
             if (string.IsNullOrEmpty(ChatCoreOptions.Master))
             {
-                context.Request.Path = "/index.html";
+                await context.Response.SendFileAsync("wwwroot/index.html");
+                return;
             }
             else
             {
@@ -205,21 +209,15 @@ try
         {
             if (string.IsNullOrEmpty(ChatCoreOptions.Master))
             {
-                context.Request.Path = "/index.html";
+                await context.Response.SendFileAsync("wwwroot/index.html");
             }
             else
             {
                 context.Response.Redirect(ChatCoreOptions.Master);
                 return;
             }
-
-            await next(context);
         }
     }));
-
-    app.UseResponseCompression();
-
-    app.UseStaticFiles();
 
     app.UseOpenTelemetry();
 
