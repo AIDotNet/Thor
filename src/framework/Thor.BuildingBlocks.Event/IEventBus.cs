@@ -1,4 +1,4 @@
-﻿namespace Thor.BuildingBlocks.Data;
+﻿namespace Thor.BuildingBlocks.Event;
 
 /// <summary>
 /// Represents the event bus.

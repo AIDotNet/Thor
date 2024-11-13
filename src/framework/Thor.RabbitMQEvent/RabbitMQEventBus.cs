@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Thor.BuildingBlocks.Data;
+using Thor.BuildingBlocks.Event;
 using Thor.Rabbit;
 
 namespace Thor.RabbitMQEvent;

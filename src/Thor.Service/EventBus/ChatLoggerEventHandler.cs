@@ -1,4 +1,4 @@
-﻿using Thor.BuildingBlocks.Data;
+﻿using Thor.BuildingBlocks.Event;
 using Thor.Core.DataAccess;
 
 namespace Thor.Service.EventBus;

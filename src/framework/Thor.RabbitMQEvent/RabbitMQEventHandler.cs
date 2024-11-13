@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Events;
-using Thor.BuildingBlocks.Data;
+using Thor.BuildingBlocks.Event;
 using Thor.Rabbit;
 using Thor.Rabbit.Handler;
 

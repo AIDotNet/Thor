@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using Thor.BuildingBlocks.Data;
+using Thor.BuildingBlocks.Event;
 using Thor.Rabbit;
 using Thor.Rabbit.Handler;
 

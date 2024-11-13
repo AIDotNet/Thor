@@ -1,7 +1,7 @@
 ﻿using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Thor.BuildingBlocks.Data;
+using Thor.BuildingBlocks.Event;
 
 namespace Thor.LocalEvent;
 

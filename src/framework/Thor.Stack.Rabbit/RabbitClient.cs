@@ -68,7 +68,7 @@ public abstract class RabbitClient(
             var scopeBag = new ConcurrentBag<AsyncServiceScope>(asyncServiceScopes);
 
             // 根据FetchCount创建固定的Task数量，然后Received事件中通过Task.Run执行
-            consumer.Received += async (obj, arg) =>
+            consumer.ReceivedAsync += async (obj, arg) =>
             {
                 _ = Task.Run(async () =>
                 {
@@ -98,7 +98,7 @@ public abstract class RabbitClient(
         else
         {
             var asyncServiceScope = serviceProvider.CreateAsyncScope();
-            consumer.Received += async (obj, arg) =>
+            consumer.ReceivedAsync += async (obj, arg) =>
             {
                 try
                 {
@@ -117,7 +117,12 @@ public abstract class RabbitClient(
 
 
         // 当通道调用的回调中发生异常时发出信号
-        channel.CallbackException += (_, args) => { _logger.LogError(args.Exception, args.Exception.Message); };
+        channel.CallbackExceptionAsync += async (_, args) =>
+        {
+            _logger.LogError(args.Exception, args.Exception.Message);
+
+            await Task.CompletedTask;
+        };
         await channel.BasicConsumeAsync(queue, opt.AutoAck, consumer).ConfigureAwait(false);
 
         return channel;
@@ -189,7 +194,8 @@ public abstract class RabbitClient(
         // TProperties
         options?.Invoke(prop);
 
-        await channel.BasicPublishAsync(exchange: exchange, routingKey: routingKey, body: data, basicProperties: prop);
+        await channel.BasicPublishAsync(exchange: exchange, routingKey: routingKey, body: data, basicProperties: prop,
+            mandatory: true).ConfigureAwait(false);
     }
 
     private IConnection GetConnection()
