@@ -1,4 +1,4 @@
-﻿using Thor.BuildingBlocks.Data;
+﻿using Thor.BuildingBlocks.Event;
 using Thor.Service.Eto;
 using Thor.Service.Service;
 
