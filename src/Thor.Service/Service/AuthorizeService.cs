@@ -243,7 +243,7 @@ public class AuthorizeService(
         };
         var content = new FormUrlEncodedContent(parameters);
 
-        var url = $"{endipoint.TrimEnd("/")}/api/login/oauth/access_token";
+        var url = $"{endipoint.TrimEnd('/')}/api/login/oauth/access_token";
 
         var response = await HttpClient.PostAsync(url, content);
 
@@ -256,7 +256,7 @@ public class AuthorizeService(
         }
 
         var casdoorUser =
-            await HttpClient.GetFromJsonAsync<CasdoorUserDto>($"{endipoint.TrimEnd("/")}/api/get-account?accessToken=" +
+            await HttpClient.GetFromJsonAsync<CasdoorUserDto>($"{endipoint.TrimEnd('/')}/api/get-account?accessToken=" +
                                                               str.access_token);
 
         if (casdoorUser is null)
