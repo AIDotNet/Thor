@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using Casdoor.Client;
+using Thor.Abstractions.Dtos;
 using Thor.BuildingBlocks.Event;
 using Thor.Service.Eto;
 
@@ -232,29 +233,74 @@ public class AuthorizeService(
         var endipoint = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorEndipoint);
         var clientSecret = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorClientSecret);
 
-        var httpClient = new HttpClient();
-        var client = new CasdoorClient(httpClient, new CasdoorOptions
-        {
-            Endpoint = "https://auth.ai-v1.cn/",
-            OrganizationName = "casbin", // your Casdoor organization
-            ApplicationName = "thor", // your Casdoor application
-            ApplicationType = "native", // webapp, webapi or native
-            ClientId = "a387a4892ee19b1a2249", // your Casdoor application's client ID
-            ClientSecret = "dbf205949d704de81b0b5b3603174e23fbecc354"
-        });
 
         var parameters = new Dictionary<string, string>
         {
             { "grant_type", "authorization_code" },
-            { "client_id", "a387a4892ee19b1a2249" },
-            { "client_secret", "dbf205949d704de81b0b5b3603174e23fbecc354" },
+            { "client_id", clientId },
+            { "client_secret", clientSecret },
             { "code", code }
         };
         var content = new FormUrlEncodedContent(parameters);
 
-        var response = await httpClient.PostAsync("https://auth.ai-v1.cn/api/login/oauth/access_token");
+        var url = $"{endipoint.TrimEnd("/")}/api/login/oauth/access_token";
 
-        var str = await response.Content.ReadAsStringAsync();
+        var response = await HttpClient.PostAsync(url, content);
+
+        var str = await response.Content.ReadFromJsonAsync<GitTokenDto>();
+
+        if (str is null)
+        {
+            logger.LogError("Casdoor授权失败");
+            throw new Exception("Casdoor授权失败");
+        }
+
+        var casdoorUser =
+            await HttpClient.GetFromJsonAsync<CasdoorUserDto>($"{endipoint.TrimEnd("/")}/api/get-account?accessToken=" +
+                                                              str.access_token);
+
+        if (casdoorUser is null)
+        {
+            logger.LogError("Casdoor授权失败");
+            throw new Exception("Casdoor授权失败");
+        }
+
+
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == casdoorUser.Data.id);
+
+        if (user is null)
+        {
+            user = new User(casdoorUser.Data.id, casdoorUser.Data.id,
+                casdoorUser.Data.id + "@token-ai.cn",
+                Guid.NewGuid().ToString("N"));
+            user.SetUser();
+
+            user.SetPassword("Aa123456");
+
+            await DbContext.Users.AddAsync(user);
+
+            // 初始用户额度
+            var userQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.NewUserQuota);
+            user.SetResidualCredit(userQuota);
+
+            await DbContext.Users.AddAsync(user);
+
+            await eventBus.PublishAsync(new CreateUserEto()
+            {
+                User = user,
+                Source = CreateUserSource.Gitee
+            });
+
+            await DbContext.SaveChangesAsync();
+        }
+
+        var key = jwtHelper.CreateToken(user);
+
+        return new
+        {
+            token = key,
+            role = user.Role
+        };
 
         return new
         {

@@ -106,6 +106,11 @@ const router = createBrowserRouter([{
   element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
     <Auth />
   </Suspense>
+},  {
+  path: "/auth/casdoor",
+  element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
+    <Auth />
+  </Suspense>
 }, {
   path: "/share",
   element: <Suspense fallback={<FullscreenLoading title='加载分享页面中' />}>

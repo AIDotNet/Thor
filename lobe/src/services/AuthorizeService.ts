@@ -13,3 +13,7 @@ export const getGithubToken = (code: string) => {
 export const getGiteeToken = (code:string,redirectUri:string) =>{
   return post(prefix+"/gitee?code="+code+"&redirectUri="+redirectUri);
 }
+
+export const getCasdoorToken = (code:string) =>{
+  return post(prefix+"/casdoor?code="+code);
+}
