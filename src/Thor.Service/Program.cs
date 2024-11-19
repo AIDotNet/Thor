@@ -233,7 +233,6 @@ try
 
     app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBody] LoginInput input) =>
         await service.TokenAsync(input))
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Get token")
         .WithTags("Authorize")
@@ -241,7 +240,6 @@ try
 
     app.MapPost("/api/v1/authorize/github", async (AuthorizeService service, string code) =>
             await service.GithubAsync(code))
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Github login")
         .WithTags("Authorize")
@@ -249,7 +247,6 @@ try
 
     app.MapPost("/api/v1/authorize/gitee", async (AuthorizeService service, string code, string redirectUri) =>
             await service.GiteeAsync(code, redirectUri))
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Github login")
         .WithTags("Authorize")
@@ -257,7 +254,6 @@ try
 
     app.MapPost("/api/v1/authorize/casdoor", async (AuthorizeService service, string code) =>
             await service.CasdoorAsync(code))
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Casdoor login")
         .WithTags("Authorize")

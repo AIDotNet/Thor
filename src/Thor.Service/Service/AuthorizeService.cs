@@ -5,7 +5,7 @@ using Thor.Service.Eto;
 
 namespace Thor.Service.Service;
 
-public  class AuthorizeService(
+public class AuthorizeService(
     IServiceProvider serviceProvider,
     IEventBus<CreateUserEto> eventBus,
     ILogger<AuthorizeService> logger,
@@ -32,10 +32,10 @@ public  class AuthorizeService(
         var user = await DbContext.Users.FirstOrDefaultAsync(x =>
             x.UserName == input.account || x.Email == input.account);
 
-        if (user == null) 
+        if (user == null)
             throw new Exception("账号不存在");
 
-        if (user.IsDisabled) 
+        if (user.IsDisabled)
             throw new Exception("账号已被禁用");
 
         if (user.Password != StringHelper.HashPassword(input.pass, user.PasswordHas))
@@ -121,7 +121,7 @@ public  class AuthorizeService(
             user.SetResidualCredit(userQuota);
 
             await DbContext.Users.AddAsync(user);
-            
+
             // 发送创建用户事件
             await eventBus.PublishAsync(new CreateUserEto()
             {
@@ -133,7 +133,7 @@ public  class AuthorizeService(
         }
 
         var key = jwtHelper.CreateToken(user);
-        
+
         return new
         {
             token = key,
@@ -209,12 +209,12 @@ public  class AuthorizeService(
                 User = user,
                 Source = CreateUserSource.Gitee
             });
-            
+
             await DbContext.SaveChangesAsync();
         }
 
         var key = jwtHelper.CreateToken(user);
-        
+
         return new
         {
             token = key,
@@ -231,12 +231,35 @@ public  class AuthorizeService(
         var clientId = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorClientId);
         var endipoint = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorEndipoint);
         var clientSecret = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorClientSecret);
-        
-        
+
+        var httpClient = new HttpClient();
+        var client = new CasdoorClient(httpClient, new CasdoorOptions
+        {
+            Endpoint = "https://auth.ai-v1.cn/",
+            OrganizationName = "casbin", // your Casdoor organization
+            ApplicationName = "thor", // your Casdoor application
+            ApplicationType = "native", // webapp, webapi or native
+            ClientId = "a387a4892ee19b1a2249", // your Casdoor application's client ID
+            ClientSecret = "dbf205949d704de81b0b5b3603174e23fbecc354"
+        });
+
+        var parameters = new Dictionary<string, string>
+        {
+            { "grant_type", "authorization_code" },
+            { "client_id", "a387a4892ee19b1a2249" },
+            { "client_secret", "dbf205949d704de81b0b5b3603174e23fbecc354" },
+            { "code", code }
+        };
+        var content = new FormUrlEncodedContent(parameters);
+
+        var response = await httpClient.PostAsync("https://auth.ai-v1.cn/api/login/oauth/access_token");
+
+        var str = await response.Content.ReadAsStringAsync();
+
         return new
         {
             token = "",
             role = ""
         };
-    } 
+    }
 }
