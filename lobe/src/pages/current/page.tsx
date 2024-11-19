@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { info, update, updatePassword } from '../../services/UserService';
-import { message, Avatar, Input, Button, Tabs } from 'antd';
+import { info,  updatePassword } from '../../services/UserService';
+import { message,  Input, Button, Tabs } from 'antd';
 import Pay from '../../components/pay';
 
 export default function ProfileForm() {
@@ -18,20 +18,6 @@ export default function ProfileForm() {
   useEffect(() => {
     loadUser();
   }, []);
-
-  /**
-   * 提交修改
-   */
-  const handleSubmit = () => {
-    update(user)
-      .then((res) => {
-        res.success ? message.success({
-          content: '修改成功',
-        }) : message.error({
-          content: '修改失败',
-        });
-      });
-  };
 
   /**
    * 修改密码
