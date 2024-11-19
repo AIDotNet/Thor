@@ -128,7 +128,7 @@ try
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-        
+
         if (dbType.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) ||
             dbType.Equals("pgsql", StringComparison.OrdinalIgnoreCase))
         {
@@ -157,7 +157,7 @@ try
     }));
 
     builder.Services.AddResponseCompression();
-    
+
     builder.AddServiceDefaults();
 
     builder.Services.AddWebSockets(options =>
@@ -252,6 +252,14 @@ try
         .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Github login")
+        .WithTags("Authorize")
+        .WithOpenApi();
+
+    app.MapPost("/api/v1/authorize/casdoor", async (AuthorizeService service, string code) =>
+            await service.CasdoorAsync(code))
+        .WithGroupName("Token")
+        .AddEndpointFilter<ResultFilter>()
+        .WithDescription("Casdoor login")
         .WithTags("Authorize")
         .WithOpenApi();
 

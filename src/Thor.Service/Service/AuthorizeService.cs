@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using Casdoor.Client;
 using Thor.BuildingBlocks.Event;
 using Thor.Service.Eto;
 
@@ -220,4 +221,22 @@ public  class AuthorizeService(
             role = user.Role
         };
     }
+
+    public async Task<object> CasdoorAsync(string code)
+    {
+        var enable = SettingService.GetBoolSetting(SettingExtensions.SystemSetting.EnableCasdoorAuth);
+
+        if (!enable) throw new Exception("Casdoor 没有启用");
+
+        var clientId = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorClientId);
+        var endipoint = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorEndipoint);
+        var clientSecret = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorClientSecret);
+        
+        
+        return new
+        {
+            token = "",
+            role = ""
+        };
+    } 
 }
