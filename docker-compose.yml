@@ -1,8 +1,8 @@
 ﻿version: '3.8'
 
 services:
-  ai-dotnet-api-service:
-    image: hejiale010426/thor:latest
+  thor:
+    image: aidotnet/thor:latest
     ports:
       - 18080:8080
     build:

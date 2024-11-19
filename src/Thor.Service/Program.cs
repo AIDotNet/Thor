@@ -405,7 +405,7 @@ try
         });
 
     user.MapGet("info", async (UserService service) =>
-            await service.GetAsync())
+            await service.GetAsync(isMemory:false))
         .RequireAuthorization();
 
 
