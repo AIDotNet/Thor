@@ -176,6 +176,26 @@ public static class SettingExtensions
         /// 启用邮箱验证注册
         /// </summary>
         public const string EnableEmailRegister = Default + ":EnableEmailRegister";
+
+        /// <summary>
+        /// 启用Casdoor授权
+        /// </summary>
+        public const string EnableCasdoorAuth = Default + ":EnableCasdoorAuth";
+        
+        /// <summary>
+        /// Casdoor 自定义端点
+        /// </summary>
+        public const string CasdoorEndipoint = Default + ":CasdoorEndipoint";
+
+        /// <summary>
+        /// Casdoor Client Id
+        /// </summary>
+        public const string CasdoorClientId = Default + ":CasdoorClientId";
+
+        /// <summary>
+        /// Casdoor Client Secret
+        /// </summary>
+        public const string CasdoorClientSecret = Default + ":CasdoorClientSecret";
     }
 
     /// <summary>
@@ -365,7 +385,7 @@ public static class SettingExtensions
             Value = "true",
             Description = "启用账号注册"
         });
-        
+
         settings.Add(new Setting
         {
             Key = SystemSetting.EnableGithubLogin,
@@ -450,6 +470,38 @@ public static class SettingExtensions
             Value = "false",
             Description = "启用邮箱验证注册",
             Private = false,
+        });
+
+        settings.Add(new Setting()
+        {
+            Key = SystemSetting.EnableCasdoorAuth,
+            Value = "false",
+            Description = "启用Casdoor 授权",
+            Private = true
+        });
+
+        settings.Add(new Setting()
+        {
+            Key = SystemSetting.CasdoorEndipoint,
+            Value = "",
+            Description = "Casdoor 自定义端点",
+            Private = true
+        });
+        
+        settings.Add(new Setting()
+        {
+            Key = SystemSetting.CasdoorClientId,
+            Value = "",
+            Description = "Casdoor Client Id",
+            Private = true
+        });
+
+        settings.Add(new Setting()
+        {
+            Key = SystemSetting.CasdoorClientSecret,
+            Value = "",
+            Description = "Casdoor Client Secret",
+            Private = false
         });
 
         #endregion

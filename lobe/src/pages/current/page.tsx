@@ -70,39 +70,6 @@ export default function ProfileForm() {
             </div>
           },
           {
-            key: '2',
-            label: '修改个人信息',
-            children: <div style={{
-              padding: '0 24px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}>
-              <Avatar style={{
-                marginTop: 8
-              }} src={(!user.avatar || user.avatar === '') ? "/logo.png" : user.avatar} />
-              <Input placeholder={'输入您的头像地址'} style={{
-                marginTop: 8
-              }} value={user.avatar} onChange={value => setUser({
-                ...user,
-                avatar: value
-              })} >
-              </Input>
-              <Input placeholder={'输入您的新的邮箱地址'} style={{
-                marginTop: 8
-              }} value={user.email} onChange={value => setUser({
-                ...user,
-                email: value
-              })} >
-              </Input>
-              <Button style={{
-                marginTop: 8
-              }} onClick={() => handleSubmit()} block type="primary" htmlType="submit">
-                保存修改
-              </Button>
-            </div>
-          },
-          {
             key: '3',
             label: '修改登录密码',
             children: <div style={{

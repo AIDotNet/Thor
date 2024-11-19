@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { message, Button } from "antd";
-import { getGiteeToken, getGithubToken } from "../../services/AuthorizeService";
+import { getCasdoorToken, getGiteeToken, getGithubToken } from "../../services/AuthorizeService";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Logo } from "@lobehub/ui";
 
@@ -76,12 +76,46 @@ export default function Auth() {
             });
     }
 
+    function Casdoor(code:string){
+        
+        setLoading(true);
+        getCasdoorToken(code)
+            .then((res) => {
+                if (res.success) {
+                    localStorage.setItem('token', res.data.token);
+                    localStorage.setItem('role', res.data.role);
+
+                    message.success({
+                        content: "请记住默认密码为Aa123456",
+                        duration: 5
+                    });
+
+                    setTimeout(() => {
+                        navigate('/panel');
+                    }, 800);
+                } else {
+                    message.error({
+                        content: res.message
+                    } as any);
+                    setLoading(false);
+                }
+            }).catch((error) => {
+                message.error({
+                    content: error.message
+                });
+            }).finally(() => {
+                setLoading(false);
+            });
+    }
+
     useEffect(() => {
         if (code) {
             if (location.pathname === "/auth") {
                 GithubToken(code);
             } else if (location.pathname === "/auth/gitee") {
                 GiteeToken(code);
+            }else if (location.pathname === "/auth/casdoor") {
+                Casdoor(code);
             }
         }
     }, []);
