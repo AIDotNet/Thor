@@ -1,5 +1,3 @@
-import { config } from "../config";
-
 export async function fetch(url: string, options: any) {
   const token = localStorage.getItem("token");
   const headers = {

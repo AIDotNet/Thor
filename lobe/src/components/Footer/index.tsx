@@ -7,6 +7,15 @@ import {
 export default function ThorFooter() {
     return (
         <Footer
+            bottom={
+                <div>
+                    <p>© {new Date().getFullYear()} AIDotNet. All rights reserved.
+                    </p>
+                    <p>
+                        Powered by .NET 9
+                    </p>
+                </div>
+            }
             columns={[
                 {
                     title: '关于我们',
