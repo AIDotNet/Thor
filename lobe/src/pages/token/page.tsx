@@ -3,7 +3,7 @@ import styled from "styled-components"
 import { disable, getTokens, Remove } from '../../services/TokenService'
 import { Switch, Dropdown, message, Button, Table } from 'antd'
 import { renderQuota } from "../../utils/render";
-import { Input } from "@lobehub/ui";
+import { Input, Tag } from "@lobehub/ui";
 import CreateToken from "./features/CreateToken";
 import UpdateToken from "./features/UpdateToken";
 
@@ -95,7 +95,17 @@ export default function TokenPage() {
             menu={{
               items: [
                 {
-                  key: 1,
+                  key: 'lobeChat',
+                  label: <Tag>绑定LobeChat</Tag>,
+                  onClick: () => bingLobeChat(item.key)
+                },
+                {
+                  key: 'ChatNext',
+                  label: <Tag>绑定ChatNext</Tag>,
+                  onClick: () => bingChatNext(item.key)
+                },
+                {
+                  key: 'edit',
                   label: '编辑',
                   onClick: () => {
                     setUpdateTokenVisible(true);
@@ -103,12 +113,12 @@ export default function TokenPage() {
                   }
                 },
                 {
-                  key: 2,
+                  key: 'copy',
                   label: '复制Key',
                   onClick: () => copyKey(item.key)
                 },
                 {
-                  key: 3,
+                  key: 'disable',
                   label: item.disabled ? '启用' : '禁用',
                   onClick: () => {
                     disable(item.id).then((item) => {
@@ -125,7 +135,7 @@ export default function TokenPage() {
                   }
                 },
                 {
-                  key: 4,
+                  key: 'show',
                   label: '查看',
                   onClick: () => {
                     message.info({
@@ -134,7 +144,7 @@ export default function TokenPage() {
                   }
                 },
                 {
-                  key: 5,
+                  key: 'delete',
                   label: '删除',
                   onClick: () => removeToken(item.id)
                 }
@@ -167,9 +177,29 @@ export default function TokenPage() {
       })
     }).catch(() => {
       message.error({
-        content: '复制失败',
+        content: '复制失败 token:' + key,
       })
     });
+  }
+
+  function bingLobeChat(token: string) {
+    const json = JSON.stringify({
+      keyVaults: {
+        openai: {
+          apiKey: token,
+          baseURL: window.location.origin + '/v1',
+        }
+      }
+    });
+    window.open(`https://lobe-chat.ai-v1.cn?settings=${json}`);
+  }
+
+  function bingChatNext(token: string) {
+    const json = JSON.stringify({
+      key: token,
+      url: window.location.origin
+    });
+    window.open(`https://chat-next.ai-v1.cn/#/?settings=${json}`);
   }
 
   function removeToken(id: string) {
@@ -263,13 +293,13 @@ export default function TokenPage() {
       <Table style={{
         marginTop: '1rem',
       }}
-        scroll={{ 
+        scroll={{
           x: 800,
           y: 500
         }}
         columns={columns}
         dataSource={data}
-        rowKey={row=>row.id}
+        rowKey={row => row.id}
         rowSelection={rowSelection}
         pagination={{
           total: total,
