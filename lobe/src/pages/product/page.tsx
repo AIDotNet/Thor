@@ -14,6 +14,7 @@ export default function ProductPage() {
   const columns = [
     {
       title: '名称',
+      fixed: 'left',
       dataIndex: 'name',
     },
     {
@@ -38,6 +39,7 @@ export default function ProductPage() {
     {
       title: '操作',
       dataIndex: 'operate',
+      fixed: 'right',
       render: (_v: any, item: any) => {
         return <>
           <Dropdown
@@ -115,7 +117,12 @@ export default function ProductPage() {
       </Header>
       <Table style={{
         marginTop: '1rem',
-      }} columns={columns} dataSource={data} />
+      }} columns={columns as any}
+      scroll={{
+        x: 'max-content',
+        y: 'calc(100vh - 350px)',
+      }}
+      dataSource={data} />
       <CreateProduct visible={createVisible} onCancel={() => setCreateVisible(false)} onSuccess={() => {
         setCreateVisible(false);
         loadingData();
