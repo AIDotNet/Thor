@@ -24,7 +24,7 @@ public class MetaGLMTextEmbeddingService : IThorTextEmbeddingService
     {
         var embeddingRequestBase = new EmbeddingRequestBase();
         embeddingRequestBase.SetModel(createEmbeddingModel.Model);
-        embeddingRequestBase.SetInput(createEmbeddingModel.Input);
+        embeddingRequestBase.SetInput(createEmbeddingModel.InputCalculated);
         var response = _openAiOptions.Client!.Embeddings.Process(embeddingRequestBase, options.ApiKey);
         var embeddingCreateResponse = new EmbeddingCreateResponse
         {
