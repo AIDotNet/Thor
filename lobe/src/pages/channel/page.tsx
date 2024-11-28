@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { Input } from "@lobehub/ui";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
-import { getTypes} from "../../services/ModelService";
+import { getTypes } from "../../services/ModelService";
 
 const Header = styled.header`
 
@@ -17,9 +17,11 @@ export default function ChannelPage() {
     {
       title: '名称',
       dataIndex: 'name',
+      fixed: 'left',
     },
     {
       title: '是否禁用',
+      width: '100px',
       dataIndex: 'disable',
       render: (value: any, item: any) => {
         return <Switch
@@ -52,6 +54,7 @@ export default function ChannelPage() {
     },
     {
       title: '自动检测',
+      width: '100px',
       dataIndex: 'controlAutomatically',
       render: (value: any, item: any) => {
         return <Switch
@@ -80,6 +83,7 @@ export default function ChannelPage() {
       }
     },
     {
+      width: '100px',
       title: '平台类型',
       dataIndex: 'typeName',
       render: (value: any) => {
@@ -88,6 +92,7 @@ export default function ChannelPage() {
     },
     {
       title: '响应时间',
+      width: '100px',
       dataIndex: 'responseTime',
       render: (value: any, item: any) => {
         if (value) {
@@ -110,6 +115,7 @@ export default function ChannelPage() {
     },
     {
       title: '创建时间',
+      width: '150px',
       dataIndex: 'createdAt',
     },
     {
@@ -128,6 +134,7 @@ export default function ChannelPage() {
     },
     {
       title: '渠道权重',
+      
       dataIndex: 'order',
       render: (value: any, item: any) => {
         return <InputNumber
@@ -161,6 +168,7 @@ export default function ChannelPage() {
     },
     {
       title: '操作',
+      fixed: 'right',
       dataIndex: 'operate',
       render: (_v: any, item: any) => {
         return <>
@@ -270,25 +278,25 @@ export default function ChannelPage() {
         if (v.success) {
           const values = v.data.items as any[];
           getTypes()
-          .then(res => {
+            .then(res => {
               if (res.success) {
-                  const entries = Object.entries(res.data);
-                  values.forEach(x=>{
-                    for (const [key, value] of entries) {
-                      if(value==x.type){
-                        x.typeName=key;
-                        break;
-                      }
+                const entries = Object.entries(res.data);
+                values.forEach(x => {
+                  for (const [key, value] of entries) {
+                    if (value == x.type) {
+                      x.typeName = key;
+                      break;
                     }
-                  })
-                  setData([...values]);
-                  setTotal(v.data.total);
+                  }
+                })
+                setData([...values]);
+                setTotal(v.data.total);
               } else {
-                  message.error({
-                      content: res.message
-                  });
+                message.error({
+                  content: res.message
+                });
               }
-          })
+            })
         } else {
           message.error({
             content: v.message,
@@ -303,11 +311,8 @@ export default function ChannelPage() {
 
 
   return (
-    <div style={{
-      margin: '20px',
-      height: '100%',
-      width: '100%',
-    }}>
+    <>
+
       <Header>
         <span style={{
           fontSize: '1.5rem',
@@ -350,13 +355,13 @@ export default function ChannelPage() {
         style={{
           marginTop: '1rem',
         }}
-        columns={columns}
+        columns={columns as any}
         dataSource={data}
         scroll={{
-          y: 800,
-          x: 800,
+          y: 'calc(100vh - 350px)',
+          x: 'max-content'
         }}
-        rowKey={row=>row.id}
+        rowKey={row => row.id}
         pagination={{
           total: total,
           pageSize: input.pageSize,
@@ -386,6 +391,6 @@ export default function ChannelPage() {
         setUpdateVisible(false);
         setUpdateValue({} as any);
       }} />
-    </div>
+    </>
   );
 }

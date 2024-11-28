@@ -16,6 +16,7 @@ export default function TokenPage() {
     {
       title: '名称',
       dataIndex: 'name',
+      fixed: 'left',
     },
     {
       title: '是否禁用',
@@ -89,6 +90,7 @@ export default function TokenPage() {
     {
       title: '操作',
       dataIndex: 'operate',
+      fixed: 'right',
       render: (_v: any, item: any) => {
         return <>
           <Dropdown
@@ -171,15 +173,22 @@ export default function TokenPage() {
   });
 
   function copyKey(key: string) {
-    navigator.clipboard.writeText(key).then(() => {
-      message.success({
-        content: '复制成功',
-      })
-    }).catch(() => {
+    try {
+
+      navigator.clipboard.writeText(key).then(() => {
+        message.success({
+          content: '复制成功',
+        })
+      }).catch(() => {
+        message.error({
+          content: '复制失败 token:' + key,
+        })
+      });
+    } catch (e) {
       message.error({
         content: '复制失败 token:' + key,
       })
-    });
+    }
   }
 
   function bingLobeChat(token: string) {
@@ -237,7 +246,6 @@ export default function TokenPage() {
 
   return (
     <div style={{
-      margin: '10px',
       height: '80vh',
       overflow: 'auto',
       width: '100%',
@@ -294,12 +302,12 @@ export default function TokenPage() {
         marginTop: '1rem',
       }}
         scroll={{
-          x: 800,
-          y: 500
+          x: 'max-content',
+          y: 'calc(100vh - 350px)',
         }}
-        columns={columns}
+        columns={columns as any[]}
         dataSource={data}
-        rowKey={row => row.id}
+        rowKey={(row:any) => row.id}
         rowSelection={rowSelection}
         pagination={{
           total: total,
