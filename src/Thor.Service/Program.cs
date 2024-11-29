@@ -665,7 +665,6 @@ try
 
     app.MapGet("/v1/models", async (HttpContext context) => { return await ModelService.GetAsync(context); })
         .WithDescription("获取模型列表")
-        .RequireAuthorization()
         .WithOpenApi();
 
     app.Map("/v1/realtime", (applicationBuilder =>
