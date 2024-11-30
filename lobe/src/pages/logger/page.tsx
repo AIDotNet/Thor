@@ -11,8 +11,9 @@ import {
   Card,
 } from "antd";
 import { getLoggers, viewConsumption } from "../../services/LoggerService";
-import { Tag } from "@lobehub/ui";
+import { Tag, Tooltip } from "@lobehub/ui";
 import { renderQuota } from "../../utils/render";
+import dayjs from "dayjs";
 
 const Header = styled.header``;
 
@@ -27,9 +28,17 @@ export default function LoggerPage() {
     pageSize: 10,
     type: -1 | 1 | 2 | 3,
     model: "",
-    startTime: "",
-    endTime: "",
+    startTime: null,
+    endTime: null,
     keyword: "",
+  } as {
+    page: number;
+    pageSize: number;
+    type: -1 | 1 | 2 | 3;
+    model: string;
+    startTime: string | null;
+    endTime: string | null;
+    keyword: string;
   });
 
   function timeString(totalTime: number) {
@@ -43,9 +52,20 @@ export default function LoggerPage() {
   const columns = [
     {
       title: "时间",
+      fixed: "left",
       dataIndex: "createdAt",
       key: "createdAt",
       width: "180px",
+    },
+    {
+      title: "消费",
+      dataIndex: "quota",
+      fixed: "left",
+      key: "quota",
+      width: "120px",
+      render: (value: any) => {
+        return value && <Tag color="green">{renderQuota(value, 6)}</Tag>;
+      },
     },
     {
       disable: !(localStorage.getItem("role") === "admin"),
@@ -135,15 +155,6 @@ export default function LoggerPage() {
       width: "120px",
     },
     {
-      title: "额度",
-      dataIndex: "quota",
-      key: "quota",
-      width: "120px",
-      render: (value: any) => {
-        return value && <Tag color="green">{renderQuota(value, 6)}</Tag>;
-      },
-    },
-    {
       title: "详情",
       dataIndex: "content",
       key: "content",
@@ -152,8 +163,14 @@ export default function LoggerPage() {
     {
       title: "客户端信息",
       dataIndex: "userAgent",
-      width: "380px",
       key: "userAgent",
+      render: (value: any) => {
+        // 如果value超过10个字符，就截取前10个字符
+        if (value && value.length > 10) {
+          return <Tooltip title={value}>{value.slice(0, 10)}...</Tooltip>;
+        }
+        return <Tooltip title={value}>{value}</Tooltip>;
+      }
     },
   ];
 
@@ -197,12 +214,11 @@ export default function LoggerPage() {
     loadData();
   }, [input.page, input.pageSize]);
 
+
   return (
     <div
       style={{
         margin: "10px",
-        height: "80vh",
-        overflow: "auto",
         width: "100%",
       }}
     >
@@ -318,28 +334,12 @@ export default function LoggerPage() {
           }}
           placeholder="关键字"
         />
-
         <DatePicker
-          value={input.startTime}
+          value={input.endTime ? dayjs(input.endTime) : null}
           onChange={(e: any) => {
             setInput({
               ...input,
-              startTime: e,
-            });
-          }}
-          style={{
-            marginRight: "0.5rem",
-            width: "10rem",
-            float: "right",
-          }}
-          placeholder="开始时间"
-        />
-        <DatePicker
-          value={input.endTime}
-          onChange={(e: any) => {
-            setInput({
-              ...input,
-              endTime: e,
+              endTime: e.format("YYYY-MM-DD HH:mm:ss"),
             });
           }}
           style={{
@@ -349,11 +349,26 @@ export default function LoggerPage() {
           }}
           placeholder="结束时间"
         />
+        <DatePicker
+          value={input.startTime?dayjs(input.startTime):null}
+          onChange={(e: any) => {
+            setInput({
+              ...input,
+              startTime: e.format("YYYY-MM-DD HH:mm:ss"),
+            });
+          }}
+          style={{
+            marginRight: "0.5rem",
+            width: "10rem",
+            float: "right",
+          }}
+          placeholder="开始时间"
+        />
       </Header>
       <Table
         scroll={{
-          y: 800,
-          x: 1800,
+          x: "max-content",
+          y: "calc(100vh - 350px)",
         }}
         loading={loading}
         style={{
@@ -361,7 +376,7 @@ export default function LoggerPage() {
         }}
         columns={columns.filter(
           (item) => item.disable == false || item.disable == undefined
-        )}
+        ) as any}
         dataSource={data}
         pagination={{
           total: total,

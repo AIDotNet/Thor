@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Card, Collapse, Form, Input, Switch, notification } from 'antd';
+import { Button, Card, Collapse, Divider, Form, Input, Switch, notification } from 'antd';
 import { SystemSetting, UpdateSetting } from '../../../services/SettingService';
 
 interface SystemSetupProps {
@@ -78,6 +78,7 @@ export default function SystemSetup({
                                 onChange={(checked) => handleInputChange(SystemSetting.EnableRegister, checked ? 'true' : 'false')}
                             />
                         </Form.Item>
+                        <Divider>如果允许Github登录，请填写以下信息</Divider>
                         <Form.Item
                             label='允许Github登录'
                             valuePropName="checked"
@@ -105,6 +106,7 @@ export default function SystemSetup({
                                 placeholder='请输入Github Client Secret'
                             />
                         </Form.Item>
+                        <Divider>如果允许Gitee登录，请填写以下信息</Divider>
                         <Form.Item
                             label='允许Gitee登录'
                             valuePropName="checked"
@@ -132,6 +134,7 @@ export default function SystemSetup({
                                 placeholder='请输入Gitee Client Secret'
                             />
                         </Form.Item>
+                        <Divider>如果启用邮箱注册验证，请填写以下信息</Divider>
                         <Form.Item
                             label='是否启用邮箱注册验证'
                             valuePropName="checked"
@@ -166,6 +169,45 @@ export default function SystemSetup({
                                 value={input[SystemSetting.SmtpAddress]}
                                 onChange={(e) => handleInputChange(SystemSetting.SmtpAddress, e.target.value)}
                                 placeholder='SMTP地址'
+                            />
+                        </Form.Item>
+
+                        <Divider>如果启用Casdoor授权，请填写以下信息</Divider>
+                        
+                        <Form.Item
+                            label='是否启用Casdoor授权'
+                            valuePropName="checked"
+                        >
+                            <Switch
+                                checked={input[SystemSetting.EnableCasdoorAuth] === 'true'}
+                                onChange={(checked) => handleInputChange(SystemSetting.EnableCasdoorAuth, checked ? 'true' : 'false')}
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='Casdoor 自定义端点'
+                        >
+                            <Input
+                                value={input[SystemSetting.CasdoorEndipoint]}
+                                onChange={(e) => handleInputChange(SystemSetting.CasdoorEndipoint, e.target.value)}
+                                placeholder='请输入Casdoor 自定义端点'
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='Casdoor Client Id'
+                        >
+                            <Input
+                                value={input[SystemSetting.CasdoorClientId]}
+                                onChange={(e) => handleInputChange(SystemSetting.CasdoorClientId, e.target.value)}
+                                placeholder='请输入Casdoor Client Id'
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            label='Casdoor Client Secret'
+                        >
+                            <Input
+                                value={input[SystemSetting.CasdoorClientSecret]}
+                                onChange={(e) => handleInputChange(SystemSetting.CasdoorClientSecret, e.target.value)}
+                                placeholder='Casdoor Client Secret'
                             />
                         </Form.Item>
                     </Collapse.Panel>

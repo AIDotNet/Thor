@@ -1,10 +1,12 @@
 ﻿using System.Net.Http.Headers;
-using Thor.BuildingBlocks.Data;
+using Casdoor.Client;
+using Thor.Abstractions.Dtos;
+using Thor.BuildingBlocks.Event;
 using Thor.Service.Eto;
 
 namespace Thor.Service.Service;
 
-public  class AuthorizeService(
+public class AuthorizeService(
     IServiceProvider serviceProvider,
     IEventBus<CreateUserEto> eventBus,
     ILogger<AuthorizeService> logger,
@@ -31,10 +33,10 @@ public  class AuthorizeService(
         var user = await DbContext.Users.FirstOrDefaultAsync(x =>
             x.UserName == input.account || x.Email == input.account);
 
-        if (user == null) 
+        if (user == null)
             throw new Exception("账号不存在");
 
-        if (user.IsDisabled) 
+        if (user.IsDisabled)
             throw new Exception("账号已被禁用");
 
         if (user.Password != StringHelper.HashPassword(input.pass, user.PasswordHas))
@@ -120,7 +122,7 @@ public  class AuthorizeService(
             user.SetResidualCredit(userQuota);
 
             await DbContext.Users.AddAsync(user);
-            
+
             // 发送创建用户事件
             await eventBus.PublishAsync(new CreateUserEto()
             {
@@ -132,7 +134,7 @@ public  class AuthorizeService(
         }
 
         var key = jwtHelper.CreateToken(user);
-        
+
         return new
         {
             token = key,
@@ -208,16 +210,102 @@ public  class AuthorizeService(
                 User = user,
                 Source = CreateUserSource.Gitee
             });
-            
+
             await DbContext.SaveChangesAsync();
         }
 
         var key = jwtHelper.CreateToken(user);
-        
+
         return new
         {
             token = key,
             role = user.Role
+        };
+    }
+
+    public async Task<object> CasdoorAsync(string code)
+    {
+        var enable = SettingService.GetBoolSetting(SettingExtensions.SystemSetting.EnableCasdoorAuth);
+
+        if (!enable) throw new Exception("Casdoor 没有启用");
+
+        var clientId = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorClientId);
+        var endipoint = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorEndipoint);
+        var clientSecret = SettingService.GetSetting(SettingExtensions.SystemSetting.CasdoorClientSecret);
+
+
+        var parameters = new Dictionary<string, string>
+        {
+            { "grant_type", "authorization_code" },
+            { "client_id", clientId },
+            { "client_secret", clientSecret },
+            { "code", code }
+        };
+        var content = new FormUrlEncodedContent(parameters);
+
+        var url = $"{endipoint.TrimEnd('/')}/api/login/oauth/access_token";
+
+        var response = await HttpClient.PostAsync(url, content);
+
+        var str = await response.Content.ReadFromJsonAsync<GitTokenDto>();
+
+        if (str is null)
+        {
+            logger.LogError("Casdoor授权失败");
+            throw new Exception("Casdoor授权失败");
+        }
+
+        var casdoorUser =
+            await HttpClient.GetFromJsonAsync<CasdoorUserDto>($"{endipoint.TrimEnd('/')}/api/get-account?accessToken=" +
+                                                              str.access_token);
+
+        if (casdoorUser is null)
+        {
+            logger.LogError("Casdoor授权失败");
+            throw new Exception("Casdoor授权失败");
+        }
+
+
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == casdoorUser.Data.id);
+
+        if (user is null)
+        {
+            user = new User(casdoorUser.Data.id, casdoorUser.Data.id,
+                casdoorUser.Data.id + "@token-ai.cn",
+                Guid.NewGuid().ToString("N"));
+            user.SetUser();
+
+            user.SetPassword("Aa123456");
+
+            await DbContext.Users.AddAsync(user);
+
+            // 初始用户额度
+            var userQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.NewUserQuota);
+            user.SetResidualCredit(userQuota);
+
+            await DbContext.Users.AddAsync(user);
+
+            await eventBus.PublishAsync(new CreateUserEto()
+            {
+                User = user,
+                Source = CreateUserSource.Gitee
+            });
+
+            await DbContext.SaveChangesAsync();
+        }
+
+        var key = jwtHelper.CreateToken(user);
+
+        return new
+        {
+            token = key,
+            role = user.Role
+        };
+
+        return new
+        {
+            token = "",
+            role = ""
         };
     }
 }

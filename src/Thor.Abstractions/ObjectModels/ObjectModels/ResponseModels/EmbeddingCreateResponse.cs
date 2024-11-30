@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Thor.Abstractions.Dtos;
 
@@ -52,14 +53,35 @@ public record EmbeddingCreateResponse : ThorBaseResponse
                         if (str.ValueKind == JsonValueKind.Array)
                         {
                             var floats = str.EnumerateArray().Select(element => element.GetSingle()).ToArray();
-                            
+
                             embeddingResponse.Embedding = ConvertFloatArrayToBase64(floats);
                         }
+                    }
+                    else if (embeddingResponse.Embedding is IList<double> doubles)
+                    {
+                        embeddingResponse.Embedding = ConvertFloatArrayToBase64(doubles.ToArray());
                     }
                 }
 
                 break;
             }
+        }
+    }
+
+    public static string ConvertFloatArrayToBase64(double[] floatArray)
+    {
+        // 将 float[] 转换成 byte[]
+        byte[] byteArray = ArrayPool<byte>.Shared.Rent(floatArray.Length * sizeof(float));
+        try
+        {
+            Buffer.BlockCopy(floatArray, 0, byteArray, 0, byteArray.Length);
+
+            // 将 byte[] 转换成 base64 字符串
+            return Convert.ToBase64String(byteArray);
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(byteArray);
         }
     }
 

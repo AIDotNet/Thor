@@ -208,6 +208,35 @@ class SystemSetting {
      */
     static readonly EnableEmailRegister: string = SystemSetting.Default + ":EnableEmailRegister";
 
+    
+    /**
+     * Casdoor Client Id
+     * @type {string}
+     */
+    static readonly CasdoorClientId: string = SystemSetting.Default + ":CasdoorClientId";
+
+    
+    /**
+     * 启用Casdoor授权
+     * @type {string}
+     */
+    static readonly EnableCasdoorAuth: string = SystemSetting.Default + ":EnableCasdoorAuth";
+
+    
+    /**
+     * Casdoor 自定义端点
+     * @type {string}
+     */
+    static readonly CasdoorEndipoint: string = SystemSetting.Default + ":CasdoorEndipoint";
+
+    
+    /**
+     * Casdoor Client Secret
+     * @type {string}
+     */
+    static readonly CasdoorClientSecret: string = SystemSetting.Default + ":CasdoorClientSecret";
+
+    
 }
 
 /**

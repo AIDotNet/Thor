@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using Thor.BuildingBlocks.Data;
+using Thor.BuildingBlocks.Event;
 using Thor.Service.Model;
 using Thor.Service.Options;
 

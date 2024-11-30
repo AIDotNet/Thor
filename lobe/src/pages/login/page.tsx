@@ -8,6 +8,7 @@ import { InitSetting, SystemSetting } from '../../services/SettingService';
 import { useNavigate } from 'react-router-dom';
 import Divider from '@lobehub/ui/es/Form/components/FormDivider';
 import Gitee from '../../components/Icon/Gitee';
+import Casdoor from '../../components/Icon/Casdoor';
 
 const FunctionTools = styled.div`
     display: flex;
@@ -33,6 +34,7 @@ const Login = memo(() => {
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
+    const enableCasdoorAuth = InitSetting.find(s => s.key === SystemSetting.EnableCasdoorAuth)?.value;
 
     function handleGithub() {
 
@@ -113,7 +115,33 @@ const Login = memo(() => {
 
         // 跳转 Gitee 授权页面
         window.location.href = `https://gitee.com/oauth/authorize?client_id=${clientId}&redirect_uri=${location.origin}/auth/gitee&response_type=code`;
+    }
 
+    function handleCasdoorAuth(){
+        let casdoorEndipoint = InitSetting.find(s => s.key === SystemSetting.CasdoorEndipoint)?.value as string;
+        
+        if (!casdoorEndipoint) {
+            message.error({
+                content: '请联系管理员配置 Casdoor Endipoint',
+            });
+            return;
+        }
+
+        var casdoorClientId = InitSetting.find(s => s.key === SystemSetting.CasdoorClientId)?.value;
+
+        if (!casdoorClientId) {
+            message.error({
+                content: '请联系管理员配置 Casdoor ClientId',
+            });
+            return;
+        }
+
+        // 删除casdoorEndipoint最后的斜杠
+        if (casdoorEndipoint[casdoorEndipoint.length - 1] === '/') {
+            casdoorEndipoint = casdoorEndipoint.slice(0, -1);
+        }
+
+        window.location.href = `${casdoorEndipoint}/login/oauth/authorize?client_id=${casdoorClientId}&redirect_uri=${location.origin}/auth/casdoor&response_type=code&scope=open email profile`;
     }
 
     return (
@@ -209,6 +237,11 @@ const Login = memo(() => {
                     <Tooltip title="Gitee 登录">
                         <Button onClick={() => { handlerGitee() }} size='large' icon={<Gitee />} />
                     </Tooltip>
+                    {
+                        enableCasdoorAuth && <Tooltip title="Casdoor 登录">
+                            <Button onClick={() => { handleCasdoorAuth() }} size='large' icon={<Casdoor />} />
+                        </Tooltip>
+                    }
                 </div>
             </div>
         </GridShowcase>

@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Thor.BuildingBlocks.Data;
+using Thor.BuildingBlocks.Event;
 
 namespace Thor.LocalEvent;
 

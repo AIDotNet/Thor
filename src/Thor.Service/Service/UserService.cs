@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Thor.BuildingBlocks.Data;
+using Thor.BuildingBlocks.Event;
 using Thor.Service.Eto;
 using Thor.Service.Options;
 
@@ -82,28 +82,13 @@ public partial class UserService(
         await emailService.SendEmailAsync(email, "注册账号验证码", $"欢迎您注册Thor（雷神托尔），您的验证码是：{code}").ConfigureAwait(false);
     }
 
-    public async ValueTask<User?> GetAsync(string? id = null, bool isMemory = true)
+    public async Task<User?> GetAsync(string? id = null)
     {
         User? user;
 
-        if (isMemory)
-        {
-            user = await memoryCache.GetOrCreateAsync("User:" + (id ?? UserContext.CurrentUserId), async () =>
-            {
-                var info = await DbContext.Users
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
-
-                return info;
-            });
-        }
-        else
-        {
-            user = await DbContext.Users
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
-        }
-
+        user = await DbContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
         if (user == null)
             throw new UnauthorizedAccessException();
 

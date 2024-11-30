@@ -24,7 +24,7 @@ public sealed class TokenService(
 
         token.Id = Guid.NewGuid().ToString("N");
 
-        token.Key = "sk-" + StringHelper.GenerateRandomString(38);
+        token.Key = "sk-" + StringHelper.GenerateRandomString(50);
 
         await DbContext.Tokens.AddAsync(token);
     }
@@ -146,7 +146,7 @@ public sealed class TokenService(
                     throw new UnauthorizedAccessException();
                 }
 
-                user = await userService.GetAsync(userDto.Id, false).ConfigureAwait(false);
+                user = await userService.GetAsync(userDto.Id).ConfigureAwait(false);
                 token = null;
             }
             catch (Exception e)
@@ -183,7 +183,7 @@ public sealed class TokenService(
                 throw new InsufficientQuotaException("当前 Token 额度不足，请充值 Token 额度");
             }
 
-            user = await userService.GetAsync(token.Creator, false).ConfigureAwait(false);
+            user = await userService.GetAsync(token.Creator).ConfigureAwait(false);
         }
 
         if (user == null)

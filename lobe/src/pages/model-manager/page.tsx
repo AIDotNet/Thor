@@ -38,7 +38,8 @@ export default function ModelManager() {
     }, [input]);
 
     return (
-        <div>
+        <>
+
             <Header
                 nav={'模型倍率管理'}
                 actions={<>
@@ -75,13 +76,14 @@ export default function ModelManager() {
                 loading={loading}
                 dataSource={data}
                 scroll={{
-                    y: 800,
-                    x: 800,
+                    y: 'calc(100vh - 340px)',
+                    x: 'max-content'
                 }}
                 columns={[
                     {
                         key: 'icon',
                         title: '图标',
+                        fixed: 'left',
                         dataIndex: 'icon',
                         width: 60,
                         render: (value: any) => {
@@ -158,6 +160,7 @@ export default function ModelManager() {
                     {
                         key: 'actions',
                         title: '操作',
+                        fixed: 'right',
                         render: (_: any, item: any) => {
                             return (
                                 <Dropdown
@@ -239,6 +242,6 @@ export default function ModelManager() {
                 });
             }} value={updateValue.value} />
 
-        </div>
+        </>
     )
 }

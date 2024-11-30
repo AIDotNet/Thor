@@ -1,8 +1,8 @@
 ﻿version: '3.8'
 
 services:
-  ai-dotnet-api-service:
-    image: registry.token-ai.cn/thor:latest
+  thor:
+    image: aidotnet/thor:latest
     ports:
       - 18080:8080
     build:
@@ -18,8 +18,8 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - DBType=postgresql # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionStrings:ConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet;Username=aidotnet;Password=aidotnet
-      - ConnectionStrings:LoggerConnectionString=Host=ai-postgres;Port=5432;Database=aidotnet-log;Username=aidotnet;Password=aidotnet
+      - ConnectionStrings:DefaultConnection=Host=ai-postgres;Port=5432;Database=aidotnet;Username=aidotnet;Password=aidotnet
+      - ConnectionStrings:LoggerConnection=Host=ai-postgres;Port=5432;Database=aidotnet-log;Username=aidotnet;Password=aidotnet
       - CACHE_TYPE=Redis
       - CACHE_CONNECTION_STRING=ai-redis
       - RabbitMQ:ConnectionString=amqp://admin:admin@ai-rabbitmq:5672

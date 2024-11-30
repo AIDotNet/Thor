@@ -1,5 +1,3 @@
-import { config } from "../config";
-
 export async function fetch(url: string, options: any) {
   const token = localStorage.getItem("token");
   const headers = {
@@ -7,9 +5,6 @@ export async function fetch(url: string, options: any) {
     Authorization: `Bearer ${token}`,
   };
   try {
-    // 拼接baseUrl并且处理/重复问题
-    const baseUrl = config.FAST_API_URL;
-    url = `${baseUrl}${url}`.replace(/([^:]\/)\/+/g, "$1");
     const response = await window.fetch(url, { ...options, headers });
     if (response.status >= 200 && response.status < 300) {
       const data = await response.text();
@@ -54,9 +49,6 @@ export async function fetchRaw(url: string, data: any) {
     "Content-Type": "application/json",
   };
   try {
-    // 拼接baseUrl并且处理/重复问题
-    const baseUrl = config.FAST_API_URL;
-    url = `${baseUrl}${url}`.replace(/([^:]\/)\/+/g, "$1");
     const response = await window.fetch(url, {
       headers,
       method: "POST",

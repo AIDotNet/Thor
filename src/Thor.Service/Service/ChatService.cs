@@ -734,6 +734,7 @@ public sealed class ChatService(
 
         var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
+
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
         if (request.Messages.Any(x => x.Contents != null))
         {
@@ -767,6 +768,7 @@ public sealed class ChatService(
                 }
             }
 
+
             var quota = requestToken * rate;
 
             // 判断请求token数量是否超过额度
@@ -781,8 +783,21 @@ public sealed class ChatService(
 
             await context.Response.WriteAsJsonAsync(result);
 
-            responseToken =
-                TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray());
+            if (result?.Usage?.PromptTokens is not null && result.Usage.PromptTokens > 0)
+            {
+                requestToken = result.Usage.PromptTokens.Value;
+            }
+
+            // 如果存在返回的Usage则使用返回的Usage中的CompletionTokens
+            if (result?.Usage?.CompletionTokens is not null && result.Usage.CompletionTokens > 0)
+            {
+                responseToken = result.Usage.CompletionTokens.Value;
+            }
+            else
+            {
+                responseToken =
+                    TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray());
+            }
         }
         else
         {
@@ -804,6 +819,24 @@ public sealed class ChatService(
             await context.Response.WriteAsJsonAsync(result);
 
             responseToken = TokenHelper.GetTokens(result.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
+        }
+
+        if (request.ResponseFormat?.JsonSchema is not null)
+        {
+            requestToken += TokenHelper.GetTotalTokens(request.ResponseFormat.JsonSchema.Name,
+                request.ResponseFormat.JsonSchema.Description ?? string.Empty,
+                JsonSerializer.Serialize(request.ResponseFormat.JsonSchema.Schema));
+        }
+
+        if (request.Tools != null && request.Tools.Count != 0)
+        {
+            requestToken += TokenHelper.GetTotalTokens(request.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Name))
+                .Select(x => x.Function!.Name).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(request.Tools
+                .Where(x => !string.IsNullOrEmpty(x.Function?.Description))
+                .Select(x => x.Function!.Description!).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(request.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Type))
+                .Select(x => x.Function!.Type!).ToArray());
         }
 
         return (requestToken, responseToken);
@@ -885,6 +918,24 @@ public sealed class ChatService(
 
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+        }
+
+        if (input.ResponseFormat?.JsonSchema is not null)
+        {
+            requestToken += TokenHelper.GetTotalTokens(input.ResponseFormat.JsonSchema.Name,
+                input.ResponseFormat.JsonSchema.Description ?? string.Empty,
+                JsonSerializer.Serialize(input.ResponseFormat.JsonSchema.Schema));
+        }
+
+        if (input.Tools != null && input.Tools.Count != 0)
+        {
+            requestToken += TokenHelper.GetTotalTokens(input.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Name))
+                .Select(x => x.Function!.Name).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(input.Tools
+                .Where(x => !string.IsNullOrEmpty(x.Function?.Description))
+                .Select(x => x.Function!.Description!).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(input.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Type))
+                .Select(x => x.Function!.Type!).ToArray());
         }
 
         var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));

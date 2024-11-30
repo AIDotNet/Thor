@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { info, update, updatePassword } from '../../services/UserService';
-import { message, Avatar, Input, Button, Tabs } from 'antd';
+import { info,  updatePassword } from '../../services/UserService';
+import { message,  Input, Button, Tabs } from 'antd';
 import Pay from '../../components/pay';
 
 export default function ProfileForm() {
@@ -18,20 +18,6 @@ export default function ProfileForm() {
   useEffect(() => {
     loadUser();
   }, []);
-
-  /**
-   * 提交修改
-   */
-  const handleSubmit = () => {
-    update(user)
-      .then((res) => {
-        res.success ? message.success({
-          content: '修改成功',
-        }) : message.error({
-          content: '修改失败',
-        });
-      });
-  };
 
   /**
    * 修改密码
@@ -67,39 +53,6 @@ export default function ProfileForm() {
             label: '账号余额',
             children: <div style={{ padding: '0 24px' }}>
               <Pay user={user} />
-            </div>
-          },
-          {
-            key: '2',
-            label: '修改个人信息',
-            children: <div style={{
-              padding: '0 24px',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center'
-            }}>
-              <Avatar style={{
-                marginTop: 8
-              }} src={(!user.avatar || user.avatar === '') ? "/logo.png" : user.avatar} />
-              <Input placeholder={'输入您的头像地址'} style={{
-                marginTop: 8
-              }} value={user.avatar} onChange={value => setUser({
-                ...user,
-                avatar: value
-              })} >
-              </Input>
-              <Input placeholder={'输入您的新的邮箱地址'} style={{
-                marginTop: 8
-              }} value={user.email} onChange={value => setUser({
-                ...user,
-                email: value
-              })} >
-              </Input>
-              <Button style={{
-                marginTop: 8
-              }} onClick={() => handleSubmit()} block type="primary" htmlType="submit">
-                保存修改
-              </Button>
             </div>
           },
           {

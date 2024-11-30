@@ -130,7 +130,7 @@ try
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-        
+
         if (dbType.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase) ||
             dbType.Equals("pgsql", StringComparison.OrdinalIgnoreCase))
         {
@@ -158,9 +158,9 @@ try
         }
     }));
 
-    builder.AddServiceDefaults();
-
     builder.Services.AddResponseCompression();
+
+    builder.AddServiceDefaults();
 
     builder.Services.AddWebSockets(options =>
     {
@@ -183,13 +183,17 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
+    app.UseResponseCompression();
+    app.UseStaticFiles();
+
     app.Use((async (context, next) =>
     {
         if (context.Request.Path == "/")
         {
             if (string.IsNullOrEmpty(ChatCoreOptions.Master))
             {
-                context.Request.Path = "/index.html";
+                await context.Response.SendFileAsync("wwwroot/index.html");
+                return;
             }
             else
             {
@@ -207,21 +211,15 @@ try
         {
             if (string.IsNullOrEmpty(ChatCoreOptions.Master))
             {
-                context.Request.Path = "/index.html";
+                await context.Response.SendFileAsync("wwwroot/index.html");
             }
             else
             {
                 context.Response.Redirect(ChatCoreOptions.Master);
                 return;
             }
-
-            await next(context);
         }
     }));
-
-    app.UseResponseCompression();
-
-    app.UseStaticFiles();
 
     app.UseOpenTelemetry();
 
@@ -237,7 +235,6 @@ try
 
     app.MapPost("/api/v1/authorize/token", async (AuthorizeService service, [FromBody] LoginInput input) =>
         await service.TokenAsync(input))
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Get token")
         .WithTags("Authorize")
@@ -245,7 +242,6 @@ try
 
     app.MapPost("/api/v1/authorize/github", async (AuthorizeService service, string code) =>
             await service.GithubAsync(code))
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Github login")
         .WithTags("Authorize")
@@ -253,9 +249,15 @@ try
 
     app.MapPost("/api/v1/authorize/gitee", async (AuthorizeService service, string code, string redirectUri) =>
             await service.GiteeAsync(code, redirectUri))
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .WithDescription("Github login")
+        .WithTags("Authorize")
+        .WithOpenApi();
+
+    app.MapPost("/api/v1/authorize/casdoor", async (AuthorizeService service, string code) =>
+            await service.CasdoorAsync(code))
+        .AddEndpointFilter<ResultFilter>()
+        .WithDescription("Casdoor login")
         .WithTags("Authorize")
         .WithOpenApi();
 
@@ -665,7 +667,6 @@ try
 
     app.MapGet("/v1/models", async (HttpContext context) => { return await ModelService.GetAsync(context); })
         .WithDescription("获取模型列表")
-        .RequireAuthorization()
         .WithOpenApi();
 
     app.Map("/v1/realtime", (applicationBuilder =>
