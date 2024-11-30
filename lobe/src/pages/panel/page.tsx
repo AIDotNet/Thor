@@ -2,7 +2,7 @@ import { renderNumber, renderQuota } from '../../utils/render';
 import { useEffect, useState } from 'react';
 import { GetStatistics } from '../../services/StatisticsService';
 import { Flexbox } from 'react-layout-kit';
-import { BarChart, BarList, CategoryBar, Legend, LineChart, LineChartProps } from '@lobehub/charts';
+import { BarList, DonutChart, LineChart, LineChartProps } from '@lobehub/charts';
 import { useTheme } from 'antd-style';
 import { getIconByName } from '../../utils/iconutils';
 
@@ -16,6 +16,11 @@ export default function PanelPage() {
 
   const theme = useTheme();
   const colors = [theme.colorSuccess, theme.colorError];
+
+  const commonFlexboxStyle = {
+    width: '25%',
+    marginLeft: 5,
+  };
 
   function loadStatistics() {
     const consumeChart: any[] = [];
@@ -44,10 +49,7 @@ export default function PanelPage() {
             令牌数: token?.value
           });
 
-          const model = {
-
-          } as any;
-
+          const model = {} as any;
           models.forEach((item: any) => {
             model[item.name] = item.data[i];
           });
@@ -102,32 +104,29 @@ export default function PanelPage() {
       padding: 20,
       height: 'calc(100vh - 150px)',
       overflow: 'auto',
+      gap: 20,
     }}>
       <Flexbox style={{
         height: 250,
-      }} horizontal>
+      }} horizontal gap={20}>
         <Flexbox style={{
           width: '25%',
           marginRight: 20,
         }}>
-          <Flexbox horizontal>
+          <Flexbox horizontal gap={10}>
             <Flexbox>
               <div style={{ opacity: 0.5 }}>
                 最近消费总额
               </div>
               <h2 style={{ marginTop: 4 }}>{renderQuota(data?.consumes?.reduce((a: number, b: any) => a + b.value, 0), 2)}</h2>
             </Flexbox>
-            <Flexbox style={{
-              marginLeft: 10
-            }}>
+            <Flexbox>
               <div style={{ opacity: 0.5 }}>
                 令牌消耗总数
               </div>
               <h2 style={{ marginTop: 4 }}>{renderNumber(data?.totalTokenCount)}</h2>
             </Flexbox>
-            <Flexbox style={{
-              marginLeft: 10
-            }}>
+            <Flexbox>
               <div style={{ opacity: 0.5 }}>
                 请求总数
               </div>
@@ -143,34 +142,36 @@ export default function PanelPage() {
               {renderQuota(data?.currentResidualCredit, 2)}
             </h2>
             <div />
-            <CategoryBar colors={colors}
-              showLabels
+            <DonutChart colors={colors}
               showAnimation={true}
-              values={[data?.currentConsumedCredit, data?.currentResidualCredit]} />
-            <Legend categories={['消费额度', '剩余额度']} colors={colors} />
+              style={{
+                width: '100%',
+                padding: 10,
+              }}
+              valueFormatter={(v) => `${renderQuota(v, 2)}`}
+              data={[{
+                value: data?.currentConsumedCredit,
+                name: '消费额度',
+              }, {
+                value: data?.currentResidualCredit,
+                name: '剩余额度',
+              }]} />
           </Flexbox>
         </Flexbox>
-        <Flexbox style={{
-          width: '25%',
-          marginLeft: 5
-        }}>
+        <Flexbox style={commonFlexboxStyle}>
           <div style={{ opacity: 0.5 }}>
             最近消费总额（最近七天）
           </div>
           <h2 style={{ marginTop: 4 }}>{renderQuota(data?.consumes?.reduce((a: number, b: any) => a + b.value, 0), 6)}</h2>
           <LineChart
             categories={['消费']}
-
             data={consumeChart}
             valueFormatter={cunsumeValueFormatter}
             xAxisLabelFormatter={labelFormatter}
             index="date"
           />
         </Flexbox>
-        <Flexbox style={{
-          width: '25%',
-          marginLeft: 5
-        }}>
+        <Flexbox style={commonFlexboxStyle}>
           <div style={{ opacity: 0.5 }}>
             最近请求总数（最近七天）
           </div>
@@ -183,10 +184,7 @@ export default function PanelPage() {
             index="date"
           />
         </Flexbox>
-        <Flexbox style={{
-          width: '25%',
-          marginLeft: 5
-        }}>
+        <Flexbox style={commonFlexboxStyle}>
           <div style={{ opacity: 0.5 }}>
             最近消耗token总数（最近七天）
           </div>
@@ -203,7 +201,7 @@ export default function PanelPage() {
       <Flexbox style={{
         marginTop: 50,
         height: '400px',
-      }} horizontal>
+      }} horizontal gap={20}>
         <Flexbox style={{
           width: '60%',
           height: '100%',
@@ -211,7 +209,7 @@ export default function PanelPage() {
           <h4>
             模型消耗分布（最近七天）
           </h4>
-          <BarChart
+          <LineChart
             style={{
               height: '100%',
             }}

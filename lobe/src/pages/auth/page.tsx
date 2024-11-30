@@ -10,115 +10,54 @@ export default function Auth() {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const location = useLocation();
-    console.log(location.pathname, code);
 
-    function GithubToken(code: string) {
-        setLoading(true);
-        getGithubToken(code)
-            .then((res) => {
-                if (res.success) {
-                    localStorage.setItem('token', res.data.token);
-                    localStorage.setItem('role', res.data.role);
-
-                    message.success({
-                        content: "请记住默认密码为Aa123456",
-                        duration: 5
-                    });
-
-                    setTimeout(() => {
-                        navigate('/panel');
-                    }, 800);
-                } else {
-                    message.error({
-                        content: res.message
-                    } as any);
-                    setLoading(false);
-                }
-            }).catch((error) => {
-                message.error({
-                    content: error.message
-                });
-            }).finally(() => {
-                setLoading(false);
+    const handleTokenResponse = (res: any) => {
+        if (res.success) {
+            localStorage.setItem('token', res.data.token);
+            localStorage.setItem('role', res.data.role);
+            message.success({
+                content: "请记住默认密码为Aa123456",
+                duration: 5
             });
-    }
+            setTimeout(() => {
+                navigate('/panel');
+            }, 800);
+        } else {
+            message.error({ content: res.message });
+            setLoading(false);
+        }
+    };
 
-    function GiteeToken(code: string) {
+    const handleError = (error: any) => {
+        message.error({ content: error.message });
+        setLoading(false);
+    };
+
+    const fetchToken = (fetchFunction: Function, code: string, redirectUri?: string) => {
         setLoading(true);
-        const redirectUri = window.location.origin + '/auth/gitee';
-
-        getGiteeToken(code, redirectUri)
-            .then((res) => {
-                if (res.success) {
-                    localStorage.setItem('token', res.data.token);
-                    localStorage.setItem('role', res.data.role);
-
-                    message.success({
-                        content: "请记住默认密码为Aa123456",
-                        duration: 5
-                    });
-
-                    setTimeout(() => {
-                        navigate('/panel');
-                    }, 800);
-                } else {
-                    message.error({
-                        content: res.message
-                    } as any);
-                    setLoading(false);
-                }
-            }).catch((error) => {
-                message.error({
-                    content: error.message
-                });
-            }).finally(() => {
-                setLoading(false);
-            });
-    }
-
-    function Casdoor(code:string){
-        
-        setLoading(true);
-        getCasdoorToken(code)
-            .then((res) => {
-                if (res.success) {
-                    localStorage.setItem('token', res.data.token);
-                    localStorage.setItem('role', res.data.role);
-
-                    message.success({
-                        content: "请记住默认密码为Aa123456",
-                        duration: 5
-                    });
-
-                    setTimeout(() => {
-                        navigate('/panel');
-                    }, 800);
-                } else {
-                    message.error({
-                        content: res.message
-                    } as any);
-                    setLoading(false);
-                }
-            }).catch((error) => {
-                message.error({
-                    content: error.message
-                });
-            }).finally(() => {
-                setLoading(false);
-            });
-    }
+        fetchFunction(code, redirectUri)
+            .then(handleTokenResponse)
+            .catch(handleError)
+            .finally(() => setLoading(false));
+    };
 
     useEffect(() => {
         if (code) {
-            if (location.pathname === "/auth") {
-                GithubToken(code);
-            } else if (location.pathname === "/auth/gitee") {
-                GiteeToken(code);
-            }else if (location.pathname === "/auth/casdoor") {
-                Casdoor(code);
+            switch (location.pathname) {
+                case "/auth":
+                    fetchToken(getGithubToken, code);
+                    break;
+                case "/auth/gitee":
+                    fetchToken(getGiteeToken, code, window.location.origin + '/auth/gitee');
+                    break;
+                case "/auth/casdoor":
+                    fetchToken(getCasdoorToken, code);
+                    break;
+                default:
+                    break;
             }
         }
-    }, []);
+    }, [code, location.pathname]);
 
     return (
         <div style={{
@@ -130,19 +69,19 @@ export default function Auth() {
             alignItems: 'center',
             color: 'white',
             textAlign: 'center',
+            backgroundColor: '#282c34',
+            padding: '20px',
         }}>
-            <Logo size={64} extra="Thor"/>
+            <Logo size={64} extra="Thor" />
             <h2 style={{
                 marginBottom: '20px',
                 fontSize: '2rem',
                 fontWeight: 'bold',
             }}>第三方登录授权</h2>
-            <div>
-                <h3 style={{
-                    marginBottom: '40px',
-                    fontSize: '1.5rem',
-                }}>{loading ? "正在登录中..." : "登录完成"}</h3>
-            </div>
+            <h3 style={{
+                marginBottom: '40px',
+                fontSize: '1.5rem',
+            }}>{loading ? "正在登录中..." : "登录完成"}</h3>
             <Button style={{
                 fontSize: '1.25rem',
                 color: 'white',
@@ -156,6 +95,5 @@ export default function Auth() {
                 返回登陆
             </Button>
         </div>
-    )
+    );
 }
-

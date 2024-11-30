@@ -152,7 +152,7 @@ public sealed class ChatService(
             sw.Stop();
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), request.Model,
-                0, 0, quota ?? 0, token?.Name, user?.UserName, user?.Id, channel.Id,
+                0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds);
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
@@ -250,7 +250,7 @@ public sealed class ChatService(
 
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     input.Model,
-                    requestToken, 0, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
+                    requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
@@ -324,7 +324,7 @@ public sealed class ChatService(
 
                     await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                         input.Model,
-                        requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
+                        requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(), false,
                         (int)sw.ElapsedMilliseconds);
 
@@ -456,7 +456,7 @@ public sealed class ChatService(
 
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     model,
-                    requestToken, responseToken, (int)quota, token?.Name, user?.UserName, user?.Id, channel.Id,
+                    requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                     request.Stream is true,
                     (int)sw.ElapsedMilliseconds);
@@ -680,7 +680,7 @@ public sealed class ChatService(
                             ModelManagerService.AudioPromptRate[model], ModelManagerService.AudioPromptRate[model]),
                         model,
                         (int)requestToken + (int)audioRequestToken, (int)responseToken + (int)audioResponseTokens,
-                        (int)quota, token?.Name,
+                        (int)quota, token?.Key,
                         user?.UserName, user?.Id,
                         channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(),
