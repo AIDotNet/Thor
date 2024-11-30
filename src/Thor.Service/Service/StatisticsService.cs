@@ -21,8 +21,6 @@ public static class StatisticsService
 
         #region 统计数据
 
-        // 获取七天的日期范围
-        var today = DateTime.Now.Date;
         var sevenDaysAgo = DateTime.Now.Date.AddDays(-7);
 
         var userQuery = dbContext.StatisticsConsumesNumbers
@@ -191,6 +189,10 @@ public static class StatisticsService
         statisticsDto.ModelRanking = modelRanking;
 
         #endregion
+        
+        statisticsDto.Consumes = statisticsDto.Consumes.OrderBy(x => x.DateTime)
+            .ThenByDescending(x => x.Value)
+            .ToList();
 
         // 消费总额
         statisticsDto.CurrentConsumedCredit = await dbContext.StatisticsConsumesNumbers
