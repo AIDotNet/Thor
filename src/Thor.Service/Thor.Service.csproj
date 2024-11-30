@@ -41,6 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\extensions\Thor.AWSClaude\Thor.AWSClaude.csproj" />
     <ProjectReference Include="..\extensions\Thor.AzureOpenAI\Thor.AzureOpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Claudia\Thor.Claudia.csproj" />
     <ProjectReference Include="..\extensions\Thor.ErnieBot\Thor.ErnieBot.csproj" />

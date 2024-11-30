@@ -19,6 +19,7 @@ using Thor.MetaGLM.Extensions;
 using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
 using Thor.OpenAI.Extensions;
+using Thor.AWSClaude.Extensions;
 using Thor.Provider;
 using Thor.Qiansail.Extensions;
 using Thor.RabbitMQEvent;
@@ -105,6 +106,7 @@ try
         .AddMetaGLMService()
         .AddHunyuanService()
         .AddClaudiaService()
+        .AddAWSClaudeService()
         .AddOllamaService()
         .AddAzureOpenAIService()
         .AddErnieBotService()
