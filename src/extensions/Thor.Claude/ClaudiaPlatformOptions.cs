@@ -1,4 +1,4 @@
-﻿namespace Thor.Claudia;
+﻿namespace Thor.Claude;
 
 /// <summary>
 /// 平台信息

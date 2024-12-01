@@ -7,7 +7,7 @@ using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI;
-using Thor.Claudia;
+using Thor.Claude;
 using Thor.Core;
 using Thor.Hunyuan;
 using Thor.OpenAI;

@@ -1,4 +1,4 @@
-﻿namespace Thor.Claudia;
+﻿namespace Thor.Claude;
 
 public class ClaudiaClientHandler : HttpClientHandler
 {

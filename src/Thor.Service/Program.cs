@@ -8,7 +8,7 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI.Extensions;
-using Thor.Claudia.Extensions;
+using Thor.Claude.Extensions;
 using Thor.Core.DataAccess;
 using Thor.Core.Extensions;
 using Thor.ErnieBot.Extensions;

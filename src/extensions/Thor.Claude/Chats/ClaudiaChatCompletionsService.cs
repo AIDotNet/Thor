@@ -7,7 +7,7 @@ using Thor.Abstractions.Chats.Dtos;
 using ThorChatCompletionsResponse =
     Thor.Abstractions.Chats.Dtos.ThorChatCompletionsResponse;
 
-namespace Thor.Claudia.Chats;
+namespace Thor.Claude.Chats;
 
 public sealed class ClaudiaChatCompletionsService : IThorChatCompletionsService
 {

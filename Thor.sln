@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.OpenAI", "src\extensio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.MetaGLM", "src\extensions\Thor.MetaGLM\Thor.MetaGLM.csproj", "{77CB4305-7EB2-4CD9-BB97-00A5FC29B97F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Claudia", "src\extensions\Thor.Claudia\Thor.Claudia.csproj", "{9D365565-CDA2-4D27-87D6-439E106A64B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Claude", "src\extensions\Thor.Claude\Thor.Claude.csproj", "{9D365565-CDA2-4D27-87D6-439E106A64B8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Qiansail", "src\extensions\Thor.Qiansail\Thor.Qiansail.csproj", "{48FD7CDD-A777-42F8-9A14-33DA28469819}"
 EndProject
