@@ -31,7 +31,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     public async Task<ChatChannel[]> GetChannelsAsync()
     {
         return await cache.GetOrCreateAsync(CacheKey,
-            async () => { return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToArrayAsync(); });
+            async () => { return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToArrayAsync(); }, isLock: false);
     }
 
     /// <summary>

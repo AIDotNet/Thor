@@ -44,7 +44,8 @@ public interface IServiceCache
     /// <param name="key"></param>
     /// <param name="factory"></param>
     /// <param name="ttl"></param>
+    /// <param name="isLock"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null);
+    ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null,bool isLock = false);
 }

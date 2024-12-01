@@ -84,8 +84,21 @@ public sealed class RedisCache : IServiceCache
         }
     }
 
-    public async ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null)
+    public async ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null,bool isLock = false)
     {
+        if (!isLock)
+        {
+            if (await ExistsAsync(key))
+            {
+                var result = await GetAsync<T>(key);
+                if (result != null) return result;
+            }
+
+            var value = await factory();
+            await CreateAsync(key, value, ttl);
+            return value;
+        }
+        
         var lockKey = $"{key}_lock";
         
         var expiry = TimeSpan.FromSeconds(3);

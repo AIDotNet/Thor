@@ -28,7 +28,7 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
                     .AsNoTracking()
                     .Where(x => x.Enable)
                     .ToListAsync();
-            }).ConfigureAwait(false);
+            }, isLock: false).ConfigureAwait(false);
 
         if (rateLimitModels == null || rateLimitModels?.Count == 0) return;
 
