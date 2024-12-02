@@ -39,6 +39,7 @@ export default function LoggerPage() {
     startTime: string | null;
     endTime: string | null;
     keyword: string;
+    organizationId?: string;
   });
 
   function timeString(totalTime: number) {
@@ -333,6 +334,21 @@ export default function LoggerPage() {
             width: "5rem",
           }}
           placeholder="关键字"
+        />
+        <Input
+          value={input.organizationId}
+          onChange={(e) => {
+            setInput({
+              ...input,
+              organizationId: e.target.value,
+            });
+          }}
+          style={{
+            marginRight: "0.5rem",
+            float: "right",
+            width: "5rem",
+          }}
+          placeholder="组织Id"
         />
         <DatePicker
           value={input.endTime ? dayjs(input.endTime) : null}

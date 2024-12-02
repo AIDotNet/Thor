@@ -54,8 +54,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Moonshot", "src\extens
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.RabbitMQEvent", "src\framework\Thor.RabbitMQEvent\Thor.RabbitMQEvent.csproj", "{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AppHost", "src\Thor.AppHost\Thor.AppHost.csproj", "{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{BE7E011E-E469-44B4-B06B-CE908762D7A3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.GiteeAI", "src\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj", "{F56E56A9-83DB-4585-BA26-492E8E6EF4C9}"
@@ -160,10 +158,6 @@ Global
 		{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BE7E011E-E469-44B4-B06B-CE908762D7A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BE7E011E-E469-44B4-B06B-CE908762D7A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE7E011E-E469-44B4-B06B-CE908762D7A3}.Release|Any CPU.ActiveCfg = Release|Any CPU

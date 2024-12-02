@@ -15,7 +15,7 @@ namespace Thor.Provider.Logger
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
             modelBuilder.Entity("Thor.Service.Domain.ChatLogger", b =>
                 {
@@ -50,6 +50,9 @@ namespace Thor.Provider.Logger
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Modifier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OrganizationId")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("PromptTokens")
@@ -87,6 +90,8 @@ namespace Thor.Provider.Logger
                     b.HasIndex("Creator");
 
                     b.HasIndex("ModelName");
+
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("TokenName");
 

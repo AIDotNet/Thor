@@ -34,9 +34,10 @@ public sealed class LoggerService(
     /// <param name="userAgent"></param>
     /// <param name="stream">是否Stream请求</param>
     /// <param name="totalTime">请求总耗时</param>
+    /// <param name="organizationId"></param>
     public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
         int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName,
-        string ip, string userAgent, bool stream, int totalTime)
+        string ip, string userAgent, bool stream, int totalTime, string? organizationId = null)
     {
         using var consume =
             Activity.Current?.Source.StartActivity("创建消费日志");
@@ -75,7 +76,8 @@ public sealed class LoggerService(
             UserName = userName,
             UserId = userId,
             ChannelId = channelId,
-            ChannelName = channelName
+            ChannelName = channelName,
+            OrganizationId = organizationId
         };
 
         await CreateAsync(logger);
@@ -140,7 +142,7 @@ public sealed class LoggerService(
 
     public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ThorChatLoggerType? type,
         string? model,
-        DateTime? startTime, DateTime? endTime, string? keyword)
+        DateTime? startTime, DateTime? endTime, string? keyword,string? organizationId = null)
     {
         var query = LoggerDbContext.Loggers
             .AsNoTracking();
@@ -156,6 +158,11 @@ public sealed class LoggerService(
         if (endTime.HasValue) query = query.Where(x => x.CreatedAt <= endTime);
 
         if (!UserContext.IsAdmin) query = query.Where(x => x.UserId == UserContext.CurrentUserId);
+
+        if (!string.IsNullOrEmpty(organizationId))
+        {
+			query = query.Where(x => x.OrganizationId == organizationId);
+		}
 
         if (!string.IsNullOrWhiteSpace(keyword))
             query = query.Where(x =>

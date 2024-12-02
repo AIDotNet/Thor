@@ -14,8 +14,11 @@ public sealed class AutoChannelDetectionBackgroundTask(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
-        {
-            await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken,
+		{
+			// 启动一分钟后开始执行，防止卡住启动
+			await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
+
+			await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             while (!stoppingToken.IsCancellationRequested)

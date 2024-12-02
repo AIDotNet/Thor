@@ -195,6 +195,8 @@ public static class EntityConfigExtensions
             options.HasIndex(x => x.ModelName);
 
             options.HasIndex(x => x.UserName);
+
+            options.HasIndex(x => x.OrganizationId);
         });
 
 
