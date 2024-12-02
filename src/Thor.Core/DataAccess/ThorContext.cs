@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Thor.Core.DataAccess;

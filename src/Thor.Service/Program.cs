@@ -370,8 +370,8 @@ try
     log.MapGet(string.Empty,
             async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model,
                     DateTime? startTime,
-                    DateTime? endTime, string? keyword) =>
-                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword))
+                    DateTime? endTime, string? keyword,string? organizationId) =>
+                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword,organizationId))
         .WithDescription("获取日志")
         .WithDisplayName("获取日志")
         .WithOpenApi();
