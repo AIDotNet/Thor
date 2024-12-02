@@ -94,6 +94,12 @@ export default function LoggerPage() {
       key: "tokenName",
     },
     {
+      // organizationId
+      title: '组织id',
+      dataIndex: 'organizationId',
+      key: 'organizationId'
+    },
+    {
       title: "模型",
       dataIndex: "modelName",
       width: "180px",
@@ -366,7 +372,7 @@ export default function LoggerPage() {
           placeholder="结束时间"
         />
         <DatePicker
-          value={input.startTime?dayjs(input.startTime):null}
+          value={input.startTime ? dayjs(input.startTime) : null}
           onChange={(e: any) => {
             setInput({
               ...input,
