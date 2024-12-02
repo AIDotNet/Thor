@@ -1,68 +1,129 @@
-﻿using FreeRedis;
+﻿using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 using Thor.BuildingBlocks.Cache;
 
 namespace Thor.RedisMemory.Cache;
 
-public sealed class RedisCache(RedisClient redis) : IServiceCache
+public sealed class RedisCache : IServiceCache
 {
+    private readonly IServiceProvider _serviceProvider;
+
+    public RedisCache(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+        _connectionMultiplexer = serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+        Subscriber = _connectionMultiplexer.GetSubscriber();
+    }
+
+    private IConnectionMultiplexer _connectionMultiplexer;
+    protected ISubscriber Subscriber;
+
+    protected IDatabase Db
+    {
+        get
+        {
+            EnsureDbConnection();
+            return _connectionMultiplexer.GetDatabase();
+        }
+    }
+
+    protected void EnsureDbConnection()
+    {
+        if (_connectionMultiplexer is { IsConnected: false, IsConnecting: false })
+        {
+            _connectionMultiplexer =
+                _connectionMultiplexer = _serviceProvider.GetRequiredService<IConnectionMultiplexer>();
+            Subscriber = _connectionMultiplexer.GetSubscriber();
+        }
+
+        if (_connectionMultiplexer is { IsConnected: false, IsConnecting: false })
+        {
+            throw new NotSupportedException(
+                "Unable to reconnect to Redis, please check the connection settings and try again.");
+        }
+    }
+
     public async ValueTask CreateAsync(string key, object value, TimeSpan? ttl = null)
     {
-        await redis.SetAsync(key, value);
+        await Db.StringSetAndGetAsync(key, RedisValueConvert.ConvertToRedisValue(value));
 
         if (ttl.HasValue)
         {
-            await redis.ExpireAsync(key, ttl.Value);
+            await Db.KeyExpireAsync(key, ttl);
         }
     }
 
     public async Task<bool> ExistsAsync(string key)
     {
-        return await redis.ExistsAsync(key).ConfigureAwait(false);
+        return await Db.KeyExistsAsync(key);
     }
 
     public async ValueTask<T?> GetAsync<T>(string key)
     {
-        return await redis.GetAsync<T>(key).ConfigureAwait(false);
+        if (!await ExistsAsync(key)) return default;
+        var value = await Db.StringGetAsync(key);
+
+        if (value.IsNullOrEmpty) return default;
+
+        return RedisValueConvert.ConvertTo<T>(value);
     }
 
     public async ValueTask RemoveAsync(string key)
     {
-        await redis.DelAsync(key);
+        await Db.KeyDeleteAsync(key);
     }
 
     public async ValueTask IncrementAsync(string key, int value = 1, TimeSpan? ttl = null)
     {
-        await redis.IncrByAsync(key, value);
+        await Db.StringIncrementAsync(key, value);
 
         if (ttl.HasValue)
         {
-            await redis.ExpireAsync(key, ttl.Value);
+            await Db.KeyExpireAsync(key, ttl);
         }
     }
 
-    public async ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null)
+    public async ValueTask<T?> GetOrCreateAsync<T>(string key, Func<ValueTask<T>> factory, TimeSpan? ttl = null,bool isLock = false)
     {
-        // 加分布式锁住
-        using var @lock = redis.Lock(key, 3);
-        // 实现
-        if (await redis.ExistsAsync(key))
+        if (!isLock)
         {
-            var result = await GetAsync<T>(key);
+            if (await ExistsAsync(key))
+            {
+                var result = await GetAsync<T>(key);
+                if (result != null) return result;
+            }
 
-            if (result != null) return result;
-
-            result = await factory().ConfigureAwait(false);
-            await CreateAsync(key, result, ttl).ConfigureAwait(false);
-
-            return result;
+            var value = await factory();
+            await CreateAsync(key, value, ttl);
+            return value;
         }
-        else
+        
+        var lockKey = $"{key}_lock";
+        
+        var expiry = TimeSpan.FromSeconds(3);
+
+        await using var redisLock = new RedisLock(Db, lockKey, expiry);
+
+        if (!await redisLock.AcquireAsync()) throw new InvalidOperationException("Unable to acquire lock");
+        
+        try
         {
-            var result = await factory().ConfigureAwait(false);
+            if (await ExistsAsync(key))
+            {
+                var result = await GetAsync<T>(key);
+                if (result != null) return result;
+            }
 
-            await CreateAsync(key, result, ttl).ConfigureAwait(false);
-
-            return result;
+            var value = await factory();
+            await CreateAsync(key, value, ttl);
+            return value;
         }
+        finally
+        {
+            await redisLock.ReleaseAsync();
+        }
+
+        throw new InvalidOperationException("Unable to acquire lock");
     }
 }

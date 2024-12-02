@@ -26,7 +26,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.OpenAI", "src\extensio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.MetaGLM", "src\extensions\Thor.MetaGLM\Thor.MetaGLM.csproj", "{77CB4305-7EB2-4CD9-BB97-00A5FC29B97F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Claudia", "src\extensions\Thor.Claudia\Thor.Claudia.csproj", "{9D365565-CDA2-4D27-87D6-439E106A64B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Claude", "src\extensions\Thor.Claude\Thor.Claude.csproj", "{9D365565-CDA2-4D27-87D6-439E106A64B8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Qiansail", "src\extensions\Thor.Qiansail\Thor.Qiansail.csproj", "{48FD7CDD-A777-42F8-9A14-33DA28469819}"
 EndProject
@@ -52,33 +52,37 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.RedisMemory.Cache", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Moonshot", "src\extensions\Thor.Moonshot\Thor.Moonshot.csproj", "{4D98C74B-D071-430C-9956-3A9B8CF642DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.RabbitMQEvent", "src\framework\Thor.RabbitMQEvent\Thor.RabbitMQEvent.csproj", "{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.RabbitMQEvent", "src\framework\Thor.RabbitMQEvent\Thor.RabbitMQEvent.csproj", "{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{BE7E011E-E469-44B4-B06B-CE908762D7A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.AppHost", "src\Thor.AppHost\Thor.AppHost.csproj", "{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.GiteeAI", "src\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj", "{F56E56A9-83DB-4585-BA26-492E8E6EF4C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{BE7E011E-E469-44B4-B06B-CE908762D7A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Domain", "src\Thor.Domain\Thor.Domain.csproj", "{29280BF8-A1BE-4737-B844-1139FD66DE03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.GiteeAI", "src\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj", "{F56E56A9-83DB-4585-BA26-492E8E6EF4C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Domain.Shared", "src\Thor.Domain.Shared\Thor.Domain.Shared.csproj", "{E6E3AA08-00C6-4F10-B6CD-D721336F1CFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Domain", "src\Thor.Domain\Thor.Domain.csproj", "{29280BF8-A1BE-4737-B844-1139FD66DE03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Infrastructure", "src\Thor.Infrastructure\Thor.Infrastructure.csproj", "{B133C3A5-459A-4A55-B437-AD731DF00DAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Domain.Shared", "src\Thor.Domain.Shared\Thor.Domain.Shared.csproj", "{E6E3AA08-00C6-4F10-B6CD-D721336F1CFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Core", "src\Thor.Core\Thor.Core.csproj", "{B2E3C1CF-A69B-47F7-8649-46BBFB2C56FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Infrastructure", "src\Thor.Infrastructure\Thor.Infrastructure.csproj", "{B133C3A5-459A-4A55-B437-AD731DF00DAA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Core", "src\Thor.Core\Thor.Core.csproj", "{B2E3C1CF-A69B-47F7-8649-46BBFB2C56FE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Provider", "Provider", "{C64DA1C5-9D96-445C-B537-6B83C07F2E47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Provider.Sqlite", "src\Provider\Thor.Provider.Sqlite\Thor.Provider.Sqlite.csproj", "{BC1B9140-404D-43C5-B231-99656BF8DB0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Provider.Sqlite", "src\Provider\Thor.Provider.Sqlite\Thor.Provider.Sqlite.csproj", "{BC1B9140-404D-43C5-B231-99656BF8DB0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Provider.PostgreSQL", "src\Provider\Thor.Provider.PostgreSQL\Thor.Provider.PostgreSQL.csproj", "{646ACAC6-C6ED-445A-87C8-1C639B709E8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Provider.PostgreSQL", "src\Provider\Thor.Provider.PostgreSQL\Thor.Provider.PostgreSQL.csproj", "{646ACAC6-C6ED-445A-87C8-1C639B709E8E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Provider.SqlServer", "src\Provider\Thor.Provider.SqlServer\Thor.Provider.SqlServer.csproj", "{289E03C7-090B-4788-8760-607C54A73756}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Provider.SqlServer", "src\Provider\Thor.Provider.SqlServer\Thor.Provider.SqlServer.csproj", "{289E03C7-090B-4788-8760-607C54A73756}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Provider.MySql", "src\Provider\Thor.Provider.MySql\Thor.Provider.MySql.csproj", "{AB03676F-C10C-4633-9D5B-5858CF96B16A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Provider.MySql", "src\Provider\Thor.Provider.MySql\Thor.Provider.MySql.csproj", "{AB03676F-C10C-4633-9D5B-5858CF96B16A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Provider.DM", "src\Provider\Thor.Provider.DM\Thor.Provider.DM.csproj", "{9C731BC5-C473-4113-9001-5322364B9706}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Provider.DM", "src\Provider\Thor.Provider.DM\Thor.Provider.DM.csproj", "{9C731BC5-C473-4113-9001-5322364B9706}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Rabbit", "src\framework\Thor.Stack.Rabbit\Thor.Rabbit.csproj", "{58C7FCA8-BC91-4066-885B-48EDE51C6192}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Rabbit", "src\framework\Thor.Stack.Rabbit\Thor.Rabbit.csproj", "{58C7FCA8-BC91-4066-885B-48EDE51C6192}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AWSClaude", "src\extensions\Thor.AWSClaude\Thor.AWSClaude.csproj", "{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -206,6 +210,10 @@ Global
 		{58C7FCA8-BC91-4066-885B-48EDE51C6192}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58C7FCA8-BC91-4066-885B-48EDE51C6192}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58C7FCA8-BC91-4066-885B-48EDE51C6192}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -243,6 +251,7 @@ Global
 		{AB03676F-C10C-4633-9D5B-5858CF96B16A} = {C64DA1C5-9D96-445C-B537-6B83C07F2E47}
 		{9C731BC5-C473-4113-9001-5322364B9706} = {C64DA1C5-9D96-445C-B537-6B83C07F2E47}
 		{58C7FCA8-BC91-4066-885B-48EDE51C6192} = {1035B36B-8194-43D4-8A4A-992D962CD1D8}
+		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

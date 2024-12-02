@@ -1,4 +1,4 @@
-﻿namespace Thor.Claudia;
+﻿namespace Thor.Claude;
 
 /// <summary>
 /// 平台信息
@@ -8,10 +8,10 @@ public class ClaudiaPlatformOptions
     /// <summary>
     /// 平台名称
     /// </summary>
-    public const string PlatformName = "Claudia";
+    public const string PlatformName = "Claude";
 
     /// <summary>
     /// 平台编码
     /// </summary>
-    public const string PlatformCode = "Claudia";
+    public const string PlatformCode = "Claude";
 }

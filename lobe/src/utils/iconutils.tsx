@@ -11,7 +11,6 @@ import {
     Hunyuan,
     Minimax,
     Spark,
-    Tongyi,
     Moonshot,
     Wenxin,
     Yi,
@@ -33,7 +32,6 @@ export function getIconByNames(size: number = 24) {
         'Hunyuan',
         'Minimax',
         'Spark',
-        'Tongyi',
         'Wenxin',
         'Yi',
         'Zhipu',
@@ -113,11 +111,6 @@ export function getIconByName(name: string, size: number = 36) {
             return {
                 icon: <IconAvatar Icon={Spark} size={size} />,
                 label: 'Spark'
-            };
-        case 'Tongyi':
-            return {
-                icon: <IconAvatar Icon={Tongyi} size={size} />,
-                label: 'Tongyi'
             };
         case 'Wenxin':
             return {

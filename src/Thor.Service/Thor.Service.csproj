@@ -41,8 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\extensions\Thor.AWSClaude\Thor.AWSClaude.csproj" />
     <ProjectReference Include="..\extensions\Thor.AzureOpenAI\Thor.AzureOpenAI.csproj" />
-    <ProjectReference Include="..\extensions\Thor.Claudia\Thor.Claudia.csproj" />
+    <ProjectReference Include="..\extensions\Thor.Claude\Thor.Claude.csproj" />
     <ProjectReference Include="..\extensions\Thor.ErnieBot\Thor.ErnieBot.csproj" />
     <ProjectReference Include="..\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Hunyuan\Thor.Hunyuan.csproj" />
@@ -72,6 +73,12 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
   </ItemGroup>
 
 </Project>

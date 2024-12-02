@@ -86,18 +86,18 @@ const Nav = memo(() => {
             navigate("/model-manager");
           },
           role: "admin",
-        },
-        {
-          icon: <KeyRound />,
-          enable: true,
-          label: "令牌",
-          key: SidebarTabKey.Token,
-          onClick: () => {
-            navigate("/token");
-          },
-          role: "user,admin",
         }
       ]
+    },
+    {
+      icon: <KeyRound />,
+      enable: true,
+      label: "API Key 管理",
+      key: SidebarTabKey.Token,
+      onClick: () => {
+        navigate("/token");
+      },
+      role: "user,admin",
     },
     {
       key: SidebarTabKey.Business,

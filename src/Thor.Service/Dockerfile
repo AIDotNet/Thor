@@ -1,12 +1,10 @@
-# 请参阅 https://aka.ms/customizecontainer 以了解如何自定义调试容器，以及 Visual Studio 如何使用此 Dockerfile 生成映像以更快地进行调试。
-
-# 此阶段用于在快速模式(默认为调试配置)下从 VS 运行时
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER root
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN echo "Asia/Shanghai" > /etc/timezone
 WORKDIR /app
 EXPOSE 8080
+EXPOSE 8081
 
 FROM node as lobe
 WORKDIR /src
@@ -16,16 +14,14 @@ RUN npm i
 RUN yarn run build
 
 
-# 此阶段用于生成服务项目
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Directory.Build.props", "."]
 COPY ["src/Thor.Service/Thor.Service.csproj", "src/Thor.Service/"]
 COPY ["src/extensions/Thor.AzureOpenAI/Thor.AzureOpenAI.csproj", "src/extensions/Thor.AzureOpenAI/"]
 COPY ["src/Thor.Abstractions/Thor.Abstractions.csproj", "src/Thor.Abstractions/"]
 COPY ["src/Thor.Domain.Shared/Thor.Domain.Shared.csproj", "src/Thor.Domain.Shared/"]
-COPY ["src/extensions/Thor.Claudia/Thor.Claudia.csproj", "src/extensions/Thor.Claudia/"]
+COPY ["src/extensions/Thor.Claude/Thor.Claude.csproj", "src/extensions/Thor.Claude/"]
 COPY ["src/extensions/Thor.ErnieBot/Thor.ErnieBot.csproj", "src/extensions/Thor.ErnieBot/"]
 COPY ["src/extensions/Thor.GiteeAI/Thor.GiteeAI.csproj", "src/extensions/Thor.GiteeAI/"]
 COPY ["src/extensions/Thor.Hunyuan/Thor.Hunyuan.csproj", "src/extensions/Thor.Hunyuan/"]
@@ -51,17 +47,16 @@ COPY ["src/Provider/Thor.Provider.PostgreSQL/Thor.Provider.PostgreSQL.csproj", "
 COPY ["src/Provider/Thor.Provider.Sqlite/Thor.Provider.Sqlite.csproj", "src/Provider/Thor.Provider.Sqlite/"]
 COPY ["src/Provider/Thor.Provider.SqlServer/Thor.Provider.SqlServer.csproj", "src/Provider/Thor.Provider.SqlServer/"]
 COPY ["src/Thor.ServiceDefaults/Thor.ServiceDefaults.csproj", "src/Thor.ServiceDefaults/"]
-RUN dotnet restore "./src/Thor.Service/Thor.Service.csproj"
+COPY ["src/extensions/Thor.AWSClaude/Thor.AWSClaude.csproj", "src/extensions/Thor.AWSClaude/"]
+RUN dotnet restore "src/Thor.Service/Thor.Service.csproj"
 COPY . .
 WORKDIR "/src/src/Thor.Service"
-RUN dotnet build "./Thor.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "Thor.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# 此阶段用于发布要复制到最终阶段的服务项目
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Thor.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Thor.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# 此阶段在生产中使用，或在常规模式下从 VS 运行时使用(在不使用调试配置时为默认值)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

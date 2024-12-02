@@ -7,7 +7,7 @@ using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI;
-using Thor.Claudia;
+using Thor.Claude;
 using Thor.Core;
 using Thor.Hunyuan;
 using Thor.OpenAI;
@@ -31,7 +31,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     public async Task<ChatChannel[]> GetChannelsAsync()
     {
         return await cache.GetOrCreateAsync(CacheKey,
-            async () => { return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToArrayAsync(); });
+            async () => { return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToArrayAsync(); }, isLock: false);
     }
 
     /// <summary>

@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Security;
 using Claudia;
 
-namespace Thor.Claudia;
+namespace Thor.Claude;
 
 public static class ClaudiaFactory
 {
