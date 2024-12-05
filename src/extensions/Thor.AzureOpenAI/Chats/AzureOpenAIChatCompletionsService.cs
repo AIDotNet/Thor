@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
@@ -25,7 +25,7 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
         var response =
             await HttpClientFactory.HttpClient.PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
 
-        openai?.SetTag("Address",options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
         // 如果限流则抛出限流异常
@@ -59,11 +59,9 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
         var response = await HttpClientFactory.HttpClient.HttpRequestRaw(url,
             chatCompletionCreate, options.ApiKey, "Api-Key");
 
-        openai?.SetTag("Address",options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
-        using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
-
 
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
