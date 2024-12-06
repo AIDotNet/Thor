@@ -24,8 +24,7 @@ public abstract class BaseContext<TContext>(DbContextOptions<TContext> context, 
     
     private void OnBeforeSaveChanges()
     {
-        var entries = ChangeTracker.Entries();
-        foreach (var entry in entries)
+        foreach (var entry in ChangeTracker.Entries())
         {
             if (_userContext.IsAuthenticated)
             {

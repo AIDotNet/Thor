@@ -21,6 +21,9 @@ export const getLoggers = async (params: any) => {
     if (params.endTime) {
         url += "endTime=" + params.endTime + "&";
     }
+    if (params.organizationId) {
+        url += "organizationId=" + params.organizationId + "&";
+    }
     if (params.keyword) {
         url += "keyword=" + params.keyword;
     }
@@ -28,7 +31,7 @@ export const getLoggers = async (params: any) => {
 }
 
 export const viewConsumption = async (params: any) => {
-    
+
     let url = prefix + "/view-consumption?";
     if (params.type) {
         url += "type=" + params.type + "&";

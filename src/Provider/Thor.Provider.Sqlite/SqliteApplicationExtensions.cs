@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Thor.Core.DataAccess;
 using Thor.Core.Extensions;
 
 namespace Thor.Provider;

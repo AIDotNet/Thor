@@ -61,4 +61,9 @@ public sealed class ChatLogger : Entity<string>
     public string? IP { get; set; }
 
     public string? UserAgent { get; set; }
+
+    /// <summary>
+    /// 组织id
+    /// </summary>
+    public string? OrganizationId { get; set; }
 }

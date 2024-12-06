@@ -39,6 +39,7 @@ export default function LoggerPage() {
     startTime: string | null;
     endTime: string | null;
     keyword: string;
+    organizationId?: string;
   });
 
   function timeString(totalTime: number) {
@@ -91,6 +92,12 @@ export default function LoggerPage() {
       dataIndex: "tokenName",
       width: "190px",
       key: "tokenName",
+    },
+    {
+      // organizationId
+      title: '组织id',
+      dataIndex: 'organizationId',
+      key: 'organizationId'
     },
     {
       title: "模型",
@@ -334,6 +341,21 @@ export default function LoggerPage() {
           }}
           placeholder="关键字"
         />
+        <Input
+          value={input.organizationId}
+          onChange={(e) => {
+            setInput({
+              ...input,
+              organizationId: e.target.value,
+            });
+          }}
+          style={{
+            marginRight: "0.5rem",
+            float: "right",
+            width: "5rem",
+          }}
+          placeholder="组织Id"
+        />
         <DatePicker
           value={input.endTime ? dayjs(input.endTime) : null}
           onChange={(e: any) => {
@@ -350,7 +372,7 @@ export default function LoggerPage() {
           placeholder="结束时间"
         />
         <DatePicker
-          value={input.startTime?dayjs(input.startTime):null}
+          value={input.startTime ? dayjs(input.startTime) : null}
           onChange={(e: any) => {
             setInput({
               ...input,

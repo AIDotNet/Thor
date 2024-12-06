@@ -100,6 +100,12 @@ public sealed class ChatService(
             using var image =
                 Activity.Current?.Source.StartActivity("文字生成图片");
 
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
+
             var (token, user) = await tokenService.CheckTokenAsync(context);
 
             request.Model = TokenService.ModelMap(request.Model);
@@ -153,7 +159,8 @@ public sealed class ChatService(
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), request.Model,
                 0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
-                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds);
+                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                organizationId);
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
         }
@@ -180,6 +187,12 @@ public sealed class ChatService(
 
             using var embedding =
                 Activity.Current?.Source.StartActivity("向量模型调用");
+
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
 
             input.Model = TokenService.ModelMap(input.Model);
 
@@ -251,7 +264,8 @@ public sealed class ChatService(
                 await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
                     input.Model,
                     requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
-                    channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds);
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                    organizationId);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     input.Model);
@@ -390,6 +404,12 @@ public sealed class ChatService(
 
         try
         {
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
+
             request.Model = TokenService.ModelMap(request.Model);
 
             var model = request.Model;
@@ -459,7 +479,7 @@ public sealed class ChatService(
                     requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                     request.Stream is true,
-                    (int)sw.ElapsedMilliseconds);
+                    (int)sw.ElapsedMilliseconds, organizationId);
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     model);
@@ -517,6 +537,12 @@ public sealed class ChatService(
     {
         try
         {
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
+
             var model = context.Request.Query["model"].ToString();
 
             using var chatCompletions =
@@ -685,7 +711,7 @@ public sealed class ChatService(
                         channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                         true,
-                        (int)sw.ElapsedMilliseconds);
+                        (int)sw.ElapsedMilliseconds, organizationId);
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, (int)requestToken, token?.Key, channel.Id,
                         model);
