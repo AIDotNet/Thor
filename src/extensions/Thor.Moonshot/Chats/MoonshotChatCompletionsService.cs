@@ -8,7 +8,7 @@ using Thor.Abstractions.Extensions;
 
 namespace Thor.Moonshot.Chats;
 
-public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClientFactory) : IThorChatCompletionsService
+public sealed class MoonshotChatCompletionsService : IThorChatCompletionsService
 {
     /// <summary>
     /// 非流式对话补全
@@ -22,9 +22,7 @@ public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClient
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);
-
-        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
         var result =
@@ -46,9 +44,7 @@ public sealed class MoonshotChatCompletionsService(IHttpClientFactory httpClient
         ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);
-
-        var response = await client.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));

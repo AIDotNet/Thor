@@ -7,15 +7,13 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Moonshot.Chats;
 
-public sealed class MoonshotCompletionService(IHttpClientFactory httpClientFactory) : IThorCompletionsService
+public sealed class MoonshotCompletionService : IThorCompletionsService
 {
     public async Task<CompletionCreateResponse> CompletionAsync(CompletionCreateRequest createCompletionModel,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);
-
-        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             createCompletionModel, options.ApiKey);
 
         var result = await response.Content.ReadFromJsonAsync<CompletionCreateResponse>(

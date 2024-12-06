@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Thor.Moonshot
+﻿namespace Thor.Moonshot
 {
     /// <summary>
     /// 平台信息

@@ -10,16 +10,14 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.Moonshot.Embeddings;
 
-public sealed class MoonshotTextEmbeddingService(IHttpClientFactory httpClientFactory)
+public sealed class MoonshotTextEmbeddingService
     : IThorTextEmbeddingService
 {
     public async Task<EmbeddingCreateResponse> EmbeddingAsync(EmbeddingCreateRequest createEmbeddingModel,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var client = httpClientFactory.CreateClient(MoonshotPlatformOptions.PlatformCode);
-
-        var response = await client.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
+        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
             createEmbeddingModel, options!.ApiKey);
 
         var result =

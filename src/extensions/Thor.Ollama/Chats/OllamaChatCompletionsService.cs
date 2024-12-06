@@ -12,15 +12,9 @@ namespace Thor.Ollama.Chats
     /// <summary>
     /// Ollama 对话补全服务实现
     /// </summary>
-    /// <param name="httpClientFactory"></param>
-    public class OllamaChatCompletionsService(IHttpClientFactory httpClientFactory)
+    public class OllamaChatCompletionsService
         : IThorChatCompletionsService
     {
-        /// <summary>
-        /// http 客户端
-        /// </summary>
-        private HttpClient HttpClient => httpClientFactory.CreateClient(nameof(OllamaPlatformOptions.PlatformCode));
-
         /// <summary>
         /// 非流式对话补全
         /// </summary>
@@ -33,8 +27,6 @@ namespace Thor.Ollama.Chats
             ThorPlatformOptions? options = null, 
             CancellationToken cancellationToken = default)
         {
-            var client = HttpClient;
-
             var url = (options?.Address?.TrimEnd('/') ?? "") + "/api/chat";
 
             var tools = new List<Tool>();
@@ -71,7 +63,7 @@ namespace Thor.Ollama.Chats
                 }
             }
 
-            var response = await client.PostJsonAsync(url, new OllamaChatCompletionsRequest()
+            var response = await HttpClientFactory.HttpClient.PostJsonAsync(url, new OllamaChatCompletionsRequest()
             {
                 stream = false,
                 model = request.Model ?? "", 
@@ -155,7 +147,6 @@ namespace Thor.Ollama.Chats
             ThorPlatformOptions? options = null, 
             CancellationToken cancellationToken = default)
         {
-            var client = HttpClient;
             var tools = new List<Tool>();
 
             if (request.Tools != null)
@@ -189,7 +180,7 @@ namespace Thor.Ollama.Chats
                     });
                 }
             }
-            var response = await client.HttpRequestRaw((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
+            var response = await HttpClientFactory.HttpClient.HttpRequestRaw((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
             {
                 stream = true,
                 model = request.Model ?? "",

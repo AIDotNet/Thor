@@ -23,6 +23,8 @@ public static class OllamaServiceCollectionExtensions
             "llama2:latest",
             "llama3:latest",
             "qwen:4b",
+            "qwen2.5",
+            "qwen2.5:32b"
         ]);
 
         // 基于平台码注册服务
