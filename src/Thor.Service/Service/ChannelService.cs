@@ -5,12 +5,14 @@ using System.Threading.Channels;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI;
 using Thor.Claude;
 using Thor.Core;
 using Thor.Hunyuan;
 using Thor.OpenAI;
+using Thor.Service.Infrastructure;
 using Thor.SparkDesk;
 
 namespace Thor.Service.Service;
@@ -31,7 +33,8 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     public async Task<ChatChannel[]> GetChannelsAsync()
     {
         return await cache.GetOrCreateAsync(CacheKey,
-            async () => { return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToArrayAsync(); }, isLock: false);
+            async () => { return await DbContext.Channels.AsNoTracking().Where(x => !x.Disable).ToArrayAsync(); },
+            isLock: false);
     }
 
     /// <summary>
@@ -255,11 +258,21 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         ThorChatCompletionsResponse response = null;
 
-        await circuitBreaker.ExecuteAsync(async () =>
+        var result = await circuitBreaker.ExecuteAsync(async () =>
         {
             response = await chatCompletionsService.ChatCompletionsAsync(chatRequest, platformOptions,
                 token.Token);
         }, 3).ConfigureAwait(false);
+
+        if (result is ThorRateLimitException)
+        {
+            throw new ChannelException("请求过于频繁，请稍后再试");
+        }
+        
+        if (result is UnauthorizedAccessException)
+        {
+            throw new ChannelException("未授权");
+        }
 
         sw.Stop();
 

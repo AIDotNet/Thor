@@ -1,6 +1,6 @@
 ﻿using Thor.Abstractions.Exceptions;
 
-namespace Thor.Core;
+namespace Thor.Service.Infrastructure;
 
 public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
 {
@@ -9,7 +9,8 @@ public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
     private CircuitBreakerState _state = CircuitBreakerState.Closed;
     private DateTime _nextRetryTime = DateTime.MinValue;
 
-    public async ValueTask ExecuteAsync(Func<Task> action, int maxAttempts, int delay = 500)
+    public async ValueTask<Exception?> ExecuteAsync(Func<Task> action, int maxAttempts, int delay = 500,
+        Action<Exception>? errorAction = null)
     {
         if (_state == CircuitBreakerState.Open && DateTime.UtcNow >= _nextRetryTime)
         {
@@ -36,15 +37,16 @@ public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
                     _state = CircuitBreakerState.Closed;
                 }
 
-                return; // Exit if action is successful
-            }
-            catch (ThorRateLimitException)
-            {
-                throw new ThorRateLimitException();
+                return null; // Exit if action is successful
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Attempt {attempts} failed: {ex}");
+
+                if (ex is ThorRateLimitException or UnauthorizedAccessException)
+                {
+                    return ex;
+                }
 
                 _failureCount++;
                 if (_failureCount >= failureThreshold)
@@ -57,10 +59,14 @@ public class CircuitBreaker(int failureThreshold, TimeSpan openTimeSpan)
                 {
                     throw; // 
                 }
+
+                errorAction?.Invoke(ex);
             }
 
             await Task.Delay(delay); // 重试延迟，避免瞬间大量请求
         }
+
+        return null;
     }
 
     private enum CircuitBreakerState

@@ -16,6 +16,7 @@ using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
 using Thor.Core;
 using Thor.Service.Extensions;
+using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
@@ -496,6 +497,7 @@ public sealed class ChatService(
         }
         catch (ThorRateLimitException)
         {
+            logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
             rateLimit++;
             // TODO：限流重试次数
             if (rateLimit > 3)
@@ -804,8 +806,18 @@ public sealed class ChatService(
 
             ThorChatCompletionsResponse result = null;
 
-            await circuitBreaker.ExecuteAsync(
+            var err = await circuitBreaker.ExecuteAsync(
                 async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3);
+
+            if (err is ThorRateLimitException)
+            {
+                throw new ThorRateLimitException();
+            }
+
+            if (err is UnauthorizedAccessException)
+            {
+                throw new UnauthorizedAccessException("未授权");
+            }
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -839,8 +851,18 @@ public sealed class ChatService(
 
             ThorChatCompletionsResponse result = null;
 
-            await circuitBreaker.ExecuteAsync(
+            var err = await circuitBreaker.ExecuteAsync(
                 async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3);
+
+            if (err is ThorRateLimitException)
+            {
+                throw new ThorRateLimitException();
+            }
+            
+            if (err is UnauthorizedAccessException)
+            {
+                throw new UnauthorizedAccessException("未授权");
+            }
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -893,8 +915,6 @@ public sealed class ChatService(
         var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         var responseMessage = new StringBuilder();
-
-        context.SetEventStreamHeaders();
 
         if (input.Messages.Any(x => x.Contents != null))
         {
@@ -964,12 +984,21 @@ public sealed class ChatService(
                 .Select(x => x.Function!.Type!).ToArray());
         }
 
+        // 是否第一次输出
+        bool isFirst = true;
+
         var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
-        await circuitBreaker.ExecuteAsync(
+        var err = await circuitBreaker.ExecuteAsync(
             async () =>
             {
                 await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
                 {
+                    if (isFirst)
+                    {
+                        context.SetEventStreamHeaders();
+                        isFirst = false;
+                    }
+
                     if (item.Error != null)
                     {
                         await context.WriteStreamErrorAsync(item.Error.Message);
@@ -1005,6 +1034,16 @@ public sealed class ChatService(
                     await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
                 }
             }, 3);
+
+        if (err is ThorRateLimitException)
+        {
+            throw new ThorRateLimitException();
+        }
+
+        if (err is UnauthorizedAccessException)
+        {
+            throw new UnauthorizedAccessException();
+        }
 
         await context.WriteAsEventStreamEndAsync();
 
