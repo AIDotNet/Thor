@@ -121,11 +121,8 @@ public sealed class ChatService(
                 organizationId = organizationIdHeader.ToString();
             }
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
 
             request.Model = TokenService.ModelMap(request.Model);
-
-            TokenService.CheckModel(request.Model, token, context);
 
             if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
 
@@ -133,11 +130,16 @@ public sealed class ChatService(
 
             var imageCostRatio = GetImageCostRatio(request);
 
-            var rate = ModelManagerService.PromptRate[request.Model].PromptRate;
+            var rate = ModelManagerService.PromptRate[request.Model];
+
+            var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+            TokenService.CheckModel(request.Model, token, context);
+
 
             request.N ??= 1;
 
-            var quota = (int)(rate * imageCostRatio * 1000) * request.N;
+            var quota = (int)(rate.PromptRate * imageCostRatio * 1000) * request.N;
 
             if (request == null) throw new Exception("模型校验异常");
 
@@ -213,61 +215,63 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(input!.Model, context);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
-            TokenService.CheckModel(input.Model, token, context);
-
-            // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model), input.Model);
-
-            if (channel == null) throw new NotModelException(input.Model);
-
-            // 获取渠道指定的实现类型的服务
-            var embeddingService = GetKeyedService<IThorTextEmbeddingService>(channel.Type);
-
-            if (embeddingService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
-
-            var embeddingCreateRequest = new EmbeddingCreateRequest
+            if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
-                Model = input.Model,
-                EncodingFormat = input.EncodingFormat
-            };
+                var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+                TokenService.CheckModel(input.Model, token, context);
 
-            int requestToken;
-            if (input.Input is JsonElement str)
-            {
-                if (str.ValueKind == JsonValueKind.String)
+                // 获取渠道 通过算法计算权重
+                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model),
+                    input.Model);
+
+                if (channel == null) throw new NotModelException(input.Model);
+
+                // 获取渠道指定的实现类型的服务
+                var embeddingService = GetKeyedService<IThorTextEmbeddingService>(channel.Type);
+
+                if (embeddingService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
+
+                var embeddingCreateRequest = new EmbeddingCreateRequest
                 {
-                    embeddingCreateRequest.Input = str.ToString();
-                    requestToken = TokenHelper.GetTotalTokens(str.ToString());
-                }
-                else if (str.ValueKind == JsonValueKind.Array)
+                    Model = input.Model,
+                    EncodingFormat = input.EncodingFormat
+                };
+
+                int requestToken;
+                if (input.Input is JsonElement str)
                 {
-                    var inputString = str.EnumerateArray().Select(x => x.ToString()).ToArray();
-                    embeddingCreateRequest.InputAsList = inputString.ToList();
-                    requestToken = TokenHelper.GetTotalTokens(inputString);
+                    if (str.ValueKind == JsonValueKind.String)
+                    {
+                        embeddingCreateRequest.Input = str.ToString();
+                        requestToken = TokenHelper.GetTotalTokens(str.ToString());
+                    }
+                    else if (str.ValueKind == JsonValueKind.Array)
+                    {
+                        var inputString = str.EnumerateArray().Select(x => x.ToString()).ToArray();
+                        embeddingCreateRequest.InputAsList = inputString.ToList();
+                        requestToken = TokenHelper.GetTotalTokens(inputString);
+                    }
+                    else
+                    {
+                        throw new Exception("输入格式错误");
+                    }
                 }
                 else
                 {
                     throw new Exception("输入格式错误");
                 }
-            }
-            else
-            {
-                throw new Exception("输入格式错误");
-            }
 
-            var sw = Stopwatch.StartNew();
+                var sw = Stopwatch.StartNew();
 
-            var stream = await embeddingService.EmbeddingAsync(embeddingCreateRequest, new ThorPlatformOptions
-            {
-                ApiKey = channel.Key,
-                Address = channel.Address,
-                Other = channel.Other
-            }, context.RequestAborted);
-            sw.Stop();
+                var stream = await embeddingService.EmbeddingAsync(embeddingCreateRequest, new ThorPlatformOptions
+                {
+                    ApiKey = channel.Key,
+                    Address = channel.Address,
+                    Other = channel.Other
+                }, context.RequestAborted);
+                sw.Stop();
 
-            if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
-            {
+
                 var quota = requestToken * rate.PromptRate;
 
                 var completionRatio = GetCompletionRatio(input.Model);
@@ -284,11 +288,10 @@ public sealed class ChatService(
 
                 await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
                     input.Model);
+                stream.ConvertEmbeddingData(input.EncodingFormat);
+
+                await context.Response.WriteAsJsonAsync(stream);
             }
-
-            stream.ConvertEmbeddingData(input.EncodingFormat);
-
-            await context.Response.WriteAsJsonAsync(stream);
         }
         catch (RateLimitException)
         {
@@ -321,8 +324,6 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(input!.Model, context);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
-            TokenService.CheckModel(input.Model, token, context);
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model), input.Model);
@@ -335,6 +336,9 @@ public sealed class ChatService(
 
             if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
+                var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+                TokenService.CheckModel(input.Model, token, context);
+
                 if (input.Stream == false)
                 {
                     var sw = Stopwatch.StartNew();
@@ -430,10 +434,6 @@ public sealed class ChatService(
             var model = request.Model;
             await rateLimitModelService.CheckAsync(model, context);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
-
-            TokenService.CheckModel(request.Model, token, context);
-
             // 获取渠道通过算法计算权重
             var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model), model);
 
@@ -442,8 +442,6 @@ public sealed class ChatService(
                 throw new NotModelException(model);
             }
 
-            // 记录请求模型 / 请求用户
-            logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
 
             // 获取渠道指定的实现类型的服务
             var chatCompletionsService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
@@ -455,6 +453,13 @@ public sealed class ChatService(
 
             if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
+                var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+                TokenService.CheckModel(request.Model, token, context);
+
+                // 记录请求模型 / 请求用户
+                logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
+
                 int requestToken;
                 var responseToken = 0;
 
@@ -550,6 +555,7 @@ public sealed class ChatService(
             {
                 context.Response.StatusCode = 402;
             }
+
             await context.WriteErrorAsync(insufficientQuotaException.Message, "402");
         }
         catch (RateLimitException)
@@ -606,9 +612,6 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(model, context);
 
-            var (token, user) = await tokenService.CheckTokenAsync(context);
-
-            TokenService.CheckModel(model, token, context);
 
             // 获取渠道通过算法计算权重
             var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model), model);
@@ -618,8 +621,6 @@ public sealed class ChatService(
                 throw new NotModelException(model);
             }
 
-            // 记录请求模型 / 请求用户
-            logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
 
             // 获取渠道指定的实现类型的服务
             var realtimeService = GetKeyedService<IThorRealtimeService>(channel.Type);
@@ -631,6 +632,12 @@ public sealed class ChatService(
 
             if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
+                var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+                TokenService.CheckModel(model, token, context);
+                // 记录请求模型 / 请求用户
+                logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
+
                 decimal requestToken = 0;
                 decimal audioRequestToken = 0;
                 decimal responseToken = 0;
