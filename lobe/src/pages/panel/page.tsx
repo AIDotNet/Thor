@@ -111,7 +111,7 @@ export default function PanelPage() {
     return `${value}` + '日';
   }
 
-  const modelsValueFormatter = (value: any) => {
+  const modelsValueFormatter: LineChartProps['valueFormatter'] = (value: any) => {
     return `${renderQuota(value)}`;
   }
 
@@ -302,6 +302,7 @@ export default function PanelPage() {
             showArrow={true}
             showGridLines={true}
             showLegend={true}
+            valueFormatter={modelsValueFormatter}
             showTooltip={true}
             showXAxis={true}
             showYAxis={true}

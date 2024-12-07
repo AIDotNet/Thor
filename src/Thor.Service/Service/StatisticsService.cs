@@ -42,7 +42,7 @@ public static class StatisticsService
                 .Select(x => new StatisticsNumberDto
                 {
                     Name = x.Key,
-                    Value = x.Count()
+                    Value = x.Sum(x => x.Quota)
                 });
 
             statisticsDto.UserNewData = new List<StatisticsNumberDto>();
