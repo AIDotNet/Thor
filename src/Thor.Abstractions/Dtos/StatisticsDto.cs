@@ -9,6 +9,7 @@ public class StatisticsDto
     public List<StatisticsNumberDto> Tokens { get; set; }
 
     public List<ModelStatisticsDto> Models { get; set; }
+    
 
     /// <summary>
     /// 模式日期
@@ -40,7 +41,20 @@ public class StatisticsDto
     /// </summary>
     /// <returns></returns>
     public List<ModelRankingDto> ModelRanking { get; set; }
+
+    /// <summary>
+    /// 用户新增数据
+    /// </summary>
+    /// <returns></returns>
+    public List<StatisticsNumberDto> UserNewData { get; set; } = null;
+    
+    /// <summary>
+    /// 充值最近数据
+    /// </summary>
+    public List<StatisticsNumberDto> RechargeData { get; set; } = null;
 }
+
+
 
 public class ModelRankingDto
 {
@@ -134,6 +148,8 @@ public class StatisticsNumberDto
     public long Value { get; set; }
 
     public string DateTime { get; set; }
+
+    public string Name { get; set; }
 }
 
 public class ModelStatisticsDto

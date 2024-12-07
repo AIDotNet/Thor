@@ -325,6 +325,7 @@ export default function LoggerPage() {
           <Select.Option value={1}>消费</Select.Option>
           <Select.Option value={2}>充值</Select.Option>
           <Select.Option value={3}>系统</Select.Option>
+          <Select.Option value={4}>新增用户</Select.Option>
         </Select>
         <Input
           value={input.keyword}

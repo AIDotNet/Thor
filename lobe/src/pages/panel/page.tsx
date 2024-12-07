@@ -2,7 +2,7 @@ import { renderNumber, renderQuota } from '../../utils/render';
 import { useEffect, useState } from 'react';
 import { GetStatistics } from '../../services/StatisticsService';
 import { Flexbox } from 'react-layout-kit';
-import { BarList, DonutChart, LineChart, LineChartProps } from '@lobehub/charts';
+import { BarList, DonutChart, FunnelChart, LineChart, LineChartProps } from '@lobehub/charts';
 import { useTheme } from 'antd-style';
 import { getIconByName } from '../../utils/iconutils';
 
@@ -13,6 +13,8 @@ export default function PanelPage() {
   const [tokenChart, setTokenChart] = useState<any[]>([]);
   const [modelsChart, setModelsChart] = useState<any[]>([]);
   const [modelsName, setModelsName] = useState<any[]>([]);
+  const [userNewData, setUserNewData] = useState<any[] | null>(null)
+  const [rechargeData,setRechargeData] = useState<any[] | null>(null)
 
   const theme = useTheme();
   const colors = [theme.colorSuccess, theme.colorError];
@@ -31,7 +33,21 @@ export default function PanelPage() {
 
     GetStatistics()
       .then((res) => {
-        const { modelDate, consumes, requests, tokens, models } = res.data;
+        const { modelDate, consumes, requests, tokens, models, userNewData,rechargeData } = res.data;
+
+        if (userNewData) {
+          setUserNewData(userNewData);
+        } else {
+          setUserNewData(null);
+        }
+
+        if(rechargeData){
+          setRechargeData(rechargeData)
+        }else{
+          setRechargeData(null)
+        }
+
+
         modelDate.forEach((item: any, i: number) => {
           const consume = consumes?.find((x: any) => x.dateTime === item);
           const request = requests.find((x: any) => x.dateTime === item);
@@ -236,6 +252,66 @@ export default function PanelPage() {
             sortOrder='descending' />
         </Flexbox>
       </Flexbox>
+      {userNewData && (
+        <Flexbox style={{
+          height: '400px',
+          width: '100%',
+        }}>
+          <h4>
+            新用户注册（最近七天）
+          </h4>
+          <FunnelChart 
+            style={{
+              height: '100%',
+            }}
+            data={userNewData}
+            barGap='20%'
+            enableLegendSlider={false}
+            evolutionGradient={true}
+            gradient={false}
+            showArrow={true}
+            showGridLines={true}
+            showLegend={true}
+            showTooltip={true}
+            showXAxis={true}
+            showYAxis={true}
+            variant='base'
+            xAxisLabel=''
+            yAxisAlign='left'
+            yAxisLabel=''
+          />
+        </Flexbox>
+      )}
+      {rechargeData && (
+        <Flexbox style={{
+          height: '400px',
+          width: '100%',
+        }}>
+          <h4>
+            最近充值数据
+          </h4>
+          <FunnelChart 
+            style={{
+              height: '100%',
+            }}
+            data={rechargeData}
+            barGap='20%'
+            enableLegendSlider={false}
+            evolutionGradient={true}
+            gradient={false}
+            showArrow={true}
+            showGridLines={true}
+            showLegend={true}
+            showTooltip={true}
+            showXAxis={true}
+            showYAxis={true}
+            variant='base'
+            xAxisLabel=''
+            yAxisAlign='left'
+            yAxisLabel=''
+          />
+        </Flexbox>
+      )}
     </Flexbox>
   );
 }

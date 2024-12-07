@@ -100,7 +100,7 @@ public sealed class LoggerService(
     {
         var logger = new ChatLogger
         {
-            Type = ThorChatLoggerType.System,
+            Type = ThorChatLoggerType.CreateUser,
             Content = content,
             ModelName = string.Empty
         };

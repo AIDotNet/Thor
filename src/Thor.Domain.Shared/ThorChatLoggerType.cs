@@ -20,5 +20,8 @@ public enum ThorChatLoggerType
     /// </summary>
     System = 3,
     
-    
+    /// <summary>
+    /// 新增用户
+    /// </summary>
+    CreateUser = 4
 }
