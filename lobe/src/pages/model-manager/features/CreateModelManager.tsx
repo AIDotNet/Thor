@@ -2,7 +2,7 @@ import { Modal, Tag } from "@lobehub/ui";
 import { Button, Form, Input, InputNumber, message, Select } from "antd";
 import { CreateModelManager } from "../../../services/ModelManagerService";
 import { getIconByNames } from "../../../utils/iconutils";
-import { createRef, useState } from "react";
+import { useState } from "react";
 import { renderQuota } from "../../../utils/render";
 
 interface CreateModelManagerProps {
@@ -52,8 +52,8 @@ export default function CreateModelManagerPage({
                 </Select>
             </Form.Item>
             <Form.Item style={{
-                padding:0,
-                margin:0
+                padding: 0,
+                margin: 0
             }} shouldUpdate={(prevValues, currentValues) => prevValues.quotaType !== currentValues.quotaType}>
                 {({ getFieldValue }) => {
                     const quotaType = getFieldValue('quotaType');
@@ -85,9 +85,9 @@ export default function CreateModelManagerPage({
                                     }
                                 },
                             ]} style={{
-                                padding:0,
-                                margin:0
-                            }} 
+                                padding: 0,
+                                margin: 0
+                            }}
                             name={"promptRate"} label="每次费用">
                             <InputNumber
                                 onChange={(value) => setPromptRate(value ?? 0)}
@@ -98,10 +98,10 @@ export default function CreateModelManagerPage({
                     ) : null;
                 }}
             </Form.Item>
-            <Form.Item  style={{
-                padding:0,
-                margin:0
-            }}  shouldUpdate={(prevValues, currentValues) => prevValues.quotaType !== currentValues.quotaType}>
+            <Form.Item style={{
+                padding: 0,
+                margin: 0
+            }} shouldUpdate={(prevValues, currentValues) => prevValues.quotaType !== currentValues.quotaType}>
                 {({ getFieldValue }) => {
                     return getFieldValue('quotaType') === 1 ? (
                         <Form.Item name={"completionRate"} label="完成倍率">
