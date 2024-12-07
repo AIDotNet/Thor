@@ -77,7 +77,7 @@ public static class StatisticsService
                 }
                 else
                 {
-                    statisticsDto.RechargeData.Add(item);
+                    statisticsDto.RechargeData.Add(rechargeItem);
                 }
             }
         }
