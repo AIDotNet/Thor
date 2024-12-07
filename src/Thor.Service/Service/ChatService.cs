@@ -15,6 +15,8 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
 using Thor.Core;
+using Thor.Infrastructure;
+using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
 using Thor.Service.Infrastructure;
 
@@ -41,7 +43,19 @@ public sealed class ChatService(
     LoggerService loggerService)
     : ApplicationService(serviceProvider), IScopeDependency
 {
+    /// <summary>
+    ///  按量计费模型倍率模板
+    /// </summary>
     private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
+
+    /// <summary>
+    /// 按次计费模型倍率模板
+    /// </summary>
+    private const string ConsumerTemplateOnDemand = "按次数计费费用：{0}";
+
+    /// <summary>
+    /// 实时对话计费模型倍率模板
+    /// </summary>
     private const string RealtimeConsumerTemplate = "模型倍率：文本提示词倍率:{0} 文本完成倍率:{1} 音频请求倍率:{2} 音频完成倍率:{3}  实时对话";
 
 
@@ -119,7 +133,7 @@ public sealed class ChatService(
 
             var imageCostRatio = GetImageCostRatio(request);
 
-            var rate = ModelManagerService.PromptRate[request.Model];
+            var rate = ModelManagerService.PromptRate[request.Model].PromptRate;
 
             request.N ??= 1;
 
@@ -254,10 +268,10 @@ public sealed class ChatService(
 
             if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
-                var quota = requestToken * rate;
+                var quota = requestToken * rate.PromptRate;
 
                 var completionRatio = GetCompletionRatio(input.Model);
-                quota += rate * completionRatio;
+                quota += rate.PromptRate * completionRatio;
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
@@ -325,12 +339,12 @@ public sealed class ChatService(
                 {
                     var sw = Stopwatch.StartNew();
                     var (requestToken, responseToken) =
-                        await CompletionsHandlerAsync(context, input, channel, openService, user, rate);
+                        await CompletionsHandlerAsync(context, input, channel, openService, user, rate.PromptRate);
 
-                    var quota = requestToken * rate;
+                    var quota = requestToken * rate.PromptRate;
 
                     var completionRatio = GetCompletionRatio(input.Model);
-                    quota += responseToken * rate * completionRatio;
+                    quota += responseToken * rate.PromptRate * completionRatio;
 
                     // 将quota 四舍五入
                     quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
@@ -453,7 +467,7 @@ public sealed class ChatService(
 
                     (requestToken, responseToken) =
                         await StreamChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
-                            rate);
+                            rate.PromptRate);
                 }
                 else
                 {
@@ -462,28 +476,49 @@ public sealed class ChatService(
 
                     (requestToken, responseToken) =
                         await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
-                            rate);
+                            rate.PromptRate);
                 }
 
-                var quota = requestToken * rate;
+                var quota = requestToken * rate.PromptRate;
 
                 var completionRatio = GetCompletionRatio(model);
-                quota += responseToken * rate * completionRatio;
+                quota += responseToken * rate.PromptRate * completionRatio;
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
                 sw.Stop();
 
-                await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
-                    model,
-                    requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
-                    channel.Name, context.GetIpAddress(), context.GetUserAgent(),
-                    request.Stream is true,
-                    (int)sw.ElapsedMilliseconds, organizationId);
+                // 判断是否按次
+                if (rate.QuotaType == ModelQuotaType.OnDemand)
+                {
+                    await loggerService.CreateConsumeAsync(
+                        string.Format(ConsumerTemplate, rate.PromptRate, completionRatio),
+                        model,
+                        requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                        request.Stream is true,
+                        (int)sw.ElapsedMilliseconds, organizationId);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                    model);
+                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                        model);
+                }
+                else
+                {
+                    // 费用
+                    await loggerService.CreateConsumeAsync(
+                        string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate)),
+                        model,
+                        requestToken, responseToken, (int)rate.PromptRate, token?.Key, user?.UserName, user?.Id,
+                        channel.Id,
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                        request.Stream is true,
+                        (int)sw.ElapsedMilliseconds, organizationId);
+
+                    await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
+                        channel.Id,
+                        model);
+                }
             }
 
             else
@@ -509,6 +544,14 @@ public sealed class ChatService(
                 goto limitGoto;
             }
         }
+        catch (InsufficientQuotaException insufficientQuotaException)
+        {
+            if (context.Response.StatusCode != 402)
+            {
+                context.Response.StatusCode = 402;
+            }
+            await context.WriteErrorAsync(insufficientQuotaException.Message, "402");
+        }
         catch (RateLimitException)
         {
             context.Response.StatusCode = 429;
@@ -525,12 +568,21 @@ public sealed class ChatService(
             // else
             await context.WriteErrorAsync(error.Message, error.Code);
         }
+        catch (NotModelException modelException)
+        {
+            context.Response.StatusCode = 400;
+            // if (request.Stream == true)
+            //     await context.WriteStreamErrorAsync(error.Message, error.Code);
+            // else
+            await context.WriteErrorAsync(modelException.Message, "400");
+        }
         catch (Exception e)
         {
             logger.LogError("对话模型请求异常：{e}", e);
             // if (request.Stream == true)
             //     await context.WriteStreamErrorAsync(e.Message);
             // else
+            context.Response.StatusCode = 400;
             await context.WriteErrorAsync(e.Message, "500");
         }
     }
@@ -687,13 +739,14 @@ public sealed class ChatService(
                         return;
                     }
 
-                    var quota = requestToken * rate;
+                    var quota = requestToken * rate.PromptRate;
 
                     var completionRatio = GetCompletionRatio(model);
-                    quota += responseToken * rate * completionRatio;
+                    quota += responseToken * rate.PromptRate * completionRatio;
 
-                    var audioQuota = audioRequestToken * ModelManagerService.AudioPromptRate[model];
-                    var audioCompletionRatio = audioResponseTokens * ModelManagerService.AudioPromptRate[model];
+                    var audioQuota = audioRequestToken * (ModelManagerService.PromptRate[model].AudioPromptRate ?? 0);
+                    var audioCompletionRatio = audioResponseTokens *
+                                               (ModelManagerService.PromptRate[model].AudioOutputRate ?? 0);
 
                     quota += audioQuota;
                     quota += audioCompletionRatio;
@@ -705,7 +758,8 @@ public sealed class ChatService(
 
                     await loggerService.CreateConsumeAsync(
                         string.Format(RealtimeConsumerTemplate, rate, completionRatio,
-                            ModelManagerService.AudioPromptRate[model], ModelManagerService.AudioPromptRate[model]),
+                            (ModelManagerService.PromptRate[model].AudioPromptRate),
+                            ModelManagerService.PromptRate[model].AudioOutputRate),
                         model,
                         (int)requestToken + (int)audioRequestToken, (int)responseToken + (int)audioResponseTokens,
                         (int)quota, token?.Key,
@@ -858,7 +912,7 @@ public sealed class ChatService(
             {
                 throw new ThorRateLimitException();
             }
-            
+
             if (err is UnauthorizedAccessException)
             {
                 throw new UnauthorizedAccessException("未授权");
@@ -1090,7 +1144,8 @@ public sealed class ChatService(
     /// <returns></returns>
     private decimal GetCompletionRatio(string name)
     {
-        if (ModelManagerService.CompletionRate?.TryGetValue(name, out var ratio) == true) return ratio;
+        if (ModelManagerService.PromptRate?.TryGetValue(name, out var ratio) == true)
+            return (decimal)(ratio.CompletionRate ?? 0);
 
         if (name.StartsWith("gpt-3.5"))
         {

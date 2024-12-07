@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DeleteModelManager, EnableModelManager, GetModelManagerList } from "../../services/ModelManagerService";
-import { Button, Dropdown, message, Table, Space, Input as AntInput } from "antd";
-import { Header,  Tag } from "@lobehub/ui";
+import { Button, Dropdown, message, Table, Space, Input as AntInput, Switch } from "antd";
+import { Header, Tag } from "@lobehub/ui";
 import { getCompletionRatio, renderQuota } from "../../utils/render";
 import CreateModelManagerPage from "./features/CreateModelManager";
 import { getIconByName } from "../../utils/iconutils";
@@ -17,6 +17,7 @@ export default function ModelManager() {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [total, setTotal] = useState<number>(0);
+    const [isK, setIsK] = useState<boolean>(false);
     const [input, setInput] = useState({
         page: 1,
         pageSize: 10,
@@ -44,6 +45,10 @@ export default function ModelManager() {
                 nav={'模型倍率管理'}
                 actions={
                     <Space>
+                        <Switch value={isK} checkedChildren={<Tag >K</Tag>} unCheckedChildren={<Tag >M</Tag>} defaultChecked onChange={(checked) => {
+                            setIsK(checked);
+                        }
+                        } />
                         <AntInput.Search
                             placeholder="请输入需要搜索的模型"
                             value={input.model}
@@ -105,34 +110,64 @@ export default function ModelManager() {
                         title: '模型价格',
                         dataIndex: 'price',
                         width: 180,
-                        render: (_: any, item: any) => (
-                            <div>
-                                <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000)}/1k tokens</Tag>
-                                {item.completionRate ? (
-                                    <Tag style={{ marginTop: 8 }} color='geekblue'>
-                                        完成{renderQuota(item.completionRate * 1000)}/1M tokens
-                                    </Tag>
-                                ) : (
-                                    <Tag style={{ marginTop: 8 }} color='geekblue'>
-                                        完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1M tokens
-                                    </Tag>
-                                )}
-                                {item.isVersion2 && (
-                                    <div>
-                                        <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000000)}/1M tokens</Tag>
-                                        {item.completionRate ? (
-                                            <Tag style={{ marginTop: 8 }} color='geekblue'>
-                                                音频完成{renderQuota(item.audioOutputRate * 1000000)}/1M tokens
-                                            </Tag>
-                                        ) : (
-                                            <Tag style={{ marginTop: 8 }} color='geekblue'>
-                                                音频完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens
-                                            </Tag>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )
+                        render: (_: any, item: any) => {
+
+                            if (isK) {
+                                if (item.quotaType === 1) {
+                                    return (<>
+                                        <div>
+                                            <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000, 6)}/1K tokens</Tag>
+                                            {item.completionRate ? <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>完成{renderQuota(item.completionRate * 1000, 6)}/1K tokens</Tag></> : <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000, 6)}/1K tokens</Tag></>}
+                                        </div>
+                                        {item.isVersion2 && <div>
+                                            <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000)}/1M tokens</Tag>
+                                            {item.completionRate ? <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>音频完成{renderQuota(item.audioOutputRate * 1000)}/1M tokens</Tag></> : <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1M tokens</Tag></>}
+                                        </div>}
+                                    </>)
+                                } else {
+                                    return (
+                                        <Tag style={{ marginTop: 8 }} color='geekblue'>
+                                            每次{renderQuota(item.promptRate, 6)}
+                                        </Tag>)
+                                }
+                            } else {
+                                if (item.quotaType === 1) {
+
+                                    return (<>
+                                        <div>
+                                            <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000000)}/1M tokens</Tag>
+                                            {item.completionRate ? <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>完成{renderQuota(item.completionRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
+                                        </div>
+                                        {item.isVersion2 && <div>
+                                            <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000000)}/1M tokens</Tag>
+                                            {item.completionRate ? <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>音频完成{renderQuota(item.audioOutputRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
+                                                marginTop: 8
+                                            }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
+                                        </div>}
+                                    </>)
+                                } else {
+
+                                    return (
+                                        <Tag style={{ marginTop: 8 }} color='geekblue'>
+                                            每次{renderQuota(item.promptRate, 6)}
+                                        </Tag>)
+                                }
+                            }
+                        }
                     },
                     {
                         key: 'quotaType',
