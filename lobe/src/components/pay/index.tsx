@@ -107,7 +107,12 @@ export default function Pay({
                             未启用支付宝支付
                         </div>
                     </> :
-                        <div>
+                        <div style={{
+                            marginTop: 16,
+                            marginBottom: 16,
+                            overflow: 'auto',
+                            height: 'calc(100vh - 440px)',
+                        }}>
                             {
                                 products.length > 0 ? (
                                     <div
