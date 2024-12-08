@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { message, Card, Tabs, Button, Select, Input, Row, Col, Badge } from 'antd';
+import { message, Card, Tabs, Button, Input, Badge } from 'antd';
 import { GeneralSetting, InitSetting, IsEnableAlipay } from "../../services/SettingService";
 import { Use } from "../../services/RedeemCodeService";
 import { getProduct, startPayload } from "../../services/ProductService";
@@ -15,7 +15,6 @@ export default function Pay({
     user
 }: IPayProps) {
     const [code, setCode] = useState('');
-    const [product, setProduct] = useState({} as any);
     const [products, setProducts] = useState([] as any[]);
     const [qrCode, setQrCode] = useState('');
     const [timeLeft, setTimeLeft] = useState("");
