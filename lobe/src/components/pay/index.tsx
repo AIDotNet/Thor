@@ -114,7 +114,7 @@ export default function Pay({
                                         style={{
                                             display: 'flex', // 使用 flexbox 布局
                                             flexWrap: 'wrap', // 允许换行
-                                            justifyContent: 'center', // 居中对齐
+                                            justifyContent: 'flex-start', // 从左到右排列
                                             gap: '16px', // 卡片之间的间距
                                         }}
                                     >
