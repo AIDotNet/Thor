@@ -158,8 +158,6 @@ try
         }
     }));
 
-    builder.Services.AddResponseCompression();
-
     builder.AddServiceDefaults();
 
     builder.Services.AddWebSockets(options =>
@@ -183,7 +181,6 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
 
-    app.UseResponseCompression();
     app.UseStaticFiles();
 
     app.Use((async (context, next) =>
