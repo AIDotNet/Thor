@@ -192,8 +192,12 @@ try
         {
             if (string.IsNullOrEmpty(ChatCoreOptions.Master))
             {
-                await context.Response.SendFileAsync("wwwroot/index.html");
-                return;
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+                if (File.Exists(path))
+                {
+                    await context.Response.SendFileAsync(path);
+                    return;
+                }
             }
             else
             {
@@ -205,13 +209,73 @@ try
         context.Response.Headers["AI-Gateway-Versions"] = "1.0.0.4";
         context.Response.Headers["AI-Gateway-Name"] = "Thor";
 
+        if (context.Request.Path.Value?.EndsWith(".js") == true)
+        {
+            var path = context.Request.Path.Value;
+
+            // 判断是否存在.br文件
+            var brPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", path.TrimStart('/') + ".br");
+            if (File.Exists(brPath))
+            {
+                context.Response.Headers.Append("Content-Encoding", "br");
+                context.Response.Headers.Append("Content-Type", "application/javascript");
+
+                await context.Response.SendFileAsync(brPath);
+
+                return;
+            }
+
+            // 判断是否存在.gz文件
+            var gzPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", path.TrimStart('/') + ".gz");
+            if (File.Exists(gzPath))
+            {
+                context.Response.Headers.Append("Content-Encoding", "gzip");
+                context.Response.Headers.Append("Content-Type", "application/javascript");
+                await context.Response.SendFileAsync(gzPath);
+                return;
+            }
+        }
+        else if (context.Request.Path.Value?.EndsWith(".css") == true)
+        {
+            // 判断是否存在.br文件
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot",
+                context.Request.Path.Value.TrimStart('/'));
+            if (File.Exists(path))
+            {
+                context.Response.Headers.Append("Content-Type", "text/css");
+                await context.Response.SendFileAsync(path);
+                return;
+            }
+        }
+
         await next(context);
 
         if (context.Response.StatusCode == 404)
         {
             if (string.IsNullOrEmpty(ChatCoreOptions.Master))
             {
-                await context.Response.SendFileAsync("wwwroot/index.html");
+                // 判断是否存在文件
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot",
+                    context.Request.Path.Value.TrimStart('/'));
+
+                if (File.Exists(path))
+                {
+                    context.Response.StatusCode = 200;
+                    context.Response.Headers.Append("Content-Type",
+                        HttpContextExtensions.GetContentType(Path.GetExtension(path)));
+                    await context.Response.SendFileAsync(path);
+                    return;
+                }
+
+                // 返回index.html
+                path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+
+                if (File.Exists(path))
+                {
+                    context.Response.StatusCode = 200;
+                    await context.Response.SendFileAsync(path);
+                    return;
+                }
             }
             else
             {
@@ -372,8 +436,8 @@ try
     log.MapGet(string.Empty,
             async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model,
                     DateTime? startTime,
-                    DateTime? endTime, string? keyword,string? organizationId) =>
-                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword,organizationId))
+                    DateTime? endTime, string? keyword, string? organizationId) =>
+                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword, organizationId))
         .WithDescription("获取日志")
         .WithDisplayName("获取日志")
         .WithOpenApi();
