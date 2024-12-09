@@ -91,7 +91,7 @@ public record EmbeddingCreateResponse : ThorBaseResponse
         byte[] byteArray = ArrayPool<byte>.Shared.Rent(floatArray.Length * sizeof(float));
         try
         {
-            Buffer.BlockCopy(floatArray, 0, byteArray, 0, byteArray.Length);
+            Buffer.BlockCopy(floatArray, 0, byteArray, 0, floatArray.Length);
 
             // 将 byte[] 转换成 base64 字符串
             return Convert.ToBase64String(byteArray);
