@@ -1,4 +1,4 @@
-import {  putProduct } from "../../../services/ProductService";
+import { putProduct } from "../../../services/ProductService";
 import { Form, Button, Drawer, Input, InputNumber, Tag, message } from 'antd';
 import { renderQuota } from "../../../utils/render";
 import { useEffect, useState } from "react";
@@ -57,14 +57,15 @@ export default function UpdateProduct({
             });
     }
 
-    return (
+    return (visible ? (
         <Drawer
-            title="创建产品"
+            title="更新产品"
             footer={null}
             open={visible}
             onClose={onCancel}
         >
             <Form
+                initialValues={value}
                 onFinish={handleSubmit}
                 layout="vertical"
             >
@@ -118,6 +119,6 @@ export default function UpdateProduct({
                 </Form.Item>
                 <Button type="primary" block htmlType="submit">提交</Button>
             </Form>
-        </Drawer>
+        </Drawer>) : <></>
     );
 }

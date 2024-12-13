@@ -17,31 +17,9 @@ export default function Pay({
     const [code, setCode] = useState('');
     const [products, setProducts] = useState([] as any[]);
     const [qrCode, setQrCode] = useState('');
-    const [timeLeft, setTimeLeft] = useState("");
 
     useEffect(() => {
         loadProducts();
-    }, []);
-
-    useEffect(() => {
-        const targetDate = new Date("2024-12-12T23:59:59"); // 双十二活动截止时间
-        const interval = setInterval(() => {
-            const now = new Date();
-            const diff = targetDate.getTime() - now.getTime();
-
-            if (diff <= 0) {
-                clearInterval(interval);
-                setTimeLeft("活动已结束");
-            } else {
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const minutes = Math.floor((diff / (1000 * 60)) % 60);
-                const seconds = Math.floor((diff / 1000) % 60);
-                setTimeLeft(`${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`);
-            }
-        }, 1000);
-
-        return () => clearInterval(interval);
     }, []);
 
     function loadProducts() {
@@ -128,7 +106,7 @@ export default function Pay({
 
                                             return (
                                                 <Badge.Ribbon
-                                                    text="双十二特惠"
+                                                    text="超值充值"
                                                     color="red"
                                                     placement="start"
                                                     key={x.id}
@@ -226,21 +204,6 @@ export default function Pay({
                                                             >
                                                                 {x.description}
                                                             </div>
-
-                                                            {/* 倒计时 */}
-                                                            <div
-                                                                style={{
-                                                                    fontSize: 14,
-                                                                    color: '#ff4d4f',
-                                                                    marginBottom: 16,
-                                                                    fontWeight: 'bold',
-                                                                }}
-                                                            >
-                                                                活动倒计时：
-                                                                <span style={{ fontSize: 16 }}>{timeLeft}</span>
-                                                            </div>
-
-                                                            {/* 充值按钮 */}
                                                             <GradientButton
                                                                 onClick={() => {
                                                                     message.loading({
