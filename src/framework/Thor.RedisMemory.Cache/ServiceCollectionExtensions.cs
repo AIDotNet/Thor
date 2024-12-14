@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
     /// <returns></returns>
     public static IServiceCollection AddRedisMemory(this IServiceCollection services, string redisConnectionString)
     {
+        services.AddMemoryCache();
         services.AddTransient<IConnectionMultiplexer>((_) =>
         {
             var connection = ConnectionMultiplexer.Connect(redisConnectionString);

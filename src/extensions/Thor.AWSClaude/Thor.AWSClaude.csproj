@@ -7,7 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="AWSSDK.BedrockRuntime" Version="3.7.403.14" />
+		<PackageReference Include="AWSSDK.BedrockRuntime" Version="4.0.0-preview.4" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\Thor.Abstractions\Thor.Abstractions.csproj" />
