@@ -204,7 +204,20 @@ public sealed class TokenService(
             throw new UnauthorizedAccessException("账号已禁用");
         }
 
-        if ((value.QuotaType == ModelQuotaType.ByCount && user.ResidualCredit >= value.PromptRate) || user.ResidualCredit >= requestQuota)
+        if (value.QuotaType == ModelQuotaType.ByCount)
+        {
+            if (user.ResidualCredit < value.PromptRate)
+            {
+                logger.LogWarning("用户额度不足");
+                context.Response.StatusCode = 402;
+                throw new InsufficientQuotaException("额度不足");
+            }
+            else
+            {
+                return (token, user);
+            }
+        }
+        else if ((user.ResidualCredit >= value.PromptRate) || user.ResidualCredit >= requestQuota)
         {
             return (token, user);
         }

@@ -280,7 +280,8 @@ public sealed class ChatService(
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
-                await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
+                await loggerService.CreateConsumeAsync(
+                    string.Format(ConsumerTemplate, rate.PromptRate, completionRatio),
                     input.Model,
                     requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -416,7 +417,7 @@ public sealed class ChatService(
         using var chatCompletions =
             Activity.Current?.Source.StartActivity("对话补全调用");
 
-        int rateLimit = 0;
+        var rateLimit = 0;
 
         // 用于限流重试，如果限流则重试并且进行重新负载均衡计算
         limitGoto:
@@ -569,27 +570,27 @@ public sealed class ChatService(
         catch (OpenAIErrorException error)
         {
             context.Response.StatusCode = 400;
-            // if (request.Stream == true)
-            //     await context.WriteStreamErrorAsync(error.Message, error.Code);
-            // else
             await context.WriteErrorAsync(error.Message, error.Code);
         }
         catch (NotModelException modelException)
         {
             context.Response.StatusCode = 400;
-            // if (request.Stream == true)
-            //     await context.WriteStreamErrorAsync(error.Message, error.Code);
-            // else
             await context.WriteErrorAsync(modelException.Message, "400");
         }
         catch (Exception e)
         {
-            logger.LogError("对话模型请求异常：{e}", e);
-            // if (request.Stream == true)
-            //     await context.WriteStreamErrorAsync(e.Message);
-            // else
-            context.Response.StatusCode = 400;
-            await context.WriteErrorAsync(e.Message, "500");
+            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}", e, rateLimit);
+            rateLimit++;
+            // TODO：限流重试次数
+            if (rateLimit > 3)
+            {
+                context.Response.StatusCode = 400;
+                await context.WriteErrorAsync(e.Message, "500");
+            }
+            else
+            {
+                goto limitGoto;
+            }
         }
     }
 
@@ -865,20 +866,7 @@ public sealed class ChatService(
 
             var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
 
-            ThorChatCompletionsResponse result = null;
-
-            var err = await circuitBreaker.ExecuteAsync(
-                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3);
-
-            if (err is ThorRateLimitException)
-            {
-                throw new ThorRateLimitException();
-            }
-
-            if (err is UnauthorizedAccessException)
-            {
-                throw new UnauthorizedAccessException("未授权");
-            }
+            ThorChatCompletionsResponse result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -910,20 +898,7 @@ public sealed class ChatService(
 
             var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
 
-            ThorChatCompletionsResponse result = null;
-
-            var err = await circuitBreaker.ExecuteAsync(
-                async () => { result = await openService.ChatCompletionsAsync(request, platformOptions); }, 3);
-
-            if (err is ThorRateLimitException)
-            {
-                throw new ThorRateLimitException();
-            }
-
-            if (err is UnauthorizedAccessException)
-            {
-                throw new UnauthorizedAccessException("未授权");
-            }
+            ThorChatCompletionsResponse result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -1048,62 +1023,47 @@ public sealed class ChatService(
         // 是否第一次输出
         bool isFirst = true;
 
-        var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
-        var err = await circuitBreaker.ExecuteAsync(
-            async () =>
+        await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
+        {
+            if (isFirst)
             {
-                await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
+                context.SetEventStreamHeaders();
+                isFirst = false;
+            }
+
+            if (item.Error != null)
+            {
+                await context.WriteStreamErrorAsync(item.Error.Message);
+            }
+            else
+            {
+                foreach (var response in item.Choices)
                 {
-                    if (isFirst)
+                    if (string.IsNullOrEmpty(response.Delta.Role))
                     {
-                        context.SetEventStreamHeaders();
-                        isFirst = false;
+                        response.Delta.Role = "assistant";
                     }
 
-                    if (item.Error != null)
+                    if (string.IsNullOrEmpty(response.Message.Role))
                     {
-                        await context.WriteStreamErrorAsync(item.Error.Message);
-                    }
-                    else
-                    {
-                        foreach (var response in item.Choices)
-                        {
-                            if (string.IsNullOrEmpty(response.Delta.Role))
-                            {
-                                response.Delta.Role = "assistant";
-                            }
-
-                            if (string.IsNullOrEmpty(response.Message.Role))
-                            {
-                                response.Message.Role = "assistant";
-                            }
-
-                            if (string.IsNullOrEmpty(response.Delta.Content))
-                            {
-                                response.Delta.Content = null;
-                                response.Message.Content = null;
-                            }
-
-                            if (string.IsNullOrEmpty(response.FinishReason))
-                            {
-                                response.FinishReason = null;
-                            }
-                        }
+                        response.Message.Role = "assistant";
                     }
 
-                    responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
-                    await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
+                    if (string.IsNullOrEmpty(response.Delta.Content))
+                    {
+                        response.Delta.Content = null;
+                        response.Message.Content = null;
+                    }
+
+                    if (string.IsNullOrEmpty(response.FinishReason))
+                    {
+                        response.FinishReason = null;
+                    }
                 }
-            }, 3);
+            }
 
-        if (err is ThorRateLimitException)
-        {
-            throw new ThorRateLimitException();
-        }
-
-        if (err is UnauthorizedAccessException)
-        {
-            throw new UnauthorizedAccessException();
+            responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
+            await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
         }
 
         await context.WriteAsEventStreamEndAsync();

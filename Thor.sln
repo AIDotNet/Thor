@@ -54,10 +54,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Moonshot", "src\extens
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.RabbitMQEvent", "src\framework\Thor.RabbitMQEvent\Thor.RabbitMQEvent.csproj", "{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.AppHost", "src\Thor.AppHost\Thor.AppHost.csproj", "{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{BE7E011E-E469-44B4-B06B-CE908762D7A3}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.GiteeAI", "src\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj", "{F56E56A9-83DB-4585-BA26-492E8E6EF4C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Domain", "src\Thor.Domain\Thor.Domain.csproj", "{29280BF8-A1BE-4737-B844-1139FD66DE03}"
@@ -83,6 +79,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.Rabbit", "src\framework\Thor.Stack.Rabbit\Thor.Rabbit.csproj", "{58C7FCA8-BC91-4066-885B-48EDE51C6192}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AWSClaude", "src\extensions\Thor.AWSClaude\Thor.AWSClaude.csproj", "{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AppHost", "src\Thor.AppHost\Thor.AppHost.csproj", "{5342E72B-E609-42B3-85E7-89FA9B32CF9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -162,14 +162,6 @@ Global
 		{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1F516B3-E06A-4F2A-8465-FC3D8C7645D3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{40A5DC80-CF4A-4491-93EF-D2AD0AF8F2BB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE7E011E-E469-44B4-B06B-CE908762D7A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE7E011E-E469-44B4-B06B-CE908762D7A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE7E011E-E469-44B4-B06B-CE908762D7A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE7E011E-E469-44B4-B06B-CE908762D7A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F56E56A9-83DB-4585-BA26-492E8E6EF4C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F56E56A9-83DB-4585-BA26-492E8E6EF4C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F56E56A9-83DB-4585-BA26-492E8E6EF4C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -218,6 +210,14 @@ Global
 		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5342E72B-E609-42B3-85E7-89FA9B32CF9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5342E72B-E609-42B3-85E7-89FA9B32CF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5342E72B-E609-42B3-85E7-89FA9B32CF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5342E72B-E609-42B3-85E7-89FA9B32CF9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
