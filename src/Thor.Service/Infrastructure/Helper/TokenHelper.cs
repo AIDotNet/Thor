@@ -18,7 +18,7 @@ public static class TokenHelper
     /// <param name="content"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetTotalTokens(params string[] content)
+    public static int GetTotalTokens(params string?[] content)
     {
         return content.Sum((s => RefGetTokens(ref s)));
     }

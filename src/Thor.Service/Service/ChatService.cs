@@ -864,8 +864,6 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
-
             ThorChatCompletionsResponse result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
@@ -883,7 +881,7 @@ public sealed class ChatService(
             else
             {
                 responseToken =
-                    TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray());
+                    TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray() ?? []);
             }
         }
         else
@@ -896,13 +894,11 @@ public sealed class ChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
-
-            ThorChatCompletionsResponse result = await openService.ChatCompletionsAsync(request, platformOptions);
+            var result = await openService.ChatCompletionsAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
-            responseToken = TokenHelper.GetTokens(result.Choices.FirstOrDefault()?.Delta.Content ?? string.Empty);
+            responseToken = TokenHelper.GetTokens(result.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
         }
 
         if (request.ResponseFormat?.JsonSchema is not null)
