@@ -1,5 +1,5 @@
 ﻿using Thor.Core.DataAccess;
-using Thor.Service.Domain.Core;
+using Thor.Domain.Shared.Core;
 using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Thor.Service.Domain.Core;
+using Thor.Domain.Shared.Core;
 using Thor.Service.Infrastructure;
 
 namespace Thor.Core;

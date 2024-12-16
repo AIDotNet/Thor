@@ -15,8 +15,8 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
 using Thor.Core;
+using Thor.Domain.Shared.Core;
 using Thor.Infrastructure;
-using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
 using Thor.Service.Infrastructure;
 

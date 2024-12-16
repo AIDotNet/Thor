@@ -1,5 +1,5 @@
 ﻿using Thor.Abstractions;
-using Thor.Service.Domain.Core;
+using Thor.Domain.Shared.Core;
 
 namespace Thor.Service.Domain;
 

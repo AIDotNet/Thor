@@ -1,8 +1,8 @@
 ﻿using Aop.Api;
 using Aop.Api.Request;
 using Newtonsoft.Json;
+using Thor.Domain.Shared.Core;
 using Thor.Infrastructure;
-using Thor.Service.Domain.Core;
 using Thor.Service.Infrastructure;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 

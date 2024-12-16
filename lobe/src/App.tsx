@@ -19,7 +19,6 @@ const DocPage = lazy(() => import('./pages/doc/page'))
 const ModelPage = lazy(() => import('./pages/model/page'))
 const Auth = lazy(() => import('./pages/auth/page'))
 const RateLimit = lazy(() => import('./pages/rate-limit/page'))
-const SharePage = lazy(() => import('./pages/share'))
 const WelcomePage = lazy(() => import('./pages/welcome/page'))
 const DefaultLayout = lazy(() => import('./_layout/Default/page'))
 const ChannelPage = lazy(() => import('./pages/channel/page'))
@@ -111,12 +110,7 @@ const router = createBrowserRouter([{
   element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
     <Auth />
   </Suspense>
-}, {
-  path: "/share",
-  element: <Suspense fallback={<FullscreenLoading title='加载分享页面中' />}>
-    <SharePage />
-  </Suspense>
-},
+}, 
 {
   element: <Suspense fallback={<FullscreenLoading title='加载默认布局中' />}>
     <DefaultLayout />

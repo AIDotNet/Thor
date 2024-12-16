@@ -1,4 +1,4 @@
-﻿namespace Thor.Service.Domain.Core;
+﻿namespace Thor.Domain.Shared.Core;
 
 public enum StatisticsConsumesNumberType
 {

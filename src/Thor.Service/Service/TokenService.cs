@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Thor.Service.Domain.Core;
+using Thor.Domain.Shared.Core;
 using Thor.Service.Extensions;
 using Thor.Service.Options;
 
