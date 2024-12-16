@@ -197,10 +197,8 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
         {
             TopP = 0.7f,
             Temperature = 0.95f,
-            Messages = new List<ThorChatMessage>()
-            {
-                ThorChatMessage.CreateUserMessage("hello")
-            }
+            MaxTokens = 100,
+            Messages = [ThorChatMessage.CreateUserMessage("hello")]
         };
 
         var platformOptions = new ThorPlatformOptions
@@ -253,37 +251,26 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
 
         var sw = Stopwatch.StartNew();
 
-
-        var circuitBreaker = new CircuitBreaker(3, TimeSpan.FromSeconds(10));
-
-        ThorChatCompletionsResponse response = null;
-
-        var result = await circuitBreaker.ExecuteAsync(async () =>
-        {
-            response = await chatCompletionsService.ChatCompletionsAsync(chatRequest, platformOptions,
-                token.Token);
-        }, 3).ConfigureAwait(false);
-
-        if (result is ThorRateLimitException)
-        {
-            throw new ChannelException("请求过于频繁，请稍后再试");
-        }
-        
-        if (result is UnauthorizedAccessException)
-        {
-            throw new ChannelException("未授权");
-        }
+        var response = await chatCompletionsService.ChatCompletionsAsync(chatRequest,
+            platformOptions,
+            token.Token);
 
         sw.Stop();
 
         // 更新渠道测试响应时间
         await DbContext.Channels
             .Where(x => x.Id == id)
-            .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResponseTime, sw.ElapsedMilliseconds));
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.ResponseTime, sw.ElapsedMilliseconds),
+                cancellationToken: token.Token);
 
         if (!string.IsNullOrWhiteSpace(response.Error?.Message))
         {
             throw new ChannelException(response.Error?.Message);
+        }
+
+        if (response.Choices?.Count == 0)
+        {
+            throw new ChannelException("渠道返回数据为空");
         }
 
         return (response.Choices?.Count > 0, (int)sw.ElapsedMilliseconds);

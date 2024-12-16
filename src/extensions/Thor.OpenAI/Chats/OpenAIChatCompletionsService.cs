@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
@@ -36,7 +35,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         }
 
         // 如果限流则抛出限流异常
-        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
         {
             throw new ThorRateLimitException();
         }
@@ -82,7 +81,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         }
 
         // 如果限流则抛出限流异常
-        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        if (response.StatusCode == HttpStatusCode.TooManyRequests)
         {
             throw new ThorRateLimitException();
         }
