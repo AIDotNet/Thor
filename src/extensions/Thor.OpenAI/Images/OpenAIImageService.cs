@@ -12,7 +12,7 @@ public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorIma
     public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
             options.Address?.TrimEnd('/') + "/v1/images/generations",
             imageCreate, options.ApiKey);
 
@@ -61,7 +61,7 @@ public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorIma
         multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image",
             imageEditCreateRequest.ImageName);
 
-        return await HttpClientFactory.HttpClient.PostFileAndReadAsAsync<ImageCreateResponse>(
+        return await HttpClientFactory.GetHttpClient(options.Address).PostFileAndReadAsAsync<ImageCreateResponse>(
             options.Address.TrimEnd('/') + "/v1/images/edits",
             multipartContent, cancellationToken);
     }
@@ -99,7 +99,7 @@ public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorIma
         multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image",
             imageEditCreateRequest.ImageName);
 
-        return await HttpClientFactory.HttpClient.PostFileAndReadAsAsync<ImageCreateResponse>(
+        return await HttpClientFactory.GetHttpClient(options.Address).PostFileAndReadAsAsync<ImageCreateResponse>(
             options!.Address!.TrimEnd('/') + "/v1//images/variations", multipartContent, cancellationToken);
     }
 }

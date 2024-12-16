@@ -21,9 +21,9 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
         using var openai =
             Activity.Current?.Source.StartActivity("Azure OpenAI 对话补全");
         var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
-
+        
         var response =
-            await HttpClientFactory.HttpClient.PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
+            await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
 
         openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
@@ -56,7 +56,7 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
             Activity.Current?.Source.StartActivity("Azure OpenAI 对话流式补全");
         var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
 
-        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(url,
+        var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(url,
             chatCompletionCreate, options.ApiKey, "Api-Key");
 
         openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");

@@ -63,7 +63,7 @@ namespace Thor.Ollama.Chats
                 }
             }
 
-            var response = await HttpClientFactory.HttpClient.PostJsonAsync(url, new OllamaChatCompletionsRequest()
+            var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(url, new OllamaChatCompletionsRequest()
             {
                 stream = false,
                 model = request.Model ?? "", 
@@ -180,7 +180,7 @@ namespace Thor.Ollama.Chats
                     });
                 }
             }
-            var response = await HttpClientFactory.HttpClient.HttpRequestRaw((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
+            var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw((options?.Address?.TrimEnd('/') ?? "") + "/api/chat", new OllamaChatCompletionsRequest()
             {
                 stream = true,
                 model = request.Model ?? "",
@@ -200,7 +200,7 @@ namespace Thor.Ollama.Chats
 
             using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
             string? line = string.Empty;
-            while ((line = await reader.ReadLineAsync()) != null)
+            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
             {
                 OllamaChatResponse? result;
                 try

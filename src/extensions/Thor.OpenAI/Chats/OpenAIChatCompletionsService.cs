@@ -22,7 +22,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         using var openai =
             Activity.Current?.Source.StartActivity("OpenAI 对话补全");
         
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
@@ -63,7 +63,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         using var openai =
             Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
         
-        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(
+        var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
         

@@ -22,7 +22,7 @@ public sealed class GiteeAICompletionService : IThorCompletionsService
     {
         var url = GetBaseUrl(createCompletionModel.Model);
         
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(url,
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(url,
             createCompletionModel, options.ApiKey);
 
         var result = await response.Content.ReadFromJsonAsync<CompletionCreateResponse>(

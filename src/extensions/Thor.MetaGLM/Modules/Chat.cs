@@ -56,10 +56,11 @@ public class Chat
 
         if (!string.IsNullOrEmpty(apiKey))
         {
-            request.Headers.Add("Authorization",$"Bearer {token}");
+            request.Headers.Add("Authorization", $"Bearer {token}");
         }
 
-        var response = await HttpClientFactory.HttpClient.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+        var response = await HttpClientFactory.GetHttpClient(requestUri.AbsoluteUri)
+            .SendAsync(request, HttpCompletionOption.ResponseContentRead);
         var stream = await response.Content.ReadAsStreamAsync();
         var buffer = new byte[8192];
         int bytesRead;

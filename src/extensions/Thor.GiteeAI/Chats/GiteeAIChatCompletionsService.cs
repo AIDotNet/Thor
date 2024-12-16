@@ -25,7 +25,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
     {
         var url = GetBaseUrl(chatCompletionCreate.Model);
         
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(url,
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(url,
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -52,7 +52,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var url = GetBaseUrl(chatCompletionCreate.Model);
-        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(url,
+        var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(url,
             chatCompletionCreate, options.ApiKey);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -71,7 +71,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
         string? line = string.Empty;
-        while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+        while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
 

@@ -22,7 +22,7 @@ public sealed class MoonshotChatCompletionsService : IThorChatCompletionsService
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
         var result =
@@ -44,7 +44,7 @@ public sealed class MoonshotChatCompletionsService : IThorChatCompletionsService
         ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.HttpClient.HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));

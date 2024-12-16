@@ -17,7 +17,7 @@ public sealed class MoonshotTextEmbeddingService
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
             createEmbeddingModel, options!.ApiKey);
 
         var result =

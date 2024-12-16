@@ -28,10 +28,10 @@ namespace Thor.MetaGLM.Modules
                 {
                     { "Authorization", api_key }
                 },
-
             };
 
-            var response = HttpClientFactory.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
+            var response = HttpClientFactory.GetHttpClient(request.RequestUri.AbsoluteUri)
+                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
             var stream = response.Content.ReadAsStreamAsync().Result;
             byte[] buffer = new byte[8192];
             int bytesRead;
@@ -45,13 +45,12 @@ namespace Thor.MetaGLM.Modules
         public EmbeddingResponseBase Process(EmbeddingRequestBase requestBody, string apiKey)
         {
             var sb = new StringBuilder();
-            foreach (var str in ProcessBase(requestBody,apiKey))
+            foreach (var str in ProcessBase(requestBody, apiKey))
             {
                 sb.Append(str);
             }
 
             return EmbeddingResponseBase.FromJson(sb.ToString());
         }
-
     }
 }

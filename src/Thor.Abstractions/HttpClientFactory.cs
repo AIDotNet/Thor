@@ -1,4 +1,6 @@
-﻿namespace Thor.Abstractions;
+﻿using System.Collections.Concurrent;
+
+namespace Thor.Abstractions;
 
 public static class HttpClientFactory
 {
@@ -22,12 +24,12 @@ public static class HttpClientFactory
                 }
                 else
                 {
-                    _poolSize = Environment.ProcessorCount * 2;
+                    _poolSize = Environment.ProcessorCount;
                 }
 
                 if (_poolSize < 1)
                 {
-                    _poolSize = 5;
+                    _poolSize = 2;
                 }
             }
 
@@ -35,30 +37,35 @@ public static class HttpClientFactory
         }
     }
 
-    private static readonly List<HttpClient> HttpClients = new();
+    private static readonly ConcurrentDictionary<string, Lazy<List<HttpClient>>> HttpClientPool = new();
 
-    static HttpClientFactory()
+    public static HttpClient GetHttpClient(string key)
     {
-        for (var i = 0; i < PoolSize; i++)
+        return HttpClientPool.GetOrAdd(key, k => new Lazy<List<HttpClient>>(() =>
         {
-            HttpClients.Add(new HttpClient(new SocketsHttpHandler
-            {
-                PooledConnectionLifetime = TimeSpan.FromMinutes(10),
-                PooledConnectionIdleTimeout = TimeSpan.FromMinutes(10),
-                EnableMultipleHttp2Connections = true,
-                ConnectTimeout = TimeSpan.FromMinutes(10),
-                KeepAlivePingTimeout = TimeSpan.FromMinutes(10),
-                ResponseDrainTimeout = TimeSpan.FromMinutes(10),
-            })
-            {
-                Timeout = TimeSpan.FromMinutes(10),
-                DefaultRequestHeaders =
-                {
-                    { "User-Agent", "Thor" },
-                }
-            });
-        }
-    }
+            var clients = new List<HttpClient>(PoolSize);
 
-    public static HttpClient HttpClient => HttpClients[new Random().Next(0, PoolSize)];
+            for (var i = 0; i < PoolSize; i++)
+            {
+                clients.Add(new HttpClient(new SocketsHttpHandler
+                {
+                    PooledConnectionLifetime = TimeSpan.FromMinutes(10),
+                    PooledConnectionIdleTimeout = TimeSpan.FromMinutes(10),
+                    EnableMultipleHttp2Connections = true,
+                    ConnectTimeout = TimeSpan.FromMinutes(10),
+                    KeepAlivePingTimeout = TimeSpan.FromMinutes(10),
+                    ResponseDrainTimeout = TimeSpan.FromMinutes(10),
+                })
+                {
+                    Timeout = TimeSpan.FromMinutes(10),
+                    DefaultRequestHeaders =
+                    {
+                        { "User-Agent", "Thor" },
+                    }
+                });
+            }
+
+            return clients;
+        })).Value[new Random().Next(0, PoolSize)];
+    }
 }

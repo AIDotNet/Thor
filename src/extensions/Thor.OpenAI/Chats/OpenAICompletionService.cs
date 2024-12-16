@@ -14,7 +14,7 @@ public sealed class OpenAICompletionService : IThorCompletionsService
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.HttpClient.PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             createCompletionModel, options.ApiKey);
 
         // 如果限流则抛出限流异常

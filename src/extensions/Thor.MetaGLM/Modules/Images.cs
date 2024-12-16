@@ -27,7 +27,7 @@ namespace Thor.MetaGLM.Modules
 
             };
 
-            var response = HttpClientFactory.HttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
+            var response = HttpClientFactory.GetHttpClient(request.RequestUri.AbsoluteUri).SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result;
             var stream = response.Content.ReadAsStreamAsync().Result;
             byte[] buffer = new byte[8192];
             int bytesRead;
