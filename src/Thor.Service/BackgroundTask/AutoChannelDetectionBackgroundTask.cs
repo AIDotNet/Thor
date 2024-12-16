@@ -14,11 +14,20 @@ public sealed class AutoChannelDetectionBackgroundTask(
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
-		{
-			// 启动一分钟后开始执行，防止卡住启动
-			await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
+        {
+            // 获取环境变量是否启用自动检测通道
+            var autoChannelDetection = Environment.GetEnvironmentVariable("AutoChannelDetection");
 
-			await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken,
+            if (autoChannelDetection?.ToLower() == "false")
+            {
+                logger.LogInformation("AutoChannelDetectionBackgroundTask: AutoChannelDetection is not enabled");
+                return;
+            }
+
+            // 启动一分钟后开始执行，防止卡住启动
+            await Task.Delay(TimeSpan.FromSeconds(60), stoppingToken);
+
+            await Task.Factory.StartNew(() => AutoHandleExceptionChannelAsync(stoppingToken), stoppingToken,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
             while (!stoppingToken.IsCancellationRequested)
@@ -76,7 +85,6 @@ public sealed class AutoChannelDetectionBackgroundTask(
             try
             {
                 foreach (var channel in await dbContext.Channels
-                             .AsNoTracking()
                              .AsNoTracking()
                              .Where(x => x.ControlAutomatically && x.Disable)
                              .ToArrayAsync(cancellationToken: stoppingToken))
