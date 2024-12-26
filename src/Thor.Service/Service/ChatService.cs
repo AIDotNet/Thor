@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using MapsterMapper;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Embeddings;
@@ -14,11 +13,9 @@ using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
-using Thor.Core;
 using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
-using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
@@ -473,7 +470,7 @@ public sealed class ChatService(
 
                     (requestToken, responseToken) =
                         await StreamChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
-                            rate.PromptRate);
+                            rate);
                 }
                 else
                 {
@@ -482,7 +479,7 @@ public sealed class ChatService(
 
                     (requestToken, responseToken) =
                         await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
-                            rate.PromptRate);
+                            rate);
                 }
 
                 var quota = requestToken * rate.PromptRate;
@@ -817,16 +814,16 @@ public sealed class ChatService(
         ChatChannel channel,
         IThorChatCompletionsService openService,
         User user,
-        decimal rate)
+		ModelManager rate)
     {
-        int requestToken;
-        int responseToken;
+        int requestToken = 0;
+        int responseToken = 0;
 
-        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
+		var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
-        if (request.Messages.Any(x => x.Contents != null))
+        if (rate.QuotaType == ModelQuotaType.OnDemand && request.Messages.Any(x => x.Contents != null))
         {
             requestToken = TokenHelper.GetTotalTokens(request?.Messages.Where(x => x.Contents != null)
                 .SelectMany(x => x.Contents)
@@ -859,7 +856,7 @@ public sealed class ChatService(
             }
 
 
-            var quota = requestToken * rate;
+            var quota = requestToken * rate.PromptRate;
 
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
@@ -884,12 +881,12 @@ public sealed class ChatService(
                     TokenHelper.GetTotalTokens(result?.Choices?.Select(x => x.Delta?.Content).ToArray() ?? []);
             }
         }
-        else
+        else if(rate.QuotaType == ModelQuotaType.OnDemand )
         {
             var contentArray = request.Messages.Select(x => x.Content).ToArray();
             requestToken = TokenHelper.GetTotalTokens(contentArray);
 
-            var quota = requestToken * rate;
+            var quota = requestToken * rate.PromptRate;
 
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
@@ -900,15 +897,22 @@ public sealed class ChatService(
 
             responseToken = TokenHelper.GetTokens(result.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
         }
+        else
+        {
 
-        if (request.ResponseFormat?.JsonSchema is not null)
+			ThorChatCompletionsResponse result = await openService.ChatCompletionsAsync(request, platformOptions);
+
+			await context.Response.WriteAsJsonAsync(result);
+		}
+
+        if (rate.QuotaType == ModelQuotaType.OnDemand && request.ResponseFormat?.JsonSchema is not null)
         {
             requestToken += TokenHelper.GetTotalTokens(request.ResponseFormat.JsonSchema.Name,
                 request.ResponseFormat.JsonSchema.Description ?? string.Empty,
                 JsonSerializer.Serialize(request.ResponseFormat.JsonSchema.Schema));
         }
 
-        if (request.Tools != null && request.Tools.Count != 0)
+        if (rate.QuotaType == ModelQuotaType.OnDemand &&  request.Tools != null && request.Tools.Count != 0)
         {
             requestToken += TokenHelper.GetTotalTokens(request.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Name))
                 .Select(x => x.Function!.Name).ToArray());
@@ -940,15 +944,15 @@ public sealed class ChatService(
     private async ValueTask<(int requestToken, int responseToken)> StreamChatCompletionsHandlerAsync(
         HttpContext context,
         ThorChatCompletionsRequest input, ChatChannel channel, IThorChatCompletionsService openService, User user,
-        decimal rate)
+		ModelManager rate)
     {
-        int requestToken;
+        int requestToken = 0;
 
         var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         var responseMessage = new StringBuilder();
 
-        if (input.Messages.Any(x => x.Contents != null))
+        if (input.Messages.Any(x => x.Contents != null) && rate.QuotaType == ModelQuotaType.OnDemand)
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x.Contents != null)
                 .SelectMany(x => x.Contents)
@@ -980,32 +984,32 @@ public sealed class ChatService(
                 }
             }
 
-            var quota = requestToken * rate;
+            var quota = requestToken * rate.PromptRate;
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit)
             {
                 throw new InsufficientQuotaException("账号余额不足请充值");
             }
         }
-        else
+        else if(rate.QuotaType == ModelQuotaType.OnDemand)
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Select(x => x.Content).ToArray());
 
 
-            var quota = requestToken * rate;
+            var quota = requestToken * rate.PromptRate;
 
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
         }
 
-        if (input.ResponseFormat?.JsonSchema is not null)
+        if (rate.QuotaType == ModelQuotaType.OnDemand && input.ResponseFormat?.JsonSchema is not null)
         {
             requestToken += TokenHelper.GetTotalTokens(input.ResponseFormat.JsonSchema.Name,
                 input.ResponseFormat.JsonSchema.Description ?? string.Empty,
                 JsonSerializer.Serialize(input.ResponseFormat.JsonSchema.Schema));
         }
 
-        if (input.Tools != null && input.Tools.Count != 0)
+        if (rate.QuotaType == ModelQuotaType.OnDemand && input.Tools != null && input.Tools.Count != 0)
         {
             requestToken += TokenHelper.GetTotalTokens(input.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Name))
                 .Select(x => x.Function!.Name).ToArray());
@@ -1064,7 +1068,7 @@ public sealed class ChatService(
 
         await context.WriteAsEventStreamEndAsync();
 
-        var responseToken = TokenHelper.GetTokens(responseMessage.ToString());
+        var responseToken = rate.QuotaType == ModelQuotaType.OnDemand ? TokenHelper.GetTokens(responseMessage.ToString()) : 0;
 
         return (requestToken, responseToken);
     }

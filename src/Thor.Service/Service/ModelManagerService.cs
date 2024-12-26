@@ -114,5 +114,7 @@ public class ModelManagerService(IServiceProvider serviceProvider)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Enable, y => !y.Enable));
 
         await LoadingSettings(DbContext);
+
+
     }
 }
