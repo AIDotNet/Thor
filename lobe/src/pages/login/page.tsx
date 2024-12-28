@@ -56,7 +56,7 @@ const Login = memo(() => {
                 localStorage.setItem('token', token.data.token);
                 localStorage.setItem('role', token.data.role);
                 message.success({ title: '登录成功', content: '即将跳转到首页' } as any);
-                if (redirect_uri && redirect_uri.startsWith('http')) {
+                if (redirect_uri) {
                     const url = new URL(redirect_uri);
                     url.searchParams.append('token', token.data.token);
                     handleAuthRedirect(url.toString());
