@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Text;
 
 namespace Thor.Abstractions;
 
@@ -55,6 +56,8 @@ public static class HttpClientFactory
                     ConnectTimeout = TimeSpan.FromMinutes(30),
                     KeepAlivePingTimeout = TimeSpan.FromMinutes(30),
                     ResponseDrainTimeout = TimeSpan.FromMinutes(30),
+                    MaxAutomaticRedirections = 2,
+                    Expect100ContinueTimeout = TimeSpan.FromMinutes(30),
                 })
                 {
                     Timeout = TimeSpan.FromMinutes(30),
