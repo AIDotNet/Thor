@@ -15,6 +15,12 @@ export default function Auth() {
         if (res.success) {
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('role', res.data.role);
+            const redirect_uri = localStorage.getItem('redirect_uri');
+            if (redirect_uri) {
+                window.location.href = redirect_uri + '?token=' + res.data.token;
+                localStorage.removeItem('redirect_uri');
+                return;
+            }
             message.success({
                 content: "请记住默认密码为Aa123456",
                 duration: 5

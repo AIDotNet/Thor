@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState ,useEffect} from 'react';
 import { message, Input, Button } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone, GithubOutlined, } from '@ant-design/icons';
 import { GridShowcase, Tooltip } from '@lobehub/ui';
@@ -48,6 +48,14 @@ const Login = memo(() => {
         handleAuthRedirect(`https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${location.origin}/auth&response_type=code`);
     };
 
+    useEffect(() => {
+        localStorage.removeItem('redirect_uri');
+        if (redirect_uri) {
+            const url = new URL(redirect_uri);
+            localStorage.setItem('redirect_uri', url.toString());
+        }
+    }, [redirect_uri]);
+    
     const handleLogin = async () => {
         try {
             setLoading(true);
