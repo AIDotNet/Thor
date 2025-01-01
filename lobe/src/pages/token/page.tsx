@@ -107,6 +107,11 @@ export default function TokenPage() {
                   onClick: () => bingChatNext(item.key)
                 },
                 {
+                  key: 'chatbox',
+                  label: <Tag>绑定ChatBox</Tag>,
+                  onClick: () => bingChatBox(item.key)
+                },
+                {
                   key: 'edit',
                   label: '编辑',
                   onClick: () => {
@@ -211,6 +216,10 @@ export default function TokenPage() {
     window.open(`https://chat-next.ai-v1.cn/#/?settings=${json}`);
   }
 
+  function bingChatBox(token: string) {
+    window.open(`chatbox://callback?token` + token);
+  }
+
   function removeToken(id: string) {
     Remove(id)
       .then((v) => {
@@ -307,7 +316,7 @@ export default function TokenPage() {
         }}
         columns={columns as any[]}
         dataSource={data}
-        rowKey={(row:any) => row.id}
+        rowKey={(row: any) => row.id}
         rowSelection={rowSelection}
         pagination={{
           total: total,
