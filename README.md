@@ -71,6 +71,10 @@ Thor(雷神托尔)提供了丰富的功能：
 
 Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以及MySql，用户可以根据自己的需要选择合适的数据库。
 
+清晰的数据统计
+
+![image](https://github.com/user-attachments/assets/eb508d89-6834-4064-95c2-937c939ddbd7)
+
 ## 功能实现
 
 - [x] 支持用户管理
