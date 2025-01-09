@@ -144,6 +144,7 @@ export default function PanelPage() {
           data={userRequest}
           fontSize={12}
           blockMargin={4} 
+          blockSize={10}
           labels={{
             legend: {
               less: '少',
