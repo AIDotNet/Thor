@@ -42,58 +42,63 @@ public class TrackerBackgroundTask(
 
             client.DefaultRequestHeaders.Add("Authorization", TrackerOptions.ApiKey);
 
-            var sw = Stopwatch.StartNew();
-            // 是否成功
-            var success = false;
-
-            var response = await client.PostAsJsonAsync(TrackerOptions.Endpoint.TrimEnd('/') + "/v1/chat/completions",
-                chatRequest, stoppingToken);
-
-            sw.Stop();
-
-            if (response.IsSuccessStatusCode)
+            while (!stoppingToken.IsCancellationRequested)
             {
-                var chatResponse = await response.Content.ReadFromJsonAsync<ThorChatCompletionsResponse>(stoppingToken);
+                var sw = Stopwatch.StartNew();
+                // 是否成功
+                var success = false;
 
-                if (chatResponse?.Choices != null && chatResponse.Choices.Any())
+                var response = await client.PostAsJsonAsync(
+                    TrackerOptions.Endpoint.TrimEnd('/') + "/v1/chat/completions",
+                    chatRequest, stoppingToken);
+
+                sw.Stop();
+
+                if (response.IsSuccessStatusCode)
                 {
-                    var choice = chatResponse.Choices.FirstOrDefault();
+                    var chatResponse =
+                        await response.Content.ReadFromJsonAsync<ThorChatCompletionsResponse>(stoppingToken);
 
-                    if (string.IsNullOrWhiteSpace(choice?.Delta.Content))
+                    if (chatResponse?.Choices != null && chatResponse.Choices.Any())
                     {
-                        success = false;
-                    }
-                    else
-                    {
-                        success = true;
+                        var choice = chatResponse.Choices.FirstOrDefault();
+
+                        if (string.IsNullOrWhiteSpace(choice?.Delta.Content))
+                        {
+                            success = false;
+                        }
+                        else
+                        {
+                            success = true;
+                        }
                     }
                 }
+
+                if (success)
+                {
+                    logger.LogInformation($"TrackerBackgroundTask Success: {sw.ElapsedMilliseconds}ms");
+                }
+                else
+                {
+                    logger.LogWarning($"TrackerBackgroundTask Fail: {sw.ElapsedMilliseconds}ms");
+                }
+
+                // 根据超时时间计算服务器负载比例
+                var (percentage, color) = CalculateLoadAvailabilityStatus(sw.ElapsedMilliseconds);
+                var tracker = new TrackerDto
+                {
+                    Percentage = (int)(percentage),
+                    Color = color,
+                    Time = DateTime.Now,
+                    Tooltip = "当前服务器负载 " + (percentage) + "% "
+                };
+
+                // 保存到数据库
+                await trackerStorage.AddAsync(tracker);
+
+                // 每一分钟检查一次
+                await Task.Delay(1000 * 60, stoppingToken);
             }
-
-            if (success)
-            {
-                logger.LogInformation($"TrackerBackgroundTask Success: {sw.ElapsedMilliseconds}ms");
-            }
-            else
-            {
-                logger.LogWarning($"TrackerBackgroundTask Fail: {sw.ElapsedMilliseconds}ms");
-            }
-
-            // 根据超时时间计算服务器负载比例
-            var (percentage, color) = CalculateLoadAvailabilityStatus(sw.ElapsedMilliseconds);
-            var tracker = new TrackerDto
-            {
-                Percentage = (int)(percentage),
-                Color = color,
-                Time = DateTime.Now,
-                Tooltip = "当前服务器负载 " + (percentage) + "% "
-            };
-
-            // 保存到数据库
-            await trackerStorage.AddAsync(tracker);
-
-            // 每一分钟检查一次
-            await Task.Delay(1000 * 60, stoppingToken);
         }
         catch (Exception e)
         {
