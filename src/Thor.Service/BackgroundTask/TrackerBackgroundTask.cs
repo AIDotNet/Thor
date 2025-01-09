@@ -90,7 +90,7 @@ public class TrackerBackgroundTask(
                     Percentage = (int)(percentage),
                     Color = color,
                     Time = DateTime.Now,
-                    Tooltip = $"{DateTime.Now:HH:mm:ss}\n当前服务器负载 " + (percentage) + "% "
+                    Tooltip = $"{DateTime.Now:HH:mm}\n当前服务器负载 " + (percentage) + "% "
                 };
 
                 // 保存到数据库
