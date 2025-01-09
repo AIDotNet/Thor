@@ -25,7 +25,7 @@ public sealed class TokenService(
 
         token.Id = Guid.NewGuid().ToString("N");
 
-        token.Key = "sk-" + StringHelper.GenerateRandomString(50);
+        token.Key = "sk-" + StringHelper.GenerateRandomString(38);
 
         await DbContext.Tokens.AddAsync(token);
     }
