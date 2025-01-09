@@ -701,7 +701,7 @@ try
         .WithTags("Tracker")
         .AddEndpointFilter<ResultFilter>();
 
-    tracker.MapGet(string.Empty, (TrackerService service) => service.Get())
+    tracker.MapGet(string.Empty, async (TrackerService service) => await service.GetAsync())
         .WithDescription("获取Tracker")
         .WithOpenApi();
 

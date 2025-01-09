@@ -90,7 +90,7 @@ public class TrackerBackgroundTask(
             };
 
             // 保存到数据库
-            trackerStorage.Add(tracker);
+            await trackerStorage.AddAsync(tracker);
 
             // 每一分钟检查一次
             await Task.Delay(1000 * 60, stoppingToken);

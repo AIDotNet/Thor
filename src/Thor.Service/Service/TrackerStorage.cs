@@ -3,33 +3,44 @@ using Thor.Abstractions.Tracker;
 
 namespace Thor.Service.Service;
 
-public class TrackerStorage : ITrackerStorage, ISingletonDependency
+public class TrackerStorage(IServiceCache serviceCache) : ITrackerStorage, ISingletonDependency
 {
-    public List<TrackerDto> TrackerData { get; set; }
-    
-    public TrackerStorage()
-    {
-        TrackerData = new List<TrackerDto>();
+    private const string CacheKey = "TrackerData";
 
-        for (int i = 0; i < 20; i++)
+    public async Task<List<TrackerDto>> GetTrackerData()
+    {
+        return (await serviceCache.GetOrCreateAsync(CacheKey, async () =>
         {
-            TrackerData.Add(new TrackerDto
+            var data = new List<TrackerDto>();
+
+            for (int i = 0; i < 20; i++)
             {
-                Tooltip = "服务状态 暂无数据",
-                Percentage = 100,
-                Time = DateTime.Now.AddMinutes(-i)
-            });
-        }
+                data.Add(new TrackerDto
+                {
+                    Tooltip = "服务状态 暂无数据",
+                    Percentage = 100,
+                    Time = DateTime.Now.AddMinutes(-i)
+                });
+            }
+
+            return await Task.FromResult(data);
+        }, TimeSpan.FromMinutes(5), true))!;
     }
 
-    public void Add(TrackerDto trackerDto)
+    public async Task AddAsync(TrackerDto trackerDto)
     {
-        // 如果超过30条数据，删除第一条
-        if (TrackerData.Count > 20)
+        // 获取缓存数据
+        var data = await serviceCache.GetOrCreateAsync(CacheKey, async () => await GetTrackerData());
+
+        // 只需要20条数据，如果超过则删除第一条
+        if (data.Count >= 20)
         {
-            TrackerData.RemoveAt(0);
+            data.RemoveAt(0);
         }
 
-        TrackerData.Add(trackerDto);
+        data.Add(trackerDto);
+
+        // 更新缓存
+        await serviceCache.CreateAsync(CacheKey, data);
     }
 }

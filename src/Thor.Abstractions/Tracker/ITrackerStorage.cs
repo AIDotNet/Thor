@@ -4,7 +4,7 @@ namespace Thor.Abstractions.Tracker;
 
 public interface ITrackerStorage
 {
-    List<TrackerDto> TrackerData { get; }
+    Task<List<TrackerDto>> GetTrackerData();
     
-    void Add(TrackerDto trackerDto);
+    Task AddAsync(TrackerDto trackerDto);
 }

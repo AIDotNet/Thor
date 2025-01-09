@@ -11,9 +11,9 @@ namespace Thor.Service.Service;
 public class TrackerService(ITrackerStorage trackerStorage, IServiceProvider serviceProvider)
     : ApplicationService(serviceProvider), IScopeDependency
 {
-    public List<TrackerDto> Get()
+    public async Task<List<TrackerDto>> GetAsync()
     {
-        var trackerData = trackerStorage.TrackerData;
+        var trackerData = await trackerStorage.GetTrackerData();
 
         return trackerData;
     }
