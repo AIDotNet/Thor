@@ -2,9 +2,10 @@ import { renderNumber, renderQuota } from '../../utils/render';
 import { useEffect, useState } from 'react';
 import { GetStatistics } from '../../services/StatisticsService';
 import { Flexbox } from 'react-layout-kit';
-import { BarList, DonutChart, FunnelChart, LineChart, LineChartProps } from '@lobehub/charts';
+import { BarList, DonutChart, FunnelChart, Heatmaps, LineChart, LineChartProps, Tracker } from '@lobehub/charts';
 import { useTheme } from 'antd-style';
 import { getIconByName } from '../../utils/iconutils';
+import { GetServerLoad, GetUserRequest } from '../../services/TrackerService';
 
 export default function PanelPage() {
   const [data, setData] = useState<any>(undefined);
@@ -14,7 +15,9 @@ export default function PanelPage() {
   const [modelsChart, setModelsChart] = useState<any[]>([]);
   const [modelsName, setModelsName] = useState<any[]>([]);
   const [userNewData, setUserNewData] = useState<any[] | null>(null)
-  const [rechargeData,setRechargeData] = useState<any[] | null>(null)
+  const [rechargeData, setRechargeData] = useState<any[] | null>(null)
+  const [trackerData, setTrackerData] = useState<any[]>([])
+  const [userRequest, setUserRequest] = useState<any[]>([])
 
   const theme = useTheme();
   const colors = [theme.colorSuccess, theme.colorError];
@@ -23,6 +26,18 @@ export default function PanelPage() {
     width: '25%',
     marginLeft: 5,
   };
+
+  function loadTrackerData() {
+    GetServerLoad().then((res) => {
+      setTrackerData(res.data)
+    })
+  }
+
+  function loadUserRequest() {
+    GetUserRequest().then((res) => {
+      setUserRequest(res.data)
+    })
+  }
 
   function loadStatistics() {
     const consumeChart: any[] = [];
@@ -33,7 +48,7 @@ export default function PanelPage() {
 
     GetStatistics()
       .then((res) => {
-        const { modelDate, consumes, requests, tokens, models, userNewData,rechargeData } = res.data;
+        const { modelDate, consumes, requests, tokens, models, userNewData, rechargeData } = res.data;
 
         if (userNewData) {
           setUserNewData(userNewData);
@@ -41,9 +56,9 @@ export default function PanelPage() {
           setUserNewData(null);
         }
 
-        if(rechargeData){
+        if (rechargeData) {
           setRechargeData(rechargeData)
-        }else{
+        } else {
           setRechargeData(null)
         }
 
@@ -93,6 +108,8 @@ export default function PanelPage() {
 
   useEffect(() => {
     loadStatistics();
+    loadTrackerData();
+    loadUserRequest();
   }, []);
 
   const cunsumeValueFormatter: LineChartProps['valueFormatter'] = (number: any) => {
@@ -122,6 +139,47 @@ export default function PanelPage() {
       overflow: 'auto',
       gap: 20,
     }}>
+      <Flexbox horizontal>
+        <Heatmaps
+          data={userRequest}
+          fontSize={12}
+          blockMargin={4} 
+          labels={{
+            legend: {
+              less: '少',
+              more: '多',
+            },
+            months: [
+              '一月',
+              '二月',
+              '三月',
+              '四月',
+              '五月',
+              '六月',
+              '七月',
+              '八月',
+              '九月',
+              '十月',
+              '十一月',
+              '十二月',
+            ],
+            tooltip: '{{count}} 项活动于 {{date}}',
+            totalCount: '{{year}} 年共有 {{count}} 项活动',
+            weekdays: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+          }}
+        />
+        <Flexbox style={{
+          width: '75%',
+          marginLeft: 20,
+        }}>
+          <h4 style={{
+            marginTop: 0,
+          }}>
+            服务器负载
+          </h4>
+          <Tracker data={trackerData} />
+        </Flexbox>
+      </Flexbox>
       <Flexbox style={{
         height: 250,
       }} horizontal gap={20}>
@@ -260,7 +318,7 @@ export default function PanelPage() {
           <h4>
             新用户注册（最近七天）
           </h4>
-          <FunnelChart 
+          <FunnelChart
             style={{
               height: '100%',
             }}
@@ -290,7 +348,7 @@ export default function PanelPage() {
           <h4>
             最近充值数据
           </h4>
-          <FunnelChart 
+          <FunnelChart
             style={{
               height: '100%',
             }}

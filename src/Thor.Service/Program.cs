@@ -98,6 +98,7 @@ try
         .AddHttpContextAccessor()
         .AddHostedService<StatisticBackgroundTask>()
         .AddHostedService<LoggerBackgroundTask>()
+        .AddHostedService<TrackerBackgroundTask>()
         .AddHostedService<AutoChannelDetectionBackgroundTask>()
         .AddOpenAIService()
         .AddMoonshotService()
@@ -695,6 +696,18 @@ try
         .WithOpenApi();
 
     #endregion
+
+    var tracker = app.MapGroup("/api/v1/tracker")
+        .WithTags("Tracker")
+        .AddEndpointFilter<ResultFilter>();
+
+    tracker.MapGet(string.Empty, (TrackerService service) => service.Get())
+        .WithDescription("获取Tracker")
+        .WithOpenApi();
+
+    tracker.MapGet("request-user", (TrackerService service) => service.GetUserRequest())
+        .WithDescription("获取用户请求")
+        .WithOpenApi();
 
     // 对话补全请求
     app.MapPost("/v1/chat/completions",

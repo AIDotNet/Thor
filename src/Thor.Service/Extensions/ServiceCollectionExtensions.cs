@@ -49,6 +49,8 @@ public static class ServiceCollectionExtensions
             .Get<CacheOptions>();
         builder.Configuration.GetSection(ChatCoreOptions.Name)
             .Get<ChatCoreOptions>();
+        builder.Configuration.GetSection(TrackerOptions.Tracker)
+            .Get<TrackerOptions>();
 
         var cacheType = Environment.GetEnvironmentVariable("CACHE_TYPE");
         var connectionString = Environment.GetEnvironmentVariable("CACHE_CONNECTION_STRING");
