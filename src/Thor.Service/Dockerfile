@@ -6,7 +6,7 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM node as lobe
+FROM node:20.18-alpine3.21 as lobe
 WORKDIR /src
 COPY lobe .
 RUN yarn
@@ -48,6 +48,7 @@ COPY ["src/Provider/Thor.Provider.Sqlite/Thor.Provider.Sqlite.csproj", "src/Prov
 COPY ["src/Provider/Thor.Provider.SqlServer/Thor.Provider.SqlServer.csproj", "src/Provider/Thor.Provider.SqlServer/"]
 COPY ["src/Thor.ServiceDefaults/Thor.ServiceDefaults.csproj", "src/Thor.ServiceDefaults/"]
 COPY ["src/extensions/Thor.AWSClaude/Thor.AWSClaude.csproj", "src/extensions/Thor.AWSClaude/"]
+COPY ["NuGet.config", "."]
 RUN dotnet restore "src/Thor.Service/Thor.Service.csproj"
 COPY . .
 WORKDIR "/src/src/Thor.Service"
