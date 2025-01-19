@@ -12,7 +12,8 @@ using Thor.Abstractions.Extensions;
 
 namespace Thor.OpenAI.Chats;
 
-public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsService> logger) : IThorChatCompletionsService
+public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsService> logger)
+    : IThorChatCompletionsService
 {
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
@@ -20,15 +21,15 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
     {
         using var openai =
             Activity.Current?.Source.StartActivity("OpenAI 对话补全");
-        
+
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
-        openai?.SetTag("Address",options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
-        
+
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             throw new BusinessException("渠道未登录,请联系管理人员", "401");
@@ -45,6 +46,8 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         {
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
+
+            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
 
         var result =
@@ -58,15 +61,14 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        
         using var openai =
             Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
-        
+
         var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
-        
-        openai?.SetTag("Address",options?.Address.TrimEnd('/') + "/v1/chat/completions");
+
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -90,6 +92,8 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
             logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
+
+            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
@@ -104,10 +108,12 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             {
                 logger.LogInformation("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
                     line);
-                
+
+                throw new BusinessException("OpenAI对话异常", line);
+
                 // 如果是json数据则直接返回
-                yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
-                    ThorJsonSerializer.DefaultOptions);
+                // yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
+                //     ThorJsonSerializer.DefaultOptions);
 
                 break;
             }
