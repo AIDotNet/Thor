@@ -84,6 +84,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.AppHost", "src\Thor.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.ServiceDefaults", "src\Thor.ServiceDefaults\Thor.ServiceDefaults.csproj", "{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.MiniMax", "src\extensions\Thor.MiniMax\Thor.MiniMax.csproj", "{F4B508BD-C8C4-4502-A3CC-1A0D6B220BC7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -218,6 +220,10 @@ Global
 		{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F87B1D2A-83BE-29E8-DBA4-631497B6EB9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4B508BD-C8C4-4502-A3CC-1A0D6B220BC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4B508BD-C8C4-4502-A3CC-1A0D6B220BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4B508BD-C8C4-4502-A3CC-1A0D6B220BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4B508BD-C8C4-4502-A3CC-1A0D6B220BC7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -256,6 +262,7 @@ Global
 		{9C731BC5-C473-4113-9001-5322364B9706} = {C64DA1C5-9D96-445C-B537-6B83C07F2E47}
 		{58C7FCA8-BC91-4066-885B-48EDE51C6192} = {1035B36B-8194-43D4-8A4A-992D962CD1D8}
 		{0B7F5A3F-99BB-4385-864A-9FCE1D5CAF5A} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{F4B508BD-C8C4-4502-A3CC-1A0D6B220BC7} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

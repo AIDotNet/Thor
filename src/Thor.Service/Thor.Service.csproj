@@ -48,6 +48,7 @@
     <ProjectReference Include="..\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Hunyuan\Thor.Hunyuan.csproj" />
     <ProjectReference Include="..\extensions\Thor.MetaGLM\Thor.MetaGLM.csproj" />
+    <ProjectReference Include="..\extensions\Thor.MiniMax\Thor.MiniMax.csproj" />
     <ProjectReference Include="..\extensions\Thor.Moonshot\Thor.Moonshot.csproj" />
     <ProjectReference Include="..\extensions\Thor.Ollama\Thor.Ollama.csproj" />
     <ProjectReference Include="..\extensions\Thor.OpenAI\Thor.OpenAI.csproj" />
