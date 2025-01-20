@@ -12,15 +12,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AlibabaCloud.SDK.Dysmsapi20170525" Version="3.1.0" />
-    <PackageReference Include="AlipaySDKNet.Standard" Version="4.9.320" />
+    <PackageReference Include="AlibabaCloud.SDK.Dysmsapi20170525" Version="3.1.1" />
+    <PackageReference Include="AlipaySDKNet.Standard" Version="4.9.376" />
     <PackageReference Include="Casdoor.AspNetCore" Version="1.16.0" />
     <PackageReference Include="Casdoor.Client" Version="1.16.0" />
     <PackageReference Include="Gnarly" Version="1.0.7" />
     <PackageReference Include="Gnarly.Data" Version="1.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
