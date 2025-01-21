@@ -523,7 +523,6 @@ public sealed class ChatService(
                         model);
                 }
             }
-
             else
             {
                 context.Response.StatusCode = 200;

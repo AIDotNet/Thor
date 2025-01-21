@@ -22,7 +22,34 @@ public class MiniMaxChatCompletionsService(ILogger<MiniMaxChatCompletionsService
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
             options?.Address.TrimEnd('/') + "/v1/text/chatcompletion_v2",
-            chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
+            new
+            {
+                chatCompletionCreate.Model,
+                chatCompletionCreate.Messages,
+                chatCompletionCreate.MaxTokens,
+                chatCompletionCreate.Temperature,
+                chatCompletionCreate.N,
+                chatCompletionCreate.PresencePenalty,
+                chatCompletionCreate.FrequencyPenalty,
+                stream = true,
+                chatCompletionCreate.Logprobs,
+                tool_choice = chatCompletionCreate.ToolChoiceCalculated,
+                tools = chatCompletionCreate.Tools?.Select(x => new
+                {
+                    x.Type,
+                    function = new
+                    {
+                        x.Function?.Name,
+                        x.Function?.Description,
+                        parameters = JsonSerializer.Serialize(x.Function, ThorJsonSerializer.DefaultOptions)
+                    }
+                }),
+                chatCompletionCreate.User,
+                chatCompletionCreate.ResponseFormat,
+                chatCompletionCreate.TopLogprobs,
+                stop = chatCompletionCreate.StopCalculated,
+                chatCompletionCreate.ServiceTier
+            }, options.ApiKey).ConfigureAwait(false);
 
         openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/text/chatcompletion_v2");
         openai?.SetTag("Model", chatCompletionCreate.Model);
@@ -55,17 +82,44 @@ public class MiniMaxChatCompletionsService(ILogger<MiniMaxChatCompletionsService
         return result;
     }
 
-    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
+    public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
+        ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        
         using var openai =
             Activity.Current?.Source.StartActivity("MiniMax 对话流式补全");
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
             options?.Address.TrimEnd('/') + "/v1/text/chatcompletion_v2",
-            chatCompletionCreate, options.ApiKey);
+            new
+            {
+                chatCompletionCreate.Model,
+                chatCompletionCreate.Messages,
+                chatCompletionCreate.MaxTokens,
+                chatCompletionCreate.Temperature,
+                chatCompletionCreate.N,
+                chatCompletionCreate.PresencePenalty,
+                chatCompletionCreate.FrequencyPenalty,
+                stream = true,
+                chatCompletionCreate.Logprobs,
+                tool_choice = chatCompletionCreate.ToolChoiceCalculated,
+                tools = chatCompletionCreate.Tools?.Select(x => new
+                {
+                    x.Type,
+                    function = new
+                    {
+                        x.Function?.Name,
+                        x.Function?.Description,
+                        parameters = JsonSerializer.Serialize(x.Function, ThorJsonSerializer.DefaultOptions)
+                    }
+                }),
+                chatCompletionCreate.User,
+                chatCompletionCreate.ResponseFormat,
+                chatCompletionCreate.TopLogprobs,
+                stop = chatCompletionCreate.StopCalculated,
+                chatCompletionCreate.ServiceTier
+            }, options.ApiKey);
 
         openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/text/chatcompletion_v2");
         openai?.SetTag("Model", chatCompletionCreate.Model);
@@ -105,16 +159,11 @@ public class MiniMaxChatCompletionsService(ILogger<MiniMaxChatCompletionsService
 
             if (line.StartsWith('{'))
             {
-                logger.LogInformation("MiniMax对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                logger.LogInformation("MiniMax对话异常 , StatusCode: {StatusCode} Response: {Response}",
+                    response.StatusCode,
                     line);
 
                 throw new BusinessException("MiniMax对话异常", line);
-
-                // 如果是json数据则直接返回
-                // yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
-                //     ThorJsonSerializer.DefaultOptions);
-
-                break;
             }
 
             if (line.StartsWith("data:"))
