@@ -758,6 +758,16 @@ try
     app.MapPost("/v1/audio/transcriptions",
         async (ChatService chatService, HttpContext context) => { await chatService.TranscriptionsAsync(context); });
 
+
+    app.MapPost("/v1/audio/translations",
+        async (ChatService chatService, HttpContext context) => { await chatService.TranscriptionsAsync(context); });
+
+    app.MapPost("/v1/audio/speech",
+        async (ChatService chatService, HttpContext context, AudioCreateSpeechRequest request) =>
+        {
+            await chatService.SpeechAsync(context, request);
+        });
+
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();

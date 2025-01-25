@@ -925,11 +925,233 @@ public sealed class ChatService(
         return (requestToken, responseToken);
     }
 
+    public async Task TranslationsAsync(HttpContext context)
+    {
+        try
+        {
+            using var audio =
+                Activity.Current?.Source.StartActivity("音频翻译");
+
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
+
+            var audioCreateTranscriptionRequest = new AudioCreateTranscriptionRequest();
+
+            var responseFormat = context.Request.Form["response_format"].ToString();
+            var temperature = context.Request.Form["temperature"].ToString();
+            audioCreateTranscriptionRequest.Model = context.Request.Form["model"].ToString();
+            audioCreateTranscriptionRequest.Prompt = context.Request.Form["prompt"].ToString();
+            audioCreateTranscriptionRequest.ResponseFormat = responseFormat;
+            if (!string.IsNullOrEmpty(temperature))
+            {
+                audioCreateTranscriptionRequest.Temperature = float.Parse(temperature);
+            }
+
+            // 读取文件
+            var file = context.Request.Form.Files.GetFile("file");
+            if (file == null)
+            {
+                throw new Exception("文件不能为空");
+            }
+
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            audioCreateTranscriptionRequest.File = ms.ToArray();
+            audioCreateTranscriptionRequest.FileName = file.FileName;
+            audioCreateTranscriptionRequest.FileStream = ms;
+
+            audioCreateTranscriptionRequest.Model = TokenService.ModelMap(audioCreateTranscriptionRequest.Model);
+
+            await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, context);
+
+            var rate = ModelManagerService.PromptRate[audioCreateTranscriptionRequest.Model];
+
+            var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+            TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
+
+            decimal quota = (int)rate.PromptRate;
+
+            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+
+            // 获取渠道 通过算法计算权重
+            var channel = CalculateWeight(
+                await channelService.GetChannelsContainsModelAsync(audioCreateTranscriptionRequest.Model),
+                audioCreateTranscriptionRequest.Model);
+
+            if (channel == null) throw new NotModelException(audioCreateTranscriptionRequest.Model);
+
+            // 获取渠道指定的实现类型的服务
+            var openService = GetKeyedService<IThorAudioService>(channel.Type);
+
+            if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
+
+
+            var sw = Stopwatch.StartNew();
+
+            var response =
+                await openService.TranslationsAsync(audioCreateTranscriptionRequest, new ThorPlatformOptions
+                {
+                    ApiKey = channel.Key,
+                    Address = channel.Address,
+                    Other = channel.Other
+                }, context.RequestAborted);
+
+            var requestToken = TokenHelper.GetTotalTokens(response.Text);
+
+            quota = requestToken * rate.PromptRate;
+
+            await context.Response.WriteAsJsonAsync(response);
+
+            sw.Stop();
+
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0),
+                audioCreateTranscriptionRequest.Model,
+                requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                organizationId);
+
+            await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id,
+                audioCreateTranscriptionRequest.Model);
+        }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            context.Response.StatusCode = 401;
+        }
+        catch (Exception e)
+        {
+            logger.LogError("对话模型请求异常：{e}", e);
+            await context.WriteErrorAsync(e.Message);
+        }
+    }
+
+    public async Task SpeechAsync(HttpContext context, AudioCreateSpeechRequest request)
+    {
+        try
+        {
+            using var audio =
+                Activity.Current?.Source.StartActivity("文本转语音");
+
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
+
+            request.Model = TokenService.ModelMap(request.Model);
+
+            await rateLimitModelService.CheckAsync(request.Model, context);
+
+            var rate = ModelManagerService.PromptRate[request.Model];
+
+            var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+            TokenService.CheckModel(request.Model, token, context);
+
+            decimal quota = (int)rate.PromptRate;
+
+            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+
+            // 获取渠道 通过算法计算权重
+            var channel = CalculateWeight(
+                await channelService.GetChannelsContainsModelAsync(request.Model),
+                request.Model);
+
+            if (channel == null) throw new NotModelException(request.Model);
+
+            // 获取渠道指定的实现类型的服务
+            var openService = GetKeyedService<IThorAudioService>(channel.Type);
+
+            if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
+
+
+            var sw = Stopwatch.StartNew();
+
+            var response =
+                await openService.SpeechAsync(request, new ThorPlatformOptions
+                {
+                    ApiKey = channel.Key,
+                    Address = channel.Address,
+                    Other = channel.Other
+                }, context.RequestAborted);
+
+            // 计算音频的时长
+            var requestToken = TokenHelper.GetTotalTokens(request.Input);
+
+            quota = requestToken * rate.PromptRate * (rate.CompletionRate ?? 1);
+
+            switch (request.ResponseFormat)
+            {
+                case "opus":
+                    context.Response.ContentType = "audio/ogg";
+                    context.Response.Headers["Content-Disposition"] = $"attachment; filename={Guid.NewGuid()}.opus";
+                    break;
+                case "aac":
+                    context.Response.ContentType = "audio/aac";
+                    context.Response.Headers["Content-Disposition"] = $"attachment; filename={Guid.NewGuid()}.aac";
+                    break;
+                case "flac":
+                    context.Response.ContentType = "audio/flac";
+                    context.Response.Headers["Content-Disposition"] = $"attachment; filename={Guid.NewGuid()}.flac";
+                    break;
+                case "wav":
+                    context.Response.ContentType = "audio/wav";
+                    context.Response.Headers["Content-Disposition"] = $"attachment; filename={Guid.NewGuid()}.wav";
+                    break;
+                case "pcm":
+                    context.Response.ContentType = "audio/wav";
+                    context.Response.Headers["Content-Disposition"] = $"attachment; filename={Guid.NewGuid()}.wav";
+                    break;
+                case "mp3":
+                    context.Response.ContentType = "audio/mpeg";
+                    context.Response.Headers["Content-Disposition"] = $"attachment; filename={Guid.NewGuid()}.mp3";
+                    break;
+                default:
+                    context.Response.ContentType = "audio/mpeg";
+                    context.Response.Headers["Content-Disposition"] = $"attachment; filename={Guid.NewGuid()}.mp3";
+                    break;
+            }
+
+            await response.CopyToAsync(context.Response.Body);
+
+            sw.Stop();
+
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0),
+                request.Model,
+                requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                organizationId);
+
+            await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id,
+                request.Model);
+        }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            context.Response.StatusCode = 401;
+        }
+        catch (Exception e)
+        {
+            logger.LogError("对话模型请求异常：{e}", e);
+            await context.WriteErrorAsync(e.Message);
+        }
+    }
+
     public async Task TranscriptionsAsync(HttpContext context)
     {
         try
         {
-            using var image =
+            using var audio =
                 Activity.Current?.Source.StartActivity("音频转写");
 
             var organizationId = string.Empty;
@@ -996,7 +1218,7 @@ public sealed class ChatService(
             var sw = Stopwatch.StartNew();
 
             var response =
-                await openService.AudioCompletionsAsync(audioCreateTranscriptionRequest, new ThorPlatformOptions
+                await openService.TranscriptionsAsync(audioCreateTranscriptionRequest, new ThorPlatformOptions
                 {
                     ApiKey = channel.Key,
                     Address = channel.Address,
