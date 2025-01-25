@@ -755,6 +755,9 @@ try
         });
     }));
 
+    app.MapPost("/v1/audio/transcriptions",
+        async (ChatService chatService, HttpContext context) => { await chatService.TranscriptionsAsync(context); });
+
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();

@@ -2,10 +2,12 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 using Thor.Abstractions;
+using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Realtime;
+using Thor.OpenAI.Audios;
 using Thor.OpenAI.Chats;
 using Thor.OpenAI.Embeddings;
 using Thor.OpenAI.Images;
@@ -61,6 +63,9 @@ public static class OpenAIServiceCollectionExtensions
             .PlatformCode);
 
         services.AddKeyedTransient<IThorRealtimeService, OpenAIRealtimeService>(OpenAIPlatformOptions
+            .PlatformCode);
+        
+        services.AddKeyedSingleton<IThorAudioService, OpenAIAudioService>(OpenAIPlatformOptions
             .PlatformCode);
 
         services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
