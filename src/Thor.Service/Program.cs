@@ -32,6 +32,7 @@ using Thor.Service.Infrastructure;
 using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
+using Thor.SiliconFlow.Extensions;
 using Thor.SparkDesk.Extensions;
 using Product = Thor.Service.Domain.Product;
 
@@ -113,7 +114,8 @@ try
         .AddAzureOpenAIService()
         .AddErnieBotService()
         .AddGiteeAIService()
-        .AddMiniMaxService();
+        .AddMiniMaxService()
+        .AddSiliconFlowService();
 
     builder.Services
         .AddCors(options =>

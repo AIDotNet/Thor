@@ -100,8 +100,9 @@ Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqli
 - [x] 通义千问（阿里云）（支持function）
 - [x] 腾讯混元大模型
 - [x] 支持百度大模型(ErnieBot)
-- [x] Gitee AI
+- [x] Gitee AI (支持function)
 - [x] MiniMax AI（支持function）
+- [x] SiliconFlow AI（支持function）
 
 # 支持数据库
 

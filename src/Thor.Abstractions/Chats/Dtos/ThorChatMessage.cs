@@ -109,6 +109,12 @@ public class ThorChatMessage
     /// </summary>
     [JsonPropertyName("function_call")]
     public ThorChatMessageFunction? FunctionCall { get; set; }
+    
+    /// <summary>
+    /// 【可选】推理内容
+    /// </summary>
+    [JsonPropertyName("reasoning_content")]
+    public string? ReasoningContent { get; set; }
 
     /// <summary>
     /// 工具调用列表，模型生成的工具调用，例如函数调用。<br/>

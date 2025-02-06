@@ -53,6 +53,7 @@
     <ProjectReference Include="..\extensions\Thor.Ollama\Thor.Ollama.csproj" />
     <ProjectReference Include="..\extensions\Thor.OpenAI\Thor.OpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Qiansail\Thor.Qiansail.csproj" />
+    <ProjectReference Include="..\extensions\Thor.SiliconFlow\Thor.SiliconFlow.csproj" />
     <ProjectReference Include="..\extensions\Thor.SparkDesk\Thor.SparkDesk.csproj" />
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Cache\Thor.BuildingBlocks.Cache.csproj" />
     <ProjectReference Include="..\framework\Thor.BuildingBlocks.Event\Thor.BuildingBlocks.Event.csproj" />
