@@ -8,7 +8,7 @@ using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-namespace Thor.OpenAI.Embeddings;
+namespace Thor.DeepSeek.Embeddings;
 
 public sealed class OpenAITextEmbeddingService(IHttpClientFactory httpClientFactory)
     : IThorTextEmbeddingService

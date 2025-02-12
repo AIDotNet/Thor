@@ -1,6 +1,6 @@
 ﻿using Thor.Abstractions.Realtime;
 
-namespace Thor.OpenAI.Realtime;
+namespace Thor.DeepSeek.Realtime;
 
 public class OpenAIRealtimeService :IThorRealtimeService
 {

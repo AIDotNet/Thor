@@ -5,12 +5,10 @@ using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
-using Thor.Abstractions.Realtime;
 using Thor.SiliconFlow.Audios;
 using Thor.SiliconFlow.Chats;
 using Thor.SiliconFlow.Embeddings;
 using Thor.SiliconFlow.Images;
-using Thor.SiliconFlow.Realtime;
 
 namespace Thor.SiliconFlow.Extensions;
 
@@ -21,33 +19,18 @@ public static class SiliconFlowServiceCollectionExtensions
         ThorGlobal.PlatformNames.Add(SiliconFlowPlatformOptions.PlatformName, SiliconFlowPlatformOptions.PlatformCode);
 
         ThorGlobal.ModelNames.Add(SiliconFlowPlatformOptions.PlatformCode, [
-            "gpt-3.5-turbo",
-            "gpt-3.5-turbo-0125",
-            "gpt-3.5-turbo-0301",
-            "gpt-3.5-turbo-0613",
-            "gpt-3.5-turbo-1106",
-            "gpt-3.5-turbo-16k",
-            "gpt-3.5-turbo-16k-0613",
-            "gpt-3.5-turbo-instruct",
-            "gpt-4",
-            "gpt-4-0125-preview",
-            "gpt-4-0314",
-            "gpt-4-0613",
-            "gpt-4-1106-preview",
-            "gpt-4-32k",
-            "gpt-4-32k-0314",
-            "gpt-4-32k-0613",
-            "gpt-4-all",
-            "gpt-4-gizmo-*",
-            "gpt-4-turbo-preview",
-            "gpt-4-vision-preview",
-            "text-embedding-3-large",
-            "text-embedding-3-small",
-            "text-embedding-ada-002",
-            "text-embedding-v1",
-            "text-moderation-latest",
-            "text-moderation-stable",
-            "text-search-ada-doc-001"
+            "deepseek-ai/DeepSeek-R1",
+            "deepseek-ai/DeepSeek-V3",
+            "Pro/deepseek-ai/DeepSeek-R1",
+            "Pro/deepseek-ai/DeepSeek-V3",
+            "deepseek-ai/DeepSeek-R1-Distill-Llama-70B",
+            "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+            "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
+            "deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
+            "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+            "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+            "deepseek-ai/Janus-Pro-7B",
+            "Qwen/QVQ-72B-Preview"
         ]);
 
         services.AddKeyedSingleton<IThorChatCompletionsService, SiliconFlowChatCompletionsService>(SiliconFlowPlatformOptions
@@ -59,9 +42,6 @@ public static class SiliconFlowServiceCollectionExtensions
         services.AddKeyedSingleton<IThorImageService, SiliconFlowImageService>(SiliconFlowPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IThorCompletionsService, SiliconFlowCompletionService>(SiliconFlowPlatformOptions
-            .PlatformCode);
-
-        services.AddKeyedTransient<IThorRealtimeService, SiliconFlowRealtimeService>(SiliconFlowPlatformOptions
             .PlatformCode);
         
         services.AddKeyedSingleton<IThorAudioService, SiliconFlowAudioService>(SiliconFlowPlatformOptions

@@ -9,14 +9,37 @@ namespace Thor.SiliconFlow.Images;
 
 public class SiliconFlowImageService : IThorImageService
 {
-    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ThorPlatformOptions? options = null,
+    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
-            options.Address?.TrimEnd('/') + "/v1/images/generations",
-            imageCreate, options.ApiKey);
+        object input;
 
-        var result = await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
+        if (imageCreate.Model?.StartsWith("stable-diffusion") == true || imageCreate.Model?.StartsWith("stabilityai") == true)
+        {
+            input = new
+            {
+                model = imageCreate.Model,
+                prompt = imageCreate.Prompt,
+                image_size = imageCreate.Size,
+                batch_size = imageCreate.N,
+            };
+        }
+        else
+        {
+            input = new
+            {
+                model = imageCreate.Model,
+                prompt = imageCreate.Prompt,
+            };
+        }
+
+        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
+            options.Address?.TrimEnd('/') + "/api/redirect/model",
+            input, options.ApiKey);
+
+        var result =
+            await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
 
         return result;
     }

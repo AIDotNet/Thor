@@ -8,12 +8,17 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
 namespace Thor.DeepSeek.Chats;
 
-public sealed class OpenAICompletionService : IThorCompletionsService
+public sealed class DeepSeekCompletionService : IThorCompletionsService
 {
     public async Task<CompletionCreateResponse> CompletionAsync(CompletionCreateRequest createCompletionModel,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(options.Address))
+        {
+            options.Address = "https://api.deepseek.com";
+        }
+        
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/chat/completions",
             createCompletionModel, options.ApiKey);
 

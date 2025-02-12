@@ -18,7 +18,7 @@ using Thor.LocalMemory.Cache;
 using Thor.MetaGLM.Extensions;
 using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
-using Thor.OpenAI.Extensions;
+using Thor.DeepSeek.Extensions;
 using Thor.AWSClaude.Extensions;
 using Thor.MiniMax.Extensions;
 using Thor.Provider;
@@ -115,7 +115,8 @@ try
         .AddErnieBotService()
         .AddGiteeAIService()
         .AddMiniMaxService()
-        .AddSiliconFlowService();
+        .AddSiliconFlowService()
+        .AddDeepSeekService();
 
     builder.Services
         .AddCors(options =>

@@ -11,7 +11,7 @@ using Thor.AzureOpenAI;
 using Thor.Claude;
 using Thor.Core;
 using Thor.Hunyuan;
-using Thor.OpenAI;
+using Thor.DeepSeek;
 using Thor.Service.Infrastructure;
 using Thor.SparkDesk;
 

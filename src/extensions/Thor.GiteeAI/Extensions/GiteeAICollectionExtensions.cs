@@ -4,10 +4,10 @@ using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
-using Thor.OpenAI.Chats;
-using Thor.OpenAI.Embeddings;
+using Thor.DeepSeek.Chats;
+using Thor.DeepSeek.Embeddings;
 
-namespace Thor.OpenAI.Extensions;
+namespace Thor.DeepSeek.Extensions;
 
 public static class GiteeAICollectionExtensions
 {

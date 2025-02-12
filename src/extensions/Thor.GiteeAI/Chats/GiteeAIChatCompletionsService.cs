@@ -8,23 +8,23 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
-namespace Thor.OpenAI.Chats;
+namespace Thor.DeepSeek.Chats;
 
 public class GiteeAIChatCompletionsService : IThorChatCompletionsService
 {
     private const string baseUrl = "https://ai.gitee.com/api/serverless/{0}/chat/completions";
-    
+
     private string GetBaseUrl(string model)
     {
         return string.Format(baseUrl, model);
     }
-    
+
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var url = GetBaseUrl(chatCompletionCreate.Model);
-        
+
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(url,
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
@@ -71,6 +71,8 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
         string? line = string.Empty;
+        var first = true;
+        var isThink = false;
         while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
@@ -84,26 +86,55 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
                 break;
             }
 
-            if (line.StartsWith("data:"))
-                line = line["data:".Length..];
+            if (line.StartsWith(OpenAIConstant.Data))
+                line = line[OpenAIConstant.Data.Length..];
 
             line = line.Trim();
 
-            if (line == "[DONE]")
+            if(line == OpenAIConstant.Done)
             {
                 break;
             }
 
-            if (line.StartsWith(":"))
+            if (line.StartsWith(':'))
             {
                 continue;
             }
-
 
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
+
+            if (first && string.IsNullOrWhiteSpace(result?.Choices?.FirstOrDefault()?.Delta.Content))
+            {
+                continue;
+            }
+
+            if (first && result?.Choices?.FirstOrDefault()?.Delta.Content == OpenAIConstant.ThinkStart)
+            {
+                isThink = true;
+                continue;
+                // 需要将content的内容转换到其他字段
+            }
+
+            if (isThink && result?.Choices?.FirstOrDefault()?.Delta.Content == OpenAIConstant.ThinkEnd)
+            {
+                isThink = false;
+                // 需要将content的内容转换到其他字段
+                continue;
+            }
+
+            if (isThink)
+            {
+                // 需要将content的内容转换到其他字段
+                foreach (var choice in result.Choices)
+                {
+                    choice.Delta.ReasoningContent = choice.Delta.Content;
+                    choice.Delta.Content = string.Empty;
+                }
+            }
+            first = false;
             yield return result;
         }
     }

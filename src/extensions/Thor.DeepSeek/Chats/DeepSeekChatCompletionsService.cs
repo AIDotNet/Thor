@@ -10,9 +10,9 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
-namespace Thor.SiliconFlow.Chats;
+namespace Thor.DeepSeek.Chats;
 
-public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCompletionsService> logger)
+public sealed class DeepSeekChatCompletionsService(ILogger<DeepSeekChatCompletionsService> logger)
     : IThorChatCompletionsService
 {
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
@@ -20,8 +20,13 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
         CancellationToken cancellationToken = default)
     {
         using var openai =
-            Activity.Current?.Source.StartActivity("SiliconFlow 对话补全");
+            Activity.Current?.Source.StartActivity("OpenAI 对话补全");
 
+        if (string.IsNullOrWhiteSpace(options.Address))
+        {
+            options.Address = "https://api.deepseek.com";
+        }
+        
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
@@ -45,9 +50,9 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            logger.LogError("SiliconFlow对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
+            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
 
-            throw new BusinessException("SiliconFlow对话异常", response.StatusCode.ToString());
+            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
 
         var result =
@@ -61,8 +66,12 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
         ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(options.Address))
+        {
+            options.Address = "https://api.deepseek.com";
+        }
         using var openai =
-            Activity.Current?.Source.StartActivity("SiliconFlow 对话流式补全");
+            Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
@@ -91,9 +100,9 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
         // 大于等于400的状态码都认为是异常
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            logger.LogError("SiliconFlow对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
+            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
 
-            throw new BusinessException("SiliconFlow对话异常", response.StatusCode.ToString());
+            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
@@ -108,18 +117,18 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
 
             if (line.StartsWith('{'))
             {
-                logger.LogInformation("SiliconFlow对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                logger.LogInformation("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
                     line);
 
-                throw new BusinessException("SiliconFlow对话异常", line);
+                throw new BusinessException("OpenAI对话异常", line);
             }
 
-            if (line.StartsWith("data:"))
-                line = line["data:".Length..];
+            if (line.StartsWith(OpenAIConstant.Data))
+                line = line[OpenAIConstant.Data.Length..];
 
             line = line.Trim();
 
-            if (line == "[DONE]")
+            if (line == OpenAIConstant.Done)
             {
                 break;
             }

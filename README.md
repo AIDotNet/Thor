@@ -103,6 +103,7 @@ Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqli
 - [x] Gitee AI (支持function)
 - [x] MiniMax AI（支持function）
 - [x] SiliconFlow AI（支持function）
+- [x] DeepSeek AI（支持function）
 
 # 支持数据库
 

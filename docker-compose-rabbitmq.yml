@@ -13,6 +13,11 @@ services:
       - ai-rabbitmq
       - ai-redis
       - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     volumes:
       - ./data:/data
     environment:

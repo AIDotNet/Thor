@@ -1,4 +1,4 @@
-namespace Thor.OpenAI;
+namespace Thor.DeepSeek;
 
 public class OpenAIPlatformOptions
 {

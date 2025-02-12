@@ -7,13 +7,13 @@ using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Realtime;
-using Thor.OpenAI.Audios;
-using Thor.OpenAI.Chats;
-using Thor.OpenAI.Embeddings;
-using Thor.OpenAI.Images;
-using Thor.OpenAI.Realtime;
+using Thor.DeepSeek.Audios;
+using Thor.DeepSeek.Chats;
+using Thor.DeepSeek.Embeddings;
+using Thor.DeepSeek.Images;
+using Thor.DeepSeek.Realtime;
 
-namespace Thor.OpenAI.Extensions;
+namespace Thor.DeepSeek.Extensions;
 
 public static class OpenAIServiceCollectionExtensions
 {
@@ -71,7 +71,7 @@ public static class OpenAIServiceCollectionExtensions
         services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
                 options =>
                 {
-                    options.Timeout = TimeSpan.FromMinutes(6);
+                    options.Timeout = TimeSpan.FromMinutes(10);
 
                     options.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
                 })

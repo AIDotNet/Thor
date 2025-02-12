@@ -5,7 +5,7 @@ using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-namespace Thor.OpenAI.Chats;
+namespace Thor.DeepSeek.Chats;
 
 public sealed class GiteeAICompletionService : IThorCompletionsService
 {
