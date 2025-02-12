@@ -262,27 +262,6 @@ export default function LoggerPage() {
             查看消费
           </Button>
         </Card>
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: 1,
-                label: "删除选中令牌",
-                onClick: () => {
-                  console.log("删除选中令牌");
-                },
-              },
-            ],
-          }}
-        >
-          <Button
-            style={{
-              float: "right",
-            }}
-          >
-            操作
-          </Button>
-        </Dropdown>
         <Button
           onClick={() => loadData()}
           style={{
