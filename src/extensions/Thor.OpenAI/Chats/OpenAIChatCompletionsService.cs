@@ -45,7 +45,8 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
+            logger.LogError("OpenAI对话异常 请求地址：{Address}, StatusCode: {StatusCode} Response: {Response}", options.Address,
+                response.StatusCode, error);
 
             throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
@@ -118,7 +119,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
                 line = line[OpenAIConstant.Data.Length..];
 
             line = line.Trim();
-            
+
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             if (line == OpenAIConstant.Done)
@@ -134,7 +135,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
 
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
-            
+
             if (first && string.IsNullOrWhiteSpace(result?.Choices?.FirstOrDefault()?.Delta.Content))
             {
                 continue;
@@ -163,8 +164,9 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
                     choice.Delta.Content = string.Empty;
                 }
             }
+
             first = false;
-            
+
             yield return result;
         }
     }
