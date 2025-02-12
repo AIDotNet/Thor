@@ -70,41 +70,74 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
         string? line = string.Empty;
-        while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null)
+        var first = true;
+        var isThink = false;
+        while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
 
             if (line.StartsWith('{'))
             {
-                logger.LogDebug("Azure对话异常返回数据: {Data}", line);
+                logger.LogInformation("AzureOpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                    line);
 
-                // 如果是json数据则直接返回
-                yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
-                    ThorJsonSerializer.DefaultOptions);
-
-                break;
+                throw new BusinessException("AzureOpenAI对话异常", line);
             }
 
-            if (line.StartsWith("data:"))
-                line = line["data:".Length..];
+            if (line.StartsWith(OpenAIConstant.Data))
+                line = line[OpenAIConstant.Data.Length..];
 
             line = line.Trim();
 
-            if (line == "[DONE]")
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            if (line == OpenAIConstant.Done)
             {
                 break;
             }
 
-            if (line.StartsWith(":"))
+            if (line.StartsWith(':'))
             {
                 continue;
             }
 
 
-            if (string.IsNullOrWhiteSpace(line)) continue;
-
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
+
+            var content = result?.Choices?.FirstOrDefault()?.Delta;
+
+            if (first && string.IsNullOrWhiteSpace(content?.Content) && string.IsNullOrEmpty(content?.ReasoningContent))
+            {
+                continue;
+            }
+
+            if (first && content.Content == OpenAIConstant.ThinkStart)
+            {
+                isThink = true;
+                continue;
+                // 需要将content的内容转换到其他字段
+            }
+
+            if (isThink && content.Content == OpenAIConstant.ThinkEnd)
+            {
+                isThink = false;
+                // 需要将content的内容转换到其他字段
+                continue;
+            }
+
+            if (isThink)
+            {
+                // 需要将content的内容转换到其他字段
+                foreach (var choice in result.Choices)
+                {
+                    choice.Delta.ReasoningContent = choice.Delta.Content;
+                    choice.Delta.Content = string.Empty;
+                }
+            }
+
+            first = false;
+
             yield return result;
         }
     }

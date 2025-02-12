@@ -135,19 +135,21 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
             
-            if (first && string.IsNullOrWhiteSpace(result?.Choices?.FirstOrDefault()?.Delta.Content))
+            var content = result?.Choices?.FirstOrDefault()?.Delta;
+
+            if (first && string.IsNullOrWhiteSpace(content?.Content) && string.IsNullOrEmpty(content?.ReasoningContent))
             {
                 continue;
             }
 
-            if (first && result?.Choices?.FirstOrDefault()?.Delta.Content == OpenAIConstant.ThinkStart)
+            if (first && content.Content == OpenAIConstant.ThinkStart)
             {
                 isThink = true;
                 continue;
                 // 需要将content的内容转换到其他字段
             }
 
-            if (isThink && result?.Choices?.FirstOrDefault()?.Delta.Content == OpenAIConstant.ThinkEnd)
+            if (isThink && content.Content == OpenAIConstant.ThinkEnd)
             {
                 isThink = false;
                 // 需要将content的内容转换到其他字段
