@@ -25,7 +25,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
     {
         var url = GetBaseUrl(chatCompletionCreate.Model);
 
-        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(url,
+        var response = await HttpClientFactory.GetHttpClient(url).PostJsonAsync(url,
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -52,7 +52,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var url = GetBaseUrl(chatCompletionCreate.Model);
-        var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(url,
+        var response = await HttpClientFactory.GetHttpClient(url).HttpRequestRaw(url,
             chatCompletionCreate, options.ApiKey);
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -64,8 +64,6 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
         {
             throw new PaymentRequiredException();
         }
-
-        response.EnsureSuccessStatusCode();
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
 
@@ -79,11 +77,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
 
             if (line.StartsWith('{'))
             {
-                // 如果是json数据则直接返回
-                yield return JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
-                    ThorJsonSerializer.DefaultOptions);
-
-                break;
+                throw new BusinessException("GiteeAI对话异常" + line, "400");
             }
 
             if (line.StartsWith(OpenAIConstant.Data))
@@ -91,7 +85,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
 
             line = line.Trim();
 
-            if(line == OpenAIConstant.Done)
+            if (line == OpenAIConstant.Done)
             {
                 break;
             }
@@ -134,6 +128,7 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
                     choice.Delta.Content = string.Empty;
                 }
             }
+
             first = false;
             yield return result;
         }

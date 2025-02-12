@@ -114,12 +114,14 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
                 throw new BusinessException("SiliconFlow对话异常", line);
             }
 
-            if (line.StartsWith("data:"))
-                line = line["data:".Length..];
+            if (line.StartsWith(OpenAIConstant.Data))
+                line = line[OpenAIConstant.Done.Length..];
 
             line = line.Trim();
+            
+            if (string.IsNullOrWhiteSpace(line)) continue;
 
-            if (line == "[DONE]")
+            if (line == OpenAIConstant.Done)
             {
                 break;
             }
@@ -129,8 +131,6 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
                 continue;
             }
 
-
-            if (string.IsNullOrWhiteSpace(line)) continue;
 
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);

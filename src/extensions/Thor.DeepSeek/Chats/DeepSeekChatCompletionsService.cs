@@ -127,6 +127,7 @@ public sealed class DeepSeekChatCompletionsService(ILogger<DeepSeekChatCompletio
                 line = line[OpenAIConstant.Data.Length..];
 
             line = line.Trim();
+            if (string.IsNullOrWhiteSpace(line)) continue;
 
             if (line == OpenAIConstant.Done)
             {
@@ -138,8 +139,6 @@ public sealed class DeepSeekChatCompletionsService(ILogger<DeepSeekChatCompletio
                 continue;
             }
 
-
-            if (string.IsNullOrWhiteSpace(line)) continue;
 
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);

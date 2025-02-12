@@ -179,6 +179,11 @@ public sealed class ChatService(
 
             await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
         }
+        catch (PaymentRequiredException)
+        {
+            context.Response.StatusCode = 402;
+            await context.WriteErrorAsync("账号余额不足请充值", "402");
+        }
         catch (RateLimitException)
         {
             context.Response.StatusCode = 429;
