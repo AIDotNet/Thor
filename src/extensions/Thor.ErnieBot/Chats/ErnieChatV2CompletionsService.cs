@@ -25,8 +25,16 @@ public class ErnieChatV2CompletionsService(ILogger<ErnieChatV2CompletionsService
             options.Address = "https://qianfan.baidubce.com/";
         }
 
+        if (string.IsNullOrWhiteSpace(options?.Other))
+        {
+            throw new BusinessException(
+                "appId不能为空,请前往：https://console.bce.baidu.com/iam/#/iam/apikey/list 创建Key的时候进行绑定", "400");
+        }
+
+        var header = new Dictionary<string, string>(1) { { "appId", options.Other } };
+
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
-                options?.Address.TrimEnd('/') + "/v2/chat/completions", chatCompletionCreate, options.ApiKey)
+                options?.Address.TrimEnd('/') + "/v2/chat/completions", chatCompletionCreate, options.ApiKey, header)
             .ConfigureAwait(false);
 
         openai?.SetTag("Address", "/v2/chat/completions");
@@ -73,9 +81,16 @@ public class ErnieChatV2CompletionsService(ILogger<ErnieChatV2CompletionsService
             options.Address = "https://qianfan.baidubce.com/";
         }
 
+        if (string.IsNullOrWhiteSpace(options?.Other))
+        {
+            throw new BusinessException(
+                "appId不能为空,请前往：https://console.bce.baidu.com/iam/#/iam/apikey/list 创建Key的时候进行绑定", "400");
+        }
+
+        var header = new Dictionary<string, string>(1) { { "appId", options.Other } };
         var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
             options?.Address.TrimEnd('/') + "/v2/chat/completions",
-            chatCompletionCreate, options.ApiKey);
+            chatCompletionCreate, options.ApiKey, header);
 
         openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v2/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
