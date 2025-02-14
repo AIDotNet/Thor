@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
@@ -10,23 +9,27 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
-namespace Thor.SiliconFlow.Chats;
+namespace Thor.ErnieBot.Chats;
 
-public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCompletionsService> logger)
-    : IThorChatCompletionsService
+public class ErnieChatV2CompletionsService(ILogger<ErnieChatV2CompletionsService> logger) : IThorChatCompletionsService
 {
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         using var openai =
-            Activity.Current?.Source.StartActivity("SiliconFlow 对话补全");
+            Activity.Current?.Source.StartActivity("百度千帆 对话补全");
+
+        if (string.IsNullOrWhiteSpace(options?.Address))
+        {
+            options.Address = "https://qianfan.baidubce.com/";
+        }
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
-            options?.Address.TrimEnd('/') + "/v1/chat/completions",
-            chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
+                options?.Address.TrimEnd('/') + "/v2/chat/completions", chatCompletionCreate, options.ApiKey)
+            .ConfigureAwait(false);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", "/v2/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -45,9 +48,9 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            logger.LogError("SiliconFlow对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
+            logger.LogError("百度千帆对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
 
-            throw new BusinessException("SiliconFlow对话异常", response.StatusCode.ToString());
+            throw new BusinessException("百度千帆对话异常", response.StatusCode.ToString());
         }
 
         var result =
@@ -58,17 +61,23 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
     }
 
     public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
-        ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        ThorChatCompletionsRequest chatCompletionCreate,
+        ThorPlatformOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         using var openai =
-            Activity.Current?.Source.StartActivity("SiliconFlow 对话流式补全");
+            Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
+
+        if (string.IsNullOrWhiteSpace(options?.Address))
+        {
+            options.Address = "https://qianfan.baidubce.com/";
+        }
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
-            options?.Address.TrimEnd('/') + "/v1/chat/completions",
+            options?.Address.TrimEnd('/') + "/v2/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v2/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -91,9 +100,9 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
         // 大于等于400的状态码都认为是异常
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            logger.LogError("SiliconFlow对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
+            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
 
-            throw new BusinessException("SiliconFlow对话异常", response.StatusCode.ToString());
+            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
@@ -108,17 +117,17 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
 
             if (line.StartsWith('{'))
             {
-                logger.LogInformation("SiliconFlow对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                logger.LogInformation("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
                     line);
 
-                throw new BusinessException("SiliconFlow对话异常", line);
+                throw new BusinessException("OpenAI对话异常", line);
             }
 
             if (line.StartsWith(OpenAIConstant.Data))
-                line = line[OpenAIConstant.Done.Length..];
+                line = line[OpenAIConstant.Data.Length..];
 
             line = line.Trim();
-            
+
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             if (line == OpenAIConstant.Done)
@@ -134,7 +143,7 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
 
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
-            
+
             var content = result?.Choices?.FirstOrDefault()?.Delta;
 
             if (first && string.IsNullOrWhiteSpace(content?.Content) && string.IsNullOrEmpty(content?.ReasoningContent))
@@ -165,8 +174,9 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
                     choice.Delta.Content = string.Empty;
                 }
             }
+
             first = false;
-            
+
             yield return result;
         }
     }
