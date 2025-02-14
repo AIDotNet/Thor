@@ -230,6 +230,25 @@ export default function CreateChannel({
             </Select>
           </Form.Item>
         )}
+        {input.type === "ErnieBot" && (
+          <Form.Item<FieldType>
+            name="other"
+            label="AppId"
+            rules={[
+              {
+                required: true,
+                message: "AppId不能为空",
+              },
+            ]}
+          >
+            <Input
+              value={input.other}
+              onChange={(v) => {
+                setInput({ ...input, other: v.target.value });
+              }}
+              placeholder="请输入AppId"
+            />
+          </Form.Item>)}
         <Form.Item<FieldType> label="密钥" name="key">
           <Input.Password
             placeholder={getModelPrompt(input.type)}
