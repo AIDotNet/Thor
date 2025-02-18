@@ -7,11 +7,11 @@ using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Realtime;
-using Thor.DeepSeek.Audios;
-using Thor.DeepSeek.Chats;
-using Thor.DeepSeek.Embeddings;
-using Thor.DeepSeek.Images;
-using Thor.DeepSeek.Realtime;
+using Thor.OpenAI.Audios;
+using Thor.OpenAI.Chats;
+using Thor.OpenAI.Embeddings;
+using Thor.OpenAI.Images;
+using Thor.OpenAI.Realtime;
 
 namespace Thor.DeepSeek.Extensions;
 

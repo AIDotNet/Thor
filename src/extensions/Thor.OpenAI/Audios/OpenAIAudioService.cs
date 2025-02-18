@@ -10,7 +10,7 @@ using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-namespace Thor.DeepSeek.Audios
+namespace Thor.OpenAI.Audios
 {
     public class OpenAIAudioService(ILogger<OpenAIAudioService> logger) : IThorAudioService
     {

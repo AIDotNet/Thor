@@ -10,7 +10,7 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
-namespace Thor.DeepSeek.Chats;
+namespace Thor.OpenAI.Chats;
 
 public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsService> logger)
     : IThorChatCompletionsService
@@ -92,7 +92,8 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         // 大于等于400的状态码都认为是异常
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
+            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} 错误响应内容：{Content}", response.StatusCode,
+                await response.Content.ReadAsStringAsync(cancellationToken));
 
             throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
