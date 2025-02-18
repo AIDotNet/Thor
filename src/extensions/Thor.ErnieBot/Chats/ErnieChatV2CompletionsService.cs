@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
@@ -10,23 +9,35 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
-namespace Thor.OpenAI.Chats;
+namespace Thor.ErnieBot.Chats;
 
-public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsService> logger)
-    : IThorChatCompletionsService
+public class ErnieChatV2CompletionsService(ILogger<ErnieChatV2CompletionsService> logger) : IThorChatCompletionsService
 {
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         using var openai =
-            Activity.Current?.Source.StartActivity("OpenAI 对话补全");
+            Activity.Current?.Source.StartActivity("百度千帆 对话补全");
+
+        if (string.IsNullOrWhiteSpace(options?.Address))
+        {
+            options.Address = "https://qianfan.baidubce.com/";
+        }
+
+        if (string.IsNullOrWhiteSpace(options?.Other))
+        {
+            throw new BusinessException(
+                "appId不能为空,请前往：https://console.bce.baidu.com/iam/#/iam/apikey/list 创建Key的时候进行绑定", "400");
+        }
+
+        var header = new Dictionary<string, string>(1) { { "appId", options.Other } };
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
-            options?.Address.TrimEnd('/') + "/v1/chat/completions",
-            chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
+                options?.Address.TrimEnd('/') + "/v2/chat/completions", chatCompletionCreate, options.ApiKey, header)
+            .ConfigureAwait(false);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", "/v2/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -45,10 +56,9 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            logger.LogError("OpenAI对话异常 请求地址：{Address}, StatusCode: {StatusCode} Response: {Response}", options.Address,
-                response.StatusCode, error);
+            logger.LogError("百度千帆对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode, error);
 
-            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
+            throw new BusinessException("百度千帆对话异常", response.StatusCode.ToString());
         }
 
         var result =
@@ -59,17 +69,30 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
     }
 
     public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
-        ThorChatCompletionsRequest chatCompletionCreate, ThorPlatformOptions? options = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        ThorChatCompletionsRequest chatCompletionCreate,
+        ThorPlatformOptions? options = null,
+        CancellationToken cancellationToken = default)
     {
         using var openai =
             Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
 
-        var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
-            options?.Address.TrimEnd('/') + "/v1/chat/completions",
-            chatCompletionCreate, options.ApiKey);
+        if (string.IsNullOrWhiteSpace(options?.Address))
+        {
+            options.Address = "https://qianfan.baidubce.com/";
+        }
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        if (string.IsNullOrWhiteSpace(options?.Other))
+        {
+            throw new BusinessException(
+                "appId不能为空,请前往：https://console.bce.baidu.com/iam/#/iam/apikey/list 创建Key的时候进行绑定", "400");
+        }
+
+        var header = new Dictionary<string, string>(1) { { "appId", options.Other } };
+        var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
+            options?.Address.TrimEnd('/') + "/v2/chat/completions",
+            chatCompletionCreate, options.ApiKey, header);
+
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v2/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -92,8 +115,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         // 大于等于400的状态码都认为是异常
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} 错误响应内容：{Content}", response.StatusCode,
-                await response.Content.ReadAsStringAsync(cancellationToken));
+            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
 
             throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }

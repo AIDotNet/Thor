@@ -118,6 +118,12 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// <see href="https://platform.openai.com/docs/api-reference/completions/create#completions/create-max_tokens" />
     [JsonPropertyName("max_tokens")]
     public int? MaxTokens { get; set; }
+    
+    /// <summary>
+    /// 可为补全生成的令牌数量的上限，包括可见输出令牌和推理令牌。
+    /// </summary>
+    [JsonPropertyName("max_completion_tokens")]
+    public int? MaxCompletionTokens { get; set; }
 
     /// <summary>
     /// 存在惩罚，介于 -2.0 到 2.0 之间的数字。
@@ -240,6 +246,9 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// </summary>
     [JsonPropertyName("response_format")]
     public ThorResponseFormat? ResponseFormat { get; set; }
+    
+    [JsonPropertyName("metadata")]
+    public Dictionary<string,string> Metadata { get; set; }
 
     /// <summary>
     /// 此功能处于测试阶段。

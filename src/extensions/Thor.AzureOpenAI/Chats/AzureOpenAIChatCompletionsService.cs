@@ -119,7 +119,7 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
                 // 需要将content的内容转换到其他字段
             }
 
-            if (isThink && content.Content == OpenAIConstant.ThinkEnd)
+            if (isThink && content.Content.Contains(OpenAIConstant.ThinkEnd))
             {
                 isThink = false;
                 // 需要将content的内容转换到其他字段

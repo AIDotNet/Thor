@@ -63,7 +63,7 @@ public static class ErnieBotServiceCollectionExtensions
         ]);
 
         //基于平台码注册服务
-        services.AddKeyedSingleton<IThorChatCompletionsService, ErnieBotChatCompletionsService>(ErnieBotPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorChatCompletionsService, ErnieChatV2CompletionsService>(ErnieBotPlatformOptions.PlatformCode);
         services.AddKeyedSingleton<IThorTextEmbeddingService, ErnieBotTextEmbeddingService>(ErnieBotPlatformOptions.PlatformCode);
 
         return services;
