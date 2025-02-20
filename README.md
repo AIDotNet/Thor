@@ -133,6 +133,8 @@ admin admin
 ### 注意事项
 需要注意的是，如果克隆项目后，项目根目录缺少`data`时，需要手动创建，`docker compose up` 时，需要挂载本地目录`data`。
 
+### **国内用户请切换registry.cn-shenzhen.aliyuncs.com/tokengo/thor镜像**
+
 ### 环境变量
 
 - DBType
