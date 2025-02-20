@@ -225,7 +225,13 @@ export default function RedeemCode() {
       </Header>
       <Table style={{
         marginTop: '1rem',
-      }} columns={columns} dataSource={data} rowSelection={rowSelection} pagination={{
+        height: '100%',
+      }} 
+      scroll={{
+        x: 'max-content',
+        y: 'calc(100vh - 350px)',
+      }}
+      columns={columns} dataSource={data} rowSelection={rowSelection} pagination={{
         total: total,
         pageSize: input.pageSize,
         defaultPageSize: input.page,

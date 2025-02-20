@@ -433,36 +433,36 @@ public sealed class ChatService(
                 organizationId = organizationIdHeader.ToString();
             }
 
-            request.Model = TokenService.ModelMap(request.Model);
-
-            var model = request.Model;
-            await rateLimitModelService.CheckAsync(model, context);
-
-            // 获取渠道通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model), model);
-
-            if (channel == null)
+            if (ModelManagerService.PromptRate.TryGetValue(request.Model, out var rate))
             {
-                throw new NotModelException(model);
-            }
+                await rateLimitModelService.CheckAsync(request.Model, context);
+
+                request.Model = TokenService.ModelMap(request.Model);
+
+                // 获取渠道通过算法计算权重
+                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model),
+                    request.Model);
+
+                if (channel == null)
+                {
+                    throw new NotModelException(request.Model);
+                }
 
 
-            // 获取渠道指定的实现类型的服务
-            var chatCompletionsService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
+                // 获取渠道指定的实现类型的服务
+                var chatCompletionsService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
 
-            if (chatCompletionsService == null)
-            {
-                throw new Exception($"并未实现：{channel.Type} 的服务");
-            }
+                if (chatCompletionsService == null)
+                {
+                    throw new Exception($"并未实现：{channel.Type} 的服务");
+                }
 
-            if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
-            {
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
 
                 TokenService.CheckModel(request.Model, token, context);
 
                 // 记录请求模型 / 请求用户
-                logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
+                logger.LogInformation("请求模型：{model} 请求用户：{user}", request.Model, user?.UserName);
 
                 int requestToken;
                 var responseToken = 0;
@@ -490,7 +490,7 @@ public sealed class ChatService(
 
                 var quota = requestToken * rate.PromptRate;
 
-                var completionRatio = GetCompletionRatio(model);
+                var completionRatio = GetCompletionRatio(request.Model);
                 quota += responseToken * rate.PromptRate * completionRatio;
 
                 // 将quota 四舍五入
@@ -503,21 +503,21 @@ public sealed class ChatService(
                 {
                     await loggerService.CreateConsumeAsync(
                         string.Format(ConsumerTemplate, rate.PromptRate, completionRatio),
-                        model,
+                        request.Model,
                         requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                         request.Stream is true,
                         (int)sw.ElapsedMilliseconds, organizationId);
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                        model);
+                        request.Model);
                 }
                 else
                 {
                     // 费用
                     await loggerService.CreateConsumeAsync(
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate)),
-                        model,
+                        request.Model,
                         requestToken, responseToken, (int)rate.PromptRate, token?.Key, user?.UserName, user?.Id,
                         channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(),
@@ -526,7 +526,7 @@ public sealed class ChatService(
 
                     await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
                         channel.Id,
-                        model);
+                        request.Model);
                 }
             }
             else
@@ -828,7 +828,7 @@ public sealed class ChatService(
 
 
         // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
-        if (rate.QuotaType == ModelQuotaType.OnDemand && request.Messages.Any(x => x.Contents != null))
+        if (request.Messages.Any(x => x.Contents != null))
         {
             requestToken = TokenHelper.GetTotalTokens(request?.Messages.Where(x => x.Contents != null)
                 .SelectMany(x => x.Contents)
@@ -900,7 +900,11 @@ public sealed class ChatService(
 
             await context.Response.WriteAsJsonAsync(result);
 
-            responseToken = TokenHelper.GetTokens(result.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
+            result.Choices?.ForEach(a =>
+            {
+                responseToken += TokenHelper.GetTotalTokens(a.Delta.ReasoningContent ?? a.Message.ReasoningContent);
+                responseToken += TokenHelper.GetTotalTokens(a.Delta.Content ?? a.Message.Content);
+            });
         }
         else
         {
@@ -909,14 +913,14 @@ public sealed class ChatService(
             await context.Response.WriteAsJsonAsync(result);
         }
 
-        if (rate.QuotaType == ModelQuotaType.OnDemand && request.ResponseFormat?.JsonSchema is not null)
+        if (request.ResponseFormat?.JsonSchema is not null)
         {
             requestToken += TokenHelper.GetTotalTokens(request.ResponseFormat.JsonSchema.Name,
                 request.ResponseFormat.JsonSchema.Description ?? string.Empty,
                 JsonSerializer.Serialize(request.ResponseFormat.JsonSchema.Schema));
         }
 
-        if (rate.QuotaType == ModelQuotaType.OnDemand && request.Tools != null && request.Tools.Count != 0)
+        if (request.Tools != null && request.Tools.Count != 0)
         {
             requestToken += TokenHelper.GetTotalTokens(request.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Name))
                 .Select(x => x.Function!.Name).ToArray());
@@ -926,6 +930,7 @@ public sealed class ChatService(
             requestToken += TokenHelper.GetTotalTokens(request.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Type))
                 .Select(x => x.Function!.Type!).ToArray());
         }
+
 
         return (requestToken, responseToken);
     }
@@ -1289,7 +1294,7 @@ public sealed class ChatService(
 
         var responseMessage = new StringBuilder();
 
-        if (input.Messages.Any(x => x.Contents != null) && rate.QuotaType == ModelQuotaType.OnDemand)
+        if (input.Messages.Any(x => x.Contents != null))
         {
             requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x.Contents != null)
                 .SelectMany(x => x.Contents)
@@ -1339,14 +1344,14 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
         }
 
-        if (rate.QuotaType == ModelQuotaType.OnDemand && input.ResponseFormat?.JsonSchema is not null)
+        if (input.ResponseFormat?.JsonSchema is not null)
         {
             requestToken += TokenHelper.GetTotalTokens(input.ResponseFormat.JsonSchema.Name,
                 input.ResponseFormat.JsonSchema.Description ?? string.Empty,
                 JsonSerializer.Serialize(input.ResponseFormat.JsonSchema.Schema));
         }
 
-        if (rate.QuotaType == ModelQuotaType.OnDemand && input.Tools != null && input.Tools.Count != 0)
+        if (input.Tools != null && input.Tools.Count != 0)
         {
             requestToken += TokenHelper.GetTotalTokens(input.Tools.Where(x => !string.IsNullOrEmpty(x.Function?.Name))
                 .Select(x => x.Function!.Name).ToArray());
@@ -1359,6 +1364,7 @@ public sealed class ChatService(
 
         // 是否第一次输出
         bool isFirst = true;
+        int responseToken = 0;
 
         await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
         {
@@ -1399,15 +1405,27 @@ public sealed class ChatService(
                 }
             }
 
+            item.Choices?.ForEach(a =>
+            {
+                a.Delta.ToolCalls?.ForEach(x =>
+                {
+                    responseToken += TokenHelper.GetTokens(x.Function?.Name ?? string.Empty);
+                    responseToken += TokenHelper.GetTokens(x.Function?.Arguments ?? string.Empty);
+                });
+            });
+
+            item.Choices?.ForEach(x =>
+            {
+                responseToken += TokenHelper.GetTokens(x.Delta.ReasoningContent ?? string.Empty);
+            });
+
             responseMessage.Append(item.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
             await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
         }
 
         await context.WriteAsEventStreamEndAsync();
 
-        var responseToken = rate.QuotaType == ModelQuotaType.OnDemand
-            ? TokenHelper.GetTokens(responseMessage.ToString())
-            : 0;
+        responseToken += TokenHelper.GetTokens(responseMessage.ToString());
 
         return (requestToken, responseToken);
     }
