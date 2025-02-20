@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 
 import { LayoutProps } from "./type";
 import { Outlet } from "react-router-dom";
@@ -7,13 +7,13 @@ import { Avatar, Header, Logo, ThemeSwitch } from "@lobehub/ui";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import useThemeStore from "../store/theme";
+
+
 const { Content, Footer, Sider } = Layout;
 const LayoutPage = memo<LayoutProps>(({ nav }) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-
-
   const { themeMode, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
   return (
