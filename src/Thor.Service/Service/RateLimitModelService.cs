@@ -12,11 +12,11 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
     /// 模型速率检测
     /// </summary>
     /// <param name="model"></param>
-    /// <param name="context"></param>
+    /// <param name="userId"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     /// <exception cref="RateLimitException"></exception>
-    public async ValueTask CheckAsync(string model, HttpContext context)
+    public async ValueTask CheckAsync(string model, string userId)
     {
         using var check =
             Activity.Current?.Source.StartActivity("模型速率检测");
@@ -32,22 +32,13 @@ public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCac
 
         if (rateLimitModels == null || rateLimitModels?.Count == 0) return;
 
-        // 获取IP
-        var ip = context.Connection.RemoteIpAddress?.ToString();
-
-        //获取头
-        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var header))
-        {
-            ip = header;
-        }
-
         foreach (var rateLimitModel in rateLimitModels.Where(x => x.Model.Contains(model)))
         {
-            if (rateLimitModel.WhiteList.Contains(ip)) return;
+            if (rateLimitModel.WhiteList.Contains(userId)) return;
 
-            if (rateLimitModel.BlackList.Contains(ip)) throw new Exception("IP is in the blacklist");
+            if (rateLimitModel.BlackList.Contains(userId)) throw new Exception("IP is in the blacklist");
 
-            var key = $"{model}:{ip}{rateLimitModel.Id}";
+            var key = $"{model}:{userId}{rateLimitModel.Id}";
 
 
             // 判断是否存在缓存

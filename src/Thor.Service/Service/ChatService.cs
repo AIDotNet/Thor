@@ -124,13 +124,14 @@ public sealed class ChatService(
 
             if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
 
-            await rateLimitModelService.CheckAsync(request.Model, context);
-
             var imageCostRatio = GetImageCostRatio(request);
 
             var rate = ModelManagerService.PromptRate[request.Model];
 
             var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+            await rateLimitModelService.CheckAsync(request.Model, user.Id);
+
 
             TokenService.CheckModel(request.Model, token, context);
 
@@ -216,11 +217,13 @@ public sealed class ChatService(
 
             input.Model = TokenService.ModelMap(input.Model);
 
-            await rateLimitModelService.CheckAsync(input!.Model, context);
 
             if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+                await rateLimitModelService.CheckAsync(input!.Model, user.Id);
+
                 TokenService.CheckModel(input.Model, token, context);
 
                 // 获取渠道 通过算法计算权重
@@ -326,8 +329,6 @@ public sealed class ChatService(
         {
             input.Model = TokenService.ModelMap(input.Model);
 
-            await rateLimitModelService.CheckAsync(input!.Model, context);
-
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model), input.Model);
@@ -341,6 +342,9 @@ public sealed class ChatService(
             if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+                await rateLimitModelService.CheckAsync(input!.Model, user.Id);
+
                 TokenService.CheckModel(input.Model, token, context);
 
                 if (input.Stream == false)
@@ -436,7 +440,6 @@ public sealed class ChatService(
             request.Model = TokenService.ModelMap(request.Model);
 
             var model = request.Model;
-            await rateLimitModelService.CheckAsync(model, context);
 
             // 获取渠道通过算法计算权重
             var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model), model);
@@ -458,6 +461,8 @@ public sealed class ChatService(
             if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+                await rateLimitModelService.CheckAsync(model, user.Id);
 
                 TokenService.CheckModel(request.Model, token, context);
 
@@ -613,9 +618,6 @@ public sealed class ChatService(
 
             model = TokenService.ModelMap(model);
 
-            await rateLimitModelService.CheckAsync(model, context);
-
-
             // 获取渠道通过算法计算权重
             var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model), model);
 
@@ -636,6 +638,9 @@ public sealed class ChatService(
             if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+
+                await rateLimitModelService.CheckAsync(model, user.Id);
 
                 TokenService.CheckModel(model, token, context);
                 // 记录请求模型 / 请求用户
@@ -970,11 +975,13 @@ public sealed class ChatService(
 
             audioCreateTranscriptionRequest.Model = TokenService.ModelMap(audioCreateTranscriptionRequest.Model);
 
-            await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, context);
-
             var rate = ModelManagerService.PromptRate[audioCreateTranscriptionRequest.Model];
 
             var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+
+            await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, user.Id);
+
 
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
 
@@ -1052,11 +1059,11 @@ public sealed class ChatService(
 
             request.Model = TokenService.ModelMap(request.Model);
 
-            await rateLimitModelService.CheckAsync(request.Model, context);
-
             var rate = ModelManagerService.PromptRate[request.Model];
 
             var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+            await rateLimitModelService.CheckAsync(request.Model, user.Id);
 
             TokenService.CheckModel(request.Model, token, context);
 
@@ -1195,11 +1202,10 @@ public sealed class ChatService(
 
             audioCreateTranscriptionRequest.Model = TokenService.ModelMap(audioCreateTranscriptionRequest.Model);
 
-            await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, context);
-
             var rate = ModelManagerService.PromptRate[audioCreateTranscriptionRequest.Model];
 
             var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+            await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, user.Id);
 
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
 
