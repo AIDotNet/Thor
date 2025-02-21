@@ -10,9 +10,9 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
-namespace Thor.OpenAI.Chats;
+namespace Thor.VolCenGine.Chats;
 
-public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsService> logger)
+public sealed class VolCenGineChatCompletionsService(ILogger<VolCenGineChatCompletionsService> logger)
     : IThorChatCompletionsService
 {
     public async Task<ThorChatCompletionsResponse> ChatCompletionsAsync(ThorChatCompletionsRequest chatCompletionCreate,
@@ -20,13 +20,18 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         CancellationToken cancellationToken = default)
     {
         using var openai =
-            Activity.Current?.Source.StartActivity("OpenAI 对话补全");
+            Activity.Current?.Source.StartActivity("VolCenGine 对话补全");
+
+        if (string.IsNullOrWhiteSpace(options.Address))
+        {
+            options.Address = "https://ark.cn-beijing.volces.com/";
+        }
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
-            options?.Address.TrimEnd('/') + "/v1/chat/completions",
+            options?.Address.TrimEnd('/') + "/api/v3/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/api/v3/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -45,10 +50,10 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            logger.LogError("OpenAI对话异常 请求地址：{Address}, StatusCode: {StatusCode} Response: {Response}", options.Address,
-                response.StatusCode, error);
+            logger.LogError("VolCenGine对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                error);
 
-            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
+            throw new BusinessException("VolCenGine对话异常", response.StatusCode.ToString());
         }
 
         var result =
@@ -63,13 +68,18 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var openai =
-            Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
+            Activity.Current?.Source.StartActivity("VolCenGine 对话流式补全");
+
+        if (string.IsNullOrWhiteSpace(options.Address))
+        {
+            options.Address = "https://ark.cn-beijing.volces.com/";
+        }
 
         var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(
-            options?.Address.TrimEnd('/') + "/v1/chat/completions",
+            options?.Address.TrimEnd('/') + "/api/v3/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
+        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/api/v3/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -92,10 +102,9 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         // 大于等于400的状态码都认为是异常
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} 错误响应内容：{Content}", response.StatusCode,
-                await response.Content.ReadAsStringAsync(cancellationToken));
+            logger.LogError("VolCenGine对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
 
-            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
+            throw new BusinessException("VolCenGine对话异常", response.StatusCode.ToString());
         }
 
         using var stream = new StreamReader(await response.Content.ReadAsStreamAsync(cancellationToken));
@@ -110,14 +119,15 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
 
             if (line.StartsWith('{'))
             {
-                logger.LogInformation("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                logger.LogInformation("VolCenGine对话异常 , StatusCode: {StatusCode} Response: {Response}",
+                    response.StatusCode,
                     line);
 
-                throw new BusinessException("OpenAI对话异常", line);
+                throw new BusinessException("VolCenGine对话异常", line);
             }
 
             if (line.StartsWith(OpenAIConstant.Data))
-                line = line[OpenAIConstant.Data.Length..];
+                line = line[OpenAIConstant.Done.Length..];
 
             line = line.Trim();
 
@@ -148,7 +158,6 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             {
                 isThink = true;
                 continue;
-                // 需要将content的内容转换到其他字段
             }
 
             if (isThink && content.Content.Contains(OpenAIConstant.ThinkEnd))

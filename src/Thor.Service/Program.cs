@@ -34,6 +34,7 @@ using Thor.Service.Options;
 using Thor.Service.Service;
 using Thor.SiliconFlow.Extensions;
 using Thor.SparkDesk.Extensions;
+using Thor.VolCenGine.Extensions;
 using Product = Thor.Service.Domain.Product;
 
 try
@@ -115,6 +116,7 @@ try
         .AddErnieBotService()
         .AddGiteeAIService()
         .AddMiniMaxService()
+        .AddVolCenGineService()
         .AddSiliconFlowService()
         .AddDeepSeekService();
 

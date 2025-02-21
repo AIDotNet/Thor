@@ -5,7 +5,7 @@ using Thor.Abstractions.Images;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 
-namespace Thor.DeepSeek.Images;
+namespace Thor.OpenAI.Images;
 
 public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorImageService
 {

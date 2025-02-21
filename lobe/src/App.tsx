@@ -6,7 +6,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 
 import Nav from './components/@nav/default'
-
+import useThemeStore from './store/theme'
 const ProductPage = lazy(() => import('./pages/product/page'))
 const LoggerPage = lazy(() => import('./pages/logger/page'))
 const RedeemCodePage = lazy(() => import('./pages/redeem-code/page'))
@@ -101,12 +101,12 @@ const router = createBrowserRouter([{
   element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
     <Auth />
   </Suspense>
-},  {
+}, {
   path: "/auth/gitee",
   element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
     <Auth />
   </Suspense>
-},  {
+}, {
   path: "/auth/casdoor",
   element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
     <Auth />
@@ -122,15 +122,17 @@ const router = createBrowserRouter([{
     <DefaultLayout />
   </Suspense>,
   children: [
-    { path: '', element: <Suspense fallback={<FullscreenLoading title='加载欢迎页面中' />}>
-      <WelcomePage />
-    </Suspense> },
+    {
+      path: '', element: <Suspense fallback={<FullscreenLoading title='加载欢迎页面中' />}>
+        <WelcomePage />
+      </Suspense>
+    },
     {
       path: "/doc",
       element: <Suspense fallback={<FullscreenLoading title='加载文档页面中' />}>
         <DocPage />
       </Suspense>
-    },{
+    }, {
       path: "/doc/*",
       element: <Suspense fallback={<FullscreenLoading title='加载文档页面中' />}>
         <DocPage />
@@ -147,10 +149,15 @@ const router = createBrowserRouter([{
 ])
 
 function App() {
+  const { themeMode, toggleTheme } = useThemeStore();
   return (
-    <ThemeProvider themeMode='auto' style={{
-      height: '100%'
-    }}>
+    <ThemeProvider themeMode={themeMode}
+      onThemeModeChange={(mode) => {
+        toggleTheme(mode)
+      }}
+      style={{
+        height: '100%'
+      }}>
       <RouterProvider router={router} />
     </ThemeProvider>
   )

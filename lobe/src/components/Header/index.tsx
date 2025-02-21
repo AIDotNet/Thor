@@ -1,10 +1,11 @@
-import { Header, Logo, TabsNav } from "@lobehub/ui";
+import { Header, Logo, TabsNav, ThemeSwitch } from "@lobehub/ui";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import useThemeStore from '../../store/theme';
 
 export default function ThorHeader() {
     const navigate = useNavigate();
+    const { themeMode, toggleTheme } = useThemeStore();
 
     const [key, setKey] = useState(window.location.pathname.split('/')[1] || 'welcome');
     
@@ -51,6 +52,11 @@ export default function ThorHeader() {
                     ]}
                 />
             }
-        />
+        >
+            <header>
+            <ThemeSwitch onThemeSwitch={(model) => toggleTheme(model)}
+              themeMode={themeMode} />
+            </header>
+        </Header>
     )
 }

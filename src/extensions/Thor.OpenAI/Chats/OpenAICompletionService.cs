@@ -6,7 +6,7 @@ using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 
-namespace Thor.DeepSeek.Chats;
+namespace Thor.OpenAI.Chats;
 
 public sealed class OpenAICompletionService : IThorCompletionsService
 {

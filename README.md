@@ -104,6 +104,7 @@ Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqli
 - [x] MiniMax AI（支持function）
 - [x] SiliconFlow AI（支持function）
 - [x] DeepSeek AI（支持function）
+- [x] 火山引擎 （支持function） 
 
 # 支持数据库
 
@@ -132,6 +133,8 @@ admin admin
 
 ### 注意事项
 需要注意的是，如果克隆项目后，项目根目录缺少`data`时，需要手动创建，`docker compose up` 时，需要挂载本地目录`data`。
+
+### **国内用户请切换registry.cn-shenzhen.aliyuncs.com/tokengo/thor镜像**
 
 ### 环境变量
 

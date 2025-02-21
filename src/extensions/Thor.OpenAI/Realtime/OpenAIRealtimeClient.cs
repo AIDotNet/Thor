@@ -7,7 +7,7 @@ using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
 
 
-namespace Thor.DeepSeek.Realtime;
+namespace Thor.OpenAI.Realtime;
 
 public class OpenAIRealtimeClient : IRealtimeClient
 {

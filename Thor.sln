@@ -90,6 +90,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.SiliconFlow", "src\ext
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.DeepSeek", "src\extensions\Thor.DeepSeek\Thor.DeepSeek.csproj", "{30D42224-8BC3-4CA8-81DC-349B59595A6B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.VolCenGine", "src\extensions\Thor.VolCenGine\Thor.VolCenGine.csproj", "{65B6C566-F252-499B-BF17-77C53537F766}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -236,6 +238,10 @@ Global
 		{30D42224-8BC3-4CA8-81DC-349B59595A6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30D42224-8BC3-4CA8-81DC-349B59595A6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30D42224-8BC3-4CA8-81DC-349B59595A6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65B6C566-F252-499B-BF17-77C53537F766}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65B6C566-F252-499B-BF17-77C53537F766}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65B6C566-F252-499B-BF17-77C53537F766}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65B6C566-F252-499B-BF17-77C53537F766}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -277,6 +283,7 @@ Global
 		{F4B508BD-C8C4-4502-A3CC-1A0D6B220BC7} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{B0314829-D762-4DEE-A5ED-59384E7D8B80} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{30D42224-8BC3-4CA8-81DC-349B59595A6B} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{65B6C566-F252-499B-BF17-77C53537F766} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}
