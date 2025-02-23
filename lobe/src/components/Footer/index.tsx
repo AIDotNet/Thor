@@ -52,6 +52,14 @@ export default function ThorFooter() {
                                 <br />
                                 可用于开发企业级智能客服管理系统。
                             </a>
+                        },
+                        {
+                            title: 'linker',
+                            description: <a href="https://github.com/snltty/linker"
+                                target="_blank"
+                            >
+                                一个免费开源的异地组网工具
+                            </a>
                         }
                     ]
                 }
