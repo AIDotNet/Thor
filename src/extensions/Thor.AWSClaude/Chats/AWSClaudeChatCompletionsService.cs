@@ -17,7 +17,7 @@ namespace Thor.AWSClaude.Chats
         /// <summary>
         /// 非流式对话补全
         /// </summary>
-        /// <param name="request">对话补全请求参数对象</param>
+        /// <param name="input">对话补全请求参数对象</param>
         /// <param name="options">平台参数对象</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
@@ -47,7 +47,7 @@ namespace Thor.AWSClaude.Chats
                 Role = x.Role,
                 Content = new List<ContentBlock> { new ContentBlock { Text = x.Content } }
             }).ToList();
-            var system = input.Messages.Where(x => x.Role == "system").FirstOrDefault()?.Content ?? "";
+            var system = input.Messages.FirstOrDefault(x => x.Role == "system")?.Content ?? "";
 
             var request = new ConverseRequest
             {
@@ -70,6 +70,7 @@ namespace Thor.AWSClaude.Chats
                      }
                 }; ;
             }
+            
             var response = await client.ConverseAsync(request, cancellationToken);
             string responseText = response?.Output?.Message?.Content?[0]?.Text ?? "";
 
