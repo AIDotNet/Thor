@@ -36,7 +36,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// 默认 1
     /// </summary>
     [JsonPropertyName("top_p")]
-    public float? TopP { get; set; } = 1f;
+    public float? TopP { get; set; } 
 
     /// <summary>
     /// 使用什么采样温度，介于 0 和 2 之间。
@@ -45,7 +45,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// 默认 1
     /// </summary>
     [JsonPropertyName("temperature")]
-    public float? Temperature { get; set; } = 1f;
+    public float? Temperature { get; set; }
 
     /// <summary>
     /// 为每条输入消息生成多少个结果
@@ -56,7 +56,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// </para>
     /// </summary>
     [JsonPropertyName("n")]
-    public int? N { get; set; } = 1;
+    public int? N { get; set; } 
 
     /// <summary>
     /// 如果设置，将发送部分消息增量，就像在 ChatGPT 中一样。
