@@ -14,6 +14,8 @@ export default function WelcomePage() {
                 justifyContent: "center",
                 height: "100%",
                 marginTop: 100,
+                maxWidth: 1280,
+                marginInline: "auto",
             }}
         >
             <div
