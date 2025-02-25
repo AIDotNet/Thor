@@ -118,7 +118,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// <see href="https://platform.openai.com/docs/api-reference/completions/create#completions/create-max_tokens" />
     [JsonPropertyName("max_tokens")]
     public int? MaxTokens { get; set; }
-    
+
     /// <summary>
     /// 可为补全生成的令牌数量的上限，包括可见输出令牌和推理令牌。
     /// </summary>
@@ -227,7 +227,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
                 }
                 else if (jsonElement.ValueKind == JsonValueKind.Object)
                 {
-                    ToolChoice= jsonElement.Deserialize<ThorToolChoice>();
+                    ToolChoice = jsonElement.Deserialize<ThorToolChoice>();
                 }
             }
             else
@@ -246,9 +246,8 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// </summary>
     [JsonPropertyName("response_format")]
     public ThorResponseFormat? ResponseFormat { get; set; }
-    
-    [JsonPropertyName("metadata")]
-    public Dictionary<string,string> Metadata { get; set; }
+
+    [JsonPropertyName("metadata")] public Dictionary<string, string> Metadata { get; set; }
 
     /// <summary>
     /// 此功能处于测试阶段。
@@ -264,6 +263,8 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// </summary>
     [JsonPropertyName("user")]
     public string User { get; set; }
+
+    [JsonPropertyName("thinking")] public ThorChatClaudeThinking Thinking { get; set; }
 
     /// <summary>
     /// 参数验证
