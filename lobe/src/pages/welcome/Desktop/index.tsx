@@ -399,7 +399,11 @@ const ThorWebsite = () => {
                                 <Paragraph style={{ color: '#595959' }}>
                                     AIDotNet社区是一个热衷于AI开发者组成的社区，旨在推动AI技术的发展，为AI开发者提供更好的学习和交流平台。
                                 </Paragraph>
-                                <Button type="link" style={{ padding: 0 }}>了解更多 →</Button>
+                                <Button 
+                                    onClick={()=>{
+                                        window.open('https://github.com/AIDotNet/', '_blank')
+                                    }}
+                                    type="link" style={{ padding: 0 }}>了解更多 →</Button>
                             </ProjectCard>
                         </Col>
                         <Col xs={24} md={12}>
@@ -408,7 +412,11 @@ const ThorWebsite = () => {
                                 <Paragraph style={{ color: '#595959' }}>
                                     一个智能知识库的开源项目，可用于开发企业级智能客服管理系统。支持多种知识库格式，提供高效的检索和答案生成能力。
                                 </Paragraph>
-                                <Button type="link" style={{ padding: 0 }}>了解更多 →</Button>
+                                <Button 
+                                    onClick={()=>{
+                                        window.open('https://github.com/AIDotNet/fast-wiki/', '_blank')
+                                    }}
+                                    type="link" style={{ padding: 0 }}>了解更多 →</Button>
                             </ProjectCard>
                         </Col>
                     </Row>
