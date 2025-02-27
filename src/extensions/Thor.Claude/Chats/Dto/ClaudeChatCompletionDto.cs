@@ -2,6 +2,38 @@
 
 namespace Thor.Claude.Chats.Dto;
 
+public class ClaudeStreamDto
+{
+    public string type { get; set; }
+    
+    public int index { get; set; }
+    public Content_block content_block { get; set; }
+    
+    public Delta delta { get; set; }
+    
+    public ClaudeChatCompletionDto message { get; set; }
+}
+
+public class Delta
+{
+    public string type { get; set; }
+    
+    public string text { get; set; }
+    
+    public string thinking { get; set; }
+}
+
+
+public class Content_block
+{
+    public string type { get; set; }
+    
+    public string thinking { get; set; }
+    
+    public string signature { get; set; }
+}
+
+
 public class ClaudeChatCompletionDto
 {
     public string id { get; set; }

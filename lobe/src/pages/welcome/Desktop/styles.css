@@ -1,0 +1,49 @@
+/* 媒体查询样式 */
+@media (min-width: 768px) {
+  .desktop-menu {
+    display: block !important;
+  }
+  
+  .mobile-menu-button {
+    display: none !important;
+  }
+  
+  .hero-container {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .hero-content {
+    width: 50%;
+    margin-bottom: 0;
+    padding-right: 24px;
+  }
+  
+  .hero-image {
+    width: 50%;
+  }
+  
+  .footer-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .footer-copyright {
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 576px) {
+  .hero-buttons {
+    flex-direction: row;
+  }
+  
+  .primary-button {
+    margin-bottom: 0;
+  }
+}
+
+/* 悬停效果 */
+.feature-card:hover, .project-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+} 
