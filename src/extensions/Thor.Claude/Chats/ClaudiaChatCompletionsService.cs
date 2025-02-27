@@ -333,8 +333,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                 {
                     yield return new ThorChatCompletionsResponse()
                     {
-                        Choices = new List<ThorChatChoiceResponse>()
-                        {
+                        Choices =
+                        [
                             new()
                             {
                                 Message = new ThorChatMessage()
@@ -343,7 +343,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                                     Role = "assistant",
                                 }
                             }
-                        },
+                        ],
                         Model = input.Model,
                         Id = result?.message?.id,
                         Usage = new ThorUsageResponse()
