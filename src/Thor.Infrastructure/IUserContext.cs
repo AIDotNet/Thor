@@ -9,4 +9,6 @@ public interface IUserContext
     bool IsAuthenticated { get; }
 
     bool IsAdmin { get; }
+    
+    string[] Groups { get; }
 }

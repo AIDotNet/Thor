@@ -2,15 +2,12 @@ import { useEffect, useState } from "react";
 import { Button, Switch, message, Tag, Dropdown, InputNumber, Table } from 'antd';
 import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test } from "../../services/ChannelService";
 import { renderQuota } from "../../utils/render";
-import styled from "styled-components";
 import { Input } from "@lobehub/ui";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
 import { getTypes } from "../../services/ModelService";
 
-const Header = styled.header`
 
-`
 export default function ChannelPage() {
 
   const columns = [
@@ -167,6 +164,17 @@ export default function ChannelPage() {
       }
     },
     {
+      title:'分组',
+      fiexd:'groups',
+      dataIndex:'groups',
+      width:'100px',
+      render:(value:string[])=>{
+        return value.map((item:string)=>{
+          return <Tag key={item}>{item}</Tag>
+        })
+      }
+    },
+    {
       title: '操作',
       fixed: 'right',
       dataIndex: 'operate',
@@ -234,6 +242,7 @@ export default function ChannelPage() {
   ];
   const [createVisible, setCreateVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [updateValue, setUpdateValue] = useState({} as any);
   const [data, setData] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -273,6 +282,7 @@ export default function ChannelPage() {
   }
 
   function loadingData() {
+    setLoading(true);
     getChannels(input.page, input.pageSize)
       .then((v: any) => {
         if (v.success) {
@@ -303,6 +313,9 @@ export default function ChannelPage() {
           });
         }
       })
+      .finally(() => {
+        setLoading(false);
+      })
   }
 
   useEffect(() => {
@@ -312,8 +325,10 @@ export default function ChannelPage() {
 
   return (
     <>
-
-      <Header>
+      <div style={{
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
         <span style={{
           fontSize: '1.5rem',
           fontWeight: 'bold',
@@ -336,10 +351,16 @@ export default function ChannelPage() {
             float: 'right',
           }}>操作</Button>
         </Dropdown>
-        <Button style={{
-          marginRight: '0.5rem',
-          float: 'right',
-        }}>搜索</Button>
+        <Button
+          onClick={() => {
+            loadingData()
+          }}
+          style={{
+            marginRight: '0.5rem',
+            float: 'right',
+          }}>
+            刷新
+          </Button>
         <Input value={input.keyword} onChange={(v) => {
           setInput({
             ...input,
@@ -350,7 +371,7 @@ export default function ChannelPage() {
           float: 'right',
           marginRight: '1rem',
         }} placeholder='搜索关键字'></Input>
-      </Header>
+      </div>
       <Table
         style={{
           marginTop: '1rem',
@@ -361,6 +382,7 @@ export default function ChannelPage() {
           y: 'calc(100vh - 350px)',
           x: 'max-content'
         }}
+        loading={loading}
         rowKey={row => row.id}
         pagination={{
           total: total,

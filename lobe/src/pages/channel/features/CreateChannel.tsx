@@ -27,6 +27,7 @@ export default function CreateChannel({
     other: "",
     key: "",
     models: [],
+    groups: []
   });
 
   type FieldType = {
@@ -36,6 +37,7 @@ export default function CreateChannel({
     other?: string;
     key?: string;
     models: string[];
+    groups: string[];
   };
 
   function loading() {
@@ -256,6 +258,31 @@ export default function CreateChannel({
           />
         </Form.Item>
         <Form.Item<FieldType>
+          name="groups"
+          label="组"
+          style={{ width: "100%" }}
+        >
+          <Select
+            placeholder="请选择组"
+            mode="tags"
+            // 提供默认的选项
+            options={[
+              {
+                label: "default",
+                value: "default"
+              },
+              {
+                label: "vip",
+                value: "vip"
+              }
+            ]}
+            value={input.groups}
+            onChange={(v) => {
+              setInput({ ...input, groups: v });
+            }}
+          />
+        </Form.Item>
+        <Form.Item
           name="models"
           label="模型"
           rules={[

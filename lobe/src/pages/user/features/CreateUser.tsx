@@ -17,7 +17,8 @@ export default function CreateUser({
         userName: '',
         email: '',
         password: '',
-        role: 'user'
+        role: 'user',
+        groups: []
     });
 
     function handleSubmit() {
@@ -40,7 +41,8 @@ export default function CreateUser({
                 userName: '',
                 email: '',
                 password: '',
-                role: 'user'
+                role: 'user',
+                groups: []
             });
         }
     }, [visible]);
@@ -92,6 +94,17 @@ export default function CreateUser({
                     </Select>
                 </Form.Item>
 
+                <Form.Item
+                    label="组"
+                    name="groups"
+                    rules={[{ required: true, message: '请选择组' }]}
+                >
+                    <Select
+                        mode="tags"
+                        value={input.groups}
+                        onChange={(value) => setInput({ ...input, groups: value })}
+                    />
+                </Form.Item>
                 <Button type='primary' block htmlType='submit'>提交</Button>
             </Form>
         </Drawer>

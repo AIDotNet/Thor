@@ -22,7 +22,12 @@ namespace Thor.Service.Service;
 /// </summary>
 /// <param name="serviceProvider"></param>
 /// <param name="mapper"></param>
-public sealed class ChannelService(IServiceProvider serviceProvider, IMapper mapper, IServiceCache cache)
+public sealed class ChannelService(
+    IServiceProvider serviceProvider,
+    IMapper mapper,
+    IServiceCache cache,
+    UserService userService,
+    IUserContext userContext)
     : ApplicationService(serviceProvider), IScopeDependency
 {
     private const string CacheKey = "CacheKey:Channel";
@@ -41,10 +46,13 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
     /// 获取包含指定模型名的渠道列表 如果缓存中有则从缓存中获取
     /// </summary>
     /// <param name="model">模型名</param>
+    /// <param name="user"></param>
     /// <returns></returns>
-    public async ValueTask<IEnumerable<ChatChannel>> GetChannelsContainsModelAsync(string model)
+    public async ValueTask<IEnumerable<ChatChannel>> GetChannelsContainsModelAsync(string model, User user)
     {
-        return (await GetChannelsAsync()).Where(x => x.Models.Contains(model));
+        var group = (user).Groups;
+        return (await GetChannelsAsync()).Where(x =>
+            x.Models.Contains(model) && (group.Length == 0 || x.Groups.Select(x => x.ToLower()).Intersect(group).Any()));
     }
 
     /// <summary>
@@ -120,6 +128,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
                     item.SetProperty(x => x.Type, chatChannel.Type)
                         .SetProperty(x => x.Name, chatChannel.Name)
                         .SetProperty(x => x.Address, chatChannel.Address)
+                        .SetProperty(x => x.Groups, chatChannel.Groups)
                         .SetProperty(x => x.Other, chatChannel.Other)
                         .SetProperty(x => x.Extension, chatChannel.Extension)
                         .SetProperty(x => x.Models, chatChannel.Models));
@@ -134,6 +143,7 @@ public sealed class ChannelService(IServiceProvider serviceProvider, IMapper map
                         .SetProperty(x => x.Name, chatChannel.Name)
                         .SetProperty(x => x.Key, chatChannel.Key)
                         .SetProperty(x => x.Address, chatChannel.Address)
+                        .SetProperty(x => x.Groups, chatChannel.Groups)
                         .SetProperty(x => x.Extension, chatChannel.Extension)
                         .SetProperty(x => x.Other, chatChannel.Other)
                         .SetProperty(x => x.Models, chatChannel.Models));

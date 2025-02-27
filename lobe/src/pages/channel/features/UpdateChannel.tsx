@@ -20,6 +20,7 @@ interface InputProps {
   other: string;
   key: string;
   models: string[];
+  groups: string[];
   extension: {
     [key: string]: any;
   };
@@ -41,6 +42,7 @@ export default function UpdateChannel({
     other: "",
     key: "",
     models: [],
+    groups: [],
     extension: {},
   });
 
@@ -51,6 +53,7 @@ export default function UpdateChannel({
     other?: string;
     key?: string;
     models: string[];
+    groups: string[];
   };
 
   function loading() {
@@ -85,6 +88,7 @@ export default function UpdateChannel({
         other: value.other,
         key: value.key,
         models: value.models,
+        groups: value.groups,
         extension: value.extension,
       });
     }
@@ -271,6 +275,33 @@ export default function UpdateChannel({
               autoComplete="new-password"
             />
           </Form.Item>
+          
+        <Form.Item<FieldType>
+          name="groups"
+          label="组"
+          style={{ width: "100%" }}
+        >
+          <Select
+            placeholder="请选择组"
+            mode="tags"
+            // 提供默认的选项
+            options={[
+              {
+                label: "default",
+                value: "default"
+              },
+              {
+                label: "vip",
+                value: "vip"
+              }
+            ]}
+            value={input.groups}
+            onChange={(v) => {
+              setInput({ ...input, groups: v });
+            }}
+          />
+        </Form.Item>
+          
           <Form.Item<FieldType>
             name="models"
             label="模型"

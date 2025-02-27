@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
+using Thor.Abstractions.Dtos;
 using Thor.BuildingBlocks.Event;
 using Thor.Service.Eto;
 using Thor.Service.Options;
@@ -41,7 +43,20 @@ public partial class UserService(
         if (exist)
             throw new Exception("用户名已存在");
 
-        var user = new User(Guid.NewGuid().ToString(), input.UserName, input.Email, input.Password);
+        if (input.Groups.Length == 0)
+        {
+            // 默认分组
+            input.Groups = ["default"];
+        }
+        else if (input.Groups.All(x => x != "default"))
+        {
+            input.Groups = input.Groups.Append("default").ToArray();
+        }
+
+        var user = new User(Guid.NewGuid().ToString(), input.UserName, input.Email, input.Password)
+        {
+            Groups = input.Groups
+        };
 
         // 初始用户额度
         var userQuota = SettingService.GetIntSetting(SettingExtensions.GeneralSetting.NewUserQuota);
@@ -82,6 +97,12 @@ public partial class UserService(
         await emailService.SendEmailAsync(email, "注册账号验证码", $"欢迎您注册Thor（雷神托尔），您的验证码是：{code}").ConfigureAwait(false);
     }
 
+    public async Task<User?> GetCacheAsync()
+    {
+        return await memoryCache.GetOrCreateAsync("userinfo:" + UserContext.CurrentUserId,
+            (async () => await GetAsync(UserContext.CurrentUserId)));
+    }
+
     public async Task<User?> GetAsync(string? id = null)
     {
         User? user;
@@ -89,6 +110,7 @@ public partial class UserService(
         user = await DbContext.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == (id ?? UserContext.CurrentUserId));
+
         if (user == null)
             throw new UnauthorizedAccessException();
 
@@ -104,6 +126,8 @@ public partial class UserService(
             .ExecuteDeleteAsync();
 
         await RefreshUserAsync(UserContext.CurrentUserId);
+
+        await cache.RemoveAsync("userinfo:" + UserContext.CurrentUserId);
 
         return result > 0;
     }
@@ -216,16 +240,20 @@ public partial class UserService(
 
     public async ValueTask UpdateAsync(UpdateUserInput input)
     {
-        if (await DbContext.Users.AnyAsync(x =>
-                x.Id != UserContext.CurrentUserId && x.Email == input.Email))
-            throw new Exception("用户名或邮箱已存在");
+        // 先判断是否已经存在
+        if (await DbContext.Users.AnyAsync(x => x.Id != input.Id && x.Email == input.Email))
+            throw new Exception("邮箱已存在");
 
-        await DbContext.Users.Where(x => x.Id == UserContext.CurrentUserId)
-            .ExecuteUpdateAsync(x =>
-                x.SetProperty(y => y.Email, input.Email)
-                    .SetProperty(y => y.Avatar, input.Avatar));
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == input.Id);
 
-        await RefreshUserAsync(UserContext.CurrentUserId);
+        user.Email = input.Email;
+        user.Groups = input.Groups;
+
+        DbContext.Users.Update(user);
+
+        await cache.RemoveAsync("userinfo:" + UserContext.CurrentUserId);
+
+        await DbContext.SaveChangesAsync();
     }
 
     public async ValueTask EnableAsync(string id)

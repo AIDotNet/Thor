@@ -33,4 +33,10 @@ public sealed class ChatChannelInput
     /// AI类型
     /// </summary>
     public string Type { get; set; }
+    
+    /// <summary>
+    /// 分组
+    /// </summary>
+    /// <returns></returns>
+    public string[] Groups { get; set; } = [];
 }

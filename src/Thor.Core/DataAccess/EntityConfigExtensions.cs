@@ -12,6 +12,8 @@ public static class EntityConfigExtensions
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
+    private static readonly string[] ConvertFromProviderExpression = [];
+
     public static ModelBuilder ConfigureAIDotNet(this ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(options =>
@@ -21,6 +23,12 @@ public static class EntityConfigExtensions
             options.Property(x => x.UserName).IsRequired();
 
             options.Property(x => x.Email).IsRequired();
+
+            options.Property(x => x.Groups)
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => !string.IsNullOrEmpty(item)
+                        ? JsonSerializer.Deserialize<string[]>(item, JsonSerializerOptions)
+                        : new string[] { });
         });
 
         modelBuilder.Entity<Token>(options =>
@@ -87,6 +95,12 @@ public static class EntityConfigExtensions
             options.Property(x => x.Extension)
                 .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
                     item => JsonSerializer.Deserialize<Dictionary<string, string>>(item, JsonSerializerOptions));
+
+            options.Property(x => x.Groups)
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => !string.IsNullOrEmpty(item)
+                        ? JsonSerializer.Deserialize<string[]>(item, JsonSerializerOptions)
+                        : new string[] { });
         });
 
         modelBuilder.Entity<ProductPurchaseRecord>(options =>

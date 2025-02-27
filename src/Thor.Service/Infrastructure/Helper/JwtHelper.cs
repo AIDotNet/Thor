@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace Thor.Service.Infrastructure.Helper;
 
@@ -13,7 +14,8 @@ public class JwtHelper(IConfiguration configuration) : ITransientDependency
         {
             new Claim(ClaimTypes.NameIdentifier, user.UserName),
             new Claim(ClaimTypes.Sid, user.Id),
-            new Claim(ClaimTypes.Role, user.Role)
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim(ClaimTypes.GroupSid, JsonSerializer.Serialize(user.Groups)),
         };
 
         // 2. 从 appsettings.json 中读取SecretKey
@@ -46,13 +48,13 @@ public class JwtHelper(IConfiguration configuration) : ITransientDependency
         var handler = new JwtSecurityTokenHandler();
         var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
 
-        if (jsonToken == null) 
+        if (jsonToken == null)
             return null;
 
         var userName = jsonToken?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
         var id = jsonToken?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Sid)?.Value;
         var role = jsonToken?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value;
-        
+
         return new UserDto()
         {
             UserName = userName,
@@ -60,7 +62,7 @@ public class JwtHelper(IConfiguration configuration) : ITransientDependency
             Role = role
         };
     }
-    
+
     public IEnumerable<Claim> GetClaimsFromToken(string token)
     {
         var handler = new JwtSecurityTokenHandler();
