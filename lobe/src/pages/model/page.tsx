@@ -139,6 +139,7 @@ export default function DesktopLayout() {
                             key: 'model',
                             title: '模型',
                             dataIndex: 'model',
+                            width: 260,
                             render: (mode: string) => {
                                 return <Tooltip title={mode}>
                                     <Flexbox horizontal gap={8}>
