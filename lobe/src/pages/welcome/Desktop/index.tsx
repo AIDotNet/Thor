@@ -84,7 +84,7 @@ const useStyles = createStyles(({ token, css }) => ({
     }
   `,
     heroTitle: css`
-    color: ${token.colorTextLightSolid};
+    color: ${token.colorTextLightSolid} !important;
     font-size: 48px;
     font-weight: bold;
     margin-bottom: 24px;
@@ -191,7 +191,6 @@ const ThorWebsite = () => {
                                 }}
                                 style={{
                                     borderColor: '#434343',
-                                    color: '#d9d9d9',
                                     height: 48,
                                     padding: '0 24px',
                                     borderRadius: 8
@@ -268,7 +267,7 @@ const ThorWebsite = () => {
                             <Card bordered={false} style={{ textAlign: 'center', height: '100%' }}>
                                 <Statistic
                                     title="社区用户"
-                                    value="200+"
+                                    value="8000+"
                                     suffix="人"
                                     valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
                                 />
@@ -358,9 +357,7 @@ const ThorWebsite = () => {
                             }}
                             size="large"
                             style={{
-                                background: 'white',
                                 color: '#1890ff',
-                                borderColor: 'white',
                                 height: 48,
                                 padding: '0 24px',
                                 borderRadius: 8
