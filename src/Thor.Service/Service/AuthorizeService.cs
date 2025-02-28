@@ -111,6 +111,9 @@ public class AuthorizeService(
             user = new User(githubUser.id.ToString(), githubUser.id.ToString(),
                 githubUser.id + "@token-ai.cn",
                 Guid.NewGuid().ToString("N"));
+            
+            user.Groups = ["default"];
+            
             user.SetUser();
 
             user.SetPassword("Aa123456");
@@ -195,6 +198,8 @@ public class AuthorizeService(
                 Guid.NewGuid().ToString("N"));
             user.SetUser();
 
+            user.Groups = ["default"];
+
             user.SetPassword("Aa123456");
 
             await DbContext.Users.AddAsync(user);
@@ -274,6 +279,8 @@ public class AuthorizeService(
                 casdoorUser.Data.id + "@token-ai.cn",
                 Guid.NewGuid().ToString("N"));
             user.SetUser();
+            user.Groups = ["default"];
+
 
             user.SetPassword("Aa123456");
 
@@ -300,12 +307,6 @@ public class AuthorizeService(
         {
             token = key,
             role = user.Role
-        };
-
-        return new
-        {
-            token = "",
-            role = ""
         };
     }
 }

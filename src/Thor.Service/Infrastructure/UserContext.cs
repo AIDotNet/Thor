@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text.Json;
 
 namespace Thor.Service.Infrastructure;
 
@@ -38,6 +39,22 @@ public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor)
         {
             var user = httpContextAccessor.HttpContext?.User;
             return user?.IsInRole(RoleConstant.Admin) ?? false;
+        }
+    }
+
+    public string[] Groups
+    {
+        get
+        {
+            var user = httpContextAccessor.HttpContext?.User;
+            var groups = user?.FindFirst(ClaimTypes.GroupSid)?.Value;
+
+            if (string.IsNullOrWhiteSpace(groups))
+            {
+                return [];
+            }
+
+            return JsonSerializer.Deserialize<string[]>(groups) ?? [];
         }
     }
 }

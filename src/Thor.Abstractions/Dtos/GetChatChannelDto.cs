@@ -68,4 +68,10 @@ public sealed class GetChatChannelDto : Entity<string>
     /// 自动监控渠道
     /// </summary>
     public bool ControlAutomatically { get; set; }
+    
+    /// <summary>
+    /// 分组
+    /// </summary>
+    /// <returns></returns>
+    public string[] Groups { get; set; } = [];
 }

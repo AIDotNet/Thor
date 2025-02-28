@@ -42,6 +42,12 @@ public sealed class User : Entity<string>, ISoftDeletion
     /// 请求总数
     /// </summary>
     public long RequestCount { get; set; }
+    
+    /// <summary>
+    /// 分组
+    /// </summary>
+    /// <returns></returns>
+    public string[] Groups { get; set; }
 
     /// <summary>
     /// 账号额度

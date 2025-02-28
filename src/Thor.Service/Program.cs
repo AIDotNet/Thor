@@ -333,7 +333,6 @@ try
     #region Token
 
     var token = app.MapGroup("/api/v1/token")
-        .WithGroupName("Token")
         .AddEndpointFilter<ResultFilter>()
         .RequireAuthorization()
         .WithTags("Token");
@@ -370,7 +369,6 @@ try
     #region Channel
 
     var channel = app.MapGroup("/api/v1/channel")
-        .WithGroupName("Channel")
         .WithTags("Channel")
         .AddEndpointFilter<ResultFilter>()
         .RequireAuthorization(new AuthorizeAttribute()
@@ -410,7 +408,6 @@ try
     #region Model
 
     var model = app.MapGroup("/api/v1/model")
-        .WithGroupName("Model")
         .WithTags("Model")
         .AddEndpointFilter<ResultFilter>()
         .RequireAuthorization();
@@ -433,7 +430,6 @@ try
     #region Logger
 
     var log = app.MapGroup("/api/v1/logger")
-        .WithGroupName("Logger")
         .WithTags("Logger")
         .AddEndpointFilter<ResultFilter>()
         .RequireAuthorization();
@@ -460,7 +456,6 @@ try
     #region User
 
     var user = app.MapGroup("/api/v1/user")
-        .WithGroupName("User")
         .WithTags("User")
         .AddEndpointFilter<ResultFilter>();
 

@@ -37,7 +37,8 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
 
         var user = new User(Guid.NewGuid().ToString(), "admin", "239573049@qq.com", "admin")
         {
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
+            Groups = ["admin"],
         };
         user.SetAdmin();
         user.SetResidualCredit(1000000000);

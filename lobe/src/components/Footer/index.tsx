@@ -1,71 +1,88 @@
-import { Footer } from "@lobehub/ui";
+import { ThunderboltOutlined, GithubOutlined } from '@ant-design/icons';
 import {
-    description,
     email
 } from '../../../package.json'
+import { Layout, Row, Col, Typography, Divider, Button, Space } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 
+const { Footer } = Layout;
+const { Title, Paragraph, Text } = Typography;
+
+// 添加响应式footer样式
+const FooterContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+`;
+
+
+const FooterText = styled(Text)`
+  color: #8c8c8c;
+  margin-bottom: 8px;
+  
+  @media (min-width: 768px) {
+    margin-bottom: 0;
+  }
+`;
 export default function ThorFooter() {
-    return (
-        <Footer
-            bottom={
-                <div>
-                    <p>© {new Date().getFullYear()} AIDotNet. All rights reserved.
-                    </p>
-                    <p>
-                        Powered by .NET 9
-                    </p>
-                </div>
-            }
-            columns={[
-                {
-                    title: '关于我们',
-                    items: [
-                        {
-                            title: '关于我们',
-                            description: description,
-                        },
-                        {
-                            title: '邮箱',
-                            description: <a href={"mailto://" + email}>联系我们</a>
-                        }
-                    ]
-                },
-                {
-                    title: '其他开源项目',
-                    items: [
-                        {
-                            title: 'AIDotNet',
-                            description: <a href="https://github.com/AIDotNet"
-                                target="_blank"
-                            >
-                                AIDotNet社区是一群热爱AI的开发者组成的社区，
-                                <br />
-                                旨在推动AI技术的发展，为AI开发者提供更好的学习和交流平台。
-                            </a>
-                        },
-                        {
-                            title: 'FastWiki',
-                            description: <a href="https://github.com/AIDotNet/Fast-wiki"
-                                target="_blank"
-                            >
-                                一个智能知识库的开源项目，
-                                <br />
-                                可用于开发企业级智能客服管理系统。
-                            </a>
-                        },
-                        {
-                            title: 'linker',
-                            description: <a href="https://github.com/snltty/linker"
-                                target="_blank"
-                            >
-                                一个免费开源的异地组网工具
-                            </a>
-                        }
-                    ]
-                }
-            ]}
-        >
+    const navigate = useNavigate()
 
+    return (
+        <Footer style={{ background: '#141414', color: '#8c8c8c', padding: '48px 0' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+                <Row gutter={[24, 32]}>
+                    <Col xs={24} md={12}>
+                        <div style={{ display: 'flex', alignItems: 'center', color: 'white', marginBottom: 16 }}>
+                            <ThunderboltOutlined style={{ color: '#faad14', fontSize: 24, marginRight: 8 }} />
+                            <span style={{ fontSize: 20, fontWeight: 'bold' }}>Thor 雷神托尔</span>
+                        </div>
+                        <Paragraph style={{ color: '#8c8c8c' }}>
+                            Thor是开源的免费并且可商用的开源项目。致力于为开发者提供高效、稳定的AI服务接口。兼容OpenAI API，支持多种模型，按量计费，价格透明。
+                        </Paragraph>
+                        <Space style={{ marginTop: 16 }}>
+                            <Button
+                                onClick={()=>{
+                                    window.open('https://github.com/AIDotNet/Thor','_blank')
+                                }}
+                                shape="circle" icon={<GithubOutlined />} />
+                        </Space>
+                    </Col>
+                    <Col xs={12} md={6}>
+                        <Title level={4} style={{ color: 'white' }}>产品</Title>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            <li style={{ marginBottom: 8 }}><a style={{ color: '#8c8c8c' }}>API服务</a></li>
+                            <li style={{ marginBottom: 8 }}><a
+                                onClick={() => {
+                                    navigate('/models')
+                                }}
+                                style={{ color: '#8c8c8c' }}>模型列表</a></li>
+                        </ul>
+                    </Col>
+                    <Col xs={12} md={6}>
+                        <Title level={4} style={{ color: 'white' }}>支持</Title>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            <li style={{ marginBottom: 8 }}><a style={{ color: '#8c8c8c' }}>开发文档</a></li>
+                            <li style={{ marginBottom: 8 }}><a style={{ color: '#8c8c8c' }}>常见问题</a></li>
+                            <li style={{ marginBottom: 8 }}><a 
+                                onClick={()=>{
+                                    window.location.href = `mailto:${email}`;
+                                }}
+                                style={{ color: '#8c8c8c' }}>联系我们</a></li>
+                        </ul>
+                    </Col>
+                </Row>
+                <Divider style={{ borderColor: '#303030', margin: '32px 0' }} />
+                <FooterContainer>
+                    <FooterText>© 2025 AIDotNet. All rights reserved.</FooterText>
+                    <Text style={{ color: '#595959' }}>Powered by .NET 9</Text>
+                </FooterContainer>
+            </div>
         </Footer>
     )
 }

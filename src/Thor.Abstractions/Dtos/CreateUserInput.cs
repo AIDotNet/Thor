@@ -12,4 +12,9 @@ public class CreateUserInput
     /// 如果使用了邮箱验证码注册，需要填写验证码
     /// </summary>
     public string Code { get; set; } = null!;
+    
+    /// <summary>
+    /// Groups
+    /// </summary>
+    public string[] Groups { get; set; } = [];
 }

@@ -1,8 +1,0 @@
-.tilted-card {
-    transform: scale(1) perspective(1040px) rotateY(-11deg) rotateX(-2deg) rotate(-1deg);
-    transition: transform 0.3s ease;
-  }
-  
-  .tilted-card:hover {
-    transform: rotate(0deg); 
-  }

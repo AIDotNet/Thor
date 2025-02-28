@@ -4,6 +4,7 @@ import { enable, getUsers, Remove } from "../../services/UserService";
 import { Switch, Tag, Tooltip, Button, Dropdown, Input, Table, message } from 'antd';
 import { renderQuota } from "../../utils/render";
 import CreateUser from "./features/CreateUser";
+import EditUser from "./features/EditUser";
 
 
 const Header = styled.header`
@@ -14,6 +15,8 @@ export default function Channel() {
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
   const [createVisible, setCreateVisible] = useState<boolean>(false);
+  const [editVisible, setEditVisible] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [input, setInput] = useState({
     page: 1,
     pageSize: 10,
@@ -35,6 +38,16 @@ export default function Channel() {
       title: '角色',
       dataIndex: 'role',
       key: 'role'
+    },
+    {
+      title: '分组',
+      dataIndex: 'groups',
+      key: 'groups',
+      render: (value: string[]) => {
+        return value.map((item: string) => {
+          return <Tag key={item}>{item}</Tag>
+        })
+      }
     },
     {
       title: '状态',
@@ -104,17 +117,27 @@ export default function Channel() {
             items: [
               {
                 key: 1,
+                label: '编辑',
+                onClick: () => openEditUser(item)
+              },
+              {
+                key: 2,
                 label: '删除',
                 onClick: () => removeUser(item.id)
               }
             ]
           }}
         >
-          <Button >操作</Button>
+          <Button>操作</Button>
         </Dropdown>
       ),
     }
   ]
+
+  function openEditUser(user: any) {
+    setCurrentUser(user);
+    setEditVisible(true);
+  }
 
   function removeUser(id: string) {
     Remove(id).then((res) => {
@@ -216,7 +239,17 @@ export default function Channel() {
         setCreateVisible(false);
       }
       } />
-
+      <EditUser 
+        visible={editVisible} 
+        user={currentUser}
+        onCancel={() => {
+          setEditVisible(false);
+        }} 
+        onSuccess={() => {
+          setEditVisible(false);
+          loadData();
+        }} 
+      />
     </div>
   )
 }
