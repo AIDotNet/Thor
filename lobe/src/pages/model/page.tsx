@@ -170,7 +170,7 @@ export default function DesktopLayout() {
                                             <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000, 6)}/1K tokens</Tag>
                                             {item.completionRate ? <><Tag style={{
                                                 marginTop: 8
-                                            }} color='geekblue'>完成{renderQuota(item.completionRate * 1000, 6)}/1K tokens</Tag></> : <><Tag style={{
+                                            }} color='geekblue'>完成{renderQuota((item.promptRate * 1000) * item.completionRate, 6)}/1K tokens</Tag></> : <><Tag style={{
                                                 marginTop: 8
                                             }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000, 6)}/1K tokens</Tag></>}
                                         </div>
@@ -178,9 +178,9 @@ export default function DesktopLayout() {
                                             <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000)}/1M tokens</Tag>
                                             {item.completionRate ? <><Tag style={{
                                                 marginTop: 8
-                                            }} color='geekblue'>音频完成{renderQuota(item.audioOutputRate * 1000)}/1M tokens</Tag></> : <><Tag style={{
+                                            }} color='geekblue'>音频完成{renderQuota((item.audioPromptRate * 1000) * item.audioOutputRate, 6)}/1K tokens</Tag></> : <><Tag style={{
                                                 marginTop: 8
-                                            }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1M tokens</Tag></>}
+                                            }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1K tokens</Tag></>}
                                         </div>}
                                     </>)
                                 } else {
@@ -197,7 +197,7 @@ export default function DesktopLayout() {
                                             <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000000)}/1M tokens</Tag>
                                             {item.completionRate ? <><Tag style={{
                                                 marginTop: 8
-                                            }} color='geekblue'>完成{renderQuota(item.completionRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
+                                            }} color='geekblue'>完成{renderQuota(item.promptRate * 1000000 * item.completionRate)}/1M tokens</Tag></> : <><Tag style={{
                                                 marginTop: 8
                                             }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
                                         </div>
@@ -205,7 +205,7 @@ export default function DesktopLayout() {
                                             <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000000)}/1M tokens</Tag>
                                             {item.completionRate ? <><Tag style={{
                                                 marginTop: 8
-                                            }} color='geekblue'>音频完成{renderQuota(item.audioOutputRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
+                                            }} color='geekblue'>音频完成{renderQuota((item.audioPromptRate * 1000000) * item.audioOutputRate)}/1M tokens</Tag></> : <><Tag style={{
                                                 marginTop: 8
                                             }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
                                         </div>}
