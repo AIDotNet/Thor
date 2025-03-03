@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getModels, getTypes } from "../../../services/ModelService";
 import { Update } from "../../../services/ChannelService";
-import { message, Drawer } from "antd";
+import { message, Drawer, Checkbox } from "antd";
 import { Button, Select, Form, Input } from "antd";
 import { getModelPrompt } from "../../../utils/render";
 
@@ -18,6 +18,7 @@ interface InputProps {
   type: string;
   address: string;
   other: string;
+  cache: boolean;
   key: string;
   models: string[];
   groups: string[];
@@ -41,6 +42,7 @@ export default function UpdateChannel({
     address: "",
     other: "",
     key: "",
+    cache: false,
     models: [],
     groups: [],
     extension: {},
@@ -54,6 +56,7 @@ export default function UpdateChannel({
     key?: string;
     models: string[];
     groups: string[];
+    cache?: boolean;
   };
 
   function loading() {
@@ -89,12 +92,19 @@ export default function UpdateChannel({
         key: value.key,
         models: value.models,
         groups: value.groups,
+        cache: value.cache,
         extension: value.extension,
       });
     }
   }, [visible]);
 
   function handleSubmit(values: any) {
+    console.log(values);
+    if (input.type === "Claude" && input.cache) {
+      values.other = "true";
+    } else if (input.type === "Claude" && !input.cache) {
+      values.other = "false";
+    }
     Update(value.id, values).then((item) => {
       if (item.success) {
         message.success({
@@ -227,6 +237,20 @@ export default function UpdateChannel({
               />
             </Form.Item>
           )}
+          {input.type === "Claude" && (
+            <Form.Item<FieldType>
+              name="cache"
+              label="是否启用缓存"
+            >
+              <Checkbox
+                checked={input.cache}
+                onChange={(v) => {
+                  setInput({ ...input, cache: v.target.checked });
+                }}
+              >
+              </Checkbox>
+            </Form.Item>
+          )}
           {input.type === "Hunyuan" && (
             <Form.Item<FieldType>
               name="other"
@@ -275,33 +299,33 @@ export default function UpdateChannel({
               autoComplete="new-password"
             />
           </Form.Item>
-          
-        <Form.Item<FieldType>
-          name="groups"
-          label="组"
-          style={{ width: "100%" }}
-        >
-          <Select
-            placeholder="请选择组"
-            mode="tags"
-            // 提供默认的选项
-            options={[
-              {
-                label: "default",
-                value: "default"
-              },
-              {
-                label: "vip",
-                value: "vip"
-              }
-            ]}
-            value={input.groups}
-            onChange={(v) => {
-              setInput({ ...input, groups: v });
-            }}
-          />
-        </Form.Item>
-          
+
+          <Form.Item<FieldType>
+            name="groups"
+            label="组"
+            style={{ width: "100%" }}
+          >
+            <Select
+              placeholder="请选择组"
+              mode="tags"
+              // 提供默认的选项
+              options={[
+                {
+                  label: "default",
+                  value: "default"
+                },
+                {
+                  label: "vip",
+                  value: "vip"
+                }
+              ]}
+              value={input.groups}
+              onChange={(v) => {
+                setInput({ ...input, groups: v });
+              }}
+            />
+          </Form.Item>
+
           <Form.Item<FieldType>
             name="models"
             label="模型"

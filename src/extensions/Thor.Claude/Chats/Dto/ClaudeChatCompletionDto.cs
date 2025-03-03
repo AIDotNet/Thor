@@ -74,8 +74,8 @@ public class Usage
 {
     public int input_tokens { get; set; }
 
-    public int cache_creation_input_tokens { get; set; }
+    public int? cache_creation_input_tokens { get; set; }
 
-    public int cache_read_input_tokens { get; set; }
+    public int? cache_read_input_tokens { get; set; }
     public int output_tokens { get; set; }
 }

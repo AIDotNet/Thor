@@ -57,7 +57,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         {
             model = input.Model,
             max_tokens = input.MaxTokens ?? 2000,
-            messages = CreateMessage(input.Messages),
+            system = CreateMessage(input.Messages.Where(x => x.Role == "system").ToList(), options),
+            messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options),
             top_p = isThink ? null : input.TopP,
             thinking = isThink
                 ? new
@@ -104,7 +105,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             await response.Content.ReadFromJsonAsync<ClaudeChatCompletionDto>(ThorJsonSerializer.DefaultOptions,
                 cancellationToken: cancellationToken);
 
-        return new ThorChatCompletionsResponse()
+        var thor = new ThorChatCompletionsResponse()
         {
             Choices = CreateResponse(value),
             Model = input.Model,
@@ -112,9 +113,19 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             Usage = new ThorUsageResponse()
             {
                 CompletionTokens = value.usage.output_tokens,
-                PromptTokens = value.usage.input_tokens,
+                PromptTokens = value.usage.input_tokens
             }
         };
+        
+        if(value.usage.cache_read_input_tokens != null)
+        {
+            thor.Usage.PromptTokensDetails ??= new ThorUsageResponsePromptTokensDetails()
+            {
+                CachedTokens = value.usage.cache_read_input_tokens.Value,
+            };
+        }
+        
+        return thor;
     }
 
     public List<ThorChatChoiceResponse> CreateResponse(ClaudeChatCompletionDto completionDto)
@@ -149,7 +160,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         return new List<ThorChatChoiceResponse> { response };
     }
 
-    private object CreateMessage(List<ThorChatMessage> messages)
+    private object CreateMessage(List<ThorChatMessage> messages, ThorPlatformOptions options)
     {
         var list = new List<object>();
 
@@ -161,10 +172,23 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                 list.Add(new
                 {
                     role = message.Role,
-                    content = contentCalculated.Select<ThorChatMessageContent, object>(x =>
+                    content = (List<object>)contentCalculated.Select<ThorChatMessageContent, object>(x =>
                     {
                         if (x.Type == "text")
                         {
+                            if (options.Other.Equals("true", StringComparison.OrdinalIgnoreCase))
+                            {
+                                return new
+                                {
+                                    type = "text",
+                                    text = x.Text,
+                                    cache_control = new
+                                    {
+                                        type = "ephemeral"
+                                    }
+                                };
+                            }
+
                             return new
                             {
                                 type = "text",
@@ -173,6 +197,24 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                         }
 
                         var isBase64 = x.ImageUrl?.Url.StartsWith("http") == true;
+
+                        if (options.Other.Equals("true", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return new
+                            {
+                                type = "image",
+                                source = new
+                                {
+                                    type = isBase64 ? "base64" : "url",
+                                    media_type = "image/png",
+                                    data = x.ImageUrl?.Url,
+                                },
+                                cache_control = new
+                                {
+                                    type = "ephemeral"
+                                }
+                            };
+                        }
 
                         return new
                         {
@@ -189,11 +231,48 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             }
             else
             {
-                list.Add(new
+                if (options.Other.Equals("true", StringComparison.OrdinalIgnoreCase))
                 {
-                    role = message.Role,
-                    content = message.Content
-                });
+                    if (message.Role == "system")
+                    {
+                        list.Add(new
+                        {
+                            type = "text",
+                            text = message.Content,
+                            cache_control = new
+                            {
+                                type = "ephemeral"
+                            }
+                        });
+                    }
+                    else
+                    {
+                        list.Add(new
+                        {
+                            role = message.Role,
+                            content = message.Content
+                        });
+                    }
+                }
+                else
+                {
+                    if (message.Role == "system")
+                    {
+                        list.Add(new
+                        {
+                            type = "text",
+                            text = message.Content
+                        });
+                    }
+                    else
+                    {
+                        list.Add(new
+                        {
+                            role = message.Role,
+                            content = message.Content
+                        });
+                    }
+                }
             }
         }
 
@@ -241,7 +320,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             model = input.Model,
             max_tokens = input.MaxTokens ?? 2048,
             stream = true,
-            messages = CreateMessage(input.Messages),
+            system = CreateMessage(input.Messages.Where(x => x.Role == "system").ToList(), options),
+            messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options),
             top_p = isThinking ? null : input.TopP,
             thinking = isThinking
                 ? new

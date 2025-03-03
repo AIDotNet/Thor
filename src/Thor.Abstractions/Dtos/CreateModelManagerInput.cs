@@ -29,6 +29,21 @@ public class CreateModelManagerInput
     /// </summary>
     public decimal PromptRate { get; set; }
 
+    /// <summary>
+    /// 写入缓存倍率
+    /// </summary>
+    public decimal? CacheRate { get; set; }
+
+    /// <summary>
+    /// 缓存命中倍率
+    /// </summary>
+    /// <returns></returns>
+    public decimal? CacheHitRate { get; set; }
+
+    /// <summary>
+    /// Audio缓存倍率
+    /// </summary>
+    public decimal? AudioCacheRate { get; set; }
     
     /// <summary>
     /// Audio倍率

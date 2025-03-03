@@ -8,13 +8,59 @@ import {
   DatePicker,
   Table,
   Card,
+  Typography,
+  Skeleton
 } from "antd";
 import { getLoggers, viewConsumption } from "../../services/LoggerService";
 import { Tag, Tooltip } from "@lobehub/ui";
 import { renderQuota } from "../../utils/render";
 import dayjs from "dayjs";
+import { motion, AnimatePresence } from "framer-motion";
 
-const Header = styled.header``;
+// 使用styled-components添加动画效果
+const Header = styled.header`
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+`;
+
+const AnimatedCard = styled(Card)`
+  transition: all 0.3s ease;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+`;
+
+const AnimatedButton = styled(Button)`
+  transition: all 0.2s ease;
+  &:hover {
+    transform: scale(1.05);
+  }
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const AnimatedTag = styled(Tag)`
+  transition: all 0.2s ease;
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+const PageContainer = styled(motion.div)`
+  margin: 10px;
+  width: 100%;
+  height: 100%;
+`;
+
+const SearchBar = styled(motion.div)`
+  display: flex;
+  flex-direction: row-reverse;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+`;
 
 export default function LoggerPage() {
   const [data, setData] = useState<any[]>([]);
@@ -64,7 +110,9 @@ export default function LoggerPage() {
       key: "quota",
       width: "120px",
       render: (value: any) => {
-        return value && <Tag color="green">{renderQuota(value, 6)}</Tag>;
+        return value && (
+          <AnimatedTag color="green">{renderQuota(value, 6)}</AnimatedTag>
+        );
       },
     },
     {
@@ -74,7 +122,7 @@ export default function LoggerPage() {
       width: "190px",
       key: "channelName",
       render: (value: any) => {
-        return value && <Tag color="blue">{value}</Tag>;
+        return value && <AnimatedTag color="blue">{value}</AnimatedTag>;
       },
     },
     {
@@ -83,7 +131,7 @@ export default function LoggerPage() {
       width: "90px",
       key: "userName",
       render: (value: any) => {
-        return value && <Tag color="blue">{value}</Tag>;
+        return value && <AnimatedTag color="blue">{value}</AnimatedTag>;
       },
     },
     {
@@ -106,7 +154,7 @@ export default function LoggerPage() {
       render: (value: any) => {
         return (
           value && (
-            <Tag
+            <AnimatedTag
               onClick={() => {
                 navigator.clipboard
                   .writeText(value)
@@ -123,7 +171,7 @@ export default function LoggerPage() {
               }}
             >
               {value}
-            </Tag>
+            </AnimatedTag>
           )
         );
       },
@@ -136,8 +184,8 @@ export default function LoggerPage() {
       render: (_: any, item: any) => {
         return (
           <>
-            <Tag color="pink">{timeString(item.totalTime)}ms</Tag>
-            <Tag color="gold">{item.stream ? "流式" : "非流式"}</Tag>
+            <AnimatedTag color="pink">{timeString(item.totalTime)}ms</AnimatedTag>
+            <AnimatedTag color="gold">{item.stream ? "流式" : "非流式"}</AnimatedTag>
           </>
         );
       },
@@ -220,16 +268,30 @@ export default function LoggerPage() {
     loadData();
   }, [input.page, input.pageSize]);
 
+  // 数字动画组件
+  const AnimatedNumber = ({ value }) => {
+    return (
+      <motion.span
+        key={value}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3 }}
+        style={{ fontWeight: "bold", display: "inline-block" }}
+      >
+        {renderQuota(value, 4)}
+      </motion.span>
+    );
+  };
 
   return (
-    <div
-      style={{
-        margin: "10px",
-        width: "100%",
-      }}
+    <PageContainer
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
     >
       <Header>
-        <Card
+        <AnimatedCard
           style={{
             float: "left",
           }}
@@ -239,16 +301,16 @@ export default function LoggerPage() {
         >
           <span>
             区间消费:{" "}
-            <span
-              style={{
-                fontWeight: "bold",
-              }}
-            >
-              {renderQuota(consume, 4)}
-            </span>
+            <AnimatePresence mode="wait">
+              {consumeLoading ? (
+                <Skeleton.Button active size="small" style={{ width: "80px" }} />
+              ) : (
+                <AnimatedNumber value={consume} />
+              )}
+            </AnimatePresence>
           </span>
 
-          <Button
+          <AnimatedButton
             type="text"
             onClick={() => {
               loadViewConsumption();
@@ -259,140 +321,189 @@ export default function LoggerPage() {
             }}
           >
             查看消费
-          </Button>
-        </Card>
-        <Button
-          onClick={() => loadData()}
-          style={{
-            marginRight: "0.5rem",
-            float: "right",
+          </AnimatedButton>
+        </AnimatedCard>
+        
+        <SearchBar
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ 
+            duration: 0.5, 
+            staggerChildren: 0.1, 
+            delayChildren: 0.2 
           }}
         >
-          搜索
-        </Button>
-        <Input
-          value={input.model}
-          onChange={(e) => {
-            setInput({
-              ...input,
-              model: e.target.value,
-            });
-          }}
-          style={{
-            marginRight: "0.5rem",
-            float: "right",
-            width: "5rem",
-          }}
-          placeholder="模型名称"
-        />
-        <Select
-          style={{
-            marginRight: "0.5rem",
-            float: "right",
-            width: "5rem",
-          }}
-          value={input.type}
-          onChange={(e: any) => {
-            setInput({
-              ...input,
-              type: e,
-            });
-          }}
-        >
-          <Select.Option value={-1}>全部</Select.Option>
-          <Select.Option value={1}>消费</Select.Option>
-          <Select.Option value={2}>充值</Select.Option>
-          <Select.Option value={3}>系统</Select.Option>
-          <Select.Option value={4}>新增用户</Select.Option>
-        </Select>
-        <Input
-          value={input.keyword}
-          onChange={(e) => {
-            setInput({
-              ...input,
-              keyword: e.target.value,
-            });
-          }}
-          style={{
-            marginRight: "0.5rem",
-            float: "right",
-            width: "5rem",
-          }}
-          placeholder="关键字"
-        />
-        <Input
-          value={input.organizationId}
-          onChange={(e) => {
-            setInput({
-              ...input,
-              organizationId: e.target.value,
-            });
-          }}
-          style={{
-            marginRight: "0.5rem",
-            float: "right",
-            width: "5rem",
-          }}
-          placeholder="组织Id"
-        />
-        <DatePicker
-          value={input.endTime ? dayjs(input.endTime) : null}
-          onChange={(e: any) => {
-            setInput({
-              ...input,
-              endTime: e.format("YYYY-MM-DD HH:mm:ss"),
-            });
-          }}
-          style={{
-            marginRight: "0.5rem",
-            width: "10rem",
-            float: "right",
-          }}
-          placeholder="结束时间"
-        />
-        <DatePicker
-          value={input.startTime ? dayjs(input.startTime) : null}
-          onChange={(e: any) => {
-            setInput({
-              ...input,
-              startTime: e.format("YYYY-MM-DD HH:mm:ss"),
-            });
-          }}
-          style={{
-            marginRight: "0.5rem",
-            width: "10rem",
-            float: "right",
-          }}
-          placeholder="开始时间"
-        />
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <AnimatedButton
+              onClick={() => loadData()}
+              style={{ marginRight: "0.5rem" }}
+              type="primary"
+            >
+              搜索
+            </AnimatedButton>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <Input
+              value={input.model}
+              onChange={(e) => {
+                setInput({
+                  ...input,
+                  model: e.target.value,
+                });
+              }}
+              style={{
+                marginRight: "0.5rem",
+                width: "7rem",
+              }}
+              placeholder="模型名称"
+              allowClear
+            />
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <Select
+              style={{
+                marginRight: "0.5rem",
+                width: "6rem",
+              }}
+              value={input.type}
+              onChange={(e: any) => {
+                setInput({
+                  ...input,
+                  type: e,
+                });
+              }}
+            >
+              <Select.Option value={-1}>全部</Select.Option>
+              <Select.Option value={1}>消费</Select.Option>
+              <Select.Option value={2}>充值</Select.Option>
+              <Select.Option value={3}>系统</Select.Option>
+              <Select.Option value={4}>新增用户</Select.Option>
+            </Select>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <Input
+              value={input.keyword}
+              onChange={(e) => {
+                setInput({
+                  ...input,
+                  keyword: e.target.value,
+                });
+              }}
+              style={{
+                marginRight: "0.5rem",
+                width: "7rem",
+              }}
+              placeholder="关键字"
+              allowClear
+            />
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <Input
+              value={input.organizationId}
+              onChange={(e) => {
+                setInput({
+                  ...input,
+                  organizationId: e.target.value,
+                });
+              }}
+              style={{
+                marginRight: "0.5rem",
+                width: "7rem",
+              }}
+              placeholder="组织Id"
+              allowClear
+            />
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <DatePicker
+              value={input.endTime ? dayjs(input.endTime) : null}
+              onChange={(e: any) => {
+                setInput({
+                  ...input,
+                  endTime: e ? e.format("YYYY-MM-DD HH:mm:ss") : null,
+                });
+              }}
+              style={{
+                marginRight: "0.5rem",
+                width: "10rem",
+              }}
+              placeholder="结束时间"
+              allowClear
+            />
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.02 }}>
+            <DatePicker
+              value={input.startTime ? dayjs(input.startTime) : null}
+              onChange={(e: any) => {
+                setInput({
+                  ...input,
+                  startTime: e ? e.format("YYYY-MM-DD HH:mm:ss") : null,
+                });
+              }}
+              style={{
+                marginRight: "0.5rem",
+                width: "10rem",
+              }}
+              placeholder="开始时间"
+              allowClear
+            />
+          </motion.div>
+        </SearchBar>
       </Header>
-      <Table
-        scroll={{
-          x: "max-content",
-          y: "calc(100vh - 350px)",
-        }}
-        loading={loading}
-        style={{
-          marginTop: "1rem",
-        }}
-        columns={columns.filter(
-          (item) => item.disable == false || item.disable == undefined
-        ) as any}
-        dataSource={data}
-        pagination={{
-          total: total,
-          pageSize: input.pageSize,
-          defaultPageSize: input.page,
-          onChange: (page, pageSize) => {
-            // 修改input以后获取数据
-            setInput({
-              ...input,
-              page,
-              pageSize,
-            });
-          },
-        }}
-      />
-    </div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Table
+          scroll={{
+            x: "max-content",
+            y: "calc(100vh - 350px)",
+          }}
+          loading={loading}
+          style={{
+            marginTop: "1rem",
+          }}
+          columns={columns.filter(
+            (item) => item.disable == false || item.disable == undefined
+          ) as any}
+          dataSource={data}
+          pagination={{
+            total: total,
+            pageSize: input.pageSize,
+            defaultPageSize: input.page,
+            onChange: (page, pageSize) => {
+              // 修改input以后获取数据
+              setInput({
+                ...input,
+                page,
+                pageSize,
+              });
+            },
+          }}
+          rowClassName={(record, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
+          onRow={(record) => {
+            return {
+              style: {
+                transition: "background-color 0.3s ease",
+              },
+              onMouseEnter: (e) => {
+                e.currentTarget.style.backgroundColor = "rgba(0, 112, 204, 0.08)";
+              },
+              onMouseLeave: (e) => {
+                e.currentTarget.style.backgroundColor = "";
+              },
+            };
+          }}
+        />
+      </motion.div>
+    </PageContainer>
   );
 }
