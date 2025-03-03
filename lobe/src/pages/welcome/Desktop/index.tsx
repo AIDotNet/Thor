@@ -221,24 +221,6 @@ const AnimatedBackground = () => {
   );
 };
 
-// 添加一个新的视差滚动效果组件
-const ParallaxSection = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <motion.div
-      style={{ 
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.8 }}
-    >
-      {children}
-    </motion.div>
-  );
-};
-
 // 优化 CountUpStatistic 组件，提高性能
 const CountUpStatistic = ({ title, value, suffix, valueStyle }: { title: string, value: string, suffix: string, valueStyle: React.CSSProperties }) => {
   const [count, setCount] = useState(0);
@@ -606,7 +588,7 @@ const ThorWebsite = () => {
                                 </motion.div>
                                 <Title level={4}>多模型支持</Title>
                                 <Paragraph style={{ color: '#595959' }}>
-                                    支持68+模型，包括主流的大型语言模型和专业领域模型，满足各种AI应用场景。
+                                    支持200+模型，包括主流的大型语言模型和专业领域模型，满足各种AI应用场景。
                                 </Paragraph>
                                 <Button type="link" style={{ padding: 0 }}>了解支持的模型 →</Button>
                             </MotionFeatureCard>

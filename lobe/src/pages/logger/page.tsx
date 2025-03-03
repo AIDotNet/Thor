@@ -8,7 +8,6 @@ import {
   DatePicker,
   Table,
   Card,
-  Typography,
   Skeleton
 } from "antd";
 import { getLoggers, viewConsumption } from "../../services/LoggerService";
@@ -17,7 +16,6 @@ import { renderQuota } from "../../utils/render";
 import dayjs from "dayjs";
 import { motion, AnimatePresence } from "framer-motion";
 
-// 使用styled-components添加动画效果
 const Header = styled.header`
   margin-bottom: 16px;
   transition: all 0.3s ease;
@@ -269,7 +267,7 @@ export default function LoggerPage() {
   }, [input.page, input.pageSize]);
 
   // 数字动画组件
-  const AnimatedNumber = ({ value }) => {
+  const AnimatedNumber = ({ value }: { value: number }) => {
     return (
       <motion.span
         key={value}
@@ -488,8 +486,8 @@ export default function LoggerPage() {
               });
             },
           }}
-          rowClassName={(record, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
-          onRow={(record) => {
+          rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
+          onRow={() => {
             return {
               style: {
                 transition: "background-color 0.3s ease",
