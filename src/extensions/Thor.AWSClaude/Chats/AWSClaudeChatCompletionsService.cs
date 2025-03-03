@@ -9,6 +9,7 @@ using Thor.Claudia;
 using Amazon.Util.Internal;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Amazon.BedrockRuntime;
 
 namespace Thor.AWSClaude.Chats
 {
@@ -25,7 +26,6 @@ namespace Thor.AWSClaude.Chats
             ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
-
             if (options != null && string.IsNullOrWhiteSpace(options.Other))
                 throw new Exception("Other is Required.place select regionEndpoint");
             var regionEndpoint = RegionEndpoint.GetBySystemName(options.Other);
@@ -42,17 +42,15 @@ namespace Thor.AWSClaude.Chats
             var client = AWSClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
 
 
-            var messages = input.Messages.Where(x => x.Role != "system").Select(x => new Message
-            {
-                Role = x.Role,
-                Content = new List<ContentBlock> { new ContentBlock { Text = x.Content } }
-            }).ToList();
-            var system = input.Messages.FirstOrDefault(x => x.Role == "system")?.Content ?? "";
+            var messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
+
+            var system = CreateSystemContentMessage(input.Messages.Where(x => x.Role == "system").ToList(), options);
 
             var request = new ConverseRequest
             {
                 ModelId = input.Model,
                 Messages = messages,
+                
                 InferenceConfig = new InferenceConfiguration()
                 {
                     MaxTokens = input.MaxTokens ?? 2000,
@@ -60,34 +58,28 @@ namespace Thor.AWSClaude.Chats
                     TopP = input.TopP ?? 0,
                 }
             };
-            if (!string.IsNullOrEmpty(system))
+            if (system.Count != 0)
             {
-                request.System = new List<SystemContentBlock>
-                {
-                     new SystemContentBlock
-                     {
-                         Text=system,
-                     }
-                }; ;
+                request.System.AddRange(system);
             }
-            
+
             var response = await client.ConverseAsync(request, cancellationToken);
             string responseText = response?.Output?.Message?.Content?[0]?.Text ?? "";
 
             var message = ThorChatMessage.CreateAssistantMessage(responseText);
+
             return new ThorChatCompletionsResponse()
             {
                 Choices =
-                 [
-                        new()
-                        {
-                            Delta = message,
-                            Message = message,
-                            FinishReason = "stop",
-                            Index = 0,
-
-                        }
-                 ],
+                [
+                    new()
+                    {
+                        Delta = message,
+                        Message = message,
+                        FinishReason = "stop",
+                        Index = 0,
+                    }
+                ],
                 Usage = new Abstractions.Dtos.ThorUsageResponse
                 {
                     PromptTokens = response?.Usage?.InputTokens ?? 0,
@@ -98,14 +90,93 @@ namespace Thor.AWSClaude.Chats
             };
         }
 
+        private List<Message> CreateMessage(List<ThorChatMessage> messages, ThorPlatformOptions options)
+        {
+            var awsMessage = new List<Message>();
+
+            foreach (var chatMessage in messages)
+            {
+                if (chatMessage.ContentCalculated is IList<ThorChatMessageContent> contentCalculated)
+                {
+                    var item = new Message
+                    {
+                        Role = chatMessage.Role
+                    };
+
+                    var contents = (List<ContentBlock>)contentCalculated.Select<ThorChatMessageContent, ContentBlock>(
+                        x =>
+                        {
+                            if (x.Type == "text")
+                            {
+                                return new ContentBlock
+                                {
+                                    Text = x.Text,
+                                };
+                            }
+
+                            return new ContentBlock
+                            {
+                                Image = new ImageBlock()
+                                {
+                                    Format = ImageFormat.Png,
+                                    Source = new ImageSource()
+                                    {
+                                        Bytes = new MemoryStream(Convert.FromBase64String(x.ImageUrl?.Url)),
+                                    }
+                                }
+                            };
+                        });
+
+                    item.Content = contents;
+                    awsMessage.Add(item);
+                }
+                else
+                {
+                    var item = new Message();
+
+                    item.Role = chatMessage.Role;
+
+                    item.Content =
+                    [
+                        new ContentBlock()
+                        {
+                            Text = chatMessage.Content,
+                        }
+                    ];
+                    awsMessage.Add(item);
+                }
+            }
+
+            return awsMessage;
+        }
+
+        private List<SystemContentBlock> CreateSystemContentMessage(List<ThorChatMessage> messages,
+            ThorPlatformOptions options)
+        {
+            var awsMessage = new List<SystemContentBlock>();
+
+            foreach (var chatMessage in messages)
+            {
+                var item = new SystemContentBlock
+                {
+                    Text = chatMessage.Content
+                };
+
+                awsMessage.Add(item);
+            }
+
+            return awsMessage;
+        }
+
         /// <summary>
         /// 流式对话补全
         /// </summary>
-        /// <param name="request">对话补全请求参数对象</param>
+        /// <param name="input">对话补全请求参数对象</param>
         /// <param name="options">平台参数对象</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns></returns>
-        public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(ThorChatCompletionsRequest input,
+        public async IAsyncEnumerable<ThorChatCompletionsResponse> StreamChatCompletionsAsync(
+            ThorChatCompletionsRequest input,
             ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
@@ -125,12 +196,9 @@ namespace Thor.AWSClaude.Chats
             var client = AWSClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
 
 
-            var messages = input.Messages.Where(x => x.Role != "system").Select(x => new Message
-            {
-                Role = x.Role,
-                Content = new List<ContentBlock> { new ContentBlock { Text = x.Content } }
-            }).ToList();
-            var system = input.Messages.Where(x => x.Role == "system").FirstOrDefault()?.Content ?? "";
+            var messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
+
+            var system = CreateSystemContentMessage(input.Messages.Where(x => x.Role == "system").ToList(), options);
 
             var request = new ConverseStreamRequest
             {
@@ -143,32 +211,28 @@ namespace Thor.AWSClaude.Chats
                     TopP = input.TopP ?? 0,
                 }
             };
-            if (!string.IsNullOrEmpty(system))
+            if (system.Count != 0)
             {
-                request.System = new List<SystemContentBlock>
-                {
-                     new SystemContentBlock
-                     {
-                         Text=system,
-                     }
-                }; ;
+                request.System.AddRange(system);
             }
+
             var result = await client.ConverseStreamAsync(request, cancellationToken);
             foreach (var content in result.Stream.AsEnumerable())
             {
-                if (content is ContentBlockDeltaEvent)
+                if (content is ContentBlockDeltaEvent @event)
                 {
                     yield return new ThorChatCompletionsResponse()
                     {
                         Choices =
-                                [
-                                    new()
-                                    {
-                                        Delta = ThorChatMessage.CreateAssistantMessage((content as ContentBlockDeltaEvent).Delta.Text),
-                                        FinishReason = "stop",
-                                        Index = 0,
-                                    }
-                                ],
+                        [
+                            new()
+                            {
+                                Delta = ThorChatMessage.CreateAssistantMessage(@event.Delta
+                                    .Text),
+                                FinishReason = "stop",
+                                Index = 0,
+                            }
+                        ],
                         Model = input.Model
                     };
                 }
