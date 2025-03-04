@@ -1,16 +1,16 @@
 ﻿using System.Runtime.CompilerServices;
 using Amazon;
+using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
+using Amazon.Runtime.Documents;
+using Newtonsoft.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
+using Thor.Claudia;
 using ThorChatCompletionsResponse =
     Thor.Abstractions.Chats.Dtos.ThorChatCompletionsResponse;
-using Thor.Claudia;
-using Amazon.Util.Internal;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using Amazon.BedrockRuntime;
 
 namespace Thor.AWSClaude.Chats
 {
@@ -47,6 +47,9 @@ namespace Thor.AWSClaude.Chats
 
             var system = CreateSystemContentMessage(input.Messages.Where(x => x.Role == "system").ToList(), options);
 
+            bool isThink = input.Model.EndsWith("-thinking");
+            var model = input.Model.Replace("-thinking", string.Empty);
+
             var request = new ConverseRequest
             {
                 ModelId = input.Model,
@@ -59,6 +62,30 @@ namespace Thor.AWSClaude.Chats
                     TopP = input.TopP ?? 0,
                 }
             };
+
+            var budgetTokens = 1024;
+            if (input.MaxTokens is null or < 2048)
+            {
+                input.MaxTokens = 2048;
+            }
+
+            if (input.MaxTokens / 2 < 1024)
+            {
+                budgetTokens = input.MaxTokens.Value / (4 * 3);
+            }
+
+            // budgetTokens最大4096
+            budgetTokens = Math.Min(budgetTokens, 4096);
+
+            if (isThink)
+            {
+                request.AdditionalModelRequestFields.Add("reasoning_config", new Document
+                {
+                    { "type", "enabled" },
+                    { "budget_tokens", budgetTokens }
+                });
+            }
+
             if (system.Count != 0)
             {
                 request.System = [];
@@ -82,13 +109,13 @@ namespace Thor.AWSClaude.Chats
                         Index = 0,
                     }
                 ],
-                Usage = new Abstractions.Dtos.ThorUsageResponse
+                Usage = new ThorUsageResponse
                 {
                     PromptTokens = response?.Usage?.InputTokens ?? 0,
                     CompletionTokens = response?.Usage?.OutputTokens ?? 0,
                     TotalTokens = response?.Usage?.TotalTokens ?? 0,
                 },
-                Model = input.Model
+                Model = model
             };
         }
 
@@ -189,11 +216,38 @@ namespace Thor.AWSClaude.Chats
 
             var system = CreateSystemContentMessage(input.Messages.Where(x => x.Role == "system").ToList(), options);
 
+            bool isThink = input.Model.EndsWith("-thinking");
+            var model = input.Model.Replace("-thinking", string.Empty);
+
             var request = new ConverseStreamRequest
             {
-                ModelId = input.Model,
+                ModelId = model,
                 Messages = messages,
             };
+
+
+            var budgetTokens = 1024;
+            if (input.MaxTokens is null or < 2048)
+            {
+                input.MaxTokens = 2048;
+            }
+
+            if (input.MaxTokens / 2 < 1024)
+            {
+                budgetTokens = input.MaxTokens.Value / (4 * 3);
+            }
+
+            // budgetTokens最大4096
+            budgetTokens = Math.Min(budgetTokens, 4096);
+
+            if (isThink)
+            {
+                request.AdditionalModelRequestFields.Add("reasoning_config", new Document
+                {
+                    { "type", "enabled" },
+                    { "budget_tokens", budgetTokens }
+                });
+            }
 
             if (input?.MaxTokens != null)
             {

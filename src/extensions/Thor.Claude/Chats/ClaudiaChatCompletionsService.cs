@@ -52,6 +52,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         {
             budgetTokens = input.MaxTokens.Value / (4 * 3);
         }
+        // budgetTokens最大4096
+        budgetTokens = Math.Min(budgetTokens, 4096);
 
         var response = await client.PostJsonAsync(options.Address.TrimEnd('/') + "/v1/messages", new
         {
@@ -314,6 +316,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             budgetTokens = input.MaxTokens.Value / (4 * 3);
         }
 
+        // budgetTokens最大4096
+        budgetTokens = Math.Min(budgetTokens, 4096);
 
         var response = await client.HttpRequestRaw(options.Address.TrimEnd('/') + "/v1/messages", new
         {
