@@ -195,9 +195,9 @@ namespace Thor.AWSClaude.Chats
                 Messages = messages,
                 InferenceConfig = new InferenceConfiguration()
                 {
-                    MaxTokens = input.MaxTokens ?? 2000,
-                    Temperature = input.Temperature ?? 0,
-                    TopP = input.TopP ?? 0,
+                    MaxTokens = input?.MaxTokens ?? 2000,
+                    Temperature = input?.Temperature ?? 0,
+                    TopP = input?.TopP ?? 0,
                 }
             };
             if (system.Count != 0)
@@ -222,7 +222,7 @@ namespace Thor.AWSClaude.Chats
                                 Index = 0,
                             }
                         ],
-                        Model = input.Model
+                        Model = input?.Model
                     };
                 }
             }
