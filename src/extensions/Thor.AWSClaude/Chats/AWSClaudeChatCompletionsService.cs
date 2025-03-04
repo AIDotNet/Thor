@@ -242,11 +242,17 @@ namespace Thor.AWSClaude.Chats
 
             if (isThink)
             {
-                request.AdditionalModelRequestFields.Add("reasoning_config", new Document
+                request.AdditionalModelRequestFields = new Document
                 {
-                    { "type", "enabled" },
-                    { "budget_tokens", budgetTokens }
-                });
+                    {
+                        "reasoning_config",
+                        new Document
+                        {
+                            { "type", "enabled" },
+                            { "budget_tokens", budgetTokens }
+                        }
+                    },
+                };
             }
 
             if (input?.MaxTokens != null)
@@ -288,6 +294,8 @@ namespace Thor.AWSClaude.Chats
             }
 
             var result = await client.ConverseStreamAsync(request, cancellationToken);
+
+            
             foreach (var content in result.Stream.AsEnumerable())
             {
                 if (content is ContentBlockDeltaEvent @event)
@@ -306,6 +314,9 @@ namespace Thor.AWSClaude.Chats
                         ],
                         Model = input?.Model
                     };
+                }
+                else if (content is MessageStartEvent eventStreamEvent)
+                {
                 }
             }
         }
