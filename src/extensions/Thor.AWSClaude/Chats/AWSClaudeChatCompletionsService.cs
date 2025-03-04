@@ -1,4 +1,5 @@
-﻿using Amazon;
+﻿using System.Runtime.CompilerServices;
+using Amazon;
 using Amazon.BedrockRuntime.Model;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
@@ -13,7 +14,7 @@ using Amazon.BedrockRuntime;
 
 namespace Thor.AWSClaude.Chats
 {
-    public sealed class AWSClaudeChatCompletionsService : IThorChatCompletionsService
+    public sealed class AwsClaudeChatCompletionsService : IThorChatCompletionsService
     {
         /// <summary>
         /// 非流式对话补全
@@ -50,7 +51,7 @@ namespace Thor.AWSClaude.Chats
             {
                 ModelId = input.Model,
                 Messages = messages,
-                
+
                 InferenceConfig = new InferenceConfiguration()
                 {
                     MaxTokens = input.MaxTokens ?? 2000,
@@ -60,6 +61,7 @@ namespace Thor.AWSClaude.Chats
             };
             if (system.Count != 0)
             {
+                request.System = [];
                 request.System.AddRange(system);
             }
 
@@ -90,7 +92,8 @@ namespace Thor.AWSClaude.Chats
             };
         }
 
-        private List<Message> CreateMessage(List<ThorChatMessage> messages, ThorPlatformOptions options)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static List<Message> CreateMessage(List<ThorChatMessage> messages, ThorPlatformOptions options)
         {
             var awsMessage = new List<Message>();
 
@@ -100,9 +103,9 @@ namespace Thor.AWSClaude.Chats
                 {
                     var item = new Message
                     {
-                        Role = chatMessage.Role
+                        Role = chatMessage.Role,
+                        Content = []
                     };
-
                     item.Content.AddRange(contentCalculated.Select<ThorChatMessageContent, ContentBlock>(
                         x =>
                         {

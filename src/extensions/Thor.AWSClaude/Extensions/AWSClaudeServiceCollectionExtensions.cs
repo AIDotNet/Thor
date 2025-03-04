@@ -11,7 +11,7 @@ namespace Thor.AWSClaude.Extensions
         {
             ThorGlobal.PlatformNames.Add(AWSClaudePlatformOptions.PlatformName, AWSClaudePlatformOptions.PlatformCode);
 
-            services.AddKeyedSingleton<IThorChatCompletionsService, AWSClaudeChatCompletionsService>(AWSClaudePlatformOptions.PlatformCode);
+            services.AddKeyedSingleton<IThorChatCompletionsService, AwsClaudeChatCompletionsService>(AWSClaudePlatformOptions.PlatformCode);
             return services;
         }
     }
