@@ -193,13 +193,40 @@ namespace Thor.AWSClaude.Chats
             {
                 ModelId = input.Model,
                 Messages = messages,
-                InferenceConfig = new InferenceConfiguration()
-                {
-                    MaxTokens = input?.MaxTokens ?? 2000,
-                    Temperature = input?.Temperature ?? 0,
-                    TopP = input?.TopP ?? 0,
-                }
             };
+
+            if (input?.MaxTokens != null)
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    MaxTokens = input.MaxTokens,
+                };
+            }
+
+            if (input?.Temperature != null)
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    Temperature = input.Temperature,
+                };
+            }
+
+            if (input?.TopP != null)
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    TopP = input.TopP,
+                };
+            }
+
+            if (!string.IsNullOrWhiteSpace(input?.Stop))
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    StopSequences = [..new[] { input.Stop }]
+                };
+            }
+
             if (system.Count != 0)
             {
                 request.System.AddRange(system);
