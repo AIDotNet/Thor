@@ -229,6 +229,7 @@ namespace Thor.AWSClaude.Chats
 
             if (system.Count != 0)
             {
+                request.System = [];
                 request.System.AddRange(system);
             }
 
