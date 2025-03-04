@@ -103,7 +103,7 @@ namespace Thor.AWSClaude.Chats
                         Role = chatMessage.Role
                     };
 
-                    var contents = (List<ContentBlock>)contentCalculated.Select<ThorChatMessageContent, ContentBlock>(
+                    item.Content.AddRange(contentCalculated.Select<ThorChatMessageContent, ContentBlock>(
                         x =>
                         {
                             if (x.Type == "text")
@@ -125,9 +125,7 @@ namespace Thor.AWSClaude.Chats
                                     }
                                 }
                             };
-                        });
-
-                    item.Content = contents;
+                        }));
                     awsMessage.Add(item);
                 }
                 else
@@ -153,19 +151,7 @@ namespace Thor.AWSClaude.Chats
         private List<SystemContentBlock> CreateSystemContentMessage(List<ThorChatMessage> messages,
             ThorPlatformOptions options)
         {
-            var awsMessage = new List<SystemContentBlock>();
-
-            foreach (var chatMessage in messages)
-            {
-                var item = new SystemContentBlock
-                {
-                    Text = chatMessage.Content
-                };
-
-                awsMessage.Add(item);
-            }
-
-            return awsMessage;
+            return messages.Select(chatMessage => new SystemContentBlock { Text = chatMessage.Content }).ToList();
         }
 
         /// <summary>
