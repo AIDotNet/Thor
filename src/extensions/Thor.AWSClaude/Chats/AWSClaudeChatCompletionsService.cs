@@ -3,12 +3,10 @@ using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime.Documents;
-using Newtonsoft.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
-using Thor.Claudia;
 using ThorChatCompletionsResponse =
     Thor.Abstractions.Chats.Dtos.ThorChatCompletionsResponse;
 
@@ -40,7 +38,7 @@ namespace Thor.AWSClaude.Chats
             var awsAccessKeyId = keys[0];
             var awsSecretAccessKey = keys[1];
 
-            var client = AWSClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
+            var client = AwsClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
 
 
             var messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
@@ -50,18 +48,12 @@ namespace Thor.AWSClaude.Chats
             bool isThink = input.Model.EndsWith("-thinking");
             var model = input.Model.Replace("-thinking", string.Empty);
 
-            var request = new ConverseRequest
+            var request = new ConverseRequest()
             {
-                ModelId = input.Model,
+                ModelId = model,
                 Messages = messages,
-
-                InferenceConfig = new InferenceConfiguration()
-                {
-                    MaxTokens = input.MaxTokens ?? 2000,
-                    Temperature = input.Temperature ?? 0,
-                    TopP = input.TopP ?? 0,
-                }
             };
+
 
             var budgetTokens = 1024;
             if (input.MaxTokens is null or < 2048)
@@ -79,11 +71,49 @@ namespace Thor.AWSClaude.Chats
 
             if (isThink)
             {
-                request.AdditionalModelRequestFields.Add("reasoning_config", new Document
+                request.AdditionalModelRequestFields = new Document
                 {
-                    { "type", "enabled" },
-                    { "budget_tokens", budgetTokens }
-                });
+                    {
+                        "reasoning_config",
+                        new Document
+                        {
+                            { "type", "enabled" },
+                            { "budget_tokens", budgetTokens }
+                        }
+                    },
+                };
+            }
+
+            if (input?.MaxTokens != null)
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    MaxTokens = input.MaxTokens,
+                };
+            }
+
+            if (input?.Temperature != null)
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    Temperature = input.Temperature,
+                };
+            }
+
+            if (input?.TopP != null)
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    TopP = input.TopP,
+                };
+            }
+
+            if (!string.IsNullOrWhiteSpace(input?.Stop))
+            {
+                request.InferenceConfig ??= new InferenceConfiguration()
+                {
+                    StopSequences = [..new[] { input.Stop }]
+                };
             }
 
             if (system.Count != 0)
@@ -92,10 +122,15 @@ namespace Thor.AWSClaude.Chats
                 request.System.AddRange(system);
             }
 
-            var response = await client.ConverseAsync(request, cancellationToken);
-            string responseText = response?.Output?.Message?.Content?[0]?.Text ?? "";
+            var response = await client.ChatAsync(request, cancellationToken);
+            string responseText = response?.output?.message?.content?.Where(x => !string.IsNullOrWhiteSpace(x.text)).Select(x => x.text)
+                .FirstOrDefault();
 
             var message = ThorChatMessage.CreateAssistantMessage(responseText);
+
+            message.ReasoningContent = response?.output?.message?.content
+                ?.FirstOrDefault(x => !string.IsNullOrEmpty(x.reasoningContent.reasoningText.text))?.reasoningContent
+                .reasoningText.text;
 
             return new ThorChatCompletionsResponse()
             {
@@ -111,9 +146,13 @@ namespace Thor.AWSClaude.Chats
                 ],
                 Usage = new ThorUsageResponse
                 {
-                    PromptTokens = response?.Usage?.InputTokens ?? 0,
-                    CompletionTokens = response?.Usage?.OutputTokens ?? 0,
-                    TotalTokens = response?.Usage?.TotalTokens ?? 0,
+                    PromptTokens = response?.usage?.inputTokens ?? 0,
+                    CompletionTokens = response?.usage?.outputTokens ?? 0,
+                    TotalTokens = response?.usage?.totalTokens ?? 0,
+                    PromptTokensDetails = new ThorUsageResponsePromptTokensDetails()
+                    {
+                        CachedTokens = response?.usage?.cacheReadInputTokenCount,
+                    }
                 },
                 Model = model
             };
@@ -209,7 +248,7 @@ namespace Thor.AWSClaude.Chats
             var awsAccessKeyId = keys[0];
             var awsSecretAccessKey = keys[1];
 
-            var client = AWSClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
+            var client = AwsClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
 
 
             var messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
@@ -293,27 +332,54 @@ namespace Thor.AWSClaude.Chats
                 request.System.AddRange(system);
             }
 
-            var result = await client.ConverseStreamAsync(request, cancellationToken);
+            var result = await client.ChatStreamAsync(request, cancellationToken);
 
-            
             foreach (var content in result.Stream.AsEnumerable())
             {
-                if (content is ContentBlockDeltaEvent @event)
+                if (content is ReasoningContentBlockDeltaEvent @event)
                 {
-                    yield return new ThorChatCompletionsResponse()
+                    if (@event.Delta.IsSetText())
                     {
-                        Choices =
-                        [
-                            new()
-                            {
-                                Delta = ThorChatMessage.CreateAssistantMessage(@event.Delta
-                                    .Text),
-                                FinishReason = "stop",
-                                Index = 0,
-                            }
-                        ],
-                        Model = input?.Model
-                    };
+                        yield return new ThorChatCompletionsResponse()
+                        {
+                            Choices =
+                            [
+                                new ThorChatChoiceResponse
+                                {
+                                    Delta = ThorChatMessage.CreateAssistantMessage(@event.Delta
+                                        .Text),
+                                    Message = ThorChatMessage.CreateAssistantMessage(@event.Delta
+                                        .Text),
+                                    FinishReason = "stop",
+                                    Index = 0,
+                                }
+                            ],
+                            Model = input?.Model
+                        };
+                    }
+                    else
+                    {
+                        yield return new ThorChatCompletionsResponse()
+                        {
+                            Choices =
+                            [
+                                new ThorChatChoiceResponse
+                                {
+                                    Delta = new ThorChatMessage()
+                                    {
+                                        ReasoningContent = @event.Delta.ReasoningContent?.Text
+                                    },
+                                    Message = new ThorChatMessage()
+                                    {
+                                        ReasoningContent = @event.Delta.ReasoningContent?.Text
+                                    },
+                                    FinishReason = "stop",
+                                    Index = 0,
+                                }
+                            ],
+                            Model = input?.Model
+                        };
+                    }
                 }
                 else if (content is MessageStartEvent eventStreamEvent)
                 {
