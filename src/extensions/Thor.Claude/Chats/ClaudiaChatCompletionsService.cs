@@ -52,6 +52,38 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         {
             budgetTokens = input.MaxTokens.Value / (4 * 3);
         }
+
+        object tool_choice;
+        if (input.ToolChoice is not null && input.ToolChoice.Type == "auto")
+        {
+            tool_choice = new
+            {
+                type = "auto",
+                disable_parallel_tool_use = false,
+            };
+        }
+        else if (input.ToolChoice is not null && input.ToolChoice.Type == "any")
+        {
+            tool_choice = new
+            {
+                type = "any",
+                disable_parallel_tool_use = false,
+            };
+        }
+        else if (input.ToolChoice is not null && input.ToolChoice.Type == "tool")
+        {
+            tool_choice = new
+            {
+                type = "tool",
+                name = input.ToolChoice.Function?.Name,
+                disable_parallel_tool_use = false,
+            };
+        }
+        else
+        {
+            tool_choice = null;
+        }
+
         // budgetTokens最大4096
         budgetTokens = Math.Min(budgetTokens, 4096);
 
@@ -62,6 +94,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             system = CreateMessage(input.Messages.Where(x => x.Role == "system").ToList(), options),
             messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options),
             top_p = isThink ? null : input.TopP,
+            tool_choice,
             thinking = isThink
                 ? new
                 {
@@ -118,15 +151,15 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                 PromptTokens = value.usage.input_tokens
             }
         };
-        
-        if(value.usage.cache_read_input_tokens != null)
+
+        if (value.usage.cache_read_input_tokens != null)
         {
             thor.Usage.PromptTokensDetails ??= new ThorUsageResponsePromptTokensDetails()
             {
                 CachedTokens = value.usage.cache_read_input_tokens.Value,
             };
         }
-        
+
         return thor;
     }
 
@@ -319,11 +352,43 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         // budgetTokens最大4096
         budgetTokens = Math.Min(budgetTokens, 4096);
 
+        object tool_choice;
+        if (input.ToolChoice is not null && input.ToolChoice.Type == "auto")
+        {
+            tool_choice = new
+            {
+                type = "auto",
+                disable_parallel_tool_use = false,
+            };
+        }
+        else if (input.ToolChoice is not null && input.ToolChoice.Type == "any")
+        {
+            tool_choice = new
+            {
+                type = "any",
+                disable_parallel_tool_use = false,
+            };
+        }
+        else if (input.ToolChoice is not null && input.ToolChoice.Type == "tool")
+        {
+            tool_choice = new
+            {
+                type = "tool",
+                name = input.ToolChoice.Function?.Name,
+                disable_parallel_tool_use = false,
+            };
+        }
+        else
+        {
+            tool_choice = null;
+        }
+
         var response = await client.HttpRequestRaw(options.Address.TrimEnd('/') + "/v1/messages", new
         {
             model = input.Model,
             max_tokens = input.MaxTokens ?? 2048,
             stream = true,
+            tool_choice,
             system = CreateMessage(input.Messages.Where(x => x.Role == "system").ToList(), options),
             messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options),
             top_p = isThinking ? null : input.TopP,

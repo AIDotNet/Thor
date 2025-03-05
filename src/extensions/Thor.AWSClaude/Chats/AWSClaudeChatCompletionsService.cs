@@ -123,8 +123,9 @@ namespace Thor.AWSClaude.Chats
             }
 
             var response = await client.ChatAsync(request, cancellationToken);
-            string responseText = response?.output?.message?.content?.Where(x => !string.IsNullOrWhiteSpace(x.text)).Select(x => x.text)
-                .FirstOrDefault();
+            string responseText = response?.output?.message?.content?.Where(x => !string.IsNullOrWhiteSpace(x.text))
+                .Select(x => x.text)
+                .FirstOrDefault() ?? string.Empty;
 
             var message = ThorChatMessage.CreateAssistantMessage(responseText);
 
