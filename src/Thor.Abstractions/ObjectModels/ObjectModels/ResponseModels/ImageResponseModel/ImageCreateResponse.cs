@@ -8,7 +8,6 @@ public record ImageCreateResponse : ThorBaseResponse, IOpenAiModels.ICreatedAt
 {
     [JsonPropertyName("data")] public List<ImageDataResult> Results { get; set; }
 
-    [JsonPropertyName("created")] public int CreatedAt { get; set; }
 
     public record ImageDataResult
     {

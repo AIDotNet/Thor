@@ -10,4 +10,8 @@
       <ProjectReference Include="..\..\Thor.Abstractions\Thor.Abstractions.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Images\" />
+    </ItemGroup>
+
 </Project>

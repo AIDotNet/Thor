@@ -29,7 +29,6 @@ public interface IOpenAiModels
 
     public interface ICreatedAt
     {
-        public int CreatedAt { get; set; }
     }
 
     public interface IUser

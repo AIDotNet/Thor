@@ -164,10 +164,11 @@ public sealed class ChatService(
                 Other = channel.Other
             }, context.RequestAborted);
 
+            
             await context.Response.WriteAsJsonAsync(new ThorImageCreateResponse
             {
                 data = response.Results,
-                created = response.CreatedAt,
+                created = (int)DateTimeOffset.Now.ToUnixTimeSeconds(),
                 successful = response.Successful
             });
 
