@@ -174,7 +174,7 @@ public sealed class ChatService(
 
             sw.Stop();
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), request.Model,
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0), request.Model,
                 0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
