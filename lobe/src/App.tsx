@@ -27,6 +27,7 @@ const TokenPage = lazy(() => import('./pages/token/page'))
 const ModelManager = lazy(() => import('./pages/model-manager/page'))
 const PanelPage = lazy(() => import('./pages/panel/page'))
 const UserInfoPage = lazy(() => import('./pages/user-info/page'))
+const ModelMapPage = lazy(() => import('./pages/model-map/page'))
 
 const router = createBrowserRouter([{
   element: <MainLayout nav={<Nav />} />,
@@ -89,6 +90,11 @@ const router = createBrowserRouter([{
     {
       path: 'user-info', element: <Suspense fallback={<FullscreenLoading title='加载用户信息页面中' />}>
         <UserInfoPage />
+      </Suspense>
+    },
+    {
+      path: 'model-map', element: <Suspense fallback={<FullscreenLoading title='加载模型映射页面中' />}>
+        <ModelMapPage />
       </Suspense>
     }
   ]

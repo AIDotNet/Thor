@@ -511,6 +511,39 @@ try
 
     #endregion
 
+    #region ModelMapService
+
+    var modelMap = app.MapGroup("/api/v1/modelmap")
+        .WithTags("ModelMap")
+        .AddEndpointFilter<ResultFilter>()
+        .RequireAuthorization(new AuthorizeAttribute()
+        {
+            Roles = RoleConstant.Admin
+        });
+
+    // Complete the modelMap group with HTTP endpoints
+    modelMap.MapGet(string.Empty, async (ModelMapService service) =>
+            await service.GetListAsync())
+        .WithDescription("获取模型映射列表")
+        .WithOpenApi();
+
+    modelMap.MapPost(string.Empty, async (ModelMapService service, ModelMap modelMap) =>
+            await service.CreateAsync(modelMap))
+        .WithDescription("创建模型映射")
+        .WithOpenApi();
+
+    modelMap.MapPut(string.Empty, async (ModelMapService service, ModelMap modelMap) =>
+            await service.UpdateAsync(modelMap))
+        .WithDescription("更新模型映射")
+        .WithOpenApi();
+
+    modelMap.MapDelete("{modelId}", async (ModelMapService service, string modelId) =>
+            await service.DeleteAsync(modelId))
+        .WithDescription("删除模型映射")
+        .WithOpenApi();
+
+    #endregion
+
     #region Redeem Code
 
     var redeemCode = app.MapGroup("/api/v1/redeemCode")

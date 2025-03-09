@@ -7,7 +7,7 @@ namespace Thor.Core.DataAccess;
 public interface IThorContext
 {
     DatabaseFacade Database { get; }
-    
+
     DbSet<User> Users { get; set; }
 
     DbSet<Token> Tokens { get; set; }
@@ -25,6 +25,8 @@ public interface IThorContext
     DbSet<RateLimitModel> RateLimitModels { get; set; }
 
     DbSet<ModelManager> ModelManagers { get; set; }
+
+    DbSet<ModelMap> ModelMaps { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
 }

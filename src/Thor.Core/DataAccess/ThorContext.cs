@@ -30,6 +30,7 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
 
     public DbSet<ModelManager> ModelManagers { get; set; }
 
+    public DbSet<ModelMap> ModelMaps { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -60,6 +61,26 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
 
         modelBuilder.InitSetting();
 
+
+        modelBuilder.Entity<ModelMap>(options =>
+        {
+            options.HasKey(x => x.Id);
+
+            options.Property(x => x.Id).ValueGeneratedOnAdd();
+
+            options.Property(x => x.ModelId).IsRequired();
+
+            options.HasIndex(x => x.ModelId);
+
+            options.Property(x => x.ModelMapItems)
+                .HasConversion((list => JsonSerializer.Serialize(list, JsonSerializerOptions.Web)),
+                    (str => JsonSerializer.Deserialize<List<ModelMapItem>>(str, JsonSerializerOptions.Web) ??
+                            new List<ModelMapItem>()));
+
+            options.Property(x => x.Group)
+                .HasConversion((x) => JsonSerializer.Serialize(x, JsonSerializerOptions.Web),
+                    (x) => JsonSerializer.Deserialize<string[]>(x, JsonSerializerOptions.Web) ?? Array.Empty<string>());
+        });
 
         if (!File.Exists("model-manager.json")) return;
 

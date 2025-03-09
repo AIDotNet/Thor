@@ -13,6 +13,7 @@ import {
   User,
   CircleUserRound,
   Settings,
+  Shuffle,
   Handshake,
   BrainCog
 } from "lucide-react";
@@ -84,6 +85,16 @@ const Nav = memo(() => {
           key: SidebarTabKey.ModelManager,
           onClick: () => {
             navigate("/model-manager");
+          },
+          role: "admin",
+        },
+        {
+          icon: <Shuffle />,
+          enable: true,
+          label: "模型映射",
+          key: SidebarTabKey.ModelMap,
+          onClick: () => {
+            navigate("/model-map");
           },
           role: "admin",
         }

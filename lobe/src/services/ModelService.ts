@@ -21,3 +21,11 @@ export const getModels = () => {
 export const getUseModel = () => {
     return get(prefix + '/use-models')
 }
+
+/**
+ * 获取模型列表
+ * @returns 模型列表
+ */
+export const getModelList = async () => {
+  return get('/api/v1/model/models');
+}

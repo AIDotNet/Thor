@@ -3,9 +3,9 @@ import { Button, Switch, message, Tag, Dropdown, InputNumber, Table } from 'antd
 import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test } from "../../services/ChannelService";
 import { renderQuota } from "../../utils/render";
 import { Input } from "@lobehub/ui";
+import { getTypes } from "../../services/ModelService";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
-import { getTypes } from "../../services/ModelService";
 
 
 export default function ChannelPage() {

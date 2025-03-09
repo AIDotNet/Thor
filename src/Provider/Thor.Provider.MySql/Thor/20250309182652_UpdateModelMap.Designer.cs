@@ -2,79 +2,82 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Thor.Provider;
 
 #nullable disable
 
-namespace Thor.Provider.PostgreSQL.Thor
+namespace Thor.Provider.MySql.Thor
 {
-    [DbContext(typeof(PostgreSQLThorContext))]
-    partial class PostgreSQLThorContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MySqlThorContext))]
+    [Migration("20250309182652_UpdateModelMap")]
+    partial class UpdateModelMap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.1")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("Thor.Service.Domain.ChatChannel", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("ControlAutomatically")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<bool>("Disable")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Extension")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Groups")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Models")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("Order")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Other")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Quota")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("RemainQuota")
                         .HasColumnType("bigint");
@@ -84,10 +87,10 @@ namespace Thor.Provider.PostgreSQL.Thor
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -102,70 +105,70 @@ namespace Thor.Provider.PostgreSQL.Thor
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal?>("AudioCacheRate")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal?>("AudioOutputRate")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal?>("AudioPromptRate")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<bool>("Available")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<decimal?>("CacheHitRate")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal?>("CacheRate")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<decimal?>("CompletionRate")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("Enable")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Icon")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("IsVersion2")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("PromptRate")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<string>("QuotaMax")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("QuotaType")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Tags")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -178,9 +181,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                     b.HasData(
                         new
                         {
-                            Id = new Guid("8f113570-8088-4d6f-8fb9-28bbe66cec2c"),
+                            Id = new Guid("645a68de-f69f-4d61-8082-0181eed6820b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(7756),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4069),
                             Description = "GPT-3.5 Turbo 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -193,9 +196,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("2618cdf4-694a-481a-9367-4906db6ad804"),
+                            Id = new Guid("d4a39fc1-973e-4bcd-8906-028dea69cf4e"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8014),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4407),
                             Description = "GPT-3.5 Turbo 0125 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -208,9 +211,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("2d77a0ef-8835-4a42-86e7-11bd46380d7f"),
+                            Id = new Guid("960d1406-bb76-49de-a0fa-805e7a88ec9a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8016),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4411),
                             Description = "GPT-3.5 Turbo 0301 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -223,9 +226,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("9ad2f7b8-ab3d-4d39-a937-5eca1d165d3e"),
+                            Id = new Guid("3705aa0b-9c8f-47d1-a713-6966277f8958"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8019),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4412),
                             Description = "GPT-3.5 Turbo 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -238,9 +241,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("5855d96c-53b6-4ab3-8aa5-3ed232145a20"),
+                            Id = new Guid("fdcd681e-2a55-41d2-9959-b70b783641fa"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8020),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4413),
                             Description = "GPT-3.5 Turbo 1106 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -253,9 +256,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("2bcedc03-771c-4087-ae3b-c168606fa384"),
+                            Id = new Guid("a6dc214a-fb87-4105-9e39-56f7a6e99119"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8020),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4414),
                             Description = "GPT-3.5 Turbo 16k 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -268,9 +271,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("383edcbd-c28f-4c83-8dd6-6f2ecb7c4855"),
+                            Id = new Guid("e15bfff3-0a97-4dcf-aaae-b28fa2d9b837"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8021),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4415),
                             Description = "GPT-3.5 Turbo 16k 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -283,9 +286,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("76d31933-b038-44ac-af64-40cfef0fc86a"),
+                            Id = new Guid("09e42a33-7c59-4a0a-947f-775233d8c8f3"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8023),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4421),
                             Description = "GPT-3.5 Turbo Instruct 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -298,9 +301,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("c30d3c4c-6f74-4ecb-9f2a-9cdb6eb2a31c"),
+                            Id = new Guid("6c9893c3-4ce1-4af7-a616-3c31c14ad865"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8025),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4422),
                             Description = "GPT-4 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -313,9 +316,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("d8d65faa-7a36-4fbf-bc30-9447d2401db6"),
+                            Id = new Guid("7deb33df-62e9-4784-9868-0287d40447dd"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8026),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4423),
                             Description = "GPT-4 0125 预览文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -328,9 +331,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("28ae39d9-4fd6-4cb8-beca-031dfcc1aa6c"),
+                            Id = new Guid("97351570-c09f-4efd-98ee-89d0676f061b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8026),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4423),
                             Description = "GPT-4 0314 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -343,9 +346,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("33d8caf5-e3e7-4a45-8723-237f74564b39"),
+                            Id = new Guid("8987a1a2-aff2-45ec-8ec3-0b70aa3909aa"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8027),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4424),
                             Description = "GPT-4 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -358,9 +361,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("16c70f9c-1511-4929-9e22-408e8dde18ee"),
+                            Id = new Guid("2727faa1-d079-4387-834a-b80cd1b0b246"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8028),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4425),
                             Description = "GPT-4 1106 预览文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -373,9 +376,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("33046c9a-30b1-4993-b985-e1ef8de4cb02"),
+                            Id = new Guid("01ba66dd-7aaf-44ff-bc19-5cfcbda0d26b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8029),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4426),
                             Description = "GPT-4 1106 视觉预览模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -388,9 +391,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("d4be69a2-1ed7-46f7-8d11-8767ebf5d68a"),
+                            Id = new Guid("8de5fbe9-4ce7-4f44-9032-5de077a01a8e"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8030),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4426),
                             Description = "GPT-4 32k 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -403,9 +406,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("51c6076d-3c09-44ac-95bc-c7b5e948cb74"),
+                            Id = new Guid("b3845a22-7336-4dce-abf8-3ebd1731cc4b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8030),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4428),
                             Description = "GPT-4 32k 0314 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -418,9 +421,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("8a919f96-0ec5-4b1e-a0fa-f2439ae446e7"),
+                            Id = new Guid("f7e35038-c3e6-44fc-9c5b-fa561d22dd0c"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8032),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4429),
                             Description = "GPT-4 32k 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -433,9 +436,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("f3d28db9-1555-40c5-9943-a192ae5d0797"),
+                            Id = new Guid("3fcebbb6-90d1-4acd-8b85-8e4b39983bc2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8033),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4430),
                             Description = "GPT-4 全部文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -448,9 +451,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("03ae1de9-949b-4bc2-9a93-619f3708e0ff"),
+                            Id = new Guid("5d295953-23fe-432c-b304-e7ed4f7b43a8"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8034),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4431),
                             Description = "GPT-4 Turbo 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -463,10 +466,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("1b93eacf-e114-4789-a93d-8d1c6bb1ce31"),
+                            Id = new Guid("5345fbd4-b08d-4af8-a512-94eb51371572"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8034),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4432),
                             Description = "Gemini 1.5 Pro 文本模型",
                             Enable = true,
                             Icon = "Google",
@@ -479,10 +482,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("75618118-9b6a-47e4-b83e-e6a3da84f05c"),
+                            Id = new Guid("29499060-5dde-4bec-9f73-09ec92e3c60d"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8035),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4433),
                             Description = "Gemini Pro 文本模型",
                             Enable = true,
                             Icon = "Google",
@@ -495,10 +498,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("b4451282-77b8-4bd6-bb3b-0b7417a37cdf"),
+                            Id = new Guid("f52159eb-6783-4c4b-a973-30efc40a90cf"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8036),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4434),
                             Description = "Gemini Pro 视觉模型",
                             Enable = true,
                             Icon = "Google",
@@ -511,10 +514,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("53258cbf-66b4-49d8-925d-7f9bc5dcf8b2"),
+                            Id = new Guid("4577b02c-8fba-4d19-95c3-fb0997d6a894"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8036),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4435),
                             Description = "Gemini 1.5 Flash 文本模型",
                             Enable = true,
                             Icon = "Google",
@@ -527,9 +530,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("2d721257-3096-4c0f-b7a2-9f45dc8c681b"),
+                            Id = new Guid("510b224e-3693-4191-a396-02b4c9dc5963"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8037),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4437),
                             Description = "GPT-4 Turbo 2024-04-09 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -542,9 +545,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("402c1a5f-4fe2-45c1-be98-fe740d441fa7"),
+                            Id = new Guid("aa1a6489-8573-444c-af95-128e58e049e4"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8039),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4437),
                             Description = "GPT-4 Turbo 预览文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -557,9 +560,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("81961d3e-e9ed-47bb-a81e-e95d2bd7c9e1"),
+                            Id = new Guid("d141348c-b9c7-4709-a477-94188765ad41"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8040),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4438),
                             Description = "GPT-4 视觉预览模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -572,10 +575,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("ab2deacb-c68b-444e-a8db-8e74c78247e9"),
+                            Id = new Guid("5bd7030b-80fd-4e40-8d9c-20ed56ccbcbf"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8041),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4439),
                             Description = "GPT-4o 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -588,10 +591,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("f5a327c5-b83a-4f02-bcfc-b6eeebe1bfd8"),
+                            Id = new Guid("88f7c55c-a4bd-4caa-b74e-b525cb01e5b3"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8041),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4440),
                             Description = "ChatGPT 4o 最新文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -604,10 +607,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("ee4edee7-c37a-4ce3-bb95-6685dd5e6513"),
+                            Id = new Guid("88dcd8d1-de0a-4f2a-be8a-0462d5b1d233"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8042),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4440),
                             Description = "GPT-4o Mini 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -620,10 +623,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("2c704f09-422d-4144-b4f3-959ab332b13e"),
+                            Id = new Guid("9da81a9b-0dcb-4e4b-b53b-908c09a1e50e"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8043),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4442),
                             Description = "GPT-4o Mini 2024-07-18 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -636,10 +639,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("d0664031-d444-458e-a627-b3bf2bb44a85"),
+                            Id = new Guid("df37046a-cbd6-4ac7-9078-e400246978d5"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8044),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4442),
                             Description = "GPT-4o 2024-05-13 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -652,10 +655,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("68e6b95d-0629-4eac-a22a-2403de2b8256"),
+                            Id = new Guid("34f34dc8-e024-4e8c-af03-62b4bc428aec"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8044),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4445),
                             Description = "GPT-4o 2024-08-06 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -668,9 +671,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("78fcca8c-bbad-42ca-936e-f81dff8e766c"),
+                            Id = new Guid("2f83fae6-b62f-4b1c-b988-b8240453842a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8046),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4445),
                             Description = "Moonshot v1 128k 文本模型",
                             Enable = true,
                             Icon = "Moonshot",
@@ -683,9 +686,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("21a5d49c-c598-420d-afa7-ce623e81ed6c"),
+                            Id = new Guid("2b42b600-de8d-4f97-8a89-92f97b16905d"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8047),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4446),
                             Description = "Moonshot v1 32k 文本模型",
                             Enable = true,
                             Icon = "Moonshot",
@@ -698,9 +701,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("986b40c0-067c-4f19-8ca4-6816d5a3416b"),
+                            Id = new Guid("9b31a0d1-24db-4945-9036-87a62bdc7b27"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8048),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4447),
                             Description = "Moonshot v1 8k 文本模型",
                             Enable = true,
                             Icon = "Moonshot",
@@ -713,9 +716,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("a42ca1c9-ec78-4418-b617-b4ff152e34f3"),
+                            Id = new Guid("701f5e1e-cbe3-459a-99c0-9b52809795b8"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8048),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4447),
                             Description = "Text Babbage 001 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -728,9 +731,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("e4174c46-7094-4e34-a068-65b3c1d87d46"),
+                            Id = new Guid("1d3e2c33-4e3f-4c33-b3c4-82aae79108f2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8049),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4448),
                             Description = "Text Curie 001 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -743,9 +746,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("9f2ae5f0-7829-49c1-b699-d08a588bfee4"),
+                            Id = new Guid("03a5f47b-b762-4921-8c34-0ca428959420"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8050),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4449),
                             Description = "Text Davinci 002 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -758,9 +761,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("8951031b-619f-47a9-a482-7c2b71028e60"),
+                            Id = new Guid("12a47192-8908-4227-bb70-cfbc74fc72bd"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8050),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4449),
                             Description = "Text Davinci 003 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -773,9 +776,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("29013cf9-d0c4-48a0-a324-3b848fcc6f0d"),
+                            Id = new Guid("8ba99075-5c27-4788-a1f5-e0369366a5d2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8051),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4452),
                             Description = "Text Davinci Edit 001 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -788,9 +791,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("ce96b674-5d64-408c-8118-1a06cecf4032"),
+                            Id = new Guid("0264c1e9-c647-465c-a9b5-9b65610026c0"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8053),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4453),
                             Description = "Text Embedding 3 Large 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -803,9 +806,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("fd03f942-cd1c-4072-8d10-8a4bb2559251"),
+                            Id = new Guid("720d2d5c-93c6-4d56-924d-f1d9d232b8fc"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8054),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4453),
                             Description = "Text Embedding 3 Small 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -818,9 +821,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("142a36b6-59a0-40ca-a52e-2a8c5d4b6e4b"),
+                            Id = new Guid("cecd01fe-f9e4-40a5-90f4-a995df2dc1c6"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8059),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4454),
                             Description = "Text Embedding Ada 002 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -833,9 +836,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("a51b4041-ba0e-4070-8c37-b4d24c8be2af"),
+                            Id = new Guid("21ac498f-dc9a-4781-bbcf-f21ee2d4b703"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8060),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4455),
                             Description = "TTS 1 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -847,9 +850,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("1a052f51-02e6-4a1f-8876-470e65b6a060"),
+                            Id = new Guid("bc99297d-afda-450d-be4b-96cd66e29e0b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8061),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4456),
                             Description = "TTS 1 1106 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -861,9 +864,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("fc4559ae-6b71-4dcf-a20c-7f226028b8f8"),
+                            Id = new Guid("4e3d0cd2-db36-438e-8314-be55383588dc"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8061),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4456),
                             Description = "TTS 1 HD 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -875,9 +878,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("1ae4e068-58c1-48dd-b137-116566218e57"),
+                            Id = new Guid("59313a18-1e77-4ec2-9d89-4c563176806e"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8063),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4457),
                             Description = "TTS 1 HD 1106 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -889,9 +892,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("d6dafdc7-10cc-496d-9073-0474679f99b6"),
+                            Id = new Guid("1b8f9fca-0e51-42a8-b174-8ea73859a553"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8063),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4459),
                             Description = "Whisper 1 语音识别模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -903,9 +906,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("c5a3ebe3-df78-4dc2-bbbd-ccee13a83030"),
+                            Id = new Guid("7ad5f431-a3df-4d17-80da-ca6733053a74"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8065),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4460),
                             Description = "Hunyuan Lite 文本模型",
                             Enable = true,
                             Icon = "Hunyuan",
@@ -918,10 +921,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("98908468-228b-4864-a65d-6639f357e841"),
+                            Id = new Guid("77e11195-7883-4804-90a9-62863c2394cf"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8066),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4460),
                             Description = "通用文本模型",
                             Enable = true,
                             Icon = "Spark",
@@ -934,10 +937,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("2f925c57-32a4-4283-9a5e-ba1f0b6563c8"),
+                            Id = new Guid("21d77d7c-7353-4582-a510-c81dba3d9b19"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8067),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4461),
                             Description = "通用文本模型 v3",
                             Enable = true,
                             Icon = "Spark",
@@ -950,10 +953,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("6f8a24d0-c4aa-4a34-ac9d-a6818f6e389b"),
+                            Id = new Guid("0ebba055-754e-4f77-b06e-c642bd8d18e4"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8068),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4462),
                             Description = "通用文本模型 v3.5",
                             Enable = true,
                             Icon = "Spark",
@@ -966,10 +969,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("453bb65c-b17b-423f-a659-b226beae253a"),
+                            Id = new Guid("a1fb405c-3f0c-4474-8181-35dcecb61f0e"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8069),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4463),
                             Description = "4.0 超级文本模型",
                             Enable = true,
                             Icon = "Spark",
@@ -982,9 +985,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("1226b02d-a6b5-4cd2-8693-6138cca38a8e"),
+                            Id = new Guid("9af8a3c3-1c07-41b9-9819-47f5d79d948f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8069),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4463),
                             Description = "ChatGLM Lite 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -997,9 +1000,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("f38124c0-6d11-4921-a82e-0f134f900d97"),
+                            Id = new Guid("c2829a61-b428-4e7e-bb15-47efd5129238"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8070),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4464),
                             Description = "ChatGLM Pro 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1012,9 +1015,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("3c2f3473-d58d-417b-98ff-573d2cbee275"),
+                            Id = new Guid("54469a6c-45af-4398-bd4c-e40baf587ed3"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8071),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4466),
                             Description = "ChatGLM 标准文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1027,9 +1030,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("0c3a222a-db09-41e3-8a5f-ad85f09665a0"),
+                            Id = new Guid("3a30f9d6-6cd9-4e0d-8c29-0c796d382cbb"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8073),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4467),
                             Description = "ChatGLM Turbo 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1042,9 +1045,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("8ab98e95-86de-452d-b155-55ac448d1e2d"),
+                            Id = new Guid("d5528fcd-0654-4a78-83c5-4dd3224766f2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8073),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4468),
                             Description = "Claude 2 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1057,9 +1060,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("cb5b6f2f-1907-4313-add3-67715433068c"),
+                            Id = new Guid("84c8869b-6ced-4585-ac80-73456b839221"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8074),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4468),
                             Description = "Claude 2.0 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1072,9 +1075,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("108ef915-be27-495c-8226-7d718eb8b04f"),
+                            Id = new Guid("0617394a-e90b-433e-b104-a147b2773a0f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8075),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4469),
                             Description = "Claude 2.1 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1087,10 +1090,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("8b756a96-7229-4914-92c7-d743f5c1eda9"),
+                            Id = new Guid("a040eccc-f99a-47fd-a62d-dd2b30a68064"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8075),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4470),
                             Description = "Claude 3 Haiku 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1103,10 +1106,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("45ccb45f-d088-47b0-8428-05ecf30d1e0e"),
+                            Id = new Guid("9e8ff4a1-5951-490c-87be-d03c5b7e848f"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8076),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4475),
                             Description = "Claude 3 Haiku 20240307 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1119,10 +1122,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("74beb911-1264-46a2-b956-1e1e77ce2241"),
+                            Id = new Guid("578e28e6-abd4-42b5-9ea1-10822deb2e64"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8077),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4476),
                             Description = "Claude 3.5 Sonnet 20240620 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1135,10 +1138,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("cb1e5768-0d12-4259-be2e-d8708a84eaea"),
+                            Id = new Guid("d09fd041-828c-4bb4-a24e-8340fb4b5423"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8077),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4478),
                             Description = "Claude 3 Sonnet 20240229 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1151,10 +1154,10 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("0bcb8293-6f18-41d7-8a67-8ed87b6037b1"),
+                            Id = new Guid("c8e9b0d9-9c7a-427b-9c68-46f974f39792"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8079),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4479),
                             Description = "Claude 3 Opus 20240229 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1167,9 +1170,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("e1b32085-062f-4933-ba8d-05a8f2584006"),
+                            Id = new Guid("bc8a67f8-2e5b-4a58-a436-e29c8d15c825"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8080),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4479),
                             Description = "Claude Instant 1 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1182,9 +1185,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("cea7412b-b084-4c04-8744-7b2c3b32d4c7"),
+                            Id = new Guid("06a77880-7dd7-4ffd-b4fb-72493e4e46e3"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8081),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4480),
                             Description = "Claude Instant 1.2 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1197,9 +1200,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("c690c3f0-f6f7-4236-af3c-033f1535181c"),
+                            Id = new Guid("a648eca7-0bd3-44bb-9aa8-016925b9668a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8082),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4481),
                             Description = "DALL-E 2 图像生成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1211,9 +1214,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("5d54cd7c-5291-4e7a-9e31-06ed65d2e774"),
+                            Id = new Guid("9a95777e-5539-433b-879b-97810f5168a9"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8082),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4482),
                             Description = "DALL-E 3 图像生成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1225,9 +1228,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("7a9b3273-949c-4f39-a63e-da339dd84159"),
+                            Id = new Guid("3ff89439-aff9-49b8-bb5c-250fd85c89c1"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8083),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4483),
                             Description = "Embedding 2 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1240,9 +1243,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("b57ce632-b1ee-4586-ac87-c9dc5b3ec8c1"),
+                            Id = new Guid("3e57de4c-745d-4b72-8ce7-230eb3893e09"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8084),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4483),
                             Description = "Embedding BERT 512 v1 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1255,9 +1258,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("a7eb5c40-0f6c-4c09-b18c-f9b154d194d7"),
+                            Id = new Guid("54caf7ec-9a0f-4105-8d02-cc45d24a3651"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8084),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4486),
                             Description = "Embedding S1 v1 嵌入模型",
                             Enable = true,
                             IsVersion2 = false,
@@ -1269,9 +1272,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("59c09f18-29ca-4bbd-9bf4-f7b1a6a3234f"),
+                            Id = new Guid("9adaf255-1893-46b4-b592-aba9de6742c7"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8086),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4487),
                             Description = "GLM 3 Turbo 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1284,9 +1287,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("7aee991d-3d5b-409e-b001-394e5ef397fb"),
+                            Id = new Guid("7c850d5c-f43b-4ab9-9689-58492eaf1901"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8087),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4488),
                             Description = "GLM 4 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1299,9 +1302,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("51765bbb-bbfa-40de-b243-6edcc71b5406"),
+                            Id = new Guid("aaea5d80-a315-403e-b059-b3e173162cd2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8087),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4488),
                             Description = "GLM 4 全部文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1314,9 +1317,9 @@ namespace Thor.Provider.PostgreSQL.Thor
                         },
                         new
                         {
-                            Id = new Guid("96949aab-e78a-4083-92e7-7138526511ca"),
+                            Id = new Guid("bb647c1a-3cc5-4c83-a86e-7f02e4dabc8b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 777, DateTimeKind.Local).AddTicks(8088),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 162, DateTimeKind.Local).AddTicks(4489),
                             Description = "GLM 4v 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1333,31 +1336,31 @@ namespace Thor.Provider.PostgreSQL.Thor
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Group")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ModelId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ModelMapItems")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -1369,36 +1372,36 @@ namespace Thor.Provider.PostgreSQL.Thor
             modelBuilder.Entity("Thor.Service.Domain.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<long>("RemainQuota")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Stock")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -1408,43 +1411,43 @@ namespace Thor.Provider.PostgreSQL.Thor
             modelBuilder.Entity("Thor.Service.Domain.ProductPurchaseRecord", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ProductId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("PurchaseTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("RemainQuota")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
 
@@ -1458,51 +1461,51 @@ namespace Thor.Provider.PostgreSQL.Thor
             modelBuilder.Entity("Thor.Service.Domain.RateLimitModel", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("BlackList")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("Enable")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("Limit")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Strategy")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("Value")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("WhiteList")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -1517,45 +1520,45 @@ namespace Thor.Provider.PostgreSQL.Thor
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("Disabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<long>("Quota")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("RedeemedTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("RedeemedUserId")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("RedeemedUserName")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("State")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -1567,18 +1570,18 @@ namespace Thor.Provider.PostgreSQL.Thor
             modelBuilder.Entity("Thor.Service.Domain.Setting", b =>
                 {
                     b.Property<string>("Key")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("Private")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Key");
 
@@ -1857,63 +1860,63 @@ namespace Thor.Provider.PostgreSQL.Thor
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime?>("AccessedTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("Disabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("ExpiredTime")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<bool>("IsDelete")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Key")
                         .IsRequired()
                         .HasMaxLength(42)
-                        .HasColumnType("character varying(42)");
+                        .HasColumnType("varchar(42)");
 
                     b.Property<string>("LimitModels")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<long>("RemainQuota")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("UnlimitedExpired")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("UnlimitedQuota")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<long>("UsedQuota")
                         .HasColumnType("bigint");
 
                     b.Property<string>("WhiteIpList")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -1926,12 +1929,12 @@ namespace Thor.Provider.PostgreSQL.Thor
                     b.HasData(
                         new
                         {
-                            Id = "cc72b900-0392-47cf-b242-d0171c7adab7",
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 726, DateTimeKind.Local).AddTicks(2709),
-                            Creator = "eb84af52-d119-42cc-b9f7-62a920d36539",
+                            Id = "3291de6b-7aa6-4f78-a1da-e67ddebe2b2f",
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 110, DateTimeKind.Local).AddTicks(8696),
+                            Creator = "34305410-6062-4820-b232-3c7272f454e4",
                             Disabled = false,
                             IsDelete = false,
-                            Key = "sk-0TIlbXSvkFFJeS0gl8iM2X1ZfZTSr3IL4isO5R",
+                            Key = "sk-hwbdF7vo0m6cBZHIV8MPJtbJOGdS56VKQUlVOH",
                             LimitModels = "[]",
                             Name = "默认Token",
                             RemainQuota = 0L,
@@ -1945,47 +1948,47 @@ namespace Thor.Provider.PostgreSQL.Thor
             modelBuilder.Entity("Thor.Service.Domain.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("text");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Avatar")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<long>("ConsumeToken")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Creator")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Groups")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("IsDelete")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsDisabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("Modifier")
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("PasswordHas")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<long>("RequestCount")
                         .HasColumnType("bigint");
@@ -1995,14 +1998,14 @@ namespace Thor.Provider.PostgreSQL.Thor
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -2011,15 +2014,15 @@ namespace Thor.Provider.PostgreSQL.Thor
                     b.HasData(
                         new
                         {
-                            Id = "eb84af52-d119-42cc-b9f7-62a920d36539",
+                            Id = "34305410-6062-4820-b232-3c7272f454e4",
                             ConsumeToken = 0L,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 46, 724, DateTimeKind.Local).AddTicks(8637),
+                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 52, 109, DateTimeKind.Local).AddTicks(6251),
                             Email = "239573049@qq.com",
                             Groups = "[\"admin\"]",
                             IsDelete = false,
                             IsDisabled = false,
-                            Password = "4be25ee95c675c3090d42587375eed44",
-                            PasswordHas = "4031e50ba10749aab3c488a3269f4632",
+                            Password = "c98aaa5779b8cf77607c595b05420457",
+                            PasswordHas = "9314af52704e406b87a9fedcb9fed843",
                             RequestCount = 0L,
                             ResidualCredit = 1000000000L,
                             Role = "admin",

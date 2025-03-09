@@ -30,4 +30,6 @@ export enum SidebarTabKey {
 
   // 业务模块
   Business = "business",
+
+  ModelMap = "model-map",
 }
