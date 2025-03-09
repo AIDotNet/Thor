@@ -24,18 +24,8 @@ public class ChatResponseUnmarshaller : JsonResponseUnmarshaller
     /// <returns></returns>
     public override AmazonWebServiceResponse Unmarshall(JsonUnmarshallerContext context)
     {
-        if (context.Stream is MemoryStream stream)
-        {
-            var json = Encoding.UTF8.GetString(stream.ToArray());
-
-            return JsonSerializer.Deserialize<AwsChatResponse>(json);
-        }
-        // 将stream复制到内存
-        var memoryStream = new MemoryStream();
+        using var memoryStream = new MemoryStream();
         context.Stream.CopyTo(memoryStream);
-        
-        var a = Encoding.UTF8.GetString(memoryStream.ToArray());
-        
         return JsonSerializer.Deserialize<AwsChatResponse>(memoryStream.ToArray());
     }
 

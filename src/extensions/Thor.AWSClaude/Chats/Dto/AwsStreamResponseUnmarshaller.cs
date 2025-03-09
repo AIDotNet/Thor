@@ -49,53 +49,53 @@ public class AwsStreamResponseUnmarshaller : JsonResponseUnmarshaller
         using (var contextCopy = new JsonUnmarshallerContext(streamCopy, false, context.ResponseData))
         {
             StreamingUtf8JsonReader readerCopy = new StreamingUtf8JsonReader(streamCopy);
-            if (errorResponse.Code != null && errorResponse.Code.Equals("AccessDeniedException"))
+            if (errorResponse.Code is "AccessDeniedException")
             {
                 return AccessDeniedExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse,
                     ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("InternalServerException"))
+            if (errorResponse.Code is "InternalServerException")
             {
                 return InternalServerExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse,
                     ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("ModelErrorException"))
+            if (errorResponse.Code is "ModelErrorException")
             {
                 return ModelErrorExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse, ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("ModelNotReadyException"))
+            if (errorResponse.Code is "ModelNotReadyException")
             {
                 return ModelNotReadyExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse,
                     ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("ModelTimeoutException"))
+            if (errorResponse.Code is "ModelTimeoutException")
             {
                 return ModelTimeoutExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse,
                     ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("ResourceNotFoundException"))
+            if (errorResponse.Code is "ResourceNotFoundException")
             {
                 return ResourceNotFoundExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse,
                     ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("ServiceUnavailableException"))
+            if (errorResponse.Code is "ServiceUnavailableException")
             {
                 return ServiceUnavailableExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse,
                     ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("ThrottlingException"))
+            if (errorResponse.Code is "ThrottlingException")
             {
                 return ThrottlingExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse, ref readerCopy);
             }
 
-            if (errorResponse.Code != null && errorResponse.Code.Equals("ValidationException"))
+            if (errorResponse.Code is "ValidationException")
             {
                 return ValidationExceptionUnmarshaller.Instance.Unmarshall(contextCopy, errorResponse, ref readerCopy);
             }

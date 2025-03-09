@@ -2,6 +2,7 @@
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime.EventStreams.Internal;
 using Amazon.Runtime.Internal;
+using Thor.AWSClaude.Chats.Dto;
 
 namespace Thor.AWSClaude.Chats;
 
@@ -53,7 +54,7 @@ public class ReasoningContentBlockDeltaEvent : IEventStreamEvent
 public class ReasoningContentBlockDelta
 {
     private string _text;
-    private ToolUseBlockDelta _toolUse;
+    private AwsStreamResponseContentToolUse? _toolUse;
 
     /// <summary>
     /// Gets and sets the property Text. 
@@ -79,7 +80,7 @@ public class ReasoningContentBlockDelta
     /// Information about a tool that the model is requesting to use.
     /// </para>
     /// </summary>
-    public ToolUseBlockDelta ToolUse
+    public AwsStreamResponseContentToolUse? ToolUse
     {
         get { return this._toolUse; }
         set { this._toolUse = value; }

@@ -1,4 +1,5 @@
-﻿using Amazon.Runtime;
+﻿using System.Text.Json.Serialization;
+using Amazon.Runtime;
 
 namespace Thor.AWSClaude.Chats.Dto;
 
@@ -32,9 +33,29 @@ public class AwsMessage
 
 public class AwsContent
 {
-    public ReasoningContent? reasoningContent { get; set; }
+    [JsonPropertyName("reasoningContent")] public ReasoningContent? ReasoningContent { get; set; }
 
-    public string text { get; set; }
+    [JsonPropertyName("text")] public string Text { get; set; }
+
+    [JsonPropertyName("toolUse")] public AwsResponseContentToolUse? ToolUse { get; set; }
+}
+
+public class AwsStreamResponseContentToolUse
+{
+    [JsonPropertyName("name")] public string? Name { get; set; }
+
+    [JsonPropertyName("toolUseId")] public string? ToolUseId { get; set; }
+
+    [JsonPropertyName("input")] public string Input { get; set; }
+}
+
+public class AwsResponseContentToolUse
+{
+    [JsonPropertyName("name")] public string? Name { get; set; }
+
+    [JsonPropertyName("toolUseId")] public string? ToolUseId { get; set; }
+
+    [JsonPropertyName("input")] public Dictionary<string, object>? Input { get; set; }
 }
 
 public class ReasoningContent
@@ -45,7 +66,7 @@ public class ReasoningContent
 public class ReasoningText
 {
     public string signature { get; set; }
-    
+
     public string? text { get; set; }
 }
 

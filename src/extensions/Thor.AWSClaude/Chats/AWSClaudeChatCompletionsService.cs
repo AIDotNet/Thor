@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Amazon;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
@@ -54,6 +55,99 @@ namespace Thor.AWSClaude.Chats
                 Messages = messages,
             };
 
+            if (input.Tools != null)
+            {
+                request.ToolConfig = new ToolConfiguration();
+
+                if (input.ToolChoice != null)
+                {
+                    if (input.ToolChoice.Type == "auto")
+                    {
+                        request.ToolConfig.ToolChoice = new ToolChoice()
+                        {
+                            Auto = new AutoToolChoice()
+                        };
+                    }
+                    else if (input.ToolChoice.Type == "required")
+                    {
+                        request.ToolConfig.ToolChoice = new ToolChoice()
+                        {
+                            Any = new AnyToolChoice(),
+                        };
+                    }
+                    else if (input.ToolChoice.Type == "function")
+                    {
+                        request.ToolConfig.ToolChoice = new ToolChoice()
+                        {
+                            Any = new AnyToolChoice(),
+                            Tool = new SpecificToolChoice()
+                            {
+                                Name = input.ToolChoice.Function?.Name
+                            }
+                        };
+                    }
+                }
+
+                foreach (var tool in input.Tools)
+                {
+                    var properties = new Document();
+
+                    if (tool.Function?.Parameters?.Properties != null)
+                    {
+                        foreach (var property in tool.Function.Parameters.Properties)
+                        {
+                            var propertyValue = new Document
+                            {
+                                { "type", property.Value.Type }
+                            };
+
+                            if (!string.IsNullOrEmpty(property.Value.Description))
+                            {
+                                propertyValue.Add("description", property.Value.Description);
+                            }
+
+                            if (property.Value.Enum is { Count: > 0 })
+                            {
+                                var enums = property.Value.Enum.Select(x => new Document(x));
+
+                                propertyValue.Add("enum", new Document(enums.ToList()));
+                            }
+
+                            properties.Add(property.Key, propertyValue);
+                        }
+                    }
+
+                    var required = new Document();
+                    if (tool.Function?.Parameters?.Required != null)
+                    {
+                        foreach (var item in tool.Function.Parameters.Required)
+                        {
+                            required.Add(item);
+                        }
+                    }
+
+                    request.ToolConfig.Tools ??= [];
+                    request.ToolConfig.Tools.Add(new Tool()
+                    {
+                        ToolSpec = new ToolSpecification()
+                        {
+                            Description = tool.Function?.Description,
+                            Name = tool.Function?.Name,
+                            InputSchema = new ToolInputSchema()
+                            {
+                                Json = new Document
+                                {
+                                    { "type", tool.Function?.Parameters?.Type },
+                                    {
+                                        "properties", properties
+                                    },
+                                    { "required", required }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
 
             var budgetTokens = 1024;
             if (input.MaxTokens is null or < 2048)
@@ -123,17 +217,35 @@ namespace Thor.AWSClaude.Chats
             }
 
             var response = await client.ChatAsync(request, cancellationToken);
-            string responseText = response?.output?.message?.content?.Where(x => !string.IsNullOrWhiteSpace(x.text))
-                .Select(x => x.text)
+            string responseText = response?.output?.message?.content?.Where(x => !string.IsNullOrWhiteSpace(x.Text))
+                .Select(x => x.Text)
                 .FirstOrDefault() ?? string.Empty;
 
             var message = ThorChatMessage.CreateAssistantMessage(responseText);
 
             message.ReasoningContent = response?.output?.message?.content
-                ?.FirstOrDefault(x => !string.IsNullOrEmpty(x.reasoningContent?.reasoningText?.text))?.reasoningContent
+                ?.FirstOrDefault(x => !string.IsNullOrEmpty(x.ReasoningContent?.reasoningText?.text))?.ReasoningContent
                 ?.reasoningText?.text;
 
-            return new ThorChatCompletionsResponse()
+            if (response?.output?.message?.content?.Any(x => x.ToolUse != null) == true)
+            {
+                var tool = response?.output?.message?.content.FirstOrDefault(x => x.ToolUse != null)?.ToolUse;
+
+                message.ToolCallId = tool?.Name;
+
+                message.ToolCalls ??= [];
+                message.ToolCalls.Add(new ThorToolCall()
+                {
+                    Id = tool?.ToolUseId,
+                    Function = new ThorChatMessageFunction()
+                    {
+                        Name = tool?.Name,
+                        Arguments = JsonSerializer.Serialize(tool?.Input, ThorJsonSerializer.DefaultOptions)
+                    }
+                });
+            }
+
+            var chatCompletionsResponse = new ThorChatCompletionsResponse()
             {
                 Choices =
                 [
@@ -157,6 +269,8 @@ namespace Thor.AWSClaude.Chats
                 },
                 Model = model
             };
+
+            return chatCompletionsResponse;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -266,6 +380,100 @@ namespace Thor.AWSClaude.Chats
             };
 
 
+            if (input.Tools != null)
+            {
+                request.ToolConfig = new ToolConfiguration();
+
+                if (input.ToolChoice != null)
+                {
+                    if (input.ToolChoice.Type == "auto")
+                    {
+                        request.ToolConfig.ToolChoice = new ToolChoice()
+                        {
+                            Auto = new AutoToolChoice()
+                        };
+                    }
+                    else if (input.ToolChoice.Type == "required")
+                    {
+                        request.ToolConfig.ToolChoice = new ToolChoice()
+                        {
+                            Any = new AnyToolChoice(),
+                        };
+                    }
+                    else if (input.ToolChoice.Type == "function")
+                    {
+                        request.ToolConfig.ToolChoice = new ToolChoice()
+                        {
+                            Any = new AnyToolChoice(),
+                            Tool = new SpecificToolChoice()
+                            {
+                                Name = input.ToolChoice.Function?.Name
+                            }
+                        };
+                    }
+                }
+
+                foreach (var tool in input.Tools)
+                {
+                    var properties = new Document();
+
+                    if (tool.Function?.Parameters?.Properties != null)
+                    {
+                        foreach (var property in tool.Function.Parameters.Properties)
+                        {
+                            var propertyValue = new Document
+                            {
+                                { "type", property.Value.Type }
+                            };
+
+                            if (!string.IsNullOrEmpty(property.Value.Description))
+                            {
+                                propertyValue.Add("description", property.Value.Description);
+                            }
+
+                            if (property.Value.Enum is { Count: > 0 })
+                            {
+                                var enums = property.Value.Enum.Select(x => new Document(x));
+
+                                propertyValue.Add("enum", new Document(enums.ToList()));
+                            }
+
+                            properties.Add(property.Key, propertyValue);
+                        }
+                    }
+
+                    var required = new Document();
+                    if (tool.Function?.Parameters?.Required != null)
+                    {
+                        foreach (var item in tool.Function.Parameters.Required)
+                        {
+                            required.Add(item);
+                        }
+                    }
+
+                    request.ToolConfig.Tools ??= [];
+                    request.ToolConfig.Tools.Add(new Tool()
+                    {
+                        ToolSpec = new ToolSpecification()
+                        {
+                            Description = tool.Function?.Description,
+                            Name = tool.Function?.Name,
+                            InputSchema = new ToolInputSchema()
+                            {
+                                Json = new Document
+                                {
+                                    { "type", tool.Function?.Parameters?.Type },
+                                    {
+                                        "properties", properties
+                                    },
+                                    { "required", required }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
             var budgetTokens = 1024;
             if (input.MaxTokens is null or < 2048)
             {
@@ -358,6 +566,34 @@ namespace Thor.AWSClaude.Chats
                             Model = input?.Model
                         };
                     }
+                    else if (@event.Delta.ToolUse != null)
+                    {
+                        yield return new ThorChatCompletionsResponse()
+                        {
+                            Choices =
+                            [
+                                new ThorChatChoiceResponse
+                                {
+                                    Delta = new ThorChatMessage()
+                                    {
+                                        ToolCalls =
+                                        [
+                                            new ThorToolCall()
+                                            {
+                                                Function = new ThorChatMessageFunction()
+                                                {
+                                                    Arguments = @event.Delta.ToolUse.Input,
+                                                    Name = @event.Delta.ToolUse.Name,
+                                                },
+                                                Id = @event.Delta.ToolUse.ToolUseId
+                                            }
+                                        ]
+                                    }
+                                }
+                            ],
+                            Model = input?.Model
+                        };
+                    }
                     else
                     {
                         yield return new ThorChatCompletionsResponse()
@@ -382,8 +618,32 @@ namespace Thor.AWSClaude.Chats
                         };
                     }
                 }
-                else if (content is MessageStartEvent eventStreamEvent)
+                else if (content is ContentBlockStartEvent contentBlock)
                 {
+                    yield return new ThorChatCompletionsResponse()
+                    {
+                        Choices =
+                        [
+                            new ThorChatChoiceResponse
+                            {
+                                Delta = new ThorChatMessage()
+                                {
+                                    ToolCalls =
+                                    [
+                                        new ThorToolCall()
+                                        {
+                                            Function = new ThorChatMessageFunction()
+                                            {
+                                                Name = contentBlock.Start.ToolUse.Name
+                                            },
+                                            Id = contentBlock.Start.ToolUse.ToolUseId
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        Model = input?.Model
+                    };
                 }
             }
         }

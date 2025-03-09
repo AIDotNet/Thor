@@ -1,6 +1,6 @@
 ﻿namespace Thor.AWSClaude
 {
-    public class AWSClaudePlatformOptions
+    public static class AWSClaudePlatformOptions
     {
         /// <summary>
         /// 平台名称
