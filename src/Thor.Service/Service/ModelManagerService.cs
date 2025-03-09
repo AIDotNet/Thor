@@ -99,7 +99,7 @@ public class ModelManagerService(IServiceProvider serviceProvider)
         if (!string.IsNullOrEmpty(type))
         {
             // 如果是其他
-            query = type == "其他" ? query.Where(x => x.Icon == "") : query.Where(x => x.Icon == type);
+            query = type == "其他" ? query.Where(x => x.Icon == null || x.Icon == "") : query.Where(x => x.Icon == type);
         }
 
         var total = await query.CountAsync();
