@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import { LayoutProps } from "./type";
 import { Outlet } from "react-router-dom";
-import { Layout, theme } from "antd";
+import { Layout, theme, Button } from "antd";
 import { Avatar, Header, Logo, ThemeSwitch } from "@lobehub/ui";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -35,6 +35,11 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
       <Layout>
         <Header actions={
           <>
+            <Button type="text" onClick={() => {
+              navigate('/model')
+            }}>
+              查看模型价格
+            </Button>
             <ThemeSwitch onThemeSwitch={(model) => toggleTheme(model)}
               themeMode={themeMode} />
             <Dropdown menu={{
@@ -44,6 +49,13 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
                   label: '账户设置',
                   onClick: () => {
                     navigate('/current')
+                  }
+                },
+                {
+                  key: 'user-info',
+                  label: '个人信息',
+                  onClick: () => {
+                    navigate('/user-info')
                   }
                 },
                 {

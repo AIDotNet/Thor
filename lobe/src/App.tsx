@@ -26,6 +26,7 @@ const ChannelPage = lazy(() => import('./pages/channel/page'))
 const TokenPage = lazy(() => import('./pages/token/page'))
 const ModelManager = lazy(() => import('./pages/model-manager/page'))
 const PanelPage = lazy(() => import('./pages/panel/page'))
+const UserInfoPage = lazy(() => import('./pages/user-info/page'))
 
 const router = createBrowserRouter([{
   element: <MainLayout nav={<Nav />} />,
@@ -83,6 +84,11 @@ const router = createBrowserRouter([{
     {
       path: 'rate-limit', element: <Suspense fallback={<FullscreenLoading title='加载限速页面中' />}>
         <RateLimit />
+      </Suspense>
+    },
+    {
+      path: 'user-info', element: <Suspense fallback={<FullscreenLoading title='加载用户信息页面中' />}>
+        <UserInfoPage />
       </Suspense>
     }
   ]

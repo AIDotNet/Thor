@@ -58,6 +58,13 @@ export const update = (user: any) => {
 }
 
 /**
+ * info
+ */
+export const updateInfo = (user: any) => {
+    return putJson(prefix + `/info`, user);
+}
+
+/**
  * 更新用户密码
  * @param data 密码信息
  */

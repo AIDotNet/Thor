@@ -14,8 +14,8 @@ const DeleteModelManager = async (id: string) => {
     return del(prefix + "/" + id);
 }
 
-const GetModelManagerList = async (model:string,page: number, pageSize: number,isPublic:boolean = false) => {
-    return get(prefix + `?page=${page}&pageSize=${pageSize}&model=${model}&isPublic=${isPublic}`);
+const GetModelManagerList = async (model:string,page: number, pageSize: number,isPublic:boolean = false,type:string = '') => {
+    return get(prefix + `?page=${page}&pageSize=${pageSize}&model=${model}&isPublic=${isPublic}&type=${type}`);
 }
 
 const EnableModelManager = async (id: string) => {

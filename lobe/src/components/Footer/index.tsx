@@ -56,10 +56,9 @@ export default function ThorFooter() {
                     <Col xs={12} md={6}>
                         <Title level={4} style={{ color: 'white' }}>产品</Title>
                         <ul style={{ listStyle: 'none', padding: 0 }}>
-                            <li style={{ marginBottom: 8 }}><a style={{ color: '#8c8c8c' }}>API服务</a></li>
                             <li style={{ marginBottom: 8 }}><a
                                 onClick={() => {
-                                    navigate('/models')
+                                    navigate('/model')
                                 }}
                                 style={{ color: '#8c8c8c' }}>模型列表</a></li>
                         </ul>

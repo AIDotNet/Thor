@@ -81,7 +81,8 @@ public class ModelManagerService(IServiceProvider serviceProvider)
         await LoadingSettings(DbContext);
     }
 
-    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic)
+    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic,
+        string? type)
     {
         var query = DbContext.ModelManagers.AsQueryable();
 
@@ -93,6 +94,12 @@ public class ModelManagerService(IServiceProvider serviceProvider)
         if (isPublic)
         {
             query = query.Where(x => x.Enable);
+        }
+
+        if (!string.IsNullOrEmpty(type))
+        {
+            // 如果是其他
+            query = type == "其他" ? query.Where(x => x.Icon == "") : query.Where(x => x.Icon == type);
         }
 
         var total = await query.CountAsync();
@@ -114,7 +121,5 @@ public class ModelManagerService(IServiceProvider serviceProvider)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Enable, y => !y.Enable));
 
         await LoadingSettings(DbContext);
-
-
     }
 }

@@ -238,6 +238,7 @@ public partial class UserService(
         return result > 0;
     }
 
+    [Authorize(Roles = RoleConstant.Admin)]
     public async ValueTask UpdateAsync(UpdateUserInput input)
     {
         // 先判断是否已经存在
@@ -255,6 +256,39 @@ public partial class UserService(
 
         await DbContext.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// 修改用户信息
+    /// </summary>
+    [Authorize]
+    public async ValueTask UpdateInfoAsync(UpdateUserInfoInput input)
+    {
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == UserContext.CurrentUserId);
+        if (user == null)
+            throw new UnauthorizedAccessException();
+
+        // 先判断是否已经存在
+        if (await DbContext.Users.AnyAsync(x => x.Id != UserContext.CurrentUserId && x.Email == input.Email))
+            throw new Exception("邮箱已存在");
+
+        if (!CheckUserName().IsMatch(input.UserName))
+            throw new Exception("用户名只能由英文和数字组成");
+
+        // 先判断是否已经存在
+        if (await DbContext.Users.AnyAsync(x => x.Id != UserContext.CurrentUserId && x.UserName == input.UserName))
+            throw new Exception("账号已存在");
+
+        user.Email = input.Email;
+        user.UserName = input.UserName;
+
+        await DbContext.Users.Where(x => x.Id == UserContext.CurrentUserId)
+            .ExecuteUpdateAsync(x =>
+                x.SetProperty(y => y.Email, input.Email)
+                    .SetProperty(y => y.UserName, input.UserName));
+
+        await RefreshUserAsync(UserContext.CurrentUserId);
+    }
+
 
     public async ValueTask EnableAsync(string id)
     {

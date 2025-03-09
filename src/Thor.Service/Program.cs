@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Serilog;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI.Extensions;
@@ -492,6 +493,10 @@ try
         {
             Roles = RoleConstant.Admin
         });
+
+    user.MapPut("/info", async (UserService service, UpdateUserInfoInput input) =>
+            await service.UpdateInfoAsync(input))
+        .RequireAuthorization();
 
     user.MapPost("/enable/{id}", async (UserService service, string id) =>
             await service.EnableAsync(id))

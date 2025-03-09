@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { CopyButton, Header, Input, Tag, Tooltip, } from "@lobehub/ui";
+import { Header, Input, Tag, Tooltip, } from "@lobehub/ui";
 import { IconAvatar, OpenAI } from "@lobehub/icons";
-import { Button, Switch, Table } from "antd";
+import { Button, Switch, Table, message, theme } from "antd";
 import { getCompletionRatio, renderQuota } from "../../utils/render";
 import { getIconByName } from "../../utils/iconutils";
 import { GetModelManagerList } from "../../services/ModelManagerService";
@@ -20,12 +20,17 @@ export default function DesktopLayout() {
         page: 1,
         pageSize: 10,
         model: '',
-        isFirst: true
+        isFirst: true,
+        type: ''
     });
+    const [icons, setIcons] = useState<string[]>([]);
+
+    // 使用 Ant Design 的主题 token
+    const { token } = theme.useToken();
 
     function loadData() {
         setLoading(true);
-        GetModelManagerList(input.model, input.page, input.pageSize, true)
+        GetModelManagerList(input.model, input.page, input.pageSize, true, input.type)
             .then((res) => {
                 setData(res.data.items);
                 setTotal(res.data.total);
@@ -60,7 +65,29 @@ export default function DesktopLayout() {
 
     useEffect(() => {
         loadData();
-    }, [input.page, input.pageSize, input.isFirst])
+    }, [input.page, input.pageSize, input.isFirst, input.type, input.model])
+
+    useEffect(() => {
+        if (data.length > 0 && icons.length === 0) {
+            const uniqueIcons = Array.from(new Set(data.map(item => item.icon)));
+            // OpenAI排在最前面
+            const openAIIndex = uniqueIcons.indexOf('OpenAI');
+            if (openAIIndex > -1) {
+                uniqueIcons.splice(openAIIndex, 1);
+                uniqueIcons.unshift('OpenAI');
+            }
+
+            uniqueIcons.forEach((icon, index) => {
+                if (icon === '' || icon === undefined) {
+                    uniqueIcons[index] = '其他';
+                }
+            });
+
+            console.log(uniqueIcons);
+
+            setIcons(uniqueIcons);
+        }
+    }, [data]);
 
     return (
         <div className="model-manager-container">
@@ -100,6 +127,32 @@ export default function DesktopLayout() {
                     </div>
                 }
             />
+            <div className="icon-filter" style={{ backgroundColor: token.colorBgContainer }}>
+                {icons.map(icon => (
+                    <Flexbox
+                        key={icon}
+                        horizontal
+                        gap={8}
+                        className={`icon-item ${input.type === icon ? 'selected' : ''}`}
+                        onClick={() => {
+                            setInput({
+                                ...input,
+                                type: icon ?? "其他"
+                            })
+                        }}
+                    >
+                        {getIconByName(icon, 24)?.icon ?? <IconAvatar size={24} Icon={OpenAI} />}
+                        <span style={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 1,
+                            WebkitBoxOrient: 'vertical',
+                            color: input.type === icon ? token.colorTextLightSolid : token.colorText
+                        }}>{icon || '其他'}</span>
+                    </Flexbox>
+                ))}
+            </div>
             <div className="table-container">
                 <Table
                     rowKey={row => row.id}
@@ -141,21 +194,24 @@ export default function DesktopLayout() {
                             dataIndex: 'model',
                             width: 260,
                             render: (mode: string) => {
-                                return <Tooltip title={mode}>
-                                    <Flexbox horizontal gap={8}>
-                                        <span style={{
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            display: '-webkit-box',
-                                            WebkitLineClamp: 1,
-                                            WebkitBoxOrient: 'vertical',
-                                            marginTop: 5
-                                        }}>
-                                            {mode}
-                                        </span>
-                                        <CopyButton content={mode} />
-                                    </Flexbox>
-                                </Tooltip>
+                                return <span onClick={() => {
+                                    navigator.clipboard.writeText(mode)
+                                        .then(() => {
+                                            message.success('复制成功');
+                                        })
+                                        .catch(() => {
+                                            const input = document.createElement('input');
+                                            input.value = mode;
+                                            document.body.appendChild(input);
+                                            input.select();
+                                            document.execCommand('copy');
+                                            document.body.removeChild(input);
+
+                                            message.success('复制成功');
+                                        })
+                                }}>
+                                    {mode}
+                                </span>
                             }
                         },
                         {
@@ -332,6 +388,36 @@ export default function DesktopLayout() {
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                }
+
+                .icon-filter {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                    margin: 16px;
+                    padding: 16px;
+                    border-radius: ${token.borderRadius}px;
+                    box-shadow: ${token.boxShadow};
+                }
+
+                .icon-item {
+                    cursor: pointer;
+                    padding: 8px;
+                    border-radius: ${token.borderRadiusSM}px;
+                    transition: background-color 0.3s;
+                }
+
+                .icon-item:hover {
+                    background-color: ${token.colorBgBlur};
+                }
+
+                .icon-item.selected {
+                    background-color: ${token.colorBgTextHover};
+                    color: ${token.colorTextLightSolid};
+                }
+
+                .icon-item.selected svg {
+                    color: ${token.colorTextLightSolid};
                 }
             `}</style>
         </div>
