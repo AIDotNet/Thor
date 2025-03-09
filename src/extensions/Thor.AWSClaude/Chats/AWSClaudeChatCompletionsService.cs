@@ -150,12 +150,12 @@ namespace Thor.AWSClaude.Chats
             }
 
             var budgetTokens = 1024;
-            if (input.MaxTokens is null or < 2048)
+            if (input.MaxTokens != null && input.MaxTokens < 2048)
             {
                 input.MaxTokens = 2048;
             }
 
-            if (input.MaxTokens / 2 < 1024)
+            if (input.MaxTokens != null && input.MaxTokens / 2 < 1024)
             {
                 budgetTokens = input.MaxTokens.Value / (4 * 3);
             }
@@ -475,12 +475,12 @@ namespace Thor.AWSClaude.Chats
             }
 
             var budgetTokens = 1024;
-            if (input.MaxTokens is null or < 2048)
+            if (input.MaxTokens != null && input.MaxTokens < 2048)
             {
                 input.MaxTokens = 2048;
             }
 
-            if (input.MaxTokens / 2 < 1024)
+            if (input.MaxTokens != null && input.MaxTokens / 2 < 1024)
             {
                 budgetTokens = input.MaxTokens.Value / (4 * 3);
             }
