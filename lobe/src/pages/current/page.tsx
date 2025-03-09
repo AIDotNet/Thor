@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { info,  updatePassword } from '../../services/UserService';
 import { message,  Input, Button, Tabs } from 'antd';
 import Pay from '../../components/pay';
-import UserInfo from '../../components/User/UserInfo';
 
 export default function ProfileForm() {
   const [user, setUser] = useState({} as any);
