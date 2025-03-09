@@ -130,8 +130,8 @@ namespace Thor.AWSClaude.Chats
             var message = ThorChatMessage.CreateAssistantMessage(responseText);
 
             message.ReasoningContent = response?.output?.message?.content
-                ?.FirstOrDefault(x => !string.IsNullOrEmpty(x.reasoningContent.reasoningText.text))?.reasoningContent
-                .reasoningText.text;
+                ?.FirstOrDefault(x => !string.IsNullOrEmpty(x.reasoningContent?.reasoningText?.text))?.reasoningContent
+                ?.reasoningText?.text;
 
             return new ThorChatCompletionsResponse()
             {
