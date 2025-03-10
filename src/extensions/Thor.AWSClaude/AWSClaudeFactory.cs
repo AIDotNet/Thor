@@ -13,10 +13,7 @@ public static class AwsClaudeFactory
         RegionEndpoint region)
     {
         return Clients.GetOrAdd($"{awsAccessKeyId}_{awsSecretAccessKey}_{region.SystemName}",
-            _ =>
-            {
-                return new AwsAmazonBedrockRuntimeClient(awsAccessKeyId, awsSecretAccessKey,
-                    region);
-            });
+            _ => new AwsAmazonBedrockRuntimeClient(awsAccessKeyId, awsSecretAccessKey,
+                region));
     }
 }

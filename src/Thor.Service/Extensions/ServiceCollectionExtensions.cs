@@ -63,6 +63,22 @@ public static class ServiceCollectionExtensions
         {
             CacheOptions.ConnectionString = connectionString;
         }
+        
+        // var ConnectionStrings:DefaultConnection
+        var defaultConnection = Environment.GetEnvironmentVariable("DefaultConnection");
+        var loggerConnection = Environment.GetEnvironmentVariable("LoggerConnection");
+        
+        if (!string.IsNullOrEmpty(defaultConnection))
+        {
+            // 修改默认连接字符串
+            builder.Configuration["ConnectionStrings:DefaultConnection"] = defaultConnection;
+        }
+        
+        if (!string.IsNullOrEmpty(loggerConnection))
+        {
+            // 修改日志连接字符串
+            builder.Configuration["ConnectionStrings:LoggerConnection"] = loggerConnection;
+        }
 
         return builder;
     }
