@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Modal, Form, Input, Button, message, Select, InputNumber } from 'antd';
+import { Modal, Form,  Button, message, Select, InputNumber } from 'antd';
 import { updateModelMap, ModelMap } from "../../../services/ModelMapService";
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { getModelList } from '../../../services/ModelService';
