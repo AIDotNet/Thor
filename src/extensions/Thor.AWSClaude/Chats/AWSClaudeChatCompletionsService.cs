@@ -42,7 +42,7 @@ namespace Thor.AWSClaude.Chats
             var client = AwsClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
 
 
-            var messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
+            var messages = await CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
 
             var system = CreateSystemContentMessage(input.Messages.Where(x => x.Role == "system").ToList(), options);
 
@@ -274,7 +274,8 @@ namespace Thor.AWSClaude.Chats
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static List<Message> CreateMessage(List<ThorChatMessage> messages, ThorPlatformOptions options)
+        private static async ValueTask<List<Message>> CreateMessage(List<ThorChatMessage> messages,
+            ThorPlatformOptions options)
         {
             var awsMessage = new List<Message>();
 
@@ -287,17 +288,17 @@ namespace Thor.AWSClaude.Chats
                         Role = chatMessage.Role,
                         Content = []
                     };
-                    item.Content.AddRange(contentCalculated.Select<ThorChatMessageContent, ContentBlock>(
-                        x =>
+                    var tasks = contentCalculated.Select<ThorChatMessageContent, Task<ContentBlock>>(async x =>
+                    {
+                        if (x.Type == "text" && !string.IsNullOrEmpty(x.Text))
                         {
-                            if (x.Type == "text")
+                            return new ContentBlock
                             {
-                                return new ContentBlock
-                                {
-                                    Text = x.Text,
-                                };
-                            }
+                                Text = x.Text,
+                            };
+                        }
 
+                        if (x.ImageUrl?.Url.StartsWith("http") == false)
                             return new ContentBlock
                             {
                                 Image = new ImageBlock()
@@ -305,11 +306,28 @@ namespace Thor.AWSClaude.Chats
                                     Format = ImageFormat.Png,
                                     Source = new ImageSource()
                                     {
-                                        Bytes = new MemoryStream(Convert.FromBase64String(x.ImageUrl?.Url)),
+                                        Bytes = new MemoryStream(Convert.FromBase64String(x.ImageUrl?.Url.Split(',')[1] ?? string.Empty)),
                                     }
                                 }
                             };
-                        }));
+
+                        // 图片需要转换为byte[]
+                        var response = await HttpClientFactory.GetHttpClient(x.ImageUrl?.Url).GetAsync(x.ImageUrl?.Url);
+
+                        return new ContentBlock
+                        {
+                            Image = new ImageBlock()
+                            {
+                                Format = ImageFormat.Png,
+                                Source = new ImageSource()
+                                {
+                                    Bytes = new MemoryStream(await response.Content.ReadAsByteArrayAsync())
+                                }
+                            }
+                        };
+                    });
+                    await Task.WhenAll(tasks);
+                    item.Content.AddRange(tasks.Select(x => x.Result));
                     awsMessage.Add(item);
                 }
                 else
@@ -366,7 +384,7 @@ namespace Thor.AWSClaude.Chats
             var client = AwsClaudeFactory.CreateClient(awsAccessKeyId, awsSecretAccessKey, regionEndpoint);
 
 
-            var messages = CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
+            var messages = await CreateMessage(input.Messages.Where(x => x.Role != "system").ToList(), options);
 
             var system = CreateSystemContentMessage(input.Messages.Where(x => x.Role == "system").ToList(), options);
 

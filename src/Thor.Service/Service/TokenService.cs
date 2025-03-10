@@ -1,8 +1,6 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
-using Thor.Service.Options;
 
 namespace Thor.Service.Service;
 
