@@ -165,6 +165,13 @@ namespace Thor.AWSClaude.Chats
 
             if (isThink)
             {
+                if (input.MaxTokens == null)
+                {
+                    // 设置200K
+                    input.MaxTokens = 131072;
+                    budgetTokens = 4096;
+                }
+
                 request.AdditionalModelRequestFields = new Document
                 {
                     {
@@ -186,7 +193,7 @@ namespace Thor.AWSClaude.Chats
                 };
             }
 
-            if (input?.Temperature != null)
+            if (!isThink && input?.Temperature != null)
             {
                 request.InferenceConfig ??= new InferenceConfiguration()
                 {
@@ -194,7 +201,7 @@ namespace Thor.AWSClaude.Chats
                 };
             }
 
-            if (input?.TopP != null)
+            if (!isThink && input?.TopP != null)
             {
                 request.InferenceConfig ??= new InferenceConfiguration()
                 {
@@ -299,32 +306,43 @@ namespace Thor.AWSClaude.Chats
                         }
 
                         if (x.ImageUrl?.Url.StartsWith("http") == false)
+                        {
+                            var base64 = x.ImageUrl?.Url.Split(',')[1];
+                            var suffix = x.ImageUrl?.Url.Split(';').First().Split('/').Last();
+
                             return new ContentBlock
                             {
                                 Image = new ImageBlock()
                                 {
-                                    Format = ImageFormat.Png,
+                                    Format = suffix,
                                     Source = new ImageSource()
                                     {
-                                        Bytes = new MemoryStream(Convert.FromBase64String(x.ImageUrl?.Url.Split(',')[1] ?? string.Empty)),
+                                        Bytes = new MemoryStream(
+                                            Convert.FromBase64String(base64)),
                                     }
                                 }
                             };
-
-                        // 图片需要转换为byte[]
-                        var response = await HttpClientFactory.GetHttpClient(x.ImageUrl?.Url).GetAsync(x.ImageUrl?.Url);
-
-                        return new ContentBlock
+                        }
+                        else
                         {
-                            Image = new ImageBlock()
+                            // 获取后缀名
+                            var suffix = x.ImageUrl.Url.Split('.').Last();
+
+                            var response = await HttpClientFactory.GetHttpClient(x.ImageUrl?.Url)
+                                .GetAsync(x.ImageUrl?.Url);
+
+                            return new ContentBlock
                             {
-                                Format = ImageFormat.Png,
-                                Source = new ImageSource()
+                                Image = new ImageBlock()
                                 {
-                                    Bytes = new MemoryStream(await response.Content.ReadAsByteArrayAsync())
+                                    Format = suffix,
+                                    Source = new ImageSource()
+                                    {
+                                        Bytes = new MemoryStream(await response.Content.ReadAsByteArrayAsync())
+                                    }
                                 }
-                            }
-                        };
+                            };
+                        }
                     });
                     await Task.WhenAll(tasks);
                     item.Content.AddRange(tasks.Select(x => x.Result));
@@ -508,6 +526,13 @@ namespace Thor.AWSClaude.Chats
 
             if (isThink)
             {
+                if (input.MaxTokens == null)
+                {
+                    // 设置200K
+                    input.MaxTokens = 131072;
+                    budgetTokens = 4096;
+                }
+
                 request.AdditionalModelRequestFields = new Document
                 {
                     {
