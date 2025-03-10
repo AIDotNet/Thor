@@ -95,7 +95,7 @@ Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqli
 - [x] 星火大模型（支持function）
 - [x] Claudia （支持function）
 - [x] 智谱AI (支持function)
-- [x] AzureOpenAI（支持function）
+- [x] 微软Azure（支持function）
 - [x] Ollama（支持function）
 - [x] 通义千问（阿里云）（支持function）
 - [x] 腾讯混元大模型
@@ -105,6 +105,7 @@ Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqli
 - [x] SiliconFlow AI（支持function）
 - [x] DeepSeek AI（支持function）
 - [x] 火山引擎 （支持function） 
+- [x] 亚马逊 （支持function） 
 
 # 支持数据库
 
