@@ -33,7 +33,10 @@ export default function UpdateModelMap({ visible, value, onSuccess, onCancel }: 
       form.setFieldsValue({
         modelId: value.modelId,
         group: value.group,
-        modelMapItems: value.modelMapItems
+        modelMapItems: value.modelMapItems.map((item: any) => ({
+          modelId: [item.modelId],
+          order: item.order
+        }))
       });
     }
   }, [visible, value, form]);
@@ -43,15 +46,20 @@ export default function UpdateModelMap({ visible, value, onSuccess, onCancel }: 
       const values = await form.validateFields();
       setLoading(true);
 
+      values.modelMapItems = values.modelMapItems.map((item: any) => ({
+        modelId: item.modelId[0],
+        order: item.order
+      }));
+
       const data: ModelMap = {
         id: value.id,
-        modelId: values.modelId,
+        modelId: value.modelId,
         group: values.group || [],
         modelMapItems: values.modelMapItems || []
       };
 
       const response = await updateModelMap(data);
-      
+
       if (response.success) {
         message.success('更新成功');
         onSuccess();
@@ -89,10 +97,11 @@ export default function UpdateModelMap({ visible, value, onSuccess, onCancel }: 
           label="源模型ID"
           rules={[{ required: true, message: '请选择源模型ID' }]}
         >
-          <Select 
-            placeholder="请选择模型ID" 
+          <Select
+            placeholder="请选择模型ID"
             showSearch
             optionFilterProp="children"
+            disabled
           >
             {models.map((model: any) => (
               <Select.Option key={model.id} value={model.id}>
@@ -107,9 +116,19 @@ export default function UpdateModelMap({ visible, value, onSuccess, onCancel }: 
           label="分组"
           rules={[{ required: true, message: '请输入分组' }]}
         >
-          <Select 
-            mode="tags" 
+          <Select
+            mode="tags"
             placeholder="请输入分组，回车分隔"
+            options={[
+              {
+                label: '默认',
+                value: 'default'
+              },
+              {
+                label: 'VIP',
+                value: 'vip'
+              }
+            ]}
             style={{ width: '100%' }}
           />
         </Form.Item>
@@ -125,14 +144,18 @@ export default function UpdateModelMap({ visible, value, onSuccess, onCancel }: 
                     rules={[{ required: true, message: '请选择目标模型ID' }]}
                     style={{ flex: 1, marginRight: 8 }}
                   >
-                    <Select 
-                      placeholder="请选择目标模型ID" 
+                    <Select
+                      placeholder="请选择目标模型ID"
                       showSearch
                       optionFilterProp="children"
+                      defaultActiveFirstOption={true}
+                      mode="tags"
+                      maxCount={1}
+                      allowClear
                     >
                       {models.map((model: any) => (
-                        <Select.Option key={model.id} value={model.id}>
-                          {model.name || model.id}
+                        <Select.Option key={model} value={model}>
+                          {model}
                         </Select.Option>
                       ))}
                     </Select>
@@ -146,18 +169,18 @@ export default function UpdateModelMap({ visible, value, onSuccess, onCancel }: 
                     <InputNumber placeholder="权重" style={{ width: '100%' }} />
                   </Form.Item>
                   {fields.length > 1 ? (
-                    <MinusCircleOutlined 
-                      onClick={() => remove(name)} 
+                    <MinusCircleOutlined
+                      onClick={() => remove(name)}
                       style={{ marginLeft: 8 }}
                     />
                   ) : null}
                 </div>
               ))}
               <Form.Item>
-                <Button 
-                  type="dashed" 
-                  onClick={() => add()} 
-                  block 
+                <Button
+                  type="dashed"
+                  onClick={() => add()}
+                  block
                   icon={<PlusOutlined />}
                 >
                   添加映射项

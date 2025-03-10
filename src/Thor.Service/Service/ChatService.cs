@@ -38,6 +38,7 @@ public sealed class ChatService(
     RateLimitModelService rateLimitModelService,
     UserService userService,
     ILogger<ChatService> logger,
+    ModelMapService modelMapService,
     LoggerService loggerService)
     : ApplicationService(serviceProvider), IScopeDependency
 {
@@ -131,7 +132,7 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(request.Model, user.Id);
 
-            request.Model = TokenService.ModelMap(request.Model);
+            request.Model = await modelMapService.ModelMap(request.Model);
 
             TokenService.CheckModel(request.Model, token, context);
 
@@ -162,19 +163,21 @@ public sealed class ChatService(
                 ApiKey = channel.Key,
                 Address = channel.Address,
                 Other = channel.Other
-            }, context.RequestAborted);
-
+            });
             
+            // 计算createdAT
+            var createdAt = DateTime.Now;
+            var created = (int)createdAt.ToUnixTimeSeconds();
             await context.Response.WriteAsJsonAsync(new ThorImageCreateResponse
             {
                 data = response.Results,
-                created = (int)DateTimeOffset.Now.ToUnixTimeSeconds(),
+                created = created,
                 successful = response.Successful
             });
 
             sw.Stop();
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0), request.Model,
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), request.Model,
                 0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
@@ -222,7 +225,7 @@ public sealed class ChatService(
 
                 await rateLimitModelService.CheckAsync(input!.Model, user.Id);
 
-                input.Model = TokenService.ModelMap(input.Model);
+                input.Model = await modelMapService.ModelMap(input.Model);
 
                 TokenService.CheckModel(input.Model, token, context);
 
@@ -343,7 +346,7 @@ public sealed class ChatService(
 
                 await rateLimitModelService.CheckAsync(input!.Model, user.Id);
 
-                input.Model = TokenService.ModelMap(input.Model);
+                input.Model = await modelMapService.ModelMap(input.Model);
 
                 TokenService.CheckModel(input.Model, token, context);
 
@@ -443,7 +446,7 @@ public sealed class ChatService(
 
                 await rateLimitModelService.CheckAsync(request.Model, user.Id);
 
-                request.Model = TokenService.ModelMap(request.Model);
+                request.Model = await modelMapService.ModelMap(request.Model);
 
                 TokenService.CheckModel(request.Model, token, context);
 
@@ -638,7 +641,7 @@ public sealed class ChatService(
 
                 await rateLimitModelService.CheckAsync(model, user.Id);
 
-                model = TokenService.ModelMap(model);
+                model = await modelMapService.ModelMap(model);
 
                 TokenService.CheckModel(model, token, context);
                 // 记录请求模型 / 请求用户
@@ -977,7 +980,7 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, user.Id);
 
-            audioCreateTranscriptionRequest.Model = TokenService.ModelMap(audioCreateTranscriptionRequest.Model);
+            audioCreateTranscriptionRequest.Model = await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
 
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
 
@@ -1059,7 +1062,7 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(request.Model, user.Id);
 
-            request.Model = TokenService.ModelMap(request.Model);
+            request.Model = await modelMapService.ModelMap(request.Model);
 
             TokenService.CheckModel(request.Model, token, context);
 
@@ -1202,7 +1205,7 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, user.Id);
 
-            audioCreateTranscriptionRequest.Model = TokenService.ModelMap(audioCreateTranscriptionRequest.Model);
+            audioCreateTranscriptionRequest.Model = await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
 
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
 

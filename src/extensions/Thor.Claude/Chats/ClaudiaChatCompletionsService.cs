@@ -43,12 +43,12 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         input.Model = input.Model.Replace("-thinking", string.Empty);
 
         var budgetTokens = 1024;
-        if (input.MaxTokens is null or < 2048)
+        if (input.MaxTokens is < 2048)
         {
             input.MaxTokens = 2048;
         }
 
-        if (input.MaxTokens / 2 < 1024)
+        if (input.MaxTokens != null && input.MaxTokens / 2 < 1024)
         {
             budgetTokens = input.MaxTokens.Value / (4 * 3);
         }
@@ -337,15 +337,14 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         var isThinking = input.Model.EndsWith("thinking");
         input.Model = input.Model.Replace("-thinking", string.Empty);
         var budgetTokens = 1024;
-
-        if (input.MaxTokens is null or < 2048)
+        
+        if (input.MaxTokens is < 2048)
         {
             input.MaxTokens = 2048;
         }
 
-        if (input.MaxTokens / 2 < 1024)
+        if (input.MaxTokens != null && input.MaxTokens / 2 < 1024)
         {
-            // 至少max token的四分之三的长度
             budgetTokens = input.MaxTokens.Value / (4 * 3);
         }
 

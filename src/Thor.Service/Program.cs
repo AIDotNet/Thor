@@ -537,8 +537,8 @@ try
         .WithDescription("更新模型映射")
         .WithOpenApi();
 
-    modelMap.MapDelete("{modelId}", async (ModelMapService service, string modelId) =>
-            await service.DeleteAsync(modelId))
+    modelMap.MapDelete("{id}", async (ModelMapService service, Guid id) =>
+            await service.DeleteAsync(id))
         .WithDescription("删除模型映射")
         .WithOpenApi();
 

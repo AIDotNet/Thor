@@ -226,39 +226,4 @@ public sealed class TokenService(
         context.Response.StatusCode = 402;
         throw new InsufficientQuotaException("额度不足");
     }
-
-    /// <summary>
-    /// 模型转换映射
-    /// </summary>
-    /// <returns></returns>
-    public static string ModelMap(string model)
-    {
-        if (ChatCoreOptions.ModelMapping?.Enable == true &&
-            ChatCoreOptions.ModelMapping.Models.TryGetValue(model, out var models) && models.Length > 0)
-        {
-            using var modelMap =
-                Activity.Current?.Source.StartActivity("模型映射转换");
-            // 随机字符串
-            // 所有权重值之和
-            var total = models.Sum(x => x.Order);
-
-            var value = Convert.ToInt32(Random.Shared.NextDouble() * total);
-
-            foreach (var chatChannel in models)
-            {
-                value -= chatChannel.Order;
-                if (value <= 0)
-                {
-                    modelMap?.SetTag("Model", chatChannel.Model);
-                    return chatChannel.Model;
-                }
-            }
-
-            modelMap?.SetTag("Model", models.LastOrDefault()?.Model ?? model);
-
-            return models.LastOrDefault()?.Model ?? model;
-        }
-
-        return model;
-    }
 }

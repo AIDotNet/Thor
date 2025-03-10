@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using Thor.BuildingBlocks.Event;
 using Thor.Core.DataAccess;
+using Thor.Service.Eto;
 
 namespace Thor.Service.Service;
 
@@ -7,10 +9,11 @@ namespace Thor.Service.Service;
 /// 模型管理服务
 /// </summary>
 /// <param name="serviceProvider"></param>
-public class ModelManagerService(IServiceProvider serviceProvider)
+public sealed class ModelManagerService(IServiceProvider serviceProvider,
+    IEventBus<UpdateModelManagerCache> eventBus)
     : ApplicationService(serviceProvider), IScopeDependency
 {
-    public static ConcurrentDictionary<string, ModelManager> PromptRate { get; private set; } = new();
+    public static ConcurrentDictionary<string, ModelManager> PromptRate { get; } = new();
 
 
     public static async ValueTask LoadingSettings(IThorContext context)
@@ -45,6 +48,11 @@ public class ModelManagerService(IServiceProvider serviceProvider)
         await DbContext.SaveChangesAsync();
 
         await LoadingSettings(DbContext);
+
+        await eventBus.PublishAsync(new UpdateModelManagerCache()
+        {
+            CreatedAt = DateTime.Now
+        });
     }
 
     public async ValueTask UpdateAsync(UpdateModelManagerInput input)
@@ -70,6 +78,10 @@ public class ModelManagerService(IServiceProvider serviceProvider)
         await DbContext.SaveChangesAsync();
 
         await LoadingSettings(DbContext);
+        await eventBus.PublishAsync(new UpdateModelManagerCache()
+        {
+            CreatedAt = DateTime.Now
+        });
     }
 
     public async ValueTask DeleteAsync(Guid id)
@@ -79,10 +91,13 @@ public class ModelManagerService(IServiceProvider serviceProvider)
             .ExecuteDeleteAsync();
 
         await LoadingSettings(DbContext);
+        await eventBus.PublishAsync(new UpdateModelManagerCache()
+        {
+            CreatedAt = DateTime.Now
+        });
     }
 
-    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic,
-        string? type)
+    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic, string? type)
     {
         var query = DbContext.ModelManagers.AsQueryable();
 
@@ -94,12 +109,6 @@ public class ModelManagerService(IServiceProvider serviceProvider)
         if (isPublic)
         {
             query = query.Where(x => x.Enable);
-        }
-
-        if (!string.IsNullOrEmpty(type))
-        {
-            // 如果是其他
-            query = type == "其他" ? query.Where(x => x.Icon == null || x.Icon == "") : query.Where(x => x.Icon == type);
         }
 
         var total = await query.CountAsync();
@@ -121,5 +130,10 @@ public class ModelManagerService(IServiceProvider serviceProvider)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Enable, y => !y.Enable));
 
         await LoadingSettings(DbContext);
+
+        await eventBus.PublishAsync(new UpdateModelManagerCache()
+        {
+            CreatedAt = DateTime.Now
+        });
     }
 }

@@ -33,10 +33,14 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
       setLoading(true);
 
       values.modelId = values.modelId[0];
+      
       values.modelMapItems = values.modelMapItems.map((item: any) => ({
         modelId: item.modelId[0],
         order: item.order
       }));
+
+      // 清空values.modelMapItems中的空字符串
+      values.modelMapItems = values.modelMapItems.filter((item: any) => item.modelId !== '');
 
       const data: ModelMap = {
         modelId: values.modelId,
@@ -78,7 +82,7 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
       <Form
         form={form}
         layout="vertical"
-        initialValues={{ modelMapItems: [{ modelId: '', order: 0 }] }}
+        initialValues={{ modelMapItems: [] }}
       >
         <Form.Item
           name="modelId"
@@ -110,6 +114,16 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
           <Select
             mode="tags"
             placeholder="请输入分组，回车分隔"
+            options={[
+              {
+                label: '默认',
+                value: 'default'
+              },
+              {
+                label: 'VIP',
+                value: 'vip'
+              }
+            ]}
             style={{ width: '100%' }}
           />
         </Form.Item>

@@ -1,4 +1,5 @@
-﻿using Thor.Abstractions.Exceptions;
+﻿using System.Diagnostics;
+using Thor.Abstractions.Exceptions;
 
 namespace Thor.Service.Service;
 
@@ -10,6 +11,39 @@ namespace Thor.Service.Service;
 public sealed class ModelMapService(IServiceProvider serviceProvider, IServiceCache serviceCache)
     : ApplicationService(serviceProvider), IScopeDependency
 {
+    public async ValueTask<string> ModelMap(string model)
+    {
+        var models =
+            await serviceCache.GetOrCreateAsync("ModelMap", async () => await DbContext.ModelMaps.ToListAsync());
+
+        using var modelMap =
+            Activity.Current?.Source.StartActivity("模型映射转换");
+        var modelItems = models?.FirstOrDefault(x => x.ModelId == model);
+        
+        if(modelItems == null)
+        {
+            return model;
+        }
+        
+        var total = modelItems.ModelMapItems.Sum(x => x.Order);
+
+        var value = Convert.ToInt32(Random.Shared.NextDouble() * total);
+
+        foreach (var chatChannel in modelItems.ModelMapItems)
+        {
+            value -= chatChannel.Order;
+            if (value <= 0)
+            {
+                modelMap?.SetTag("Model", chatChannel.ModelId);
+                return chatChannel.ModelId;
+            }
+        }
+
+        modelMap?.SetTag("Model", modelItems.ModelMapItems.LastOrDefault()?.ModelId ?? model);
+
+        return modelItems.ModelMapItems?.LastOrDefault()?.ModelId ?? model;
+    }
+
     /// <summary>
     /// 创建模型映射
     /// </summary>
@@ -47,26 +81,19 @@ public sealed class ModelMapService(IServiceProvider serviceProvider, IServiceCa
                 .SetProperty(a => a.Modifier, UserContext.CurrentUserId)
                 .SetProperty(a => a.UpdatedAt, DateTime.Now));
     }
-    
+
     /// <summary>
     /// 删除模型映射
     /// </summary>
-    public async Task DeleteAsync(string modelId)
+    public async Task DeleteAsync(Guid id)
     {
-        var entity = await DbContext.ModelMaps.FirstOrDefaultAsync(x => x.ModelId == modelId);
-
-        if (entity == null)
-        {
-            throw new BusinessException("模型映射不存在", "400");
-        }
-
-        await DbContext.ModelMaps.Where(x => x.ModelId == modelId)
+        await DbContext.ModelMaps.Where(x => x.Id == id)
             .ExecuteDeleteAsync();
 
         // 清除缓存
         await serviceCache.RemoveAsync("ModelMap");
     }
-    
+
     /// <summary>
     /// 获取模型映射列表
     /// </summary>

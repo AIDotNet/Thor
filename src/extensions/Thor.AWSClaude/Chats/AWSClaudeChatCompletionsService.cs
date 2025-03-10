@@ -150,7 +150,7 @@ namespace Thor.AWSClaude.Chats
             }
 
             var budgetTokens = 1024;
-            if (input.MaxTokens != null && input.MaxTokens < 2048)
+            if (input.MaxTokens is < 2048)
             {
                 input.MaxTokens = 2048;
             }
@@ -475,7 +475,7 @@ namespace Thor.AWSClaude.Chats
             }
 
             var budgetTokens = 1024;
-            if (input.MaxTokens != null && input.MaxTokens < 2048)
+            if (input.MaxTokens is < 2048)
             {
                 input.MaxTokens = 2048;
             }
