@@ -11,7 +11,7 @@ public sealed class TokenService(
     ILogger<TokenService> logger)
     : ApplicationService(serviceProvider), IScopeDependency
 {
-    public async ValueTask CreateAsync(TokenInput input, string? createId = null)
+    public async ValueTask<string> CreateAsync(TokenInput input, string? createId = null)
     {
         if (input.ExpiredTime < DateTime.Now) throw new Exception("过期时间不能小于当前时间");
 
@@ -26,6 +26,8 @@ public sealed class TokenService(
         token.Key = "sk-" + StringHelper.GenerateRandomString(38);
 
         await DbContext.Tokens.AddAsync(token);
+
+        return token.Key;
     }
 
     public async Task<Token?> GetAsync(long id)
