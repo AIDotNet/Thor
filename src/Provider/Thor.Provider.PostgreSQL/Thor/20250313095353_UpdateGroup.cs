@@ -517,7 +517,7 @@ namespace Thor.Provider.PostgreSql.Thor
             migrationBuilder.InsertData(
                 table: "Tokens",
                 columns: new[] { "Id", "AccessedTime", "CreatedAt", "Creator", "DeletedAt", "Disabled", "ExpiredTime", "Groups", "IsDelete", "Key", "LimitModels", "Modifier", "Name", "RemainQuota", "UnlimitedExpired", "UnlimitedQuota", "UpdatedAt", "UsedQuota", "WhiteIpList" },
-                values: new object[] { "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, new DateTime(2025, 3, 13, 17, 53, 52, 625, DateTimeKind.Local).AddTicks(4766), "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, false, null, "[\"default\",\"vip\"]", false, "sk-INh3figKWbYsuPsnzqacVTBVM7DbD0MInibrmh", "[]", null, "默认Token", 0L, true, true, null, 0L, "[]" });
+                values: new object[] { "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, new DateTime(2025, 3, 13, 17, 53, 52, 625, DateTimeKind.Local).AddTicks(4766), "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, false, null, "[\"default\"]", false, "sk-INh3figKWbYsuPsnzqacVTBVM7DbD0MInibrmh", "[]", null, "默认Token", 0L, true, true, null, 0L, "[]" });
 
             migrationBuilder.InsertData(
                 table: "UserGroups",
