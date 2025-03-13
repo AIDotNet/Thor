@@ -168,8 +168,8 @@ namespace Thor.AWSClaude.Chats
                 if (input.MaxTokens == null)
                 {
                     // 设置200K
-                    input.MaxTokens = 131072;
-                    budgetTokens = 4096;
+                    input.MaxTokens = 64000;
+                    budgetTokens = 63999;
                 }
 
                 request.AdditionalModelRequestFields = new Document
