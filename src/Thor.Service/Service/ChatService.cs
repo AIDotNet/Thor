@@ -150,7 +150,8 @@ public sealed class ChatService(
                 CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
 
             if (channel == null)
-                throw new NotModelException($"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                throw new NotModelException(
+                    $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -245,7 +246,8 @@ public sealed class ChatService(
                     await channelService.GetChannelsContainsModelAsync(input.Model, user, token));
 
                 if (channel == null)
-                    throw new NotModelException($"{input.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                    throw new NotModelException(
+                        $"{input.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -360,7 +362,8 @@ public sealed class ChatService(
                     await channelService.GetChannelsContainsModelAsync(input.Model, user, token));
 
                 if (channel == null)
-                    throw new NotModelException($"{input.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                    throw new NotModelException(
+                        $"{input.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -459,6 +462,8 @@ public sealed class ChatService(
         using var chatCompletions =
             Activity.Current?.Source.StartActivity("对话补全调用");
 
+        var model = request.Model;
+
         var rateLimit = 0;
 
         // 用于限流重试，如果限流则重试并且进行重新负载均衡计算
@@ -480,13 +485,14 @@ public sealed class ChatService(
 
                 TokenService.CheckModel(request.Model, token, context);
 
-                var model = await modelMapService.ModelMap(request.Model);
+                request.Model = await modelMapService.ModelMap(request.Model);
 
                 // 获取渠道通过算法计算权重
-                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user, token));
+                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
 
                 if (channel == null)
-                    throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                    throw new NotModelException(
+                        $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -505,7 +511,7 @@ public sealed class ChatService(
 
 
                 // 记录请求模型 / 请求用户
-                logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", model, user?.UserName, channel.Name);
+                logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", request.Model, user?.UserName, channel.Name);
 
                 int requestToken;
                 var responseToken = 0;
@@ -533,7 +539,7 @@ public sealed class ChatService(
 
                 var quota = requestToken * rate.PromptRate;
 
-                var completionRatio = GetCompletionRatio(model);
+                var completionRatio = GetCompletionRatio(request.Model);
                 quota += responseToken * rate.PromptRate * completionRatio;
 
                 // 计算分组倍率
@@ -549,14 +555,14 @@ public sealed class ChatService(
                 {
                     await loggerService.CreateConsumeAsync(
                         string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
-                        model,
+                        request.Model,
                         requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                         request.Stream is true,
                         (int)sw.ElapsedMilliseconds, organizationId);
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                        model);
+                        request.Model);
                 }
                 else
                 {
@@ -564,7 +570,7 @@ public sealed class ChatService(
                     await loggerService.CreateConsumeAsync(
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
                             userGroup.Rate),
-                        model,
+                        request.Model,
                         requestToken, responseToken, (int)((int)rate.PromptRate * (decimal)userGroup.Rate), token?.Key,
                         user?.UserName, user?.Id,
                         channel.Id,
@@ -574,7 +580,7 @@ public sealed class ChatService(
 
                     await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
                         channel.Id,
-                        model);
+                        request.Model);
                 }
             }
             else
@@ -594,6 +600,7 @@ public sealed class ChatService(
             }
             else
             {
+                request.Model = model;
                 goto limitGoto;
             }
         }
@@ -636,6 +643,7 @@ public sealed class ChatService(
             }
             else
             {
+                request.Model = model;
                 goto limitGoto;
             }
         }
@@ -665,7 +673,8 @@ public sealed class ChatService(
 
 
                 if (channel == null)
-                    throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                    throw new NotModelException(
+                        $"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -1027,7 +1036,7 @@ public sealed class ChatService(
 
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
 
-            var model =
+            audioCreateTranscriptionRequest.Model =
                 await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
 
             decimal quota = (int)rate.PromptRate;
@@ -1036,10 +1045,11 @@ public sealed class ChatService(
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(
-                await channelService.GetChannelsContainsModelAsync(model, user, token));
+                await channelService.GetChannelsContainsModelAsync(audioCreateTranscriptionRequest.Model, user, token));
 
             if (channel == null)
-                throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                throw new NotModelException(
+                    $"{audioCreateTranscriptionRequest.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -1075,13 +1085,13 @@ public sealed class ChatService(
             quota = (decimal)userGroup.Rate * quota;
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
-                model,
+                audioCreateTranscriptionRequest.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
             await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id,
-                model);
+                audioCreateTranscriptionRequest.Model);
         }
         catch (RateLimitException)
         {
@@ -1131,7 +1141,8 @@ public sealed class ChatService(
 
 
             if (channel == null)
-                throw new NotModelException($"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                throw new NotModelException(
+                    $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -1272,7 +1283,7 @@ public sealed class ChatService(
 
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
 
-            var model =
+            audioCreateTranscriptionRequest.Model =
                 await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
 
             decimal quota = (int)rate.PromptRate;
@@ -1281,11 +1292,12 @@ public sealed class ChatService(
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(
-                await channelService.GetChannelsContainsModelAsync(model, user, token));
+                await channelService.GetChannelsContainsModelAsync(audioCreateTranscriptionRequest.Model, user, token));
 
 
             if (channel == null)
-                throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                throw new NotModelException(
+                    $"{audioCreateTranscriptionRequest.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -1322,13 +1334,13 @@ public sealed class ChatService(
             quota = (decimal)userGroup.Rate * quota;
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
-                model,
+                audioCreateTranscriptionRequest.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
             await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id,
-                model);
+                audioCreateTranscriptionRequest.Model);
         }
         catch (RateLimitException)
         {
