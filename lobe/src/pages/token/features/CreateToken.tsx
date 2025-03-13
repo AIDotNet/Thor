@@ -3,7 +3,6 @@ import { Add } from '../../../services/TokenService'
 import { useEffect, useState } from 'react';
 import { renderQuota } from '../../../utils/render';
 import { getModels } from '../../../services/ModelService';
-import { info } from '../../../services/UserService';
 import { getCurrentList } from '../../../services/UserGroupService';
 import { Flexbox } from 'react-layout-kit';
 
@@ -23,7 +22,6 @@ export default function CreateToken({
 }: CreateTokenProps) {
     const [models, setModels] = useState<any>();
 
-    const [user, setUser] = useState({} as any);
     const [groups, setGroups] = useState<any[]>([]);
 
     useEffect(() => {
@@ -31,21 +29,6 @@ export default function CreateToken({
             .then((res) => {
                 setGroups(res.data);
             })
-    }, []);
-  
-    function loadUser() {
-      info()
-        .then((res) => {
-          setUser(res.data);
-        })
-        .catch((err) => {
-          message.error('获取用户信息失败');
-          console.error(err);
-        })
-    }
-
-    useEffect(() => {
-        loadUser();
     }, []);
 
     type FieldType = {
