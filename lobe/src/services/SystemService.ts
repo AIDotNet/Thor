@@ -1,5 +1,5 @@
-import { post, } from "../utils/fetch"
+import { get, } from "../utils/fetch"
 
-export const Share = (userId: string) => {
-    return post('/api/v1/system/share?userId=' + userId)
+export const InviteInfo = () => {
+    return get('/api/v1/system/info')
 }

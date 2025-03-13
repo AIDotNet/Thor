@@ -17,6 +17,10 @@ public sealed class TokenService(
 
         if (input is { UnlimitedExpired: false, ExpiredTime: null }) throw new Exception("请选择过期时间");
 
+        if (input.Groups.Length <= 0) throw new Exception("请选择分组");
+
+        if (input.Groups.Length > 1) throw new Exception("token只能属于一个分组");
+
         var token = Mapper.Map<Token>(input);
 
         if (!string.IsNullOrEmpty(createId)) token.Creator = createId;
@@ -59,6 +63,12 @@ public sealed class TokenService(
 
     public async ValueTask<bool> UpdateAsync(Token input)
     {
+        
+        if (input.Groups.Length <= 0) throw new Exception("请选择分组");
+
+        if (input.Groups.Length > 1) throw new Exception("token只能属于一个分组");
+
+        
         var result = await DbContext.Tokens.Where(x => x.Id == input.Id)
             .ExecuteUpdateAsync(item =>
                 item.SetProperty(x => x.Name, input.Name)
@@ -68,6 +78,7 @@ public sealed class TokenService(
                     .SetProperty(x => x.UnlimitedExpired, input.UnlimitedExpired)
                     .SetProperty(x => x.LimitModels, input.LimitModels)
                     .SetProperty(x => x.WhiteIpList, input.WhiteIpList)
+                    .SetProperty(x => x.Groups, input.Groups)
             );
 
         return result > 0;

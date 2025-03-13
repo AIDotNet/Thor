@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { info,  updatePassword } from '../../services/UserService';
 import { message,  Input, Button, Tabs } from 'antd';
 import Pay from '../../components/pay';
-
+import UserInfo from '../../components/User/UserInfo';
 export default function ProfileForm() {
   const [user, setUser] = useState({} as any);
   const [password, setPassword] = useState('');
@@ -50,14 +50,21 @@ export default function ProfileForm() {
         items={[
           {
             key: '1',
-            label: '账号余额',
+            label: '用户信息',
+            children: <div style={{ padding: '0 24px' }}>
+              <UserInfo user={user} />
+            </div>
+          },
+          {
+            key: '2',
+            label: '充值余额',
             children: <div style={{ padding: '0 24px' }}>
               <Pay user={user} />
             </div>
           },
           {
             key: '3',
-            label: '修改登录密码',
+            label: '修改密码',
             children: <div style={{
               padding: '0 24px',
               display: 'flex',
@@ -82,11 +89,15 @@ export default function ProfileForm() {
                   marginTop: 8
                 }} >
               </Input>
-              <Button style={{
+              <div style={{
                 marginTop: 8
-              }} onClick={() => onUpdatePassword()} block type="primary" htmlType="submit">
-                保存修改
-              </Button>
+              }}>
+                <Button style={{
+                  marginTop: 8
+                }} onClick={() => onUpdatePassword()} block type="primary" htmlType="submit">
+                  保存修改
+                </Button>
+              </div>
             </div>
           }
         ]}

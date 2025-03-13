@@ -16,7 +16,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion'; // 引入Framer Motion动画库
 import { useInView } from 'react-intersection-observer'; // 引入滚动检测
 import { useState, useEffect } from 'react';
-import { Pie } from '@ant-design/plots';
 import { modelHot } from '../../../services/LoggerService';
 import { BarList, DonutChart } from '@lobehub/charts';
 import { getIconByName } from '../../../utils/iconutils';

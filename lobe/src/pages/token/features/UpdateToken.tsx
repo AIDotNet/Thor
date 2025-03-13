@@ -3,7 +3,8 @@ import { Update } from '../../../services/TokenService'
 import { useEffect, useState } from 'react';
 import { renderQuota } from '../../../utils/render';
 import { getModels } from '../../../services/ModelService';
-
+import { getCurrentList } from '../../../services/UserGroupService';
+import { Flexbox } from 'react-layout-kit';
 const { Option } = Select;
 
 interface UpdateTokenProps {
@@ -20,6 +21,14 @@ export default function UpdateToken({
     value
 }: UpdateTokenProps) {
 
+    const [groups, setGroups] = useState<any[]>([]);
+
+    useEffect(() => {
+        getCurrentList()
+            .then((res) => {
+                setGroups(res.data);
+            })
+    }, []);
     type FieldType = {
         name?: string;
         unlimitedQuota: boolean;
@@ -28,6 +37,7 @@ export default function UpdateToken({
         expiredTime?: Date;
         limitModels: string[];
         whiteIpList: string[];
+        groups: string[];
     };
     const [models, setModels] = useState<any>();
 
@@ -39,6 +49,7 @@ export default function UpdateToken({
         expiredTime: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
         limitModels: [],
         whiteIpList: [],
+        groups: [],
     });
 
     function handleSubmit(values: any) {
@@ -70,7 +81,8 @@ export default function UpdateToken({
             unlimitedExpired: value?.unlimitedExpired,
             expiredTime: value?.expiredTime,
             limitModels: value?.limitModels,
-            whiteIpList: value?.whiteIpList
+            whiteIpList: value?.whiteIpList,
+            groups: value?.groups
         })
 
     }, [value])
@@ -95,10 +107,16 @@ export default function UpdateToken({
         }
     }, [visible]);
 
+    if (!visible) {
+        return null;
+    }
+
     return <Drawer
         width={500}
         title="修改Token" open={visible} onClose={onCancel}>
-        <Form onFinish={values => handleSubmit(values)} 
+        <Form
+            initialValues={value}
+            onFinish={values => handleSubmit(values)}
             style={{ width: 400 }}>
             <Form.Item<FieldType>
                 label="Token名称"
@@ -135,15 +153,17 @@ export default function UpdateToken({
                     }} />
                 </Form.Item>
             }
-            <Form.Item<FieldType> name='limitModels' label='模型' style={{ width: '100%' }}>
+            <Form.Item<FieldType>
+                name='limitModels' label='限制使用模型（不填则不限制）' style={{ width: '100%' }}>
                 <Select
-                    placeholder="请选择可用模型"
+                    placeholder="请选择限制使用模型"
                     defaultActiveFirstOption={true}
                     mode="tags"
-                    value={input.limitModels}
+                    defaultValue={value?.limitModels}
                     onChange={(v) => {
                         setInput({ ...input, limitModels: v });
                     }}
+                    value={input.limitModels}
                     allowClear
                 >
                     {
@@ -154,6 +174,38 @@ export default function UpdateToken({
                     }
                 </Select>
             </Form.Item>
+
+            <Form.Item<FieldType>
+                name="groups"
+                label="组"
+                rules={[{ required: true, message: '请选择组' }]}
+                style={{ width: "100%" }}
+            >
+                <Select
+                    placeholder="请选择组"
+                    mode="multiple"
+                    maxTagCount={1}
+                    maxCount={1}
+                    options={groups?.map((group: any) => {
+                        return {
+                            label: <Flexbox gap={8} horizontal>
+                                <span>{group.name}</span>
+                                <span style={{ fontSize: 12, color: '#999' }}>{group.description}</span>
+                                <span style={{ fontSize: 12, color: '#999' }}>
+                                    <span>倍率：</span>
+                                    {group.rate}
+                                </span>
+                            </Flexbox>,
+                            value: group.code
+                        }
+                    })}
+                    onChange={(v) => {
+                        setInput({ ...input, groups: v });
+                    }}
+                    value={input.groups}
+                    defaultValue={value?.groups}
+                />
+            </Form.Item>
             <Form.Item<FieldType> name='whiteIpList' label='IP白名单' style={{ width: '100%' }}>
                 <Select
                     placeholder="请选择IP白名单"
@@ -163,6 +215,7 @@ export default function UpdateToken({
                     onChange={(v) => {
                         setInput({ ...input, whiteIpList: v });
                     }}
+                    defaultValue={value?.whiteIpList}
                     allowClear
                 >
                 </Select>

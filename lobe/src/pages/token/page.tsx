@@ -102,16 +102,6 @@ export default function TokenPage() {
                   onClick: () => bingLobeChat(item.key)
                 },
                 {
-                  key: 'ChatNext',
-                  label: <Tag>绑定ChatNext</Tag>,
-                  onClick: () => bingChatNext(item.key)
-                },
-                {
-                  key: 'chatbox',
-                  label: <Tag>绑定ChatBox</Tag>,
-                  onClick: () => bingChatBox(item.key)
-                },
-                {
                   key: 'edit',
                   label: '编辑',
                   onClick: () => {
@@ -206,18 +196,6 @@ export default function TokenPage() {
       }
     });
     window.open(`https://lobe-chat.ai-v1.cn?settings=${json}`);
-  }
-
-  function bingChatNext(token: string) {
-    const json = JSON.stringify({
-      key: token,
-      url: window.location.origin
-    });
-    window.open(`https://chat-next.ai-v1.cn/#/?settings=${json}`);
-  }
-
-  function bingChatBox(token: string) {
-    window.open(`chatbox://callback?token` + token);
   }
 
   function removeToken(id: string) {
@@ -344,9 +322,11 @@ export default function TokenPage() {
         onSuccess={() => {
           setUpdateTokenVisible(false);
           loadingData();
+          setUpdateTokenValue({});
         }}
         onCancel={() => {
           setUpdateTokenVisible(false);
+          setUpdateTokenValue({});
         }} />
     </div>
   )

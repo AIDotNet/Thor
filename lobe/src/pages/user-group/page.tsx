@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Dropdown, message, Table, Space, Input as AntInput } from "antd";
 import { Header, Tag } from "@lobehub/ui";
-import { create, enableUserGroup, getList, remove, update } from "../../services/UserGroupService";
+import { enableUserGroup, getList, remove } from "../../services/UserGroupService";
 import CreateUserGroupPage from "./features/CreateUserGroup";
 import UpdateUserGroupPage from "./features/UpdateUserGroup";
 

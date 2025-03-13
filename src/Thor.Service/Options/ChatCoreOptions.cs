@@ -10,7 +10,7 @@ public class ChatCoreOptions
     /// </summary>
     public static string Master { get; set; }
 
-    public static Shared? Shared { get; set; }
+    public static Shared? Invite { get; set; }
 
     public static FreeModel? FreeModel { get; set; }
 
@@ -55,19 +55,19 @@ public sealed class FreeModelItem
 public sealed class Shared
 {
     /// <summary>
-    /// 是否启用分享广告
+    /// 是否启用邀请奖励
     /// </summary>
-    public bool EnableShareAd { get; set; }
+    public bool Enable { get; set; }
 
     /// <summary>
-    /// 分享每次点击奖励（一个ip算一次）
+    /// 邀请奖励
     /// </summary>
-    public int ShareCredit { get; set; }
+    public int Credit { get; set; }
 
     /// <summary>
-    /// 分享领取限制（每个人每天的限制）
+    /// 邀请奖励上限
     /// </summary>
-    public int ShareLimit { get; set; }
+    public int Limit { get; set; }
 }
 
 public sealed class ModelMapping

@@ -16,7 +16,6 @@ import {
   Shuffle,
   Handshake,
   BrainCog,
-  Users,
   UsersRound
 } from "lucide-react";
 import './index.css'

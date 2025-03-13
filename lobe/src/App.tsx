@@ -19,14 +19,12 @@ const DocPage = lazy(() => import('./pages/doc/page'))
 const ModelPage = lazy(() => import('./pages/model/page'))
 const Auth = lazy(() => import('./pages/auth/page'))
 const RateLimit = lazy(() => import('./pages/rate-limit/page'))
-const SharePage = lazy(() => import('./pages/share'))
 const WelcomePage = lazy(() => import('./pages/welcome/page'))
 const DefaultLayout = lazy(() => import('./_layout/Default/page'))
 const ChannelPage = lazy(() => import('./pages/channel/page'))
 const TokenPage = lazy(() => import('./pages/token/page'))
 const ModelManager = lazy(() => import('./pages/model-manager/page'))
 const PanelPage = lazy(() => import('./pages/panel/page'))
-const UserInfoPage = lazy(() => import('./pages/user-info/page'))
 const ModelMapPage = lazy(() => import('./pages/model-map/page'))
 const UserGroupPage = lazy(() => import('./pages/user-group/page'))
 
@@ -89,11 +87,6 @@ const router = createBrowserRouter([{
       </Suspense>
     },
     {
-      path: 'user-info', element: <Suspense fallback={<FullscreenLoading title='加载用户信息页面中' />}>
-        <UserInfoPage />
-      </Suspense>
-    },
-    {
       path: 'model-map', element: <Suspense fallback={<FullscreenLoading title='加载模型映射页面中' />}>
         <ModelMapPage />
       </Suspense>
@@ -128,11 +121,6 @@ const router = createBrowserRouter([{
   path: "/auth/casdoor",
   element: <Suspense fallback={<FullscreenLoading title='加载认证页面中' />}>
     <Auth />
-  </Suspense>
-}, {
-  path: "/share",
-  element: <Suspense fallback={<FullscreenLoading title='加载分享页面中' />}>
-    <SharePage />
   </Suspense>
 },
 {

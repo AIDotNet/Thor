@@ -59,7 +59,7 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
             UnlimitedQuota = true,
             UnlimitedExpired = true,
             CreatedAt = DateTime.Now,
-            Groups = ["default", "vip"],
+            Groups = ["default"],
         };
 
         modelBuilder.Entity<Token>().HasData(token);

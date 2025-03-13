@@ -1,4 +1,4 @@
-import { del, get,  postJson, put, putJson } from "../utils/fetch";
+import { del, get, postJson, put, putJson } from "../utils/fetch";
 
 const prefix = '/api/v1/userGroup';
 
@@ -45,4 +45,13 @@ export const remove = (id: string) => {
  */
 export const enableUserGroup = (id: string, enable: boolean) => {
     return put(prefix + `/enable/${id}?enable=${enable}`);
+}
+
+
+/**
+ * 获取用户分组列表
+ * @returns 用户分组列表
+ */
+export const getCurrentList = () => {
+    return get(prefix + "/user");
 }

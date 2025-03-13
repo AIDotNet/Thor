@@ -18,21 +18,26 @@ public partial class UserService(
 {
     public async ValueTask<User> CreateAsync(CreateUserInput input)
     {
+        if (!SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableRegister))
+        {
+            throw new Exception("注册功能已关闭,请联系管理员");
+        }
+        
         // 判断账号和密码长度是否满足5位
-        if (input.UserName.Length < 5 || input.Password.Length < 5) throw new Exception("用户名和密码长度不能小于5位");
+        if (input.UserName.Length < 5 || input.Password.Length < 5) 
+            throw new Exception("用户名和密码长度不能小于5位");
 
         // 使用正则表达式检测账号是否由英文和数字组成
         if (!CheckUserName().IsMatch(input.UserName))
             throw new Exception("用户名只能由英文和数字组成");
-
+        
+        if (!CheEmail().IsMatch(input.Email))
+        {
+            throw new Exception("邮箱格式错误");
+        }
+        
         if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
         {
-            // 判断邮箱是否正确使用正则表达式
-            if (!CheEmail().IsMatch(input.Email))
-            {
-                throw new Exception("邮箱格式错误");
-            }
-
             // 判断验证码是否正确
             var code = await memoryCache.GetAsync<string>("email-" + input.Email);
             if (code != input.Code) throw new Exception("验证码错误");
@@ -42,6 +47,12 @@ public partial class UserService(
         var exist = await DbContext.Users.AnyAsync(x => x.UserName == input.UserName || x.Email == input.Email);
         if (exist)
             throw new Exception("用户名已存在");
+        
+        // 如果不是管理员则默认分组为default
+        if (!UserContext.IsAdmin)
+        {
+            input.Groups = ["default"];
+        }
 
         if (input.Groups.Length == 0)
         {
@@ -70,6 +81,13 @@ public partial class UserService(
             User = user,
             Source = CreateUserSource.System
         });
+
+        if (!string.IsNullOrEmpty(input.InviteCode))
+        {
+            var systemService = serviceProvider.GetRequiredService<SystemService>();
+
+            await systemService.InviteCode(input.InviteCode,user);
+        }
 
         if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
         {

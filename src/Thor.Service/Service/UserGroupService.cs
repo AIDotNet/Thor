@@ -1,10 +1,14 @@
 ﻿using Thor.Abstractions.Exceptions;
 using Thor.Domain.Users;
+using Thor.Service.Infrastructure;
 using Thor.Service.Model;
 
 namespace Thor.Service.Service;
 
-public sealed class UserGroupService(IServiceProvider serviceProvider, IServiceCache serviceCache)
+public sealed class UserGroupService(
+    IServiceProvider serviceProvider,
+    IServiceCache serviceCache,
+    IUserContext userContext)
     : ApplicationService(serviceProvider), IScopeDependency
 {
     public async Task<ResultDto> CreateAsync(UserGroup userGroup)
@@ -27,6 +31,18 @@ public sealed class UserGroupService(IServiceProvider serviceProvider, IServiceC
 
     public async Task<ResultDto> DeleteAsync(Guid id)
     {
+        var entity = await DbContext.UserGroups.FirstOrDefaultAsync(x => x.Id == id);
+
+        if (entity == null)
+        {
+            throw new BusinessException("分组不存在", "400");
+        }
+
+        if (entity.Code == "default")
+        {
+            throw new BusinessException("默认分组不能删除", "400");
+        }
+
         await DbContext.UserGroups.Where(x => x.Id == id).ExecuteDeleteAsync();
         await serviceCache.RemoveAsync("UserGroupCache");
 
@@ -51,6 +67,11 @@ public sealed class UserGroupService(IServiceProvider serviceProvider, IServiceC
             throw new BusinessException("分组编码已存在", "400");
         }
 
+        if (entity.Code == "default" && userGroup.Code != "default")
+        {
+            throw new BusinessException("默认分组不能修改编码", "400");
+        }
+
         entity.Name = userGroup.Name;
         entity.Description = userGroup.Description;
         entity.Code = userGroup.Code;
@@ -68,6 +89,11 @@ public sealed class UserGroupService(IServiceProvider serviceProvider, IServiceC
         if (entity == null)
         {
             throw new BusinessException("分组不存在", "400");
+        }
+
+        if (entity.Code == "default")
+        {
+            throw new BusinessException("默认分组不能修改状态", "400");
         }
 
         entity.Enable = enable;
@@ -100,5 +126,23 @@ public sealed class UserGroupService(IServiceProvider serviceProvider, IServiceC
     public async Task<UserGroup?> GetAsync(string[] code)
     {
         return (await GetEnableListAsync()).Where(x => code.Contains(x.Code)).MinBy(x => x.Rate);
+    }
+
+    /// <summary>
+    /// 获取当前用户分组
+    /// </summary>
+    public async Task<UserGroup[]> GetCurrentUserGroupAsync()
+    {
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == userContext.CurrentUserId);
+
+        if (user == null)
+        {
+            return null;
+        }
+
+        var groups = user.Groups;
+
+
+        return await DbContext.UserGroups.Where(x => groups.Contains(x.Code)).ToArrayAsync();
     }
 }

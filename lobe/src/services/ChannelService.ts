@@ -2,8 +2,15 @@ import { del, fetch, get, postJson, put, putJson } from "../utils/fetch";
 
 const prefix = "/api/v1/channel";
 
-export const getChannels = (page: number, pageSize: number) => {
-  return fetch(prefix + "/list?page=" + page + "&pageSize=" + pageSize, {
+export const getChannels = (page: number, pageSize: number,  keyword?: string) => {
+  const params = new URLSearchParams();
+  params.set("page", page.toString());
+  params.set("pageSize", pageSize.toString());
+  if (keyword) {
+    params.set("keyword", keyword);
+  }
+
+  return fetch(prefix + "/list?" + params.toString(), {
     method: "GET"
   });
 };

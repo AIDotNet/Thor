@@ -4,6 +4,8 @@ import { createModelMap, ModelMap } from "../../../services/ModelMapService";
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { getModelList } from '../../../services/ModelService';
 import { useEffect } from 'react';
+import { getList } from "../../../services/UserGroupService";
+import { Flexbox } from "react-layout-kit";
 
 interface CreateModelMapProps {
   visible: boolean;
@@ -15,6 +17,7 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [models, setModels] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
 
   useEffect(() => {
     // 加载模型列表
@@ -23,6 +26,15 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
         setModels(res.data);
       } else {
         message.error('加载模型列表失败');
+      }
+    });
+    
+    // 加载用户组列表
+    getList().then((res) => {
+      if (res.success) {
+        setGroups(res.data);
+      } else {
+        message.error('加载用户组列表失败');
       }
     });
   }, []);
@@ -109,21 +121,24 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
         <Form.Item
           name="group"
           label="分组"
-          rules={[{ required: true, message: '请输入分组' }]}
+          rules={[{ required: true, message: '请选择分组' }]}
         >
           <Select
             mode="tags"
-            placeholder="请输入分组，回车分隔"
-            options={[
-              {
-                label: '默认',
-                value: 'default'
-              },
-              {
-                label: 'VIP',
-                value: 'vip'
+            placeholder="请选择分组"
+            options={groups?.map((group: any) => {
+              return {
+                label: <Flexbox gap={8} horizontal>
+                  <span>{group.name}</span>
+                  <span style={{ fontSize: 12, color: '#999' }}>{group.description}</span>
+                  <span style={{ fontSize: 12, color: '#999' }}>
+                    <span>倍率：</span>
+                    {group.rate}
+                  </span>
+                </Flexbox>,
+                value: group.code
               }
-            ]}
+            })}
             style={{ width: '100%' }}
           />
         </Form.Item>

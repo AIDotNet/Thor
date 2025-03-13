@@ -47,12 +47,15 @@ public sealed class ChannelService(
     /// </summary>
     /// <param name="model">模型名</param>
     /// <param name="user"></param>
+    /// <param name="token"></param>
     /// <returns></returns>
-    public async ValueTask<IEnumerable<ChatChannel>> GetChannelsContainsModelAsync(string model, User user)
+    public async ValueTask<IEnumerable<ChatChannel>> GetChannelsContainsModelAsync(string model, User user,
+        Token? token)
     {
-        var group = (user).Groups;
+        var group = token?.Groups ?? (user).Groups;
         return (await GetChannelsAsync()).Where(x =>
-            x.Models.Contains(model) && (group.Length == 0 || x.Groups.Select(x => x.ToLower()).Intersect(group).Any()));
+            x.Models.Contains(model) &&
+            (group.Length == 0 || x.Groups.Select(x => x.ToLower()).Intersect(group).Any()));
     }
 
     /// <summary>
@@ -76,14 +79,23 @@ public sealed class ChannelService(
     /// </summary>
     /// <param name="page"></param>
     /// <param name="pageSize"></param>
+    /// <param name="keyword"></param>
     /// <returns></returns>
-    public async ValueTask<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize)
+    public async ValueTask<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize, string? keyword)
     {
-        var total = await DbContext.Channels.CountAsync();
+        var query = DbContext.Channels.AsNoTracking();
 
-        if (total > 0)
+
+        if (!string.IsNullOrWhiteSpace(keyword))
         {
-            var result = await DbContext.Channels
+            query = query.Where(x => x.Name.Contains(keyword));
+        }
+
+        var total = await query.CountAsync();
+
+        if (total <= 0) return new PagingDto<GetChatChannelDto>(total, []);
+        {
+            var result = await query
                 .AsNoTracking()
                 .OrderByDescending(x => x.CreatedAt)
                 .Skip((page - 1) * pageSize)
@@ -92,8 +104,6 @@ public sealed class ChannelService(
 
             return new PagingDto<GetChatChannelDto>(total, mapper.Map<List<GetChatChannelDto>>(result));
         }
-
-        return new PagingDto<GetChatChannelDto>(total, new List<GetChatChannelDto>());
     }
 
     /// <summary>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Avatar, Card, Row, Col, Divider, Tag } from 'antd';
+import { Form, Input, Button, message, Avatar, Card, Row, Col, Divider, Tag, Spin } from 'antd';
 import { UserOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { updateInfo } from '../../services/UserService';
 import { renderNumber, renderQuota } from '../../utils/render';
+import { InviteInfo } from '../../services/SystemService';
 
 interface UserInfoProps {
   user: any;
@@ -13,13 +14,37 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [inviteInfo, setInviteInfo] = useState({
+    credit: 0,
+    count: 0,
+    limit: 0
+  });
+
+  useEffect(() => {
+    // 获取邀请信息
+    const fetchInviteInfo = async () => {
+      try {
+        const response = await InviteInfo();
+        if (response.success) {
+          setInviteInfo({
+            credit: response.data.credit || 0,
+            count: response.data.count || 0,
+            limit: response.data.limit || 0
+          });
+        }
+      } catch (error) {
+        console.error('获取邀请信息失败', error);
+      }
+    };
+    
+    fetchInviteInfo();
+  }, []);
 
   useEffect(() => {
     if (user) {
       form.setFieldsValue({
         userName: user.userName,
         email: user.email,
-        // 只编辑基本信息，其他信息通常不允许用户直接修改
       });
     }
   }, [user, form]);
@@ -94,7 +119,24 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
       </Row>
       
       <Divider />
-      
+      <Row justify="center" style={{ marginBottom: 24 }}>
+        <Card size="small" title="邀请信息" style={{ width: '100%' }}>
+          <p><strong>邀请奖励：</strong> {renderQuota(inviteInfo.credit || 0)}</p>
+          <p><strong>已邀请人数：</strong> {inviteInfo.count || 0}</p>
+          <p><strong>剩余可邀请：</strong> {inviteInfo.limit || 0}</p>
+          <Button 
+            type="primary"
+            block
+            onClick={() => {
+              const url = window.location.origin + '/register?inviteCode=' + user.id;
+              navigator.clipboard.writeText(url);
+              message.success('邀请码已复制到剪贴板');
+            }}>
+            复制邀请码，分享给好友，您将获得{renderQuota(inviteInfo.credit || 0)}奖励
+          </Button>
+        </Card>
+      </Row>
+
       <Button 
         type="primary" 
         onClick={() => setIsEditing(true)}
@@ -152,7 +194,7 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
   );
 
   if (!user || Object.keys(user).length === 0) {
-    return <div>加载用户信息中...</div>;
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}><Spin /></div>;
   }
 
   return (

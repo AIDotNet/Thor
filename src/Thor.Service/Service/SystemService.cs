@@ -1,4 +1,5 @@
-﻿using Thor.Infrastructure;
+﻿using Thor.Abstractions.Exceptions;
+using Thor.Infrastructure;
 using Thor.Service.Infrastructure;
 using Thor.Service.Options;
 
@@ -12,16 +13,16 @@ public sealed class SystemService(
     IServiceProvider serviceProvider,
     IServiceCache serviceCache,
     LoggerService loggerService)
-    : ApplicationService(serviceProvider) ,IScopeDependency
+    : ApplicationService(serviceProvider), IScopeDependency
 {
     /// <summary>
     /// 触发分享获取奖励
     /// </summary>
     /// <returns></returns>
-    public async ValueTask ShareAsync(string userId, HttpContext context)
+    public async ValueTask InviteCode(string userId, User newUser)
     {
-        if (ChatCoreOptions.Shared == null || !ChatCoreOptions.Shared.EnableShareAd)
-            throw new Exception("分享功能未开启");
+        if (ChatCoreOptions.Invite == null || !ChatCoreOptions.Invite.Enable)
+            throw new Exception("邀请功能未开启，请联系管理员");
 
         var logger = GetLogger<SystemService>();
 
@@ -30,54 +31,60 @@ public sealed class SystemService(
         if (user == null)
             throw new Exception("用户不存在");
 
-        // 获取当前时间到今天结束的时间
-        var now = DateTime.Now;
-        var end = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59);
-        var span = end - now;
+        // 一星期内
+        var span = TimeSpan.FromDays(7);
 
         // 获取当前用户的分享缓存
         var key = $"share:{userId}";
         var cache = await serviceCache.GetOrCreateAsync(key, async () => await Task.FromResult(1),
             span);
 
-        if (cache >= ChatCoreOptions.Shared.ShareLimit)
+        if (cache >= ChatCoreOptions.Invite.Limit)
         {
-            logger.LogWarning("用户" + user.UserName + "分享次数已达上限");
-            return;
-        }
-
-        // 获取ip
-        var ip = context.Connection.RemoteIpAddress?.ToString();
-
-        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var header))
-        {
-            ip = header;
-        }
-
-        // 判断当前ip是否已经获取过
-        var ipKey = $"share:{userId}:{ip}";
-        var ipCache = await serviceCache.GetAsync<string>(ipKey);
-
-        if (!string.IsNullOrWhiteSpace(ipCache))
-        {
-            logger.LogWarning("用户" + user.UserName + "分享ip:" + ip + "已经获取过奖励");
+            logger.LogWarning("用户" + user.UserName + "邀请次数已达上限，邀请限制为每一星期" + ChatCoreOptions.Invite.Limit + "次");
             return;
         }
 
         await DbContext.Users
             .Where(x => x.Id == userId)
             .ExecuteUpdateAsync(x =>
-                x.SetProperty(x => x.ResidualCredit, x => x.ResidualCredit + ChatCoreOptions.Shared.ShareCredit));
+                x.SetProperty(x => x.ResidualCredit, x => x.ResidualCredit + ChatCoreOptions.Invite.Credit));
 
-        // 设置ip缓存
-        await serviceCache.CreateAsync(ipKey, ip, span);
-
-        await loggerService.CreateRechargeAsync("获得分享奖励 用户" + user.UserName + " 分享点击ip:" + ip + " 额度:" +
-                                                RenderHelper.RenderQuota(ChatCoreOptions.Shared.ShareCredit, 6),
-            ChatCoreOptions.Shared.ShareCredit, userId);
+        await loggerService.CreateRechargeAsync($"恭喜：{user.UserName}邀请新用户" + newUser.UserName + "获得额度:" +
+                                                RenderHelper.RenderQuota(ChatCoreOptions.Invite.Credit, 6) +
+                                                ",邀请码剩余次数：" + cache,
+            ChatCoreOptions.Invite.Credit, userId);
 
         await serviceCache.IncrementAsync(key);
 
-        logger.LogInformation("用户" + user.UserName + "分享成功");
+        logger.LogInformation("用户" + user.UserName + "邀请成功，当前邀请次数：" + cache);
+    }
+
+    /// <summary>
+    /// 返回邀请信息
+    /// </summary>
+    /// <returns></returns>
+    public async Task<object> InviteInfo()
+    {
+        if (ChatCoreOptions.Invite == null || !ChatCoreOptions.Invite.Enable)
+        {
+            return new
+            {
+                credit = 0,
+                count = 0,
+                limit = 0
+            };
+        }
+
+        var key = $"share:{UserContext.CurrentUserId}";
+        var cache = await serviceCache.GetOrCreateAsync(key, async () => await Task.FromResult(1),
+            TimeSpan.FromDays(7));
+
+        return new
+        {
+            credit = ChatCoreOptions.Invite.Credit,
+            count = cache,
+            limit = ChatCoreOptions.Invite.Limit
+        };
     }
 }

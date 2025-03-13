@@ -4,7 +4,8 @@ import { Update } from "../../../services/ChannelService";
 import { message, Drawer, Checkbox } from "antd";
 import { Button, Select, Form, Input } from "antd";
 import { getModelPrompt } from "../../../utils/render";
-
+import { getList } from "../../../services/UserGroupService";
+import { Flexbox } from "react-layout-kit";
 const { Option } = Select;
 interface IUpdateChannelProps {
   onSuccess: () => void;
@@ -33,6 +34,15 @@ export default function UpdateChannel({
   onCancel,
   value,
 }: IUpdateChannelProps) {
+  const [groups, setGroups] = useState<any[]>([]);
+
+  useEffect(() => {
+    getList()
+      .then((res) => {
+        setGroups(res.data);
+      })
+  }, []);
+
   // 字典models key, value类型
   const [types, setTypes] = useState<any>();
   const [models, setModels] = useState<any>();
@@ -303,22 +313,27 @@ export default function UpdateChannel({
           <Form.Item<FieldType>
             name="groups"
             label="组"
+            rules={[{ required: true, message: '请选择组' }]}
             style={{ width: "100%" }}
           >
             <Select
               placeholder="请选择组"
               mode="tags"
-              // 提供默认的选项
-              options={[
-                {
-                  label: "default",
-                  value: "default"
-                },
-                {
-                  label: "vip",
-                  value: "vip"
+              maxTagCount={1}
+              maxCount={1}
+              options={groups?.map((group: any) => {
+                return {
+                  label: <Flexbox gap={8} horizontal>
+                    <span>{group.name}</span>
+                    <span style={{ fontSize: 12, color: '#999' }}>{group.description}</span>
+                    <span style={{ fontSize: 12, color: '#999' }}>
+                      <span>倍率：</span>
+                      {group.rate}
+                    </span>
+                  </Flexbox>,
+                  value: group.code
                 }
-              ]}
+              })}
               value={input.groups}
               onChange={(v) => {
                 setInput({ ...input, groups: v });

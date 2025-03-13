@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Switch, message, Tag, Dropdown, InputNumber, Table } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test } from "../../services/ChannelService";
 import { renderQuota } from "../../utils/render";
 import { Input } from "@lobehub/ui";
@@ -92,6 +93,8 @@ export default function ChannelPage() {
       width: '100px',
       dataIndex: 'responseTime',
       render: (value: any, item: any) => {
+        const isLoading = testingChannels.includes(item.id);
+        
         if (value) {
           // 小于3000毫秒显示绿色
           let color;
@@ -104,9 +107,19 @@ export default function ChannelPage() {
           }
 
           return <Tag
-            color={color as any} onClick={() => testToken(item.id)}>{value / 1000}秒</Tag>
+            color={color as any} 
+            onClick={() => !isLoading && testToken(item.id)}
+            icon={isLoading ? <LoadingOutlined /> : null}
+          >
+            {isLoading ? '测试中...' : `${value / 1000}秒`}
+          </Tag>
         } else {
-          return <Tag onClick={() => testToken(item.id)}>未测试</Tag>
+          return <Tag 
+            onClick={() => !isLoading && testToken(item.id)}
+            icon={isLoading ? <LoadingOutlined /> : null}
+          >
+            {isLoading ? '测试中...' : '未测试'}
+          </Tag>
         }
       }
     },
@@ -127,6 +140,12 @@ export default function ChannelPage() {
       dataIndex: 'remainQuota',
       render: (value: any) => {
         return <span>{value}</span>
+      }
+    },{
+      title: '组',
+      dataIndex: 'groups',
+      render: (value: any) => {
+        return <span>{value.map((item: any) => item.name).join(',')}</span>
       }
     },
     {
@@ -251,6 +270,7 @@ export default function ChannelPage() {
     pageSize: 10,
     keyword: '',
   });
+  const [testingChannels, setTestingChannels] = useState<string[]>([]);
 
   function removeToken(id: string) {
     Remove(id)
@@ -266,6 +286,8 @@ export default function ChannelPage() {
   }
 
   function testToken(id: string) {
+    setTestingChannels(prev => [...prev, id]);
+    
     test(id)
       .then((v) => {
         if (v.success) {
@@ -279,11 +301,14 @@ export default function ChannelPage() {
           })
         }
       })
+      .finally(() => {
+        setTestingChannels(prev => prev.filter(channelId => channelId !== id));
+      });
   }
 
   function loadingData() {
     setLoading(true);
-    getChannels(input.page, input.pageSize)
+    getChannels(input.page, input.pageSize,  input.keyword)
       .then((v: any) => {
         if (v.success) {
           const values = v.data.items as any[];

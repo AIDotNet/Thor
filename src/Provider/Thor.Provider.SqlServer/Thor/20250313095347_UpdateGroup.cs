@@ -517,7 +517,7 @@ namespace Thor.Provider.SqlServer.Thor
             migrationBuilder.InsertData(
                 table: "Tokens",
                 columns: new[] { "Id", "AccessedTime", "CreatedAt", "Creator", "DeletedAt", "Disabled", "ExpiredTime", "Groups", "IsDelete", "Key", "LimitModels", "Modifier", "Name", "RemainQuota", "UnlimitedExpired", "UnlimitedQuota", "UpdatedAt", "UsedQuota", "WhiteIpList" },
-                values: new object[] { "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, new DateTime(2025, 3, 13, 17, 53, 46, 676, DateTimeKind.Local).AddTicks(835), "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, false, null, "[\"default\",\"vip\"]", false, "sk-WX69KEdrtnhAi1VyMytAJovi0eTnCRyfUmFri8", "[]", null, "默认Token", 0L, true, true, null, 0L, "[]" });
+                values: new object[] { "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, new DateTime(2025, 3, 13, 17, 53, 46, 676, DateTimeKind.Local).AddTicks(835), "CA378C74-19E7-458A-918B-4DBB7AE1729D", null, false, null, "[\"default\"]", false, "sk-WX69KEdrtnhAi1VyMytAJovi0eTnCRyfUmFri8", "[]", null, "默认Token", 0L, true, true, null, 0L, "[]" });
 
             migrationBuilder.InsertData(
                 table: "UserGroups",

@@ -146,10 +146,11 @@ public sealed class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
             // 获取渠道 通过算法计算权重
-            var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user),
-                request.Model);
+            var channel =
+                CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
 
-            if (channel == null) throw new NotModelException(request.Model);
+            if (channel == null)
+                throw new NotModelException($"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -240,10 +241,11 @@ public sealed class ChatService(
                 input.Model = await modelMapService.ModelMap(input.Model);
 
                 // 获取渠道 通过算法计算权重
-                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model, user),
-                    input.Model);
+                var channel = CalculateWeight(
+                    await channelService.GetChannelsContainsModelAsync(input.Model, user, token));
 
-                if (channel == null) throw new NotModelException(input.Model);
+                if (channel == null)
+                    throw new NotModelException($"{input.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -354,10 +356,11 @@ public sealed class ChatService(
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
 
                 // 获取渠道 通过算法计算权重
-                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model, user),
-                    input.Model);
+                var channel = CalculateWeight(
+                    await channelService.GetChannelsContainsModelAsync(input.Model, user, token));
 
-                if (channel == null) throw new NotModelException(input.Model);
+                if (channel == null)
+                    throw new NotModelException($"{input.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -480,13 +483,10 @@ public sealed class ChatService(
                 var model = await modelMapService.ModelMap(request.Model);
 
                 // 获取渠道通过算法计算权重
-                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user),
-                    model);
+                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user, token));
 
                 if (channel == null)
-                {
-                    throw new NotModelException(model);
-                }
+                    throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -661,12 +661,11 @@ public sealed class ChatService(
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
 
                 // 获取渠道通过算法计算权重
-                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user), model);
+                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user, token));
+
 
                 if (channel == null)
-                {
-                    throw new NotModelException(model);
-                }
+                    throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -810,7 +809,7 @@ public sealed class ChatService(
 
                     quota += audioQuota;
                     quota += audioCompletionRatio;
-                    
+
                     quota = (decimal)userGroup.Rate * quota;
 
                     // 将quota 四舍五入
@@ -1037,10 +1036,10 @@ public sealed class ChatService(
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(
-                await channelService.GetChannelsContainsModelAsync(model, user),
-                model);
+                await channelService.GetChannelsContainsModelAsync(model, user, token));
 
-            if (channel == null) throw new NotModelException(model);
+            if (channel == null)
+                throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -1048,7 +1047,7 @@ public sealed class ChatService(
             {
                 throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
             }
-            
+
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorAudioService>(channel.Type);
 
@@ -1072,7 +1071,7 @@ public sealed class ChatService(
             await context.Response.WriteAsJsonAsync(response);
 
             sw.Stop();
-            
+
             quota = (decimal)userGroup.Rate * quota;
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
@@ -1128,10 +1127,11 @@ public sealed class ChatService(
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(
-                await channelService.GetChannelsContainsModelAsync(request.Model, user),
-                request.Model);
+                await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
 
-            if (channel == null) throw new NotModelException(request.Model);
+
+            if (channel == null)
+                throw new NotModelException($"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -1139,6 +1139,7 @@ public sealed class ChatService(
             {
                 throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
             }
+
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorAudioService>(channel.Type);
 
@@ -1195,7 +1196,7 @@ public sealed class ChatService(
             await response.CopyToAsync(context.Response.Body);
 
             sw.Stop();
-            
+
             quota = (decimal)userGroup.Rate * quota;
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
@@ -1280,10 +1281,11 @@ public sealed class ChatService(
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(
-                await channelService.GetChannelsContainsModelAsync(model, user),
-                model);
+                await channelService.GetChannelsContainsModelAsync(model, user, token));
 
-            if (channel == null) throw new NotModelException(model);
+
+            if (channel == null)
+                throw new NotModelException($"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -1291,6 +1293,7 @@ public sealed class ChatService(
             {
                 throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
             }
+
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorAudioService>(channel.Type);
 
@@ -1315,7 +1318,7 @@ public sealed class ChatService(
             await context.Response.WriteAsJsonAsync(response);
 
             sw.Stop();
-            
+
             quota = (decimal)userGroup.Rate * quota;
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
@@ -1495,14 +1498,13 @@ public sealed class ChatService(
     /// 权重算法
     /// </summary>
     /// <param name="channel"></param>
-    /// <param name="model"></param>
     /// <returns></returns>
-    private static ChatChannel CalculateWeight(IEnumerable<ChatChannel> channel, string model)
+    private static ChatChannel? CalculateWeight(IEnumerable<ChatChannel> channel)
     {
         var chatChannels = channel.ToList();
         if (chatChannels.Count == 0)
         {
-            throw new NotModelException($"{model} 模型未找到可用的渠道");
+            return null;
         }
 
         // 所有权重值之和

@@ -2,12 +2,12 @@ import { memo } from "react";
 
 import { LayoutProps } from "./type";
 import { Outlet } from "react-router-dom";
-import { Layout, theme, Button } from "antd";
-import { Avatar, Header, Logo, ThemeSwitch } from "@lobehub/ui";
+import { Layout, theme, Button, Tooltip } from "antd";
+import { Avatar, Header, ThemeSwitch } from "@lobehub/ui";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import useThemeStore from "../store/theme";
-
+import { Flexbox } from "react-layout-kit";
 
 const { Content, Footer, Sider } = Layout;
 const LayoutPage = memo<LayoutProps>(({ nav }) => {
@@ -24,12 +24,27 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
           paddingTop: "16px",
         }}
       >
-        <Logo extra={"Thor"} style={{
-          textAlign: 'center',
-          marginLeft: '8px',
-          marginTop: '8px',
-          marginBottom: '8px',
-        }} size={48} />
+        <Tooltip title="Thor AI 平台管理系统">
+          <Flexbox gap={8}
+            align={'center'}
+            justify={'center'}
+            horizontal>
+            <span style={{
+              fontSize: 24,
+              fontWeight: 600,
+              fontFamily: 'PingFang SC',
+              cursor: 'pointer',
+              userSelect: 'none',
+              marginTop: '8px',
+              marginBottom: '20px',
+            }}
+              onClick={() => {
+                navigate('/')
+              }}>
+              Thor
+            </span>
+          </Flexbox>
+        </Tooltip>
         {nav}
       </Sider>
       <Layout>
@@ -52,10 +67,10 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
                   }
                 },
                 {
-                  key: 'user-info',
+                  key: 'current',
                   label: '个人信息',
                   onClick: () => {
-                    navigate('/user-info')
+                    navigate('/current')
                   }
                 },
                 {
