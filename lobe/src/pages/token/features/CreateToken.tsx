@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { renderQuota } from '../../../utils/render';
 import { getModels } from '../../../services/ModelService';
 import { info } from '../../../services/UserService';
+import { getCurrentList } from '../../../services/UserGroupService';
+import { Flexbox } from 'react-layout-kit';
 
 const { Option } = Select;
 
@@ -22,6 +24,14 @@ export default function CreateToken({
     const [models, setModels] = useState<any>();
 
     const [user, setUser] = useState({} as any);
+    const [groups, setGroups] = useState<any[]>([]);
+
+    useEffect(() => {
+        getCurrentList()
+            .then((res) => {
+                setGroups(res.data);
+            })
+    }, []);
   
     function loadUser() {
       info()
@@ -168,12 +178,19 @@ export default function CreateToken({
         >
           <Select
             placeholder="请选择组"
-            options={user?.groups?.map((group: any) => {
-                return {
-                    label: group,
-                    value: group
-                }
-            })}
+                    options={groups?.map((group: any) => {
+                        return {
+                            label: <Flexbox gap={8} horizontal>
+                                <span>{group.name}</span>
+                                <span style={{ fontSize: 12, color: '#999' }}>{group.description}</span>
+                                <span style={{ fontSize: 12, color: '#999' }}>
+                                    <span>倍率：</span>
+                                    {group.rate}
+                                </span>
+                            </Flexbox>,
+                            value: group.code
+                        }
+                    })}
             value={input.groups}
             onChange={(v) => {
               setInput({ ...input, groups: v });
