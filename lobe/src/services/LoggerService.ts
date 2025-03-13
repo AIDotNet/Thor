@@ -50,3 +50,11 @@ export const viewConsumption = async (params: any) => {
     }
     return get(url);
 }
+
+/**
+ * 获取模型热度
+ * @returns 
+ */
+export const modelHot = async () => {
+    return get(prefix + "/model-hot");
+}

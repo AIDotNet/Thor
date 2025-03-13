@@ -15,7 +15,83 @@ namespace Thor.Provider.Thor
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.2");
+
+            modelBuilder.Entity("Thor.Domain.Users.UserGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Creator")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Enable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Modifier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("Rate")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("Creator");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("UserGroups", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("ca378c74-19e7-458a-918b-4dbb7ae1729d"),
+                            Code = "default",
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 678, DateTimeKind.Local).AddTicks(9516),
+                            Description = "默认用户组",
+                            Enable = true,
+                            Name = "默认",
+                            Order = 0,
+                            Rate = 1.0
+                        },
+                        new
+                        {
+                            Id = new Guid("ca378c74-19e7-458a-918b-4dbb7ae17291"),
+                            Code = "vip",
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 678, DateTimeKind.Local).AddTicks(9934),
+                            Description = "VIP用户组",
+                            Enable = true,
+                            Name = "VIP",
+                            Order = 0,
+                            Rate = 1.0
+                        });
+                });
 
             modelBuilder.Entity("Thor.Service.Domain.ChatChannel", b =>
                 {
@@ -173,9 +249,9 @@ namespace Thor.Provider.Thor
                     b.HasData(
                         new
                         {
-                            Id = new Guid("eae580b3-ea40-410b-a3f9-4c8150f49e47"),
+                            Id = new Guid("789fd6f7-0c63-4c65-b65f-0ed7fe04bf0e"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5497),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(1844),
                             Description = "GPT-3.5 Turbo 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -188,9 +264,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("918b7faa-f748-4f72-9f87-4dadd35a7e3a"),
+                            Id = new Guid("4991d5fb-b197-4ce3-9abc-2a9bdb1273c2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5864),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2073),
                             Description = "GPT-3.5 Turbo 0125 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -203,9 +279,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("0df80a05-f88c-45c8-a1d6-236e94f23a58"),
+                            Id = new Guid("3244d451-05c4-41c6-bc43-ab683801abf4"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5867),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2075),
                             Description = "GPT-3.5 Turbo 0301 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -218,9 +294,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("c6ac786f-070c-4ad0-9736-49430e1db3f8"),
+                            Id = new Guid("a9d57e62-77a2-4215-bb85-d2c68dafb24b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5868),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2089),
                             Description = "GPT-3.5 Turbo 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -233,9 +309,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("c111c358-8f9d-4e8f-b868-1e82c1783047"),
+                            Id = new Guid("a129952c-c264-4212-8b22-74d129391415"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5869),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2090),
                             Description = "GPT-3.5 Turbo 1106 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -248,9 +324,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("7267deb9-9559-482e-be8b-7456b0c041e0"),
+                            Id = new Guid("e5f4bc8e-0cb2-4425-accf-e2cc6cbf44e1"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5877),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2092),
                             Description = "GPT-3.5 Turbo 16k 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -263,9 +339,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("f9c68481-8086-4db6-955c-130f74883627"),
+                            Id = new Guid("76fc6762-f5b7-4c90-b535-1a1f5a2f3d4a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5879),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2093),
                             Description = "GPT-3.5 Turbo 16k 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -278,9 +354,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("0580b374-970b-4297-b1f9-e4ecbdffaf78"),
+                            Id = new Guid("99cefb6b-deda-4a7e-b605-793273edd864"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5880),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2094),
                             Description = "GPT-3.5 Turbo Instruct 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -293,9 +369,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("f3ffe78b-0614-41dc-9e5f-cbc7cb1e8cb3"),
+                            Id = new Guid("021be89d-8c09-4d75-85fb-cea41c55c197"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5882),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2095),
                             Description = "GPT-4 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -308,9 +384,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("4f6b49dd-9f68-47fb-bfb0-66a873c803b5"),
+                            Id = new Guid("f5450d23-cea3-47ef-8ad1-bdd4034ae4f1"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5883),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2095),
                             Description = "GPT-4 0125 预览文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -323,9 +399,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("72ea4adf-8b9e-4ac5-9ee5-376b0531fbf0"),
+                            Id = new Guid("df0e815c-152b-40b5-8a45-0a7ec1c1d7f0"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5884),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2097),
                             Description = "GPT-4 0314 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -338,9 +414,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("1453ac01-0fa2-4bfa-8cd4-8d6efca1abb9"),
+                            Id = new Guid("ec3052a8-1bbc-4ce3-8a3f-1a94afa91b89"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5885),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2099),
                             Description = "GPT-4 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -353,9 +429,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("9ab69ffc-e2fa-4f85-99f7-57109b45e996"),
+                            Id = new Guid("6cc681b7-c408-41f1-982d-994b51f2fa0f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5887),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2100),
                             Description = "GPT-4 1106 预览文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -368,9 +444,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("89f31e0d-1b3a-40c3-ab0d-f0c2046f5d21"),
+                            Id = new Guid("0ef9d9b9-21c6-437f-97ac-8d18c56a870d"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5893),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2101),
                             Description = "GPT-4 1106 视觉预览模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -383,9 +459,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("16353676-ad86-40c2-aa4f-15664d008796"),
+                            Id = new Guid("4c67d499-476d-402f-9035-03af21bdbe7f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5894),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2102),
                             Description = "GPT-4 32k 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -398,9 +474,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("f932b830-3f29-4c5a-9a0a-4c60ae194834"),
+                            Id = new Guid("ea191b09-64a7-45f7-9181-2fcb9b2a635c"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5894),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2103),
                             Description = "GPT-4 32k 0314 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -413,9 +489,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("f2312ccd-c4af-49a4-b173-3de3f92eff08"),
+                            Id = new Guid("caa68c9f-cc6c-4aee-b6a9-57ef793f70e1"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5896),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2104),
                             Description = "GPT-4 32k 0613 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -428,9 +504,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("d9eca320-cf59-448c-818d-e3918e58c89e"),
+                            Id = new Guid("693feff7-d406-478f-9fe1-f62e01623c50"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5896),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2105),
                             Description = "GPT-4 全部文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -443,9 +519,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("26738d0f-6b5e-43cf-b924-e38f090a8836"),
+                            Id = new Guid("4382274d-620a-4566-945c-a785b7bb9f0e"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5898),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2106),
                             Description = "GPT-4 Turbo 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -458,10 +534,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("795802b4-c55d-455d-a0cd-6afa0ea6f573"),
+                            Id = new Guid("f9f8b952-2009-4948-a51c-7002e7474eb6"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5901),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2108),
                             Description = "Gemini 1.5 Pro 文本模型",
                             Enable = true,
                             Icon = "Google",
@@ -474,10 +550,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("a23ec0dc-825c-4ca3-8a40-21cb6da4b28d"),
+                            Id = new Guid("ed03b477-8e10-4c92-9660-34032435ad7a"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5902),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2108),
                             Description = "Gemini Pro 文本模型",
                             Enable = true,
                             Icon = "Google",
@@ -490,10 +566,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("c9f07d24-80a7-459b-9fb1-f90e1995d210"),
+                            Id = new Guid("da188f46-47de-4063-ba86-5dddd64438ec"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5904),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2110),
                             Description = "Gemini Pro 视觉模型",
                             Enable = true,
                             Icon = "Google",
@@ -506,10 +582,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("39c2cecc-084d-417e-8a28-3b774d44e8ff"),
+                            Id = new Guid("fb34ca74-0bad-4225-8122-936bd7b1c39e"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5905),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2111),
                             Description = "Gemini 1.5 Flash 文本模型",
                             Enable = true,
                             Icon = "Google",
@@ -522,9 +598,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("238ddb5b-b013-4c94-86ca-57b33919c9eb"),
+                            Id = new Guid("eeb91e1d-59b4-4b25-9e3b-e70abc7cbbf7"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5906),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2112),
                             Description = "GPT-4 Turbo 2024-04-09 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -537,9 +613,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("a3811ea2-f12b-4277-b7ec-68c8023c1775"),
+                            Id = new Guid("02c3e9ad-e026-4563-bf8f-1dbdf7a22c93"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5907),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2114),
                             Description = "GPT-4 Turbo 预览文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -552,9 +628,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("9fa45b26-6c99-4ebf-9243-78b6806ce0a5"),
+                            Id = new Guid("290c5a27-22ac-4937-83e5-d4cbfe331c74"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5908),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2115),
                             Description = "GPT-4 视觉预览模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -567,10 +643,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("16d3f633-7cf3-47e7-81c6-027df616dba8"),
+                            Id = new Guid("af48e37f-6b4d-4179-9545-2d39de32ae56"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5910),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2116),
                             Description = "GPT-4o 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -583,10 +659,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("3eab35b6-fab5-484f-9240-0f1be8f2b3a3"),
+                            Id = new Guid("dcbfd515-5b6a-4b72-a24a-44593ef28c08"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5910),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2118),
                             Description = "ChatGPT 4o 最新文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -599,10 +675,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("3a264778-caec-4f12-bdea-5aa4ff2e29aa"),
+                            Id = new Guid("e88f5544-4e89-4093-8ce8-4e85e7cf523d"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5911),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2119),
                             Description = "GPT-4o Mini 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -615,10 +691,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("5f342f79-f35b-41a5-bda3-a5b56c143723"),
+                            Id = new Guid("18727b14-d1f4-45f8-bbf7-c2ac1a9a8047"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5913),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2120),
                             Description = "GPT-4o Mini 2024-07-18 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -631,10 +707,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("d6bf06aa-05e5-4b90-a5aa-d7f8b6319643"),
+                            Id = new Guid("2495f69d-5957-40e5-91d8-9e11578a0627"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5914),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2121),
                             Description = "GPT-4o 2024-05-13 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -647,10 +723,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("aa5eb800-11c4-4f61-bbf1-9fa352796003"),
+                            Id = new Guid("8fe22d59-dccb-4744-9104-6f306d280e0f"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5915),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2122),
                             Description = "GPT-4o 2024-08-06 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -663,9 +739,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("aadb67d6-f15d-40a1-9822-70fc1048b2b8"),
+                            Id = new Guid("f2cd8500-6c65-4995-9189-c524019d2e68"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5915),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2123),
                             Description = "Moonshot v1 128k 文本模型",
                             Enable = true,
                             Icon = "Moonshot",
@@ -678,9 +754,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("f8b69666-884e-4573-8a6b-8805c1861100"),
+                            Id = new Guid("6486a0e9-d35f-488f-a2c3-19e0af93bb08"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5916),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2124),
                             Description = "Moonshot v1 32k 文本模型",
                             Enable = true,
                             Icon = "Moonshot",
@@ -693,9 +769,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("56bbfe24-ccfd-4073-8fe8-a5d71511ee9a"),
+                            Id = new Guid("3fd9cc16-875d-412e-8056-01942973be71"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5917),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2126),
                             Description = "Moonshot v1 8k 文本模型",
                             Enable = true,
                             Icon = "Moonshot",
@@ -708,9 +784,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("9542557a-ef16-4c98-b6c4-89db8fe1c042"),
+                            Id = new Guid("653e581f-37fc-4a3c-bef6-9a49da899fcd"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5918),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2128),
                             Description = "Text Babbage 001 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -723,9 +799,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("9f0c880f-2518-4ca2-89e7-976ead7364de"),
+                            Id = new Guid("03d67f4f-3137-4f99-aea1-51846f3169ec"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5918),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2129),
                             Description = "Text Curie 001 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -738,9 +814,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("0e60d054-63cc-4d29-83c6-1ffa25aff3bc"),
+                            Id = new Guid("f0c1704a-48d1-4b4c-8bb1-cf78c744e3d9"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5920),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2130),
                             Description = "Text Davinci 002 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -753,9 +829,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("12559331-dc3b-4ad5-9116-380889655896"),
+                            Id = new Guid("74a9b0cd-e3e2-4f7b-a0a1-6dfb3785bda0"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5921),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2131),
                             Description = "Text Davinci 003 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -768,9 +844,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("c0cbea0e-77eb-4f49-a6be-765ac1cbe782"),
+                            Id = new Guid("485fd06c-7cf1-4ce3-b2f9-d5dea66c8470"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5922),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2133),
                             Description = "Text Davinci Edit 001 文本模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -783,9 +859,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("d62cfb3c-2595-42ca-877e-18a1c2aa3f34"),
+                            Id = new Guid("0489465f-e4ea-4428-846d-bc63efbbd8f4"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5923),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2134),
                             Description = "Text Embedding 3 Large 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -798,9 +874,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("0ef0f0b6-8da1-42d6-b474-374d48c36124"),
+                            Id = new Guid("e6c64479-6ac9-4681-961e-a9db291b3dd1"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5923),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2135),
                             Description = "Text Embedding 3 Small 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -813,9 +889,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("bbd8b02b-c903-4fd0-8101-4d038cdbeb11"),
+                            Id = new Guid("515f2f98-d273-4339-96c6-b832e70b9379"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5925),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2136),
                             Description = "Text Embedding Ada 002 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -828,9 +904,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("c7294906-a4bd-4d73-8a17-7fdaf7ae51e2"),
+                            Id = new Guid("358a85b7-fa0f-45d7-9e19-bdad078afd1a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5925),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2138),
                             Description = "TTS 1 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -842,9 +918,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("df73c8e9-f4f8-42d6-a2af-94e199bf1e3b"),
+                            Id = new Guid("4e7bd91d-1301-475d-889a-8d0a175da116"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5926),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2138),
                             Description = "TTS 1 1106 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -856,9 +932,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("2fee6a0f-4e24-4ea2-8f64-f03abfcf7903"),
+                            Id = new Guid("b9df5cfa-c359-457c-abc1-7637079eb2e7"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5928),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2139),
                             Description = "TTS 1 HD 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -870,9 +946,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("e6f83bd9-032e-4db3-8a56-626eda02f87f"),
+                            Id = new Guid("3f7e9f37-b83c-46ee-bdc3-83201b17d49c"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5929),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2140),
                             Description = "TTS 1 HD 1106 语音合成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -884,9 +960,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("e26f0e68-dfe6-479d-a922-e9fef34e2091"),
+                            Id = new Guid("9e77ac8b-883e-4877-93f6-9ae9f8a2127b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5929),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2141),
                             Description = "Whisper 1 语音识别模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -898,9 +974,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("65f1efa6-6fd8-4383-b80f-41b96ec1cc00"),
+                            Id = new Guid("e24f2d89-39b4-4adb-b8fa-bb32c27dfcf4"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5930),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2142),
                             Description = "Hunyuan Lite 文本模型",
                             Enable = true,
                             Icon = "Hunyuan",
@@ -913,10 +989,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("9920d4f2-25b4-494c-8b17-b9b283ac0443"),
+                            Id = new Guid("93a2bd33-7873-4f6d-93d7-8f85f651ed0e"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5931),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2142),
                             Description = "通用文本模型",
                             Enable = true,
                             Icon = "Spark",
@@ -929,10 +1005,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("d67b89c7-6a83-4a54-a11e-2fa51d051198"),
+                            Id = new Guid("2fd6d6c1-1058-492d-a5b8-49ddbf94c5e8"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5932),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2143),
                             Description = "通用文本模型 v3",
                             Enable = true,
                             Icon = "Spark",
@@ -945,10 +1021,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("5e179c77-8fba-42a5-9dd8-fda6c087d0d2"),
+                            Id = new Guid("aaebfaca-1b8d-4725-b649-c34bdb772170"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5932),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2145),
                             Description = "通用文本模型 v3.5",
                             Enable = true,
                             Icon = "Spark",
@@ -961,10 +1037,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("d9d60b71-10f6-464e-9157-3cc847fbf07a"),
+                            Id = new Guid("2075a7ee-cc02-440e-b672-bf80159ef21e"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5933),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2146),
                             Description = "4.0 超级文本模型",
                             Enable = true,
                             Icon = "Spark",
@@ -977,9 +1053,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("360449b9-571a-4d32-82ee-2a4cee600496"),
+                            Id = new Guid("1530b1da-ff23-4985-9391-daa01c0d0f3f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5935),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2146),
                             Description = "ChatGLM Lite 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -992,9 +1068,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("f24e1e74-d2f3-4964-b2d2-57e28ce5bb63"),
+                            Id = new Guid("68dcde6f-c67d-4eb0-af93-e6b8526f38a8"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5936),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2148),
                             Description = "ChatGLM Pro 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1007,9 +1083,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("f8e5dd6c-cc7b-4304-9446-0896e41bb039"),
+                            Id = new Guid("e384be29-dd67-45e8-badd-bd86922a1512"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5937),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2148),
                             Description = "ChatGLM 标准文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1022,9 +1098,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("7f7b516b-a7c7-4be1-8bcc-7a3b1296167f"),
+                            Id = new Guid("23edfd2a-d4d2-44b9-b7e1-8967dca8156b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5938),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2149),
                             Description = "ChatGLM Turbo 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1037,9 +1113,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("df4aef4a-eb3b-4446-a425-60b8ba8c5f2c"),
+                            Id = new Guid("1554684c-f1d3-44cb-a932-c4daedb9344d"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5939),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2149),
                             Description = "Claude 2 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1052,9 +1128,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("54f5da90-be65-42ee-bbfe-06f505a20fe6"),
+                            Id = new Guid("5d245556-4afb-4cf1-b933-1a963c6b255f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5940),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2150),
                             Description = "Claude 2.0 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1067,9 +1143,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("568c68db-b5c1-47b1-9864-9b10cb1719f8"),
+                            Id = new Guid("bbd1f057-3b98-4c6d-9242-4e890ca5adbc"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5941),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2152),
                             Description = "Claude 2.1 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1082,10 +1158,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("1d5fa4d2-040b-40bb-8ef6-c0976db8b484"),
+                            Id = new Guid("7e8c257a-236d-4f31-acdb-f605e38adb4b"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5942),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2154),
                             Description = "Claude 3 Haiku 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1098,10 +1174,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("2065d008-7a42-496a-946a-7c5affee9fa3"),
+                            Id = new Guid("1419e49e-55b0-4c80-86f6-cad4a912997e"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5944),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2154),
                             Description = "Claude 3 Haiku 20240307 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1114,10 +1190,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("2439b048-b208-4848-8da5-8307f83bf464"),
+                            Id = new Guid("c396e42d-f070-474a-a7fa-cc06e84971e9"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5945),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2155),
                             Description = "Claude 3.5 Sonnet 20240620 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1130,10 +1206,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("9a55f7de-e685-4906-ae8e-602e7fb2d80c"),
+                            Id = new Guid("51d5e254-ab6f-4e99-af4a-cd00645a62c7"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5946),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2156),
                             Description = "Claude 3 Sonnet 20240229 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1146,10 +1222,10 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("ba472d99-ec2a-4bf2-af36-492aba1cbc64"),
+                            Id = new Guid("507800b9-97ad-4719-8873-c9d985353405"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5947),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2156),
                             Description = "Claude 3 Opus 20240229 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1162,9 +1238,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("49250e21-56ba-4894-97bc-da6ca8f367d0"),
+                            Id = new Guid("9b878fcb-de29-436c-8553-88b08a32a61f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5947),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2157),
                             Description = "Claude Instant 1 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1177,9 +1253,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("3ed61f02-0d3d-4ed6-8085-df1a05818818"),
+                            Id = new Guid("b994afa5-1a97-4f72-b6c5-9699c8a2c382"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5950),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2158),
                             Description = "Claude Instant 1.2 文本模型",
                             Enable = true,
                             Icon = "Claude",
@@ -1192,9 +1268,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("846139f7-9650-4415-8e9d-03cffff97811"),
+                            Id = new Guid("f113b336-b0d8-4d82-b071-415a7fa01e17"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5951),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2159),
                             Description = "DALL-E 2 图像生成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1206,9 +1282,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("87f5aae1-d290-4ae5-90e1-f74d4a4e3058"),
+                            Id = new Guid("a13071fe-7d53-475c-85d7-893422df437a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5952),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2160),
                             Description = "DALL-E 3 图像生成模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1220,9 +1296,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("7e4ef164-21d4-4ca9-9328-88855ebe20d3"),
+                            Id = new Guid("53c23548-2b3d-40e2-ab4f-2c0293837e09"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5954),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2161),
                             Description = "Embedding 2 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1235,9 +1311,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("d4ed3322-2841-4fe4-bd16-b2d4fff8657d"),
+                            Id = new Guid("704decd8-633f-46be-b7bf-30530d01d173"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5955),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2161),
                             Description = "Embedding BERT 512 v1 嵌入模型",
                             Enable = true,
                             Icon = "OpenAI",
@@ -1250,9 +1326,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("4e4d311e-0745-4c0e-b8a0-b78200ff8961"),
+                            Id = new Guid("ee848f03-2f6f-43e3-a034-be4c6a4cd2e7"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5955),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2168),
                             Description = "Embedding S1 v1 嵌入模型",
                             Enable = true,
                             IsVersion2 = false,
@@ -1264,9 +1340,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("168f76c9-c164-4d85-b774-8898c85bebcd"),
+                            Id = new Guid("9120a74b-0df3-4b4b-88cc-d1eb294dcaa6"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5956),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2168),
                             Description = "GLM 3 Turbo 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1279,9 +1355,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("e94fbf56-f7a5-4515-b662-d9017865aab8"),
+                            Id = new Guid("47400db2-1eef-452b-85c4-dff389e2328c"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5957),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2169),
                             Description = "GLM 4 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1294,9 +1370,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("27907985-ef29-4736-b844-9a2a3a6b67b8"),
+                            Id = new Guid("eea59f54-1dce-402f-85dc-cf83d431f59d"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5957),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2170),
                             Description = "GLM 4 全部文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1309,9 +1385,9 @@ namespace Thor.Provider.Thor
                         },
                         new
                         {
-                            Id = new Guid("df01232e-c75e-4034-89e7-a4b0a6914606"),
+                            Id = new Guid("e80a6723-c222-4307-93de-b339e02c8a7a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 515, DateTimeKind.Local).AddTicks(5958),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 716, DateTimeKind.Local).AddTicks(2171),
                             Description = "GLM 4v 文本模型",
                             Enable = true,
                             Icon = "ChatGLM",
@@ -1872,6 +1948,10 @@ namespace Thor.Provider.Thor
                     b.Property<DateTime?>("ExpiredTime")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Groups")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsDelete")
                         .HasColumnType("INTEGER");
 
@@ -1921,12 +2001,13 @@ namespace Thor.Provider.Thor
                     b.HasData(
                         new
                         {
-                            Id = "7395c133-b066-436c-8a0a-c230a69c5117",
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 448, DateTimeKind.Local).AddTicks(4802),
-                            Creator = "de0b039c-1a08-4982-aa14-d84b658cc8ac",
+                            Id = "CA378C74-19E7-458A-918B-4DBB7AE1729D",
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 678, DateTimeKind.Local).AddTicks(682),
+                            Creator = "CA378C74-19E7-458A-918B-4DBB7AE1729D",
                             Disabled = false,
+                            Groups = "[\"default\",\"vip\"]",
                             IsDelete = false,
-                            Key = "sk-cT9b1zsfLQMT9tjkSsZ7r0WG2FgiT0r4EMqHVR",
+                            Key = "sk-BKHG9948WROntAVjM7Q8VCbNRtUuiBc18KCbDK",
                             LimitModels = "[]",
                             Name = "默认Token",
                             RemainQuota = 0L,
@@ -2006,15 +2087,15 @@ namespace Thor.Provider.Thor
                     b.HasData(
                         new
                         {
-                            Id = "de0b039c-1a08-4982-aa14-d84b658cc8ac",
+                            Id = "CA378C74-19E7-458A-918B-4DBB7AE1729D",
                             ConsumeToken = 0L,
-                            CreatedAt = new DateTime(2025, 3, 10, 2, 26, 33, 446, DateTimeKind.Local).AddTicks(8520),
+                            CreatedAt = new DateTime(2025, 3, 13, 17, 53, 40, 676, DateTimeKind.Local).AddTicks(2654),
                             Email = "239573049@qq.com",
-                            Groups = "[\"admin\"]",
+                            Groups = "[\"default\",\"vip\"]",
                             IsDelete = false,
                             IsDisabled = false,
-                            Password = "ef5d6bb4ee7fb5fb65339625b052a7ce",
-                            PasswordHas = "bd81b367c826423e8e2f133e1b5ed617",
+                            Password = "80ec0a88ae84402531c1b6364e692107",
+                            PasswordHas = "7304b12246714a6b886b33f2d0d73bf1",
                             RequestCount = 0L,
                             ResidualCredit = 1000000000L,
                             Role = "admin",

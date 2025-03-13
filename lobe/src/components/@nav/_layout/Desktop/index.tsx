@@ -15,7 +15,9 @@ import {
   Settings,
   Shuffle,
   Handshake,
-  BrainCog
+  BrainCog,
+  Users,
+  UsersRound
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
@@ -182,6 +184,16 @@ const Nav = memo(() => {
           key: SidebarTabKey.User,
           onClick: () => {
             navigate("/user");
+          },
+          role: "admin",
+        },
+        {
+          icon: <UsersRound />,
+          label: "用户分组",
+          enable: true,
+          key: SidebarTabKey.UserGroup,
+          onClick: () => {
+            navigate("/user-group");
           },
           role: "admin",
         },

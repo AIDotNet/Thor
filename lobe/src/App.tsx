@@ -28,6 +28,7 @@ const ModelManager = lazy(() => import('./pages/model-manager/page'))
 const PanelPage = lazy(() => import('./pages/panel/page'))
 const UserInfoPage = lazy(() => import('./pages/user-info/page'))
 const ModelMapPage = lazy(() => import('./pages/model-map/page'))
+const UserGroupPage = lazy(() => import('./pages/user-group/page'))
 
 const router = createBrowserRouter([{
   element: <MainLayout nav={<Nav />} />,
@@ -95,6 +96,11 @@ const router = createBrowserRouter([{
     {
       path: 'model-map', element: <Suspense fallback={<FullscreenLoading title='加载模型映射页面中' />}>
         <ModelMapPage />
+      </Suspense>
+    },
+    {
+      path: 'user-group', element: <Suspense fallback={<FullscreenLoading title='加载用户分组页面中' />}>
+        <UserGroupPage />
       </Suspense>
     }
   ]

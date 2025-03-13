@@ -37,6 +37,7 @@ public sealed class ChatService(
     ImageService imageService,
     RateLimitModelService rateLimitModelService,
     UserService userService,
+    UserGroupService userGroupService,
     ILogger<ChatService> logger,
     ModelMapService modelMapService,
     LoggerService loggerService)
@@ -45,17 +46,17 @@ public sealed class ChatService(
     /// <summary>
     ///  按量计费模型倍率模板
     /// </summary>
-    private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1}";
+    private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1} 分组倍率：{2}";
 
     /// <summary>
     /// 按次计费模型倍率模板
     /// </summary>
-    private const string ConsumerTemplateOnDemand = "按次数计费费用：{0}";
+    private const string ConsumerTemplateOnDemand = "按次数计费费用：{0} 分组倍率：{1}";
 
     /// <summary>
     /// 实时对话计费模型倍率模板
     /// </summary>
-    private const string RealtimeConsumerTemplate = "模型倍率：文本提示词倍率:{0} 文本完成倍率:{1} 音频请求倍率:{2} 音频完成倍率:{3}  实时对话";
+    private const string RealtimeConsumerTemplate = "模型倍率：文本提示词倍率:{0} 文本完成倍率:{1} 音频请求倍率:{2} 音频完成倍率:{3}  实时对话 分组倍率：{4}";
 
 
     private static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
@@ -131,10 +132,9 @@ public sealed class ChatService(
             var (token, user) = await tokenService.CheckTokenAsync(context, rate);
 
             await rateLimitModelService.CheckAsync(request.Model, user.Id);
+            TokenService.CheckModel(request.Model, token, context);
 
             request.Model = await modelMapService.ModelMap(request.Model);
-
-            TokenService.CheckModel(request.Model, token, context);
 
 
             request.N ??= 1;
@@ -151,6 +151,13 @@ public sealed class ChatService(
 
             if (channel == null) throw new NotModelException(request.Model);
 
+            var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+            if (userGroup == null)
+            {
+                throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+            }
+
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorImageService>(channel.Type);
 
@@ -164,7 +171,7 @@ public sealed class ChatService(
                 Address = channel.Address,
                 Other = channel.Other
             });
-            
+
             // 计算createdAT
             var createdAt = DateTime.Now;
             var created = (int)createdAt.ToUnixTimeSeconds();
@@ -177,7 +184,10 @@ public sealed class ChatService(
 
             sw.Stop();
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0), request.Model,
+            quota = (int)((decimal)userGroup.Rate * quota);
+
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0, userGroup.Rate),
+                request.Model,
                 0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
@@ -225,15 +235,22 @@ public sealed class ChatService(
 
                 await rateLimitModelService.CheckAsync(input!.Model, user.Id);
 
-                input.Model = await modelMapService.ModelMap(input.Model);
-
                 TokenService.CheckModel(input.Model, token, context);
+
+                input.Model = await modelMapService.ModelMap(input.Model);
 
                 // 获取渠道 通过算法计算权重
                 var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(input.Model, user),
                     input.Model);
 
                 if (channel == null) throw new NotModelException(input.Model);
+
+                var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+                if (userGroup == null)
+                {
+                    throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+                }
 
                 // 获取渠道指定的实现类型的服务
                 var embeddingService = GetKeyedService<IThorTextEmbeddingService>(channel.Type);
@@ -286,11 +303,13 @@ public sealed class ChatService(
                 var completionRatio = GetCompletionRatio(input.Model);
                 quota += rate.PromptRate * completionRatio;
 
+                quota = (decimal)userGroup.Rate * quota;
+
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
                 await loggerService.CreateConsumeAsync(
-                    string.Format(ConsumerTemplate, rate.PromptRate, completionRatio),
+                    string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
                     input.Model,
                     requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -340,15 +359,22 @@ public sealed class ChatService(
 
                 if (channel == null) throw new NotModelException(input.Model);
 
+                var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+                if (userGroup == null)
+                {
+                    throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+                }
+
                 var openService = GetKeyedService<IThorCompletionsService>(channel.Type);
 
                 if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
 
                 await rateLimitModelService.CheckAsync(input!.Model, user.Id);
 
-                input.Model = await modelMapService.ModelMap(input.Model);
-
                 TokenService.CheckModel(input.Model, token, context);
+
+                input.Model = await modelMapService.ModelMap(input.Model);
 
                 if (input.Stream == false)
                 {
@@ -361,12 +387,15 @@ public sealed class ChatService(
                     var completionRatio = GetCompletionRatio(input.Model);
                     quota += responseToken * rate.PromptRate * completionRatio;
 
+                    quota = (decimal)userGroup.Rate * quota;
+
                     // 将quota 四舍五入
                     quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
                     sw.Stop();
 
-                    await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, completionRatio),
+                    await loggerService.CreateConsumeAsync(
+                        string.Format(ConsumerTemplate, rate, completionRatio, userGroup.Rate),
                         input.Model,
                         requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(), false,
@@ -446,17 +475,24 @@ public sealed class ChatService(
 
                 await rateLimitModelService.CheckAsync(request.Model, user.Id);
 
-                request.Model = await modelMapService.ModelMap(request.Model);
-
                 TokenService.CheckModel(request.Model, token, context);
 
+                var model = await modelMapService.ModelMap(request.Model);
+
                 // 获取渠道通过算法计算权重
-                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user),
-                    request.Model);
+                var channel = CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user),
+                    model);
 
                 if (channel == null)
                 {
-                    throw new NotModelException(request.Model);
+                    throw new NotModelException(model);
+                }
+
+                var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+                if (userGroup == null)
+                {
+                    throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
                 }
 
                 // 获取渠道指定的实现类型的服务
@@ -464,12 +500,12 @@ public sealed class ChatService(
 
                 if (chatCompletionsService == null)
                 {
-                    throw new Exception($"并未实现：{channel.Type} 的服务");
+                    throw new BusinessException($"并未实现：{channel.Type} 的服务", "400");
                 }
 
 
                 // 记录请求模型 / 请求用户
-                logger.LogInformation("请求模型：{model} 请求用户：{user}", request.Model, user?.UserName);
+                logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", model, user?.UserName, channel.Name);
 
                 int requestToken;
                 var responseToken = 0;
@@ -497,8 +533,11 @@ public sealed class ChatService(
 
                 var quota = requestToken * rate.PromptRate;
 
-                var completionRatio = GetCompletionRatio(request.Model);
+                var completionRatio = GetCompletionRatio(model);
                 quota += responseToken * rate.PromptRate * completionRatio;
+
+                // 计算分组倍率
+                quota = (decimal)userGroup!.Rate * quota;
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
@@ -509,23 +548,25 @@ public sealed class ChatService(
                 if (rate.QuotaType == ModelQuotaType.OnDemand)
                 {
                     await loggerService.CreateConsumeAsync(
-                        string.Format(ConsumerTemplate, rate.PromptRate, completionRatio),
-                        request.Model,
+                        string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
+                        model,
                         requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                         request.Stream is true,
                         (int)sw.ElapsedMilliseconds, organizationId);
 
                     await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                        request.Model);
+                        model);
                 }
                 else
                 {
                     // 费用
                     await loggerService.CreateConsumeAsync(
-                        string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate)),
-                        request.Model,
-                        requestToken, responseToken, (int)rate.PromptRate, token?.Key, user?.UserName, user?.Id,
+                        string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
+                            userGroup.Rate),
+                        model,
+                        requestToken, responseToken, (int)((int)rate.PromptRate * (decimal)userGroup.Rate), token?.Key,
+                        user?.UserName, user?.Id,
                         channel.Id,
                         channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                         request.Stream is true,
@@ -533,16 +574,13 @@ public sealed class ChatService(
 
                     await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
                         channel.Id,
-                        request.Model);
+                        model);
                 }
             }
             else
             {
-                context.Response.StatusCode = 200;
-                if (request.Stream == true)
-                    await context.WriteStreamErrorAsync("当前模型未设置倍率");
-                else
-                    await context.WriteErrorAsync("当前模型未设置倍率");
+                context.Response.StatusCode = 400;
+                await context.WriteErrorAsync($"当前{request.Model}模型未设置倍率,请联系管理员设置倍率", "400");
             }
         }
         catch (ThorRateLimitException)
@@ -630,6 +668,12 @@ public sealed class ChatService(
                     throw new NotModelException(model);
                 }
 
+                var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+                if (userGroup == null)
+                {
+                    throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+                }
 
                 // 获取渠道指定的实现类型的服务
                 var realtimeService = GetKeyedService<IThorRealtimeService>(channel.Type);
@@ -641,9 +685,9 @@ public sealed class ChatService(
 
                 await rateLimitModelService.CheckAsync(model, user.Id);
 
-                model = await modelMapService.ModelMap(model);
-
                 TokenService.CheckModel(model, token, context);
+
+                model = await modelMapService.ModelMap(model);
                 // 记录请求模型 / 请求用户
                 logger.LogInformation("请求模型：{model} 请求用户：{user}", model, user?.UserName);
 
@@ -766,6 +810,8 @@ public sealed class ChatService(
 
                     quota += audioQuota;
                     quota += audioCompletionRatio;
+                    
+                    quota = (decimal)userGroup.Rate * quota;
 
                     // 将quota 四舍五入
                     quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
@@ -775,7 +821,7 @@ public sealed class ChatService(
                     await loggerService.CreateConsumeAsync(
                         string.Format(RealtimeConsumerTemplate, rate, completionRatio,
                             (ModelManagerService.PromptRate[model].AudioPromptRate),
-                            ModelManagerService.PromptRate[model].AudioOutputRate),
+                            ModelManagerService.PromptRate[model].AudioOutputRate, userGroup.Rate),
                         model,
                         (int)requestToken + (int)audioRequestToken, (int)responseToken + (int)audioResponseTokens,
                         (int)quota, token?.Key,
@@ -980,9 +1026,10 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, user.Id);
 
-            audioCreateTranscriptionRequest.Model = await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
-
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
+
+            var model =
+                await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
 
             decimal quota = (int)rate.PromptRate;
 
@@ -990,11 +1037,18 @@ public sealed class ChatService(
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(
-                await channelService.GetChannelsContainsModelAsync(audioCreateTranscriptionRequest.Model, user),
-                audioCreateTranscriptionRequest.Model);
+                await channelService.GetChannelsContainsModelAsync(model, user),
+                model);
 
-            if (channel == null) throw new NotModelException(audioCreateTranscriptionRequest.Model);
+            if (channel == null) throw new NotModelException(model);
 
+            var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+            if (userGroup == null)
+            {
+                throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+            }
+            
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorAudioService>(channel.Type);
 
@@ -1018,15 +1072,17 @@ public sealed class ChatService(
             await context.Response.WriteAsJsonAsync(response);
 
             sw.Stop();
+            
+            quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0),
-                audioCreateTranscriptionRequest.Model,
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+                model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
             await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id,
-                audioCreateTranscriptionRequest.Model);
+                model);
         }
         catch (RateLimitException)
         {
@@ -1062,9 +1118,9 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(request.Model, user.Id);
 
-            request.Model = await modelMapService.ModelMap(request.Model);
-
             TokenService.CheckModel(request.Model, token, context);
+
+            request.Model = await modelMapService.ModelMap(request.Model);
 
             decimal quota = (int)rate.PromptRate;
 
@@ -1077,6 +1133,12 @@ public sealed class ChatService(
 
             if (channel == null) throw new NotModelException(request.Model);
 
+            var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+            if (userGroup == null)
+            {
+                throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+            }
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorAudioService>(channel.Type);
 
@@ -1133,8 +1195,10 @@ public sealed class ChatService(
             await response.CopyToAsync(context.Response.Body);
 
             sw.Stop();
+            
+            quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0),
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 request.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -1205,9 +1269,10 @@ public sealed class ChatService(
 
             await rateLimitModelService.CheckAsync(audioCreateTranscriptionRequest.Model, user.Id);
 
-            audioCreateTranscriptionRequest.Model = await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
-
             TokenService.CheckModel(audioCreateTranscriptionRequest.Model, token, context);
+
+            var model =
+                await modelMapService.ModelMap(audioCreateTranscriptionRequest.Model);
 
             decimal quota = (int)rate.PromptRate;
 
@@ -1215,11 +1280,17 @@ public sealed class ChatService(
 
             // 获取渠道 通过算法计算权重
             var channel = CalculateWeight(
-                await channelService.GetChannelsContainsModelAsync(audioCreateTranscriptionRequest.Model, user),
-                audioCreateTranscriptionRequest.Model);
+                await channelService.GetChannelsContainsModelAsync(model, user),
+                model);
 
-            if (channel == null) throw new NotModelException(audioCreateTranscriptionRequest.Model);
+            if (channel == null) throw new NotModelException(model);
 
+            var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+            if (userGroup == null)
+            {
+                throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+            }
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorAudioService>(channel.Type);
 
@@ -1244,15 +1315,17 @@ public sealed class ChatService(
             await context.Response.WriteAsJsonAsync(response);
 
             sw.Stop();
+            
+            quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0),
-                audioCreateTranscriptionRequest.Model,
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+                model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
             await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id,
-                audioCreateTranscriptionRequest.Model);
+                model);
         }
         catch (RateLimitException)
         {

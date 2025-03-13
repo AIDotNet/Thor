@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button, Drawer, Input, Select, message } from 'antd';
 import { update } from "../../../services/UserService";
+import { getList } from "../../../services/UserGroupService";
 
 interface EditUserProps {
     visible: boolean;
@@ -24,6 +25,20 @@ export default function EditUser({
         email: '',
         groups: ''
     });
+    const [groupOptions, setGroupOptions] = useState<any[]>([]);
+
+    // 获取用户分组列表
+    useEffect(() => {
+        if (visible) {
+            getList().then(res => {
+                if (res.success) {
+                    setGroupOptions(res.data || []);
+                } else {
+                    message.error('获取用户分组失败');
+                }
+            });
+        }
+    }, [visible]);
 
     // 当用户数据变化时更新输入
     useEffect(() => {
@@ -115,13 +130,13 @@ export default function EditUser({
                     <div style={{ marginBottom: 8 }}>
                         <label style={{ display: 'block', marginBottom: 8 }}>组</label>
                         <Select
-                            mode="tags"
+                            mode="multiple"
                             style={{ width: '100%' }}
                             value={input.groups}
-                            // 提供默认的选项
-                            options={user?.groups?.map((group: string) => ({
-                                label: group,
-                                value: group
+                            placeholder="请选择用户组"
+                            options={groupOptions.map(group => ({
+                                label: group.name,
+                                value: group.code
                             }))}
                             onChange={(value) => setInput({ ...input, groups: value })}
                             status={errors.groups ? 'error' : ''}

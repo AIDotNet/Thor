@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Thor.Core.DataAccess;
+using Thor.Domain.Users;
 using Thor.Service.DataAccess;
 using Thor.Service.Domain;
 using Thor.Service.Infrastructure.Helper;
@@ -31,15 +33,17 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
     public DbSet<ModelManager> ModelManagers { get; set; }
 
     public DbSet<ModelMap> ModelMaps { get; set; }
+    
+    public DbSet<UserGroup> UserGroups { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ConfigureAIDotNet();
 
-        var user = new User(Guid.NewGuid().ToString(), "admin", "239573049@qq.com", "admin")
+        var user = new User("CA378C74-19E7-458A-918B-4DBB7AE1729D", "admin", "239573049@qq.com", "admin")
         {
             CreatedAt = DateTime.Now,
-            Groups = ["admin","default","vip"],
+            Groups = ["default", "vip"],
         };
         user.SetAdmin();
         user.SetResidualCredit(1000000000);
@@ -48,19 +52,45 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
 
         var token = new Token
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = "CA378C74-19E7-458A-918B-4DBB7AE1729D",
             Key = "sk-" + StringHelper.GenerateRandomString(38),
             Creator = user.Id,
             Name = "默认Token",
             UnlimitedQuota = true,
             UnlimitedExpired = true,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
+            Groups = ["default", "vip"],
         };
 
         modelBuilder.Entity<Token>().HasData(token);
 
         modelBuilder.InitSetting();
 
+        var userGroups = new List<UserGroup>
+        {
+            new()
+            {
+                Id = Guid.Parse("CA378C74-19E7-458A-918B-4DBB7AE1729D"),
+                Code = "default",
+                Name = "默认",
+                Description = "默认用户组",
+                CreatedAt = DateTime.Now,
+                Enable = true,
+                Rate = 1,
+            },
+            new()
+            {
+                Id = Guid.Parse("CA378C74-19E7-458A-918B-4DBB7AE17291"),
+                Code = "vip",
+                Name = "VIP",
+                Description = "VIP用户组",
+                CreatedAt = DateTime.Now,
+                Enable = true,
+                Rate = 1,
+            }
+        };
+
+        modelBuilder.Entity<UserGroup>().HasData(userGroups);
 
         modelBuilder.Entity<ModelMap>(options =>
         {

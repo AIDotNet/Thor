@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Thor.Domain.Users;
 using Thor.Service.Domain;
 
 namespace Thor.Service.DataAccess;
@@ -55,6 +56,11 @@ public static class EntityConfigExtensions
                 .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
                     item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions) ??
                             new List<string>());
+
+            options.Property(x => x.Groups)
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => JsonSerializer.Deserialize<string[]>(item, JsonSerializerOptions) ??
+                            new string[] { });
         });
 
         modelBuilder.Entity<RedeemCode>(options =>
@@ -158,6 +164,19 @@ public static class EntityConfigExtensions
                     item => JsonSerializer.Deserialize<List<string>>(item, JsonSerializerOptions));
         });
 
+        modelBuilder.Entity<UserGroup>(options =>
+        {
+            options.ToTable("UserGroups");
+            
+            options.HasKey(x => x.Id);
+
+            options.HasIndex(x => x.Code).IsUnique();
+
+            options.HasIndex(x => x.Name).IsUnique();
+
+            options.HasIndex(x => x.Creator);
+        });
+        
         return modelBuilder;
     }
 

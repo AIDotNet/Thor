@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button, Drawer, Form, Input, Select, message } from 'antd';
 import { create } from "../../../services/UserService";
+import { getList } from "../../../services/UserGroupService";
 
 interface CreateUserProps {
     visible: boolean;
@@ -20,6 +21,20 @@ export default function CreateUser({
         role: 'user',
         groups: []
     });
+    const [groupOptions, setGroupOptions] = useState<any[]>([]);
+
+    // 获取用户分组列表
+    useEffect(() => {
+        if (visible) {
+            getList().then(res => {
+                if (res.success) {
+                    setGroupOptions(res.data || []);
+                } else {
+                    message.error('获取用户分组失败');
+                }
+            });
+        }
+    }, [visible]);
 
     function handleSubmit() {
         create(input)
@@ -100,9 +115,14 @@ export default function CreateUser({
                     rules={[{ required: true, message: '请选择组' }]}
                 >
                     <Select
-                        mode="tags"
+                        mode="multiple"
                         value={input.groups}
                         onChange={(value) => setInput({ ...input, groups: value })}
+                        placeholder="请选择用户组"
+                        options={groupOptions.map(group => ({
+                            label: group.name,
+                            value: group.code
+                        }))}
                     />
                 </Form.Item>
                 <Button type='primary' block htmlType='submit'>提交</Button>

@@ -94,7 +94,9 @@ public sealed class TokenService(
 
         if (token.LimitModels.Count(x => !string.IsNullOrEmpty(x)) > 0 && !token.LimitModels.Contains(model))
         {
-            throw new Exception("当前 Token 无权访问该模型");
+            // token脱敏
+            throw new Exception(
+                $"当前 {string.Concat("****", token.Key.AsSpan(token.Key.Length - 5, 5))}Token 无权访问{model}模型,请修改Token权限，当前token可访问模型：{string.Join(",", token.LimitModels)}");
         }
 
         if (token.WhiteIpList.Count <= 0) return;
@@ -103,7 +105,7 @@ public sealed class TokenService(
 
         if (string.IsNullOrEmpty(ip) || !token.WhiteIpList.Contains(ip))
         {
-            throw new Exception("当前IP: " + ip + " 无权访问该模型");
+            throw new Exception($"当前IP:{ip}无权访问模型{model}");
         }
     }
 

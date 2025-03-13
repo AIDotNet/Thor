@@ -112,6 +112,7 @@ export default function CreateModelManagerPage({
                     ) : null;
                 }}
             </Form.Item>
+
             <Form.Item name='isVersion2' label='是否实时模型'>
                 <Select defaultValue={false}>
                     <Select.Option value={true}>是</Select.Option>

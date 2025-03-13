@@ -1,4 +1,4 @@
-import { Button, Card, Layout, Space, Typography, Row, Col, Statistic } from 'antd';
+import {theme, Button, Card, Layout, Space, Typography, Row, Col, Statistic } from 'antd';
 import {
     GithubOutlined,
     RocketOutlined,
@@ -16,6 +16,10 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion'; // 引入Framer Motion动画库
 import { useInView } from 'react-intersection-observer'; // 引入滚动检测
 import { useState, useEffect } from 'react';
+import { Pie } from '@ant-design/plots';
+import { modelHot } from '../../../services/LoggerService';
+import { BarList, DonutChart } from '@lobehub/charts';
+import { getIconByName } from '../../../utils/iconutils';
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -221,6 +225,7 @@ const AnimatedBackground = () => {
   );
 };
 
+
 // 优化 CountUpStatistic 组件，提高性能
 const CountUpStatistic = ({ title, value, suffix, valueStyle }: { title: string, value: string, suffix: string, valueStyle: React.CSSProperties }) => {
   const [count, setCount] = useState(0);
@@ -280,6 +285,7 @@ const CountUpStatistic = ({ title, value, suffix, valueStyle }: { title: string,
 const ThorWebsite = () => {
     const { styles } = useStyles();
     const navigate = useNavigate();
+    const { token } = theme.useToken();
     
     // 创建滚动检测钩子
     const [featuresRef, featuresInView] = useInView({
@@ -296,6 +302,29 @@ const ThorWebsite = () => {
       triggerOnce: true,
       threshold: 0.1,
     });
+    
+    // 添加模型热度数据状态
+    const [modelHotData, setModelHotData] = useState<{model: string, percentage: number}[]>([]);
+    const [modelHotLoading, setModelHotLoading] = useState(true);
+    
+    // 添加获取模型热度数据的函数
+    useEffect(() => {
+        const fetchModelHotData = async () => {
+            try {
+                setModelHotLoading(true);
+                const response = await modelHot();
+                if (response && response.data) {
+                    setModelHotData(response.data);
+                }
+            } catch (error) {
+                console.error('获取模型热度数据失败:', error);
+            } finally {
+                setModelHotLoading(false);
+            }
+        };
+        
+        fetchModelHotData();
+    }, []);
     
     // 定义各种动画变体
     const containerVariants = {
@@ -331,6 +360,12 @@ const ThorWebsite = () => {
         }
       }
     };
+    
+    // 添加模型热度引用
+    const [modelHotRef, modelHotInView] = useInView({
+      triggerOnce: true,
+      threshold: 0.1,
+    });
     
     return (
         <Content>
@@ -545,6 +580,96 @@ const ThorWebsite = () => {
                                     suffix="位"
                                     valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
                                 />
+                            </MotionCard>
+                        </MotionCol>
+                    </MotionRow>
+                </div>
+            </div>
+
+            {/* 添加模型热度部分 */}
+            <div ref={modelHotRef} style={{ padding: '80px 0', background: token.colorBgLayout }}>
+                <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={modelHotInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                        <Title level={2} style={{ textAlign: 'center', marginBottom: 16 }}>模型热度排行</Title>
+                        <Paragraph style={{ textAlign: 'center', color: token.colorTextSecondary, marginBottom: 48, maxWidth: 700, margin: '0 auto 48px' }}>
+                            了解用户最喜爱的AI模型，选择最适合您需求的模型
+                        </Paragraph>
+                    </motion.div>
+                    
+                    <MotionRow gutter={[24, 24]}>
+                        <MotionCol xs={24} md={12}>
+                            <MotionCard
+                                loading={modelHotLoading}
+                                style={{ height: '100%', background: token.colorBgLayout }}
+                                whileHover={{ 
+                                    y: -10,
+                                    boxShadow: `0 15px 30px ${token.colorPrimary}` 
+                                }}
+                            >
+                                <Title level={4}>模型使用分布</Title>
+                                <Paragraph style={{ color: token.colorTextSecondary, marginBottom: 24 }}>
+                                    基于用户实际使用情况的模型热度分布图
+                                </Paragraph>
+                                {!modelHotLoading && modelHotData.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <DonutChart
+                                            data={modelHotData.map(item => ({
+                                                name: item.model,
+                                                value: item.percentage
+                                            }))}
+                                            valueFormatter={(value) => `${value.toFixed(1)}%`}
+                                            variant="pie"
+                                            showAnimation
+                                        />
+                                    </motion.div>
+                                )}
+                            </MotionCard>
+                        </MotionCol>
+                        
+                        <MotionCol xs={24} md={12}>
+                            <MotionCard
+                                bordered={false}
+                                loading={modelHotLoading}
+                                style={{ height: '100%' }}
+                                whileHover={{ 
+                                    y: -10,
+                                    boxShadow: `0 15px 30px ${token.colorPrimary}` 
+                                }}
+                            >
+                                <Title level={4}>热门模型排行</Title>
+                                <Paragraph style={{ color: token.colorTextSecondary, marginBottom: 24 }}>
+                                    最受欢迎的AI模型排名
+                                </Paragraph>
+                                {!modelHotLoading && modelHotData.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <BarList 
+                                            data={modelHotData
+                                              // 只要前10个
+                                              .slice(0, 10)
+                                              .map(item => ({
+                                                name: item.model,
+                                                value: item.percentage,
+                                                // 可以添加图标
+                                                icon: getIconByName(item.model)?.icon || null
+                                            }))}
+                                            showAnimation
+                                            valueFormatter={(value) => `${value.toFixed(1)}%`}
+                                            sortOrder='descending'
+                                        />
+                                    </motion.div>
+                                )}
                             </MotionCard>
                         </MotionCol>
                     </MotionRow>

@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@ant-design/plots": "^2.3.3",
     "@lobehub/charts": "^1.9.4",
     "@lobehub/icons": "^1.22.1",
     "@lobehub/ui": "^1.141.3",

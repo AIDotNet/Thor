@@ -1,4 +1,3 @@
-
 export enum SidebarTabKey {
   Panel = "panel",
 
@@ -32,4 +31,6 @@ export enum SidebarTabKey {
   Business = "business",
 
   ModelMap = "model-map",
+
+  UserGroup = 'user-group',
 }

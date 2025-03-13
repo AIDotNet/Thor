@@ -124,6 +124,7 @@ public sealed class LoggerService(
 
         if (endTime.HasValue) query = query.Where(x => x.CreatedAt <= endTime);
 
+        // 非管理员只能查看自己的日志
         if (!UserContext.IsAdmin) query = query.Where(x => x.UserId == UserContext.CurrentUserId);
 
         if (!string.IsNullOrWhiteSpace(keyword))
@@ -142,7 +143,7 @@ public sealed class LoggerService(
 
     public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ThorChatLoggerType? type,
         string? model,
-        DateTime? startTime, DateTime? endTime, string? keyword,string? organizationId = null)
+        DateTime? startTime, DateTime? endTime, string? keyword, string? organizationId = null)
     {
         var query = LoggerDbContext.Loggers
             .AsNoTracking();
@@ -161,8 +162,8 @@ public sealed class LoggerService(
 
         if (!string.IsNullOrEmpty(organizationId))
         {
-			query = query.Where(x => x.OrganizationId == organizationId);
-		}
+            query = query.Where(x => x.OrganizationId == organizationId);
+        }
 
         if (!string.IsNullOrWhiteSpace(keyword))
             query = query.Where(x =>
@@ -184,5 +185,53 @@ public sealed class LoggerService(
         if (!UserContext.IsAdmin) result.ForEach(x => { x.ChannelName = null; });
 
         return new PagingDto<ChatLogger>(total, result);
+    }
+
+    /// <summary>
+    /// 模型热榜
+    /// 统计最近15天的模型使用比例，返回模型名称和使用百分比
+    /// 使用ModelStatisticsNumber
+    /// </summary>
+    /// <returns></returns>
+    public async Task<List<object>> GetModelHotAsync()
+    {
+        return await serviceCache.GetOrCreateAsync("ModelHot", async () =>
+        {
+            var endDate = DateTime.Now.Date;
+            var startDate = endDate.AddDays(-15);
+            var year = startDate.Year;
+            var month = startDate.Month;
+            var day = startDate.Day;
+
+            var query = LoggerDbContext.ModelStatisticsNumbers
+                .AsNoTracking()
+                .Where(x =>
+                    (x.Year > year) ||
+                    (x.Year == year && x.Month > month) ||
+                    (x.Year == year && x.Month == month && x.Day >= day)
+                )
+                .GroupBy(x => x.ModelName)
+                .Select(g => new
+                {
+                    ModelName = g.Key,
+                    TotalCount = g.Sum(x => x.Count)
+                });
+
+            var results = await query.ToListAsync();
+            results = results.Where(x => !x.ModelName.Contains("text-embedding")).ToList();
+            var totalUsage = results.Sum(x => x.TotalCount);
+
+            return results
+                .Select(x => new
+                {
+                    model = x.ModelName,
+                    percentage = totalUsage > 0
+                        ? Math.Round((double)x.TotalCount / totalUsage * 100, 2)
+                        : 0
+                })
+                .OrderByDescending(x => x.percentage)
+                .Cast<object>()
+                .ToList();
+        }, TimeSpan.FromHours(1)) ?? [];
     }
 }

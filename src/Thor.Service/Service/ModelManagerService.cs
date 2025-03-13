@@ -20,7 +20,7 @@ public sealed class ModelManagerService(IServiceProvider serviceProvider,
     {
         var models = await context.ModelManagers.Where(x => x.Enable).ToListAsync();
 
-        PromptRate.Clear();
+        // PromptRate.Clear();
 
         foreach (var setting in models)
         {

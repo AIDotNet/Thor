@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Thor.Domain.Users;
 using Thor.Service.Domain;
 
 namespace Thor.Core.DataAccess;
@@ -27,6 +28,8 @@ public interface IThorContext
     DbSet<ModelManager> ModelManagers { get; set; }
 
     DbSet<ModelMap> ModelMaps { get; set; }
+
+    DbSet<UserGroup> UserGroups { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
 }

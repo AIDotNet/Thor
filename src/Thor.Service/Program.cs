@@ -21,6 +21,7 @@ using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
 using Thor.DeepSeek.Extensions;
 using Thor.AWSClaude.Extensions;
+using Thor.Domain.Users;
 using Thor.MiniMax.Extensions;
 using Thor.Provider;
 using Thor.Qiansail.Extensions;
@@ -451,6 +452,13 @@ try
         .WithDescription("查看消耗")
         .WithDisplayName("查看消耗")
         .WithOpenApi();
+    
+    log.MapGet("model-hot",
+            async (LoggerService service) =>
+                await service.GetModelHotAsync())
+        .WithDescription("获取模型热度")
+        .WithDisplayName("获取模型热度")
+        .WithOpenApi();
 
     #endregion
 
@@ -540,6 +548,43 @@ try
     modelMap.MapDelete("{id}", async (ModelMapService service, Guid id) =>
             await service.DeleteAsync(id))
         .WithDescription("删除模型映射")
+        .WithOpenApi();
+
+    #endregion
+
+    #region UserGroup
+
+    var userGroup = app.MapGroup("/api/v1/userGroup")
+        .WithTags("UserGroup")
+        .AddEndpointFilter<ResultFilter>()
+        .RequireAuthorization(new AuthorizeAttribute()
+        {
+            Roles = RoleConstant.Admin
+        });
+
+    userGroup.MapPost(string.Empty, async (UserGroupService service, UserGroup userGroup) =>
+            await service.CreateAsync(userGroup))
+        .WithDescription("创建用户分组")
+        .WithOpenApi();
+
+    userGroup.MapGet(string.Empty, async (UserGroupService service) =>
+            await service.GetListAsync())
+        .WithDescription("获取用户分组列表")
+        .WithOpenApi();
+
+    userGroup.MapPut(string.Empty, async (UserGroupService service, UserGroup userGroup) =>
+            await service.UpdateAsync(userGroup))
+        .WithDescription("更新用户分组")
+        .WithOpenApi();
+
+    userGroup.MapDelete("{id}", async (UserGroupService service, Guid id) =>
+            await service.DeleteAsync(id))
+        .WithDescription("删除用户分组")
+        .WithOpenApi();
+
+    userGroup.MapPut("/enable/{id}", async (UserGroupService service, Guid id, bool enable) =>
+            await service.EnableAsync(id, enable))
+        .WithDescription("启用/禁用用户分组")
         .WithOpenApi();
 
     #endregion

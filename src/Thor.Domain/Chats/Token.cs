@@ -59,6 +59,11 @@ public sealed class Token : Entity<string>, ISoftDeletion
     /// </summary>
     public List<string> WhiteIpList { get; set; } = new();
     
+    /// <summary>
+    /// token所属分组
+    /// </summary>
+    public string[] Groups { get; set; } = null!;
+    
     public bool IsDelete { get; set; }
     
     public DateTime? DeletedAt { get; set; }
