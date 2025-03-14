@@ -78,7 +78,9 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
   };
 
   const renderUserInfo = () => (
-    <div>
+    <div style={{
+      height:'calc(100vh - 190px)',
+    }}>
       <Row justify="center" style={{ marginBottom: 24 }}>
         <Avatar size={80} icon={<UserOutlined />} src={user.avatar} />
       </Row>
