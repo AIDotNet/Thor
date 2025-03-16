@@ -106,7 +106,6 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             {
                 name = x.Function?.Name,
                 description = x.Function?.Description,
-                type = x.Type,
                 input_schema = new
                 {
                     type = x.Function?.Parameters?.Type,
@@ -402,7 +401,6 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             {
                 name = x.Function?.Name,
                 description = x.Function?.Description,
-                type = x.Type,
                 input_schema = new
                 {
                     type = x.Function?.Parameters?.Type,
