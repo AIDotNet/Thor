@@ -50,6 +50,7 @@
     <ProjectReference Include="..\extensions\Thor.Claude\Thor.Claude.csproj" />
     <ProjectReference Include="..\extensions\Thor.DeepSeek\Thor.DeepSeek.csproj" />
     <ProjectReference Include="..\extensions\Thor.ErnieBot\Thor.ErnieBot.csproj" />
+    <ProjectReference Include="..\extensions\Thor.GCPClaude\Thor.GCPClaude.csproj" />
     <ProjectReference Include="..\extensions\Thor.GiteeAI\Thor.GiteeAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Hunyuan\Thor.Hunyuan.csproj" />
     <ProjectReference Include="..\extensions\Thor.MetaGLM\Thor.MetaGLM.csproj" />
