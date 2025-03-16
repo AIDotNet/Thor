@@ -463,8 +463,8 @@ public sealed class ChatService(
             Activity.Current?.Source.StartActivity("对话补全调用");
 
         var model = request.Model;
-        
-        if(request.MaxCompletionTokens != null && request.MaxCompletionTokens > 0)
+
+        if (request.MaxCompletionTokens != null && request.MaxCompletionTokens > 0)
         {
             request.MaxTokens = request.MaxCompletionTokens;
             request.MaxCompletionTokens = null;
@@ -1473,7 +1473,7 @@ public sealed class ChatService(
 
         // 是否第一次输出
         bool isFirst = true;
-        int? responseToken = 0;
+        int responseToken = 0;
 
         await foreach (var item in openService.StreamChatCompletionsAsync(input, platformOptions))
         {
@@ -1533,11 +1533,11 @@ public sealed class ChatService(
 
         await context.WriteAsEventStreamEndAsync();
 
-        if (rate.QuotaType == ModelQuotaType.OnDemand && responseToken == null)
+        if (rate.QuotaType == ModelQuotaType.OnDemand && responseToken == 0)
         {
             responseToken = TokenHelper.GetTokens(responseMessage.ToString());
         }
-        else if(rate.QuotaType == ModelQuotaType.ByCount)
+        else if (rate.QuotaType == ModelQuotaType.ByCount)
         {
             responseToken = rate.QuotaType == ModelQuotaType.OnDemand
                 ? TokenHelper.GetTokens(responseMessage.ToString())
@@ -1545,7 +1545,7 @@ public sealed class ChatService(
         }
 
 
-        return (requestToken, responseToken.Value);
+        return (requestToken, responseToken);
     }
 
     /// <summary>
