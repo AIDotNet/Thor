@@ -186,6 +186,7 @@ export default function UpdateToken({
                     mode="multiple"
                     maxTagCount={1}
                     maxCount={1}
+                    allowClear
                     options={groups?.map((group: any) => {
                         return {
                             label: <Flexbox gap={8} horizontal>

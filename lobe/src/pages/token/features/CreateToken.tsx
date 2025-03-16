@@ -135,7 +135,7 @@ export default function CreateToken({
                     }} />
                 </Form.Item>
             }
-            <Form.Item<FieldType> name='limitModels' label='限制使用模型（不填则不限制）'style={{ width: '100%' }}>
+            <Form.Item<FieldType> name='limitModels' label='限制使用模型（不填则不限制）' style={{ width: '100%' }}>
                 <Select
                     placeholder="请选择可用模型"
                     defaultActiveFirstOption={true}
@@ -154,13 +154,18 @@ export default function CreateToken({
                     }
                 </Select>
             </Form.Item>
-        <Form.Item
-          name="groups"
-          label="组"
-          style={{ width: "100%" }}
-        >
-          <Select
-            placeholder="请选择组"
+            <Form.Item
+                name="groups"
+                label="组"
+                rules={[{ required: true, message: '请选择组' }]}
+                style={{ width: "100%" }}
+            >
+                <Select
+                    placeholder="请选择组"
+                    mode="multiple"
+                    maxTagCount={1}
+                    maxCount={1}
+                    allowClear
                     options={groups?.map((group: any) => {
                         return {
                             label: <Flexbox gap={8} horizontal>
@@ -174,12 +179,12 @@ export default function CreateToken({
                             value: group.code
                         }
                     })}
-            value={input.groups}
-            onChange={(v) => {
-              setInput({ ...input, groups: v });
-            }}
-          />
-        </Form.Item>
+                    value={input.groups}
+                    onChange={(v) => {
+                        setInput({ ...input, groups: v });
+                    }}
+                />
+            </Form.Item>
             <Form.Item<FieldType> name='whiteIpList' label='IP白名单' style={{ width: '100%' }}>
                 <Select
                     placeholder="请选择IP白名单"
