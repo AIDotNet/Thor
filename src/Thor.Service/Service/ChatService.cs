@@ -463,6 +463,12 @@ public sealed class ChatService(
             Activity.Current?.Source.StartActivity("对话补全调用");
 
         var model = request.Model;
+        
+        if(request.MaxCompletionTokens != null && request.MaxCompletionTokens > 0)
+        {
+            request.MaxTokens = request.MaxCompletionTokens;
+            request.MaxCompletionTokens = null;
+        }
 
         var rateLimit = 0;
 
