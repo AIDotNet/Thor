@@ -106,6 +106,9 @@ Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqli
 - [x] DeepSeek AI（支持function）
 - [x] 火山引擎 （支持function） 
 - [x] 亚马逊 （支持function） 
+- [x] 谷歌Claude （支持function） 
+      ( 代理地址：[LocationId]-aiplatform.googleapis.com|[ProjectId]|[LocationId]|rawPredict  ) [这里面填写你的区域/项目id]
+      (密钥：在Google平台创建的大json 就是autu 2.0授权码 )
 
 # 支持数据库
 

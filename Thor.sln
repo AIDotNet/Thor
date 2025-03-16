@@ -19,8 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution 
 		Directory.Build.props = Directory.Build.props
 		docker-compose-rabbitmq.yml = docker-compose-rabbitmq.yml
 		docker-compose.yml = docker-compose.yml
-		README.md = README.md
 		migrations.bat = migrations.bat
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Thor.OpenAI", "src\extensions\Thor.OpenAI\Thor.OpenAI.csproj", "{F0FB17C9-8355-44C6-8340-066BE93694D8}"
@@ -92,6 +92,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.DeepSeek", "src\extensions\Thor.DeepSeek\Thor.DeepSeek.csproj", "{30D42224-8BC3-4CA8-81DC-349B59595A6B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.VolCenGine", "src\extensions\Thor.VolCenGine\Thor.VolCenGine.csproj", "{65B6C566-F252-499B-BF17-77C53537F766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.GCPClaude", "src\extensions\Thor.GCPClaude\Thor.GCPClaude.csproj", "{640AFAA2-E60E-478B-82ED-4C47BF6A5F12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -243,6 +245,10 @@ Global
 		{65B6C566-F252-499B-BF17-77C53537F766}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{65B6C566-F252-499B-BF17-77C53537F766}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{65B6C566-F252-499B-BF17-77C53537F766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{640AFAA2-E60E-478B-82ED-4C47BF6A5F12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{640AFAA2-E60E-478B-82ED-4C47BF6A5F12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{640AFAA2-E60E-478B-82ED-4C47BF6A5F12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{640AFAA2-E60E-478B-82ED-4C47BF6A5F12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -285,6 +291,7 @@ Global
 		{B0314829-D762-4DEE-A5ED-59384E7D8B80} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{30D42224-8BC3-4CA8-81DC-349B59595A6B} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{65B6C566-F252-499B-BF17-77C53537F766} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{640AFAA2-E60E-478B-82ED-4C47BF6A5F12} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

@@ -20,6 +20,7 @@ using Thor.MetaGLM.Extensions;
 using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
 using Thor.DeepSeek.Extensions;
+using Thor.GCPClaude.Extensions;
 using Thor.AWSClaude.Extensions;
 using Thor.Domain.Users;
 using Thor.MiniMax.Extensions;
@@ -109,6 +110,7 @@ try
         .AddMoonshotService()
         .AddSparkDeskService()
         .AddQiansailService()
+        .AddGCPClaudeService()
         .AddMetaGLMService()
         .AddHunyuanService()
         .AddClaudiaService()
