@@ -191,6 +191,32 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         response.Delta = chatMessage;
         response.Message = chatMessage;
 
+        if (completionDto.content.Any(x => x.type.Equals("tool_use", StringComparison.OrdinalIgnoreCase)))
+        {
+            var toolUse = completionDto.content
+                .First(x => x.type.Equals("tool_use", StringComparison.OrdinalIgnoreCase));
+
+            chatMessage.ToolCalls =
+            [
+                new()
+                {
+                    Id = toolUse.id,
+                    Function = new ThorChatMessageFunction()
+                    {
+                        Name = toolUse.name,
+                        Arguments = JsonSerializer.Serialize(toolUse.input,
+                            ThorJsonSerializer.DefaultOptions),
+                    },
+                    Index = 0,
+                }
+            ];
+
+            return
+            [
+                response
+            ];
+        }
+
         return new List<ThorChatChoiceResponse> { response };
     }
 
@@ -336,7 +362,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         var isThinking = input.Model.EndsWith("thinking");
         input.Model = input.Model.Replace("-thinking", string.Empty);
         var budgetTokens = 1024;
-        
+
         if (input.MaxTokens is < 2048)
         {
             input.MaxTokens = 2048;
@@ -436,6 +462,9 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
         string? line = string.Empty;
         var first = true;
         var isThink = false;
+
+        string? toolId = null;
+        string? toolName = null;
         while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
@@ -499,8 +528,38 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                         }
                     };
                 }
-                else if (result.delta.type == "signature_delta")
+                else if (result.delta.type == "input_json_delta")
                 {
+                    yield return new ThorChatCompletionsResponse()
+                    {
+                        Choices =
+                        [
+                            new ThorChatChoiceResponse()
+                            {
+                                Message = new ThorChatMessage()
+                                {
+                                    ToolCalls =
+                                    [
+                                        new ThorToolCall()
+                                        {
+                                            Id = toolId,
+                                            Function = new ThorChatMessageFunction()
+                                            {
+                                                Name = toolName,
+                                                Arguments = result.delta.partial_json
+                                            }
+                                        }
+                                    ],
+                                    Role = "tool",
+                                }
+                            }
+                        ],
+                        Model = input.Model,
+                        Usage = new ThorUsageResponse()
+                        {
+                            PromptTokens = result?.message?.usage?.input_tokens,
+                        }
+                    };
                 }
                 else
                 {
@@ -530,6 +589,78 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                 continue;
             }
 
+            if (result?.type == "content_block_start")
+            {
+                if (result?.content_block?.id is not null)
+                {
+                    toolId = result.content_block.id;
+                }
+
+                if (result?.content_block?.name is not null)
+                {
+                    toolName = result.content_block.name;
+                }
+
+                yield return new ThorChatCompletionsResponse()
+                {
+                    Choices =
+                    [
+                        new ThorChatChoiceResponse()
+                        {
+                            Message = new ThorChatMessage()
+                            {
+                                ToolCalls =
+                                [
+                                    new ThorToolCall()
+                                    {
+                                        Id = toolId,
+                                        Function = new ThorChatMessageFunction()
+                                        {
+                                            Name = toolName
+                                        }
+                                    }
+                                ],
+                                Role = "tool",
+                            }
+                        }
+                    ],
+                    Model = input.Model,
+                    Usage = new ThorUsageResponse()
+                    {
+                        PromptTokens = result?.message?.usage?.input_tokens,
+                    }
+                };
+            }
+
+            if (result.type == "content_block_delta")
+            {
+                yield return new ThorChatCompletionsResponse()
+                {
+                    Choices =
+                    [
+                        new ThorChatChoiceResponse()
+                        {
+                            Message = new ThorChatMessage()
+                            {
+                                ToolCallId = result?.content_block?.id,
+                                FunctionCall = new ThorChatMessageFunction()
+                                {
+                                    Name = result?.content_block?.name,
+                                    Arguments = result?.delta?.partial_json
+                                },
+                                Role = "tool",
+                            }
+                        }
+                    ],
+                    Model = input.Model,
+                    Usage = new ThorUsageResponse()
+                    {
+                        PromptTokens = result?.message?.usage?.input_tokens,
+                    }
+                };
+                continue;
+            }
+
             if (result.type == "message_start")
             {
                 yield return new ThorChatCompletionsResponse()
@@ -540,7 +671,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                         {
                             Message = new ThorChatMessage()
                             {
-                                Content = result.delta.text,
+                                Content = result?.delta?.text,
                                 Role = "assistant",
                             }
                         }
@@ -548,7 +679,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                     Model = input.Model,
                     Usage = new ThorUsageResponse()
                     {
-                        PromptTokens = result.message.usage.input_tokens,
+                        PromptTokens = result?.message?.usage?.input_tokens,
                     }
                 };
 
@@ -565,7 +696,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                         {
                             Message = new ThorChatMessage()
                             {
-                                Content = result.delta.text,
+                                Content = result.delta?.text,
                                 Role = "assistant",
                             }
                         }
