@@ -532,6 +532,56 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                 continue;
             }
 
+            if (result.type == "message_start")
+            {
+                yield return new ThorChatCompletionsResponse()
+                {
+                    Choices =
+                    [
+                        new ThorChatChoiceResponse()
+                        {
+                            Message = new ThorChatMessage()
+                            {
+                                Content = result.delta.text,
+                                Role = "assistant",
+                            }
+                        }
+                    ],
+                    Model = input.Model,
+                    Usage = new ThorUsageResponse()
+                    {
+                        PromptTokens = result.message.usage.input_tokens,
+                    }
+                };
+
+                continue;
+            }
+
+            if (result.type == "message_delta")
+            {
+                yield return new ThorChatCompletionsResponse()
+                {
+                    Choices =
+                    [
+                        new ThorChatChoiceResponse()
+                        {
+                            Message = new ThorChatMessage()
+                            {
+                                Content = result.delta.text,
+                                Role = "assistant",
+                            }
+                        }
+                    ],
+                    Model = input.Model,
+                    Usage = new ThorUsageResponse()
+                    {
+                        CompletionTokens = result.usage.output_tokens,
+                    }
+                };
+
+                continue;
+            }
+
             if (result.message == null)
             {
                 continue;

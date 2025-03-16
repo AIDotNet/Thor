@@ -12,7 +12,11 @@ public class ClaudeStreamDto
     public Delta delta { get; set; }
     
     public ClaudeChatCompletionDto message { get; set; }
+    
+
+    public Usage usage { get; set; }
 }
+
 
 public class Delta
 {

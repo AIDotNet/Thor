@@ -49,13 +49,6 @@ public class AwsStreamOutput : EnumerableEventStream<IEventStreamEvent, BedrockR
                 {
                     var context = EventStreamUtils.ConvertMessageToJsonContext(payload);
                     
-                    if(context.Stream is MemoryStream str)
-                    {
-                        // 转换字符串
-                        var strContent = Encoding.UTF8.GetString(str.ToArray());
-                        
-                    }
-                    
                     var reader = new StreamingUtf8JsonReader(context.Stream);
                     
                     return new ContentBlockStopEventUnmarshaller().Unmarshall(context, ref reader);
@@ -65,12 +58,6 @@ public class AwsStreamOutput : EnumerableEventStream<IEventStreamEvent, BedrockR
                 "MessageStart", payload =>
                 {
                     var context = EventStreamUtils.ConvertMessageToJsonContext(payload);
-                    if(context.Stream is MemoryStream str)
-                    {
-                        // 转换字符串
-                        var strContent = Encoding.UTF8.GetString(str.ToArray());
-                        
-                    }
                     var reader = new StreamingUtf8JsonReader(context.Stream);
                     return new MessageStartEventUnmarshaller().Unmarshall(context, ref reader);
                 }
@@ -87,12 +74,6 @@ public class AwsStreamOutput : EnumerableEventStream<IEventStreamEvent, BedrockR
                 "Metadata", payload =>
                 {
                     var context = EventStreamUtils.ConvertMessageToJsonContext(payload);
-                    if(context.Stream is MemoryStream str)
-                    {
-                        // 转换字符串
-                        var strContent = Encoding.UTF8.GetString(str.ToArray());
-                        
-                    }
                     var reader = new StreamingUtf8JsonReader(context.Stream);
                     return new ConverseStreamMetadataEventUnmarshaller().Unmarshall(context, ref reader);
                 }

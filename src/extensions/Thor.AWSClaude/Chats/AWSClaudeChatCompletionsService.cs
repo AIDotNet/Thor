@@ -688,6 +688,35 @@ namespace Thor.AWSClaude.Chats
                         Model = input?.Model
                     };
                 }
+                else if (content is ConverseStreamMetadataEvent metadataEvent)
+                {
+                    yield return new ThorChatCompletionsResponse()
+                    {
+                        Choices =
+                        [
+                            new ThorChatChoiceResponse
+                            {
+                                Delta = new ThorChatMessage()
+                                {
+                                    Content = null,
+                                },
+                                Message = new ThorChatMessage()
+                                {
+                                    Content = null,
+                                },
+                                FinishReason = "stop",
+                                Index = 0,
+                            }
+                        ],
+                        Usage = new ThorUsageResponse()
+                        {
+                            PromptTokens = metadataEvent.Usage.InputTokens,
+                            CompletionTokens = metadataEvent.Usage.OutputTokens,
+                            TotalTokens = metadataEvent.Usage.TotalTokens ?? 0
+                        },
+                        Model = input?.Model
+                    };
+                }
             }
         }
     }
