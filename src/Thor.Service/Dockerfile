@@ -22,7 +22,7 @@ COPY ["src/extensions/Thor.AzureOpenAI/Thor.AzureOpenAI.csproj", "src/extensions
 COPY ["src/Thor.Abstractions/Thor.Abstractions.csproj", "src/Thor.Abstractions/"]
 COPY ["src/Thor.Domain.Shared/Thor.Domain.Shared.csproj", "src/Thor.Domain.Shared/"]
 COPY ["src/extensions/Thor.Claude/Thor.Claude.csproj", "src/extensions/Thor.Claude/"]
-COPY ["src/extensions/Thor.GoogleClaude/Thor.GCPClaude.csproj", "src/extensions/Thor.GoogleClaude/"]
+COPY ["src/extensions/Thor.GCPClaude/Thor.GCPClaude.csproj", "src/extensions/Thor.GCPClaude/"]
 COPY ["src/extensions/Thor.ErnieBot/Thor.ErnieBot.csproj", "src/extensions/Thor.ErnieBot/"]
 COPY ["src/extensions/Thor.GiteeAI/Thor.GiteeAI.csproj", "src/extensions/Thor.GiteeAI/"]
 COPY ["src/extensions/Thor.Hunyuan/Thor.Hunyuan.csproj", "src/extensions/Thor.Hunyuan/"]
