@@ -647,7 +647,7 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
-            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit, JsonSerializer.Serialize(request));
+            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit, JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             rateLimit++;
             // TODO：限流重试次数
             if (rateLimit > 3)

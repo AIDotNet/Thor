@@ -350,6 +350,11 @@ namespace Thor.AWSClaude.Chats
                 }
                 else
                 {
+                    if(string.IsNullOrEmpty(chatMessage.Content))
+                    {
+                        continue;
+                    }
+                    
                     var item = new Message();
 
                     item.Role = chatMessage.Role;
