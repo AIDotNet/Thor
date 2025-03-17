@@ -464,10 +464,16 @@ public sealed class ChatService(
 
         var model = request.Model;
 
-        if (request.MaxCompletionTokens != null && request.MaxCompletionTokens > 0)
+        if (request.MaxCompletionTokens is > 0)
         {
             request.MaxTokens = request.MaxCompletionTokens;
             request.MaxCompletionTokens = null;
+        }
+
+        if (request.Model == "o3-mini")
+        {
+            request.MaxCompletionTokens = request.MaxTokens;
+            request.MaxTokens = null;
         }
 
         var rateLimit = 0;
