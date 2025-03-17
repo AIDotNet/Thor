@@ -115,6 +115,9 @@ public class ThorChatMessage
     /// </summary>
     [JsonPropertyName("reasoning_content")]
     public string? ReasoningContent { get; set; }
+    
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
 
     /// <summary>
     /// 工具调用列表，模型生成的工具调用，例如函数调用。<br/>

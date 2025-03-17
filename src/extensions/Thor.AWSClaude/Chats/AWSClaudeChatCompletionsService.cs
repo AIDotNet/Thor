@@ -350,22 +350,68 @@ namespace Thor.AWSClaude.Chats
                 }
                 else
                 {
-                    if(string.IsNullOrEmpty(chatMessage.Content))
+                    if (string.IsNullOrEmpty(chatMessage.Content))
                     {
                         continue;
                     }
-                    
-                    var item = new Message();
 
-                    item.Role = chatMessage.Role;
+                    var item = new Message
+                    {
+                        Role = chatMessage.Role
+                    };
 
-                    item.Content =
-                    [
-                        new ContentBlock()
+                    if (chatMessage.Role == "tool")
+                    {
+                        item.Role = "user";
+                        
+                        item.Content =
+                        [
+                            new ContentBlock()
+                            {
+                                ToolResult = new ToolResultBlock()
+                                {
+                                    ToolUseId = chatMessage.ToolCallId,
+                                    Status = ToolResultStatus.Success,
+                                    Content =
+                                    [
+                                        new ToolResultContentBlock()
+                                        {
+                                            Text = chatMessage.Content
+                                        }
+                                    ]
+                                }
+                            }
+                        ];
+                    }
+                    else
+                    {
+                        var block = new ContentBlock()
                         {
                             Text = chatMessage.Content,
+                        };
+
+                        item.Content =
+                        [
+                            block
+                        ];
+                        
+                        if(chatMessage.ToolCalls?.Count > 0)
+                        {
+                            foreach (var toolCall in chatMessage.ToolCalls)
+                            {
+                                item.Content.Add(new ContentBlock()
+                                {
+                                    ToolUse = new ToolUseBlock()
+                                    {
+                                        Name = toolCall.Function.Name,
+                                        Input = Document.FromObject(JsonSerializer.Deserialize<object>(toolCall.Function.Arguments)),
+                                        ToolUseId = toolCall.Id
+                                    },
+                                });
+                            }
                         }
-                    ];
+                    }
+
                     awsMessage.Add(item);
                 }
             }
