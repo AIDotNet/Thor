@@ -15,16 +15,16 @@ export default function Auth() {
         if (res.success) {
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('role', res.data.role);
-            const redirect_uri = localStorage.getItem('redirect_uri');
+            let redirect_uri = localStorage.getItem('redirect_uri');
             if (redirect_uri) {
-                window.location.href = redirect_uri + '?token=' + res.data.token;
+                if (redirect_uri.includes('?')) {
+                    window.location.href = redirect_uri + '&token=' + res.data.token;
+                } else {
+                    window.location.href = redirect_uri + '?token=' + res.data.token;
+                }
                 localStorage.removeItem('redirect_uri');
                 return;
             }
-            message.success({
-                content: "请记住默认密码为Aa123456",
-                duration: 5
-            });
             setTimeout(() => {
                 navigate('/panel');
             }, 800);
@@ -134,11 +134,11 @@ export default function Auth() {
                     height: 'auto',
                     boxShadow: '0 4px 12px rgba(254, 107, 139, 0.5)',
                     transition: 'all 0.3s ease',
-                }} 
-                className="login-button"
-                onClick={() => {
-                    window.location.href = '/login'
-                }}>
+                }}
+                    className="login-button"
+                    onClick={() => {
+                        window.location.href = '/login'
+                    }}>
                     返回登陆
                 </Button>
             </div>
