@@ -137,11 +137,6 @@ public sealed class SiliconFlowChatCompletionsService(ILogger<SiliconFlowChatCom
             
             var content = result?.Choices?.FirstOrDefault()?.Delta;
 
-            if (first && string.IsNullOrWhiteSpace(content?.Content) && string.IsNullOrEmpty(content?.ReasoningContent))
-            {
-                continue;
-            }
-
             if (first && content.Content == OpenAIConstant.ThinkStart)
             {
                 isThink = true;

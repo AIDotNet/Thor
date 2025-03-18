@@ -100,11 +100,6 @@ public class GiteeAIChatCompletionsService : IThorChatCompletionsService
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
 
-            if (first && string.IsNullOrWhiteSpace(result?.Choices?.FirstOrDefault()?.Delta.Content))
-            {
-                continue;
-            }
-
             if (first && result?.Choices?.FirstOrDefault()?.Delta.Content == OpenAIConstant.ThinkStart)
             {
                 isThink = true;

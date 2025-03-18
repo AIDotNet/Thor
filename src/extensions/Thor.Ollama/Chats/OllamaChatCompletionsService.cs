@@ -234,7 +234,7 @@ namespace Thor.Ollama.Chats
                 else
                 {
                     var toolsResult = new List<ThorToolCall>();
-                    if (result.message?.ToolCalls != null && result.message.ToolCalls.Count() > 0)
+                    if (result.message?.ToolCalls != null && result.message.ToolCalls.Any())
                     {
                         foreach (var content in result.message.ToolCalls)
                         {
