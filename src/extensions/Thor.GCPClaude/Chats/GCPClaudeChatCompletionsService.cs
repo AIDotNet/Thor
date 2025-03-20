@@ -452,7 +452,7 @@ namespace Thor.GCPClaude.Chats
             {
                 ["anthropic_version"] = "vertex-2023-10-16",
                 ["stream"] = isStreaming,
-                ["max_tokens"] = input.MaxTokens ?? 1,
+                ["max_tokens"] = input.MaxTokens ?? 8000,
                 ["messages"] = messages
             };
             // 添加系统提示词（如果有）
