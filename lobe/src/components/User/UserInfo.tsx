@@ -79,12 +79,11 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
 
   const renderUserInfo = () => (
     <div style={{
-      height:'calc(100vh - 190px)',
+      height:'calc(100vh - 290px)',
+      overflowY:'auto', 
+      padding:20,
+      overflowX:'hidden',
     }}>
-      <Row justify="center" style={{ marginBottom: 24 }}>
-        <Avatar size={80} icon={<UserOutlined />} src={user.avatar} />
-      </Row>
-      
       <Row gutter={[16, 16]}>
         <Col span={12}>
           <Card size="small" title="基本信息">
