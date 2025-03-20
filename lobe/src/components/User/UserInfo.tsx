@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Avatar, Card, Row, Col, Divider, Tag, Spin } from 'antd';
-import { UserOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { Form, Input, Button, message, Card, Row, Col, Divider, Tag, Spin } from 'antd';
+import {  CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import { updateInfo } from '../../services/UserService';
 import { renderNumber, renderQuota } from '../../utils/render';
 import { InviteInfo } from '../../services/SystemService';

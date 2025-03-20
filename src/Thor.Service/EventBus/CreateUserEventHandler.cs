@@ -27,13 +27,6 @@ public class CreateUserEventHandler : IEventHandler<CreateUserEto>, IDisposable,
     {
         _logger.LogInformation("CreateUserEto event received");
 
-        await _tokenService.CreateAsync(new TokenInput
-        {
-            Name = "默认Token",
-            UnlimitedQuota = true,
-            UnlimitedExpired = true
-        }, @event.User.Id);
-
         switch (@event.Source)
         {
             case CreateUserSource.System:
@@ -46,6 +39,14 @@ public class CreateUserEventHandler : IEventHandler<CreateUserEto>, IDisposable,
                 await _loggerService.CreateSystemAsync("Gitee新增用户：" + @event.User.UserName);
                 break;
         }
+
+        await _tokenService.CreateAsync(new TokenInput
+        {
+            Name = "默认Token",
+            UnlimitedQuota = true,
+            UnlimitedExpired = true,
+            Groups = ["default"]
+        }, @event.User.Id);
 
         _logger.LogInformation("CreateUserEto event received");
     }
