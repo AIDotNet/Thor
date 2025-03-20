@@ -204,6 +204,12 @@ export default function CreateChannel({
               <Option key={"2024-10-01-preview"} value={"2024-10-01-preview"}>
                 2024-10-01-preview
               </Option>
+              <Option key={"2024-10-21"} value={"2024-10-21"}>
+                2024-10-21
+              </Option>
+              <Option key={"2025-01-01-preview"} value={"2025-01-01-preview"}>
+                2025-01-01-preview
+              </Option>
             </Select>
           </Form.Item>
         )}
