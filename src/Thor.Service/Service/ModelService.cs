@@ -90,4 +90,47 @@ public static class ModelService
 
         return modelsListDto;
     }
+    
+    /// <summary>
+    /// 获取所有渠道
+    /// </summary>
+    /// <returns></returns>
+    public static async Task<Dictionary<string,string?>> GetProviderAsync(IThorContext context)
+    {
+        var channels = await context.ModelManagers.Select(x => x.Icon).Distinct().ToListAsync();
+        
+        var result = new Dictionary<string, string?>();
+        foreach (var channel in channels.Where(x=>!string.IsNullOrEmpty(x)))
+        {
+            switch (channel)
+            {
+                case "OpenAI":
+                    result.Add("OpenAI","OpenAI");
+                    break;
+                case "DeepSeek":
+                    result.Add("DeepSeek","深度求索");
+                    break;
+                case "Claude":
+                    result.Add("Claude","Claude");
+                    break;
+                case "ChatGLM":
+                    result.Add("ChatGLM","ChatGLM");
+                    break;
+                case "SiliconCloud":
+                    result.Add("SiliconCloud","硅基流动");
+                    break;
+                case "Moonshot":
+                    result.Add("Moonshot","Moonshot");
+                    break;
+                case "Mistral":
+                    result.Add("Mistral","Mistral");
+                    break;
+                default:
+                    result.Add(channel, channel);
+                    break;
+            }
+        }
+        result.Add("其他",null);
+        return result;
+    }
 }

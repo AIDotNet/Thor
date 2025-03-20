@@ -383,7 +383,7 @@ try
     channel.MapPost("", async (ChannelService service, ChatChannelInput input) =>
         await service.CreateAsync(input));
 
-    channel.MapGet("list", async (ChannelService service, int page, int pageSize,string? keyword) =>
+    channel.MapGet("list", async (ChannelService service, int page, int pageSize, string? keyword) =>
         await service.GetAsync(page, pageSize, keyword));
 
     channel.MapDelete("{id}", async (ChannelService service, string id) =>
@@ -427,6 +427,10 @@ try
     model.MapGet("/use-models", async (HttpContext context) => { return await ModelService.GetUseModels(context); })
         .WithDescription("获取使用模型")
         .AllowAnonymous()
+        .WithOpenApi();
+
+    model.MapGet("/provider", ModelService.GetProviderAsync)
+        .WithDescription("获取所有模型提供商")
         .WithOpenApi();
 
     #endregion

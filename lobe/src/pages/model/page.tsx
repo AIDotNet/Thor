@@ -8,6 +8,7 @@ import { GetModelManagerList } from "../../services/ModelManagerService";
 import { Search } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Flexbox } from "react-layout-kit";
+import { getProvider } from "../../services/ModelService";
 
 export default function DesktopLayout() {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function DesktopLayout() {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [isK, setIsK] = useState<boolean>(false);
+    const [provider, setProvider] = useState<any>([]);    
     const [total, setTotal] = useState<number>(0);
     const [input, setInput] = useState({
         page: 1,
@@ -23,10 +25,19 @@ export default function DesktopLayout() {
         isFirst: true,
         type: ''
     });
-    const [icons, setIcons] = useState<string[]>([]);
 
     // 使用 Ant Design 的主题 token
     const { token } = theme.useToken();
+
+    const loadProvider = () => {
+        getProvider().then((res) => {
+            setProvider(res.data);
+        })
+    }
+
+    useEffect(() => {
+        loadProvider();
+    }, []);
 
     function loadData() {
         setLoading(true);
@@ -67,27 +78,6 @@ export default function DesktopLayout() {
         loadData();
     }, [input.page, input.pageSize, input.isFirst, input.type, input.model])
 
-    useEffect(() => {
-        if (data.length > 0 && icons.length === 0) {
-            const uniqueIcons = Array.from(new Set(data.map(item => item.icon)));
-            // OpenAI排在最前面
-            const openAIIndex = uniqueIcons.indexOf('OpenAI');
-            if (openAIIndex > -1) {
-                uniqueIcons.splice(openAIIndex, 1);
-                uniqueIcons.unshift('OpenAI');
-            }
-
-            uniqueIcons.forEach((icon, index) => {
-                if (icon === '' || icon === undefined) {
-                    uniqueIcons[index] = '其他';
-                }
-            });
-
-            console.log(uniqueIcons);
-
-            setIcons(uniqueIcons);
-        }
-    }, [data]);
 
     return (
         <div className="model-manager-container">
@@ -128,28 +118,35 @@ export default function DesktopLayout() {
                 }
             />
             <div className="icon-filter" style={{ backgroundColor: token.colorBgContainer }}>
-                {icons.map(icon => (
+                {Object.entries(provider).map(([key, value]:any) => (
                     <Flexbox
-                        key={icon}
+                        key={key}
                         horizontal
                         gap={8}
-                        className={`icon-item ${input.type === icon ? 'selected' : ''}`}
+                        className={`icon-item ${input.type === key ? 'selected' : ''}`}
                         onClick={() => {
-                            setInput({
-                                ...input,
-                                type: icon ?? "其他"
-                            })
+                            if(input.type === key){
+                                setInput({
+                                    ...input,
+                                    type: ''
+                                })
+                            }else{
+                                setInput({ 
+                                    ...input,
+                                    type: key
+                                })
+                            }
                         }}
                     >
-                        {getIconByName(icon, 24)?.icon ?? <IconAvatar size={24} Icon={OpenAI} />}
+                        {getIconByName(key, 24)?.icon ?? <IconAvatar size={24} Icon={OpenAI} />}
                         <span style={{
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
                             display: '-webkit-box',
                             WebkitLineClamp: 1,
                             WebkitBoxOrient: 'vertical',
-                            color: input.type === icon ? token.colorTextLightSolid : token.colorText
-                        }}>{icon || '其他'}</span>
+                            color: input.type === key ? token.colorTextLightSolid : token.colorText
+                        }}>{value || '其他'}</span>
                     </Flexbox>
                 ))}
             </div>

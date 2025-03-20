@@ -27,5 +27,9 @@ export const getUseModel = () => {
  * @returns 模型列表
  */
 export const getModelList = async () => {
-  return get('/api/v1/model/models');
+    return get('/api/v1/model/models');
+}
+
+export const getProvider = () => {
+    return get(prefix + '/provider')
 }

@@ -9,7 +9,8 @@ namespace Thor.Service.Service;
 /// 模型管理服务
 /// </summary>
 /// <param name="serviceProvider"></param>
-public sealed class ModelManagerService(IServiceProvider serviceProvider,
+public sealed class ModelManagerService(
+    IServiceProvider serviceProvider,
     IEventBus<UpdateModelManagerCache> eventBus)
     : ApplicationService(serviceProvider), IScopeDependency
 {
@@ -97,7 +98,8 @@ public sealed class ModelManagerService(IServiceProvider serviceProvider,
         });
     }
 
-    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic, string? type)
+    public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic,
+        string? type)
     {
         var query = DbContext.ModelManagers.AsQueryable();
 
@@ -109,6 +111,11 @@ public sealed class ModelManagerService(IServiceProvider serviceProvider,
         if (isPublic)
         {
             query = query.Where(x => x.Enable);
+        }
+
+        if (!string.IsNullOrEmpty(type))
+        {
+            query = query.Where(x => x.Icon == type);
         }
 
         var total = await query.CountAsync();
