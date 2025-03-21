@@ -125,6 +125,15 @@ export default function CreateModelManagerPage({
             <Form.Item name='AudioOutputRate' label='音频完成倍率'>
                 <Input placeholder="请输入音频完成倍率"></Input>
             </Form.Item>
+            <Form.Item name='cacheRate' label='写入缓存倍率'>
+                <InputNumber style={{ width: '100%' }} placeholder="请输入写入缓存倍率" />
+            </Form.Item>
+            <Form.Item name='cacheHitRate' label='缓存命中倍率'>
+                <InputNumber style={{ width: '100%' }} placeholder="请输入缓存命中倍率" />
+            </Form.Item>
+            <Form.Item name='audioCacheRate' label='Audio缓存倍率'>
+                <InputNumber style={{ width: '100%' }} placeholder="请输入Audio缓存倍率" />
+            </Form.Item>
             <Form.Item rules={[
                 {
                     required: true,

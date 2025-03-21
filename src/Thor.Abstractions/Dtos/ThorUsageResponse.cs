@@ -45,6 +45,12 @@ public record ThorUsageResponsePromptTokensDetails
     /// </summary>
     [JsonPropertyName("cached_tokens")]
     public int? CachedTokens { get; set; }
+    
+    /// <summary>
+    /// audio_tokens
+    /// </summary>
+    [JsonPropertyName("audio_tokens")]
+    public int? AudioTokens { get; set; }
 }
 
 /// <summary>

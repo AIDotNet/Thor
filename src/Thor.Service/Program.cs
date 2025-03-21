@@ -8,6 +8,7 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Abstractions.Responses;
 using Thor.AzureOpenAI.Extensions;
 using Thor.Claude.Extensions;
 using Thor.Core.DataAccess;
@@ -820,6 +821,11 @@ try
 
     tracker.MapGet("request-user", (TrackerService service) => service.GetUserRequest())
         .WithDescription("获取用户请求")
+        .WithOpenApi();
+
+    app.MapPost("/v1/responses", (ResponsesService responsesService, HttpContext context, ResponsesInput input) =>
+            responsesService.ExecuteAsync(context, input))
+        .WithDescription("OpenAI Responses")
         .WithOpenApi();
 
     // 对话补全请求

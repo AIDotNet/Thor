@@ -206,7 +206,7 @@ export default function UpdateChannel({
               <Select
                 placeholder="请选择版本"
                 defaultActiveFirstOption={true}
-                value={input.type}
+                value={input.other}
                 onChange={(v) => {
                   setInput({ ...input, other: v });
                 }}
@@ -223,6 +223,12 @@ export default function UpdateChannel({
                 </Option>
                 <Option key={"2024-10-01-preview"} value={"2024-10-01-preview"}>
                   2024-10-01-preview
+                </Option>
+                <Option key={"2024-10-21"} value={"2024-10-21"}>
+                  2024-10-21
+                </Option>
+                <Option key={"2025-01-01-preview"} value={"2025-01-01-preview"}>
+                  2025-01-01-preview
                 </Option>
               </Select>
             </Form.Item>
@@ -269,7 +275,7 @@ export default function UpdateChannel({
             >
               <Select
                 placeholder="资源地域"
-                value={input.type}
+                value={input.other}
                 onChange={(v) => {
                   setInput({ ...input, other: v });
                 }}

@@ -7,6 +7,8 @@ using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Realtime;
+using Thor.Abstractions.Responses;
+using Thor.DeepSeek.Responses;
 using Thor.OpenAI.Audios;
 using Thor.OpenAI.Chats;
 using Thor.OpenAI.Embeddings;
@@ -64,9 +66,11 @@ public static class OpenAIServiceCollectionExtensions
 
         services.AddKeyedTransient<IThorRealtimeService, OpenAIRealtimeService>(OpenAIPlatformOptions
             .PlatformCode);
-        
+
         services.AddKeyedSingleton<IThorAudioService, OpenAIAudioService>(OpenAIPlatformOptions
             .PlatformCode);
+
+        services.AddKeyedSingleton<IThorResponsesService, OpenAIResponsesService>(OpenAIPlatformOptions.PlatformCode);
 
         services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
                 options =>

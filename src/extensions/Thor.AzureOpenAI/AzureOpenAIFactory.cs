@@ -12,7 +12,10 @@ public static class AzureOpenAIFactory
 
     public static string GetAddress(ThorPlatformOptions options, string model)
     {
-        options.Other = "2024-12-01-preview";
+        if (string.IsNullOrEmpty(options.Other))
+        {
+            options.Other = "2025-01-01-preview";
+        }
         return string.Format(AddressTemplate, options.Address.TrimEnd('/'), model, options.Other);
     }
 
