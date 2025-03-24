@@ -658,7 +658,8 @@ public sealed class ChatService(
         {
             // 转字符串memoryStream
             var str = Encoding.UTF8.GetString(memoryStream.ToArray());
-            await File.CreateText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "error.txt"))
+            await File.CreateText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs",
+                    Guid.NewGuid().ToString("N") + ".txt"))
                 .WriteAsync(str);
             rateLimit++;
             // TODO：限流重试次数
