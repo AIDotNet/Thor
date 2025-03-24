@@ -464,7 +464,9 @@ public sealed class ChatService(
         using var memoryStream = new MemoryStream();
         await context.Request.Body.CopyToAsync(memoryStream);
 
-        var request = JsonSerializer.Deserialize<ThorChatCompletionsRequest>(memoryStream.ToArray());
+        var request =
+            JsonSerializer.Deserialize<ThorChatCompletionsRequest>(memoryStream.ToArray(),
+                ThorJsonSerializer.DefaultOptions);
 
         using var chatCompletions =
             Activity.Current?.Source.StartActivity("对话补全调用");
@@ -654,8 +656,10 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
-            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
-                JsonSerializer.Serialize(memoryStream.ToArray()));
+            // 转字符串memoryStream
+            var str = Encoding.UTF8.GetString(memoryStream.ToArray());
+            await File.CreateText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "error.txt"))
+                .WriteAsync(str);
             rateLimit++;
             // TODO：限流重试次数
             if (rateLimit > 3)
