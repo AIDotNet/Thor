@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using ERNIE_Bot.SDK.Models;
 using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
@@ -458,16 +457,8 @@ public sealed class ChatService(
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="NotModelException"></exception>
-    public async ValueTask ChatCompletionsAsync(HttpContext context)
+    public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
-        // 先读取到内存
-        using var memoryStream = new MemoryStream();
-        await context.Request.Body.CopyToAsync(memoryStream);
-
-        var request =
-            JsonSerializer.Deserialize<ThorChatCompletionsRequest>(memoryStream.ToArray(),
-                ThorJsonSerializer.DefaultOptions);
-
         using var chatCompletions =
             Activity.Current?.Source.StartActivity("对话补全调用");
 
@@ -656,11 +647,8 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
-            // 转字符串memoryStream
-            var str = Encoding.UTF8.GetString(memoryStream.ToArray());
-            await File.CreateText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs",
-                    Guid.NewGuid().ToString("N") + ".txt"))
-                .WriteAsync(str);
+            // 读取body
+            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit, JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             rateLimit++;
             // TODO：限流重试次数
             if (rateLimit > 3)
