@@ -79,10 +79,13 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
 
   const renderUserInfo = () => (
     <div style={{
-      height:'calc(100vh - 290px)',
-      overflowY:'auto', 
-      padding:20,
-      overflowX:'hidden',
+      height: 'calc(100vh - 290px)',
+      overflowY: 'auto',
+      padding: 20,
+      overflowX: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
     }}>
       <Row gutter={[16, 16]}>
         <Col span={12}>
@@ -142,6 +145,7 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
         type="primary" 
         onClick={() => setIsEditing(true)}
         block
+        style={{ transition: 'background-color 0.3s', ':hover': { backgroundColor: '#1890ff' } }}
       >
         编辑基本信息
       </Button>
@@ -153,6 +157,7 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
       form={form}
       layout="vertical"
       onFinish={handleSubmit}
+      style={{ maxWidth: 600, width: '100%', margin: '0 auto' }}
     >
       <Form.Item
         label="用户名"
