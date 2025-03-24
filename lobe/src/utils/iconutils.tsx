@@ -133,11 +133,6 @@ export function getIconByName(name: string, size: number = 36) {
                 icon: <IconAvatar Icon={Yi} size={size} />,
                 label: 'Yi'
             };
-        case 'Zhipu':
-            return {
-                icon: <IconAvatar Icon={Zhipu} size={size} />,
-                label: '智谱'
-            };
         case 'Moonshot':
             return {
                 icon: <IconAvatar Icon={Moonshot} size={size} />,
@@ -177,11 +172,6 @@ export function getIconByName(name: string, size: number = 36) {
             return {
                 icon: <IconAvatar Icon={Meta} size={size} />,
                 label: 'Meta'
-            };
-        case 'Yi':
-            return {
-                icon: <IconAvatar Icon={Yi} size={size} />,
-                label: 'Yi'
             };
         case 'Zhipu':   
             return {

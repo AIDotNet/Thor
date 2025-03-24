@@ -522,6 +522,10 @@ try
     user.MapPut("/update-password", async (UserService service, UpdatePasswordInput input) =>
             await service.UpdatePasswordAsync(input))
         .RequireAuthorization();
+    
+    user.MapPost("/upload-avatar",async (UserService UserService,HttpContext context) =>
+        await UserService.UploadAvatarAsync(context))
+        .RequireAuthorization();
 
     #endregion
 
