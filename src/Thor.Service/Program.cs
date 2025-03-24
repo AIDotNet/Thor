@@ -828,8 +828,12 @@ try
 
     // 对话补全请求
     app.MapPost("/v1/chat/completions",
-            async (ChatService service, HttpContext httpContext, ThorChatCompletionsRequest request) =>
-                await service.ChatCompletionsAsync(httpContext, request))
+            async (ChatService service, HttpContext httpContext
+                    // , ThorChatCompletionsRequest request
+                    ) =>
+                await service.ChatCompletionsAsync(httpContext
+                    // , request
+                    ))
         .WithGroupName("OpenAI")
         .WithDescription("Get completions from OpenAI")
         .WithOpenApi();
