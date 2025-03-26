@@ -606,13 +606,6 @@ public sealed class ChatService(
                 await context.WriteErrorAsync($"当前{request.Model}模型未设置倍率,请联系管理员设置倍率", "400");
             }
         }
-        catch (BusinessException e)
-        {
-            logger.LogError("请求业务异常 请求参数 :{query} Exceptions:{e}",
-                JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions), e);
-            context.Response.StatusCode = 400;
-            await context.WriteErrorAsync(e.Message, "400");
-        }
         catch (ThorRateLimitException)
         {
             logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
