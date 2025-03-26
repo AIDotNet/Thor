@@ -17,6 +17,7 @@ using Thor.Abstractions.Realtime.Dto;
 using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
+using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
@@ -513,6 +514,8 @@ public sealed class ChatService(
                 {
                     throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
                 }
+
+                ChannelAsyncLocal.ChannelIds.Add(channel.Id);
 
                 // 获取渠道指定的实现类型的服务
                 var chatCompletionsService = GetKeyedService<IThorChatCompletionsService>(channel.Type);
