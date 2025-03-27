@@ -1,0 +1,105 @@
+/* 用户信息页面样式 */
+.user-profile-tabs .ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
+.info-card {
+  height: 100%;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 12px;
+  line-height: 24px;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  color: #8c8c8c;
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.info-value {
+  flex: 1;
+  word-break: break-word;
+}
+
+.info-value.highlight {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* 邀请奖励统计框样式 */
+.stat-box {
+  text-align: center;
+  padding: 20px 10px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  transition: all 0.3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stat-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #fff;
+}
+
+.stat-icon {
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.qrcode-container {
+  padding: 10px;
+  background: #fafafa;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.invite-link-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 响应式调整 */
+@media (max-width: 576px) {
+  .info-item {
+    flex-direction: column;
+  }
+  
+  .info-label {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+  
+  .stat-box {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .qrcode-container {
+    margin-bottom: 24px;
+  }
+} 

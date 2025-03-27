@@ -22,20 +22,20 @@ public partial class UserService(
         {
             throw new Exception("注册功能已关闭,请联系管理员");
         }
-        
+
         // 判断账号和密码长度是否满足5位
-        if (input.UserName.Length < 5 || input.Password.Length < 5) 
+        if (input.UserName.Length < 5 || input.Password.Length < 5)
             throw new Exception("用户名和密码长度不能小于5位");
 
         // 使用正则表达式检测账号是否由英文和数字组成
         if (!CheckUserName().IsMatch(input.UserName))
             throw new Exception("用户名只能由英文和数字组成");
-        
+
         if (!CheEmail().IsMatch(input.Email))
         {
             throw new Exception("邮箱格式错误");
         }
-        
+
         if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
         {
             // 判断验证码是否正确
@@ -47,7 +47,7 @@ public partial class UserService(
         var exist = await DbContext.Users.AnyAsync(x => x.UserName == input.UserName || x.Email == input.Email);
         if (exist)
             throw new Exception("用户名已存在");
-        
+
         // 如果不是管理员则默认分组为default
         if (!UserContext.IsAdmin)
         {
@@ -86,7 +86,7 @@ public partial class UserService(
         {
             var systemService = serviceProvider.GetRequiredService<SystemService>();
 
-            await systemService.InviteCode(input.InviteCode,user);
+            await systemService.InviteCode(input.InviteCode, user);
         }
 
         if (SettingService.GetSetting<bool>(SettingExtensions.SystemSetting.EnableEmailRegister))
@@ -343,6 +343,44 @@ public partial class UserService(
         await DbContext.Users.Where(x => x.Id == UserContext.CurrentUserId)
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.Password, user.Password)
                 .SetProperty(y => y.PasswordHas, user.PasswordHas));
+
+        await RefreshUserAsync(UserContext.CurrentUserId);
+    }
+
+    public async Task UploadAvatarAsync(HttpContext context)
+    {
+        // 先将图片保存到wwwroot
+        var file = context.Request.Form.Files[0];
+        var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "avatar", fileName);
+
+        var fileInfo = new FileInfo(path);
+
+        if (fileInfo.Directory?.Exists == false)
+        {
+            fileInfo.Directory.Create();
+        }
+        
+        using (var stream = new FileStream(path, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        // 更新用户头像
+        var user = await DbContext.Users.FirstOrDefaultAsync(x => x.Id == UserContext.CurrentUserId);
+
+        // 获取用户请求域名
+        var request = context.Request;
+        var host = request.Headers["Host"].ToString();
+        var scheme = request.Scheme;
+
+        var url = $"{scheme}://{host}/avatar/{fileName}";
+
+
+        user.Avatar = url;
+
+        await DbContext.Users.Where(x => x.Id == UserContext.CurrentUserId)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.Avatar, user.Avatar));
 
         await RefreshUserAsync(UserContext.CurrentUserId);
     }

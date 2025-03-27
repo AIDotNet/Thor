@@ -610,6 +610,8 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
+            // 读取body
+            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit, JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
                 JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             rateLimit++;

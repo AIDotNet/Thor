@@ -6,6 +6,7 @@ using System.Text.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
@@ -21,9 +22,10 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
         using var openai =
             Activity.Current?.Source.StartActivity("Azure OpenAI 对话补全");
         var url = AzureOpenAIFactory.GetAddress(options, chatCompletionCreate.Model);
-        
+
         var response =
-            await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
+            await HttpClientFactory.GetHttpClient(options.Address)
+                .PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
 
         openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
@@ -65,7 +67,11 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
 
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            logger.LogError("Azure对话异常 , StatusCode: {StatusCode} ", response.StatusCode);
+            var error = await response.Content.ReadFromJsonAsync<ThorChatCompletionsResponse>();
+            logger.LogError("Azure对话异常 , StatusCode: {StatusCode} 错误响应内容：{Content}", response.StatusCode,
+                error);
+
+            throw new BusinessException("OpenAI对话异常：" + error.Error.Message, response.StatusCode.ToString());
         }
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
@@ -78,7 +84,8 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
 
             if (line.StartsWith('{'))
             {
-                logger.LogInformation("AzureOpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                logger.LogInformation("AzureOpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}",
+                    response.StatusCode,
                     line);
 
                 throw new BusinessException("AzureOpenAI对话异常", line);
