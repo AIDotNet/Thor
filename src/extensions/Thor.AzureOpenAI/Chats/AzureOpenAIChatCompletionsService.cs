@@ -71,13 +71,12 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
             logger.LogError("Azure对话异常 , StatusCode: {StatusCode} 错误响应内容：{Content}", response.StatusCode,
                 error);
 
-            throw new BusinessException("OpenAI对话异常：" + error.Error.Message, response.StatusCode.ToString());
+            throw new BusinessException("AzureOpenAI对话异常：" + error.Error.Message, response.StatusCode.ToString());
         }
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
         string? line = string.Empty;
         var first = true;
-        var isThink = false;
         while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
@@ -107,43 +106,9 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
             {
                 continue;
             }
-
-
+            
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
-
-            var content = result?.Choices?.FirstOrDefault()?.Delta;
-
-            if (first && string.IsNullOrWhiteSpace(content?.Content) && string.IsNullOrEmpty(content?.ReasoningContent))
-            {
-                continue;
-            }
-
-            if (first && content.Content == OpenAIConstant.ThinkStart)
-            {
-                isThink = true;
-                continue;
-                // 需要将content的内容转换到其他字段
-            }
-
-            if (isThink && content.Content.Contains(OpenAIConstant.ThinkEnd))
-            {
-                isThink = false;
-                // 需要将content的内容转换到其他字段
-                continue;
-            }
-
-            if (isThink)
-            {
-                // 需要将content的内容转换到其他字段
-                foreach (var choice in result.Choices)
-                {
-                    choice.Delta.ReasoningContent = choice.Delta.Content;
-                    choice.Delta.Content = string.Empty;
-                }
-            }
-
-            first = false;
 
             yield return result;
         }
