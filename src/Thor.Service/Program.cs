@@ -43,7 +43,19 @@ using Product = Thor.Service.Domain.Product;
 
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
+    Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
+    var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
+    {
+        Args = args,
+        ContentRootPath = AppContext.BaseDirectory,
+    });
+
+    // 添加Windows服务支持
+    if (OperatingSystem.IsWindows())
+    {
+        builder.Host.UseWindowsService(options => { options.ServiceName = "ThorService"; });
+    }
 
     builder.HostEnvironment();
 
@@ -522,6 +534,10 @@ try
 
     user.MapPut("/update-password", async (UserService service, UpdatePasswordInput input) =>
             await service.UpdatePasswordAsync(input))
+        .RequireAuthorization();
+
+    user.MapPost("/upload-avatar", async (UserService UserService, HttpContext context) =>
+            await UserService.UploadAvatarAsync(context))
         .RequireAuthorization();
 
     #endregion

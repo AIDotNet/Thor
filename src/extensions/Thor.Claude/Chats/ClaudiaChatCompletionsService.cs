@@ -2,13 +2,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
-using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 using Thor.Claude.Chats.Dto;
 using ThorChatCompletionsResponse =
