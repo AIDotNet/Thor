@@ -42,72 +42,8 @@ public sealed class ChatService(
     ILogger<ChatService> logger,
     ModelMapService modelMapService,
     LoggerService loggerService)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : AIService(serviceProvider,imageService), IScopeDependency
 {
-    /// <summary>
-    ///  按量计费模型倍率模板
-    /// </summary>
-    private const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1} 分组倍率：{2}";
-
-    /// <summary>
-    /// 按次计费模型倍率模板
-    /// </summary>
-    private const string ConsumerTemplateOnDemand = "按次数计费费用：{0} 分组倍率：{1}";
-
-    /// <summary>
-    /// 实时对话计费模型倍率模板
-    /// </summary>
-    private const string RealtimeConsumerTemplate = "模型倍率：文本提示词倍率:{0} 文本完成倍率:{1} 音频请求倍率:{2} 音频完成倍率:{3}  实时对话 分组倍率：{4}";
-
-
-    private static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()
-    {
-        {
-            "dall-e-2", new Dictionary<string, double>
-            {
-                { "256x256", 1 },
-                { "512x512", 1.125 },
-                { "1024x1024", 1.25 }
-            }
-        },
-        {
-            "dall-e-3", new Dictionary<string, double>
-            {
-                { "1024x1024", 1 },
-                { "1024x1792", 2 },
-                { "1792x1024", 2 }
-            }
-        },
-        {
-            "ali-stable-diffusion-xl", new Dictionary<string, double>
-            {
-                { "512x1024", 1 },
-                { "1024x768", 1 },
-                { "1024x1024", 1 },
-                { "576x1024", 1 },
-                { "1024x576", 1 }
-            }
-        },
-        {
-            "ali-stable-diffusion-v1.5", new Dictionary<string, double>
-            {
-                { "512x1024", 1 },
-                { "1024x768", 1 },
-                { "1024x1024", 1 },
-                { "576x1024", 1 },
-                { "1024x576", 1 }
-            }
-        },
-        {
-            "wanx-v1", new Dictionary<string, double>
-            {
-                { "1024x1024", 1 },
-                { "720x1280", 1 },
-                { "1280x720", 1 }
-            }
-        }
-    };
-
 
     public async Task CreateImageAsync(HttpContext context, ImageCreateRequest request)
     {
@@ -532,6 +468,7 @@ public sealed class ChatService(
 
                 int requestToken;
                 var responseToken = 0;
+                int cachedTokens = 0;
 
                 var sw = Stopwatch.StartNew();
 
@@ -549,14 +486,14 @@ public sealed class ChatService(
                     using var activity =
                         Activity.Current?.Source.StartActivity("非流式对话", ActivityKind.Internal);
 
-                    (requestToken, responseToken) =
+                    (requestToken, responseToken, cachedTokens) =
                         await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
                             rate);
                 }
 
                 var quota = requestToken * rate.PromptRate;
 
-                var completionRatio = GetCompletionRatio(request.Model);
+                var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
                 quota += responseToken * rate.PromptRate * completionRatio;
 
                 // 计算分组倍率
@@ -570,16 +507,42 @@ public sealed class ChatService(
                 // 判断是否按次
                 if (rate.QuotaType == ModelQuotaType.OnDemand)
                 {
-                    await loggerService.CreateConsumeAsync(
-                        string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
-                        request.Model,
-                        requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
-                        channel.Name, context.GetIpAddress(), context.GetUserAgent(),
-                        request.Stream is true,
-                        (int)sw.ElapsedMilliseconds, organizationId);
+                    // 如果命中缓存 并且缓存倍率大于0 小于0则不计算缓存
+                    if (cachedTokens > 0 && rate.CacheRate > 0)
+                    {
+                        // 如果命中缓存充值quota
+                        quota = requestToken * rate.CacheRate.Value;
 
-                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                        request.Model);
+                        quota += responseToken * rate.CacheRate.Value * completionRatio;
+
+                        // 计算分组倍率
+                        quota = (decimal)userGroup!.Rate * quota;
+
+                        // 将quota 四舍五入
+                        quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                        await loggerService.CreateConsumeAsync(
+                            string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
+                                cachedTokens, rate.CacheRate),
+                            request.Model,
+                            requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                            channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                            request.Stream is true,
+                            (int)sw.ElapsedMilliseconds, organizationId);
+                    }
+                    else
+                    {
+                        await loggerService.CreateConsumeAsync(
+                            string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
+                            request.Model,
+                            requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                            channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                            request.Stream is true,
+                            (int)sw.ElapsedMilliseconds, organizationId);
+
+                        await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                            request.Model);
+                    }
                 }
                 else
                 {
@@ -651,6 +614,8 @@ public sealed class ChatService(
         catch (Exception e)
         {
             // 读取body
+            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
+                JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
                 JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             rateLimit++;
@@ -892,7 +857,7 @@ public sealed class ChatService(
     /// <param name="rate"></param>
     /// <returns></returns>
     /// <exception cref="InsufficientQuotaException"></exception>
-    private async ValueTask<(int requestToken, int responseToken)> ChatCompletionsHandlerAsync(
+    private async ValueTask<(int requestToken, int responseToken, int cachedTokens)> ChatCompletionsHandlerAsync(
         HttpContext context,
         ThorChatCompletionsRequest request,
         ChatChannel channel,
@@ -902,6 +867,9 @@ public sealed class ChatService(
     {
         int requestToken = 0;
         int responseToken = 0;
+
+        // 命中缓存tokens数量
+        int cachedTokens = 0;
 
         var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
@@ -986,6 +954,7 @@ public sealed class ChatService(
             await context.Response.WriteAsJsonAsync(result);
         }
 
+
         if (rate.QuotaType == ModelQuotaType.OnDemand && request.ResponseFormat?.JsonSchema is not null)
         {
             requestToken += TokenHelper.GetTotalTokens(request.ResponseFormat.JsonSchema.Name,
@@ -1018,7 +987,14 @@ public sealed class ChatService(
             responseToken += TokenHelper.GetTokens(result?.Choices?.FirstOrDefault()?.Delta.Content ?? string.Empty);
         }
 
-        return (requestToken, responseToken);
+
+        if (result?.Usage?.PromptTokensDetails?.CachedTokens > 0)
+        {
+            cachedTokens = result.Usage.PromptTokensDetails.CachedTokens.Value;
+        }
+
+
+        return (requestToken, responseToken, cachedTokens);
     }
 
     public async Task TranslationsAsync(HttpContext context)
@@ -1560,68 +1536,6 @@ public sealed class ChatService(
     }
 
     /// <summary>
-    /// 权重算法
-    /// </summary>
-    /// <param name="channel"></param>
-    /// <returns></returns>
-    private static ChatChannel? CalculateWeight(IEnumerable<ChatChannel> channel)
-    {
-        var chatChannels = channel.ToList();
-        if (chatChannels.Count == 0)
-        {
-            return null;
-        }
-
-        // 所有权重值之和
-        var total = chatChannels.Sum(x => x.Order);
-
-        var value = Convert.ToInt32(Random.Shared.NextDouble() * total);
-
-        foreach (var chatChannel in chatChannels)
-        {
-            value -= chatChannel.Order;
-            if (value <= 0)
-            {
-                return chatChannel;
-            }
-        }
-
-        return chatChannels.Last();
-    }
-
-    /// <summary>
-    ///     对话模型补全倍率
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    private decimal GetCompletionRatio(string name)
-    {
-        if (ModelManagerService.PromptRate?.TryGetValue(name, out var ratio) == true)
-            return (decimal)(ratio.CompletionRate ?? 0);
-
-        if (name.StartsWith("gpt-3.5"))
-        {
-            if (name == "gpt-3.5-turbo" || name.EndsWith("0125")) return 3;
-
-            if (name.EndsWith("1106")) return 2;
-
-            return (decimal)(4.0 / 3.0);
-        }
-
-        if (name.StartsWith("gpt-4")) return name.StartsWith("gpt-4-turbo") ? 3 : 2;
-
-        if (name.StartsWith("claude-")) return name.StartsWith("claude-3") ? 5 : 3;
-
-        if (name.StartsWith("mistral-") || name.StartsWith("gemini-")) return 3;
-
-        return name switch
-        {
-            "llama2-70b-4096" => new decimal(0.8 / 0.7),
-            _ => 1
-        };
-    }
-
-    /// <summary>
     /// 计算图片倍率
     /// </summary>
     /// <param name="module"></param>
@@ -1655,56 +1569,4 @@ public sealed class ChatService(
         return 1;
     }
 
-    /// <summary>
-    /// 计算图片token
-    /// </summary>
-    /// <param name="url"></param>
-    /// <param name="detail"></param>
-    /// <returns></returns>
-    public async ValueTask<Tuple<int, Exception>> CountImageTokens(string url, string detail)
-    {
-        var fetchSize = true;
-        int width = 0, height = 0;
-        var lowDetailCost = 20; // Assuming lowDetailCost is 20
-        var highDetailCostPerTile = 100; // Assuming highDetailCostPerTile is 100
-        var additionalCost = 50; // Assuming additionalCost is 50
-
-        if (string.IsNullOrEmpty(detail) || detail == "auto") detail = "high";
-
-        switch (detail)
-        {
-            case "low":
-                return new Tuple<int, Exception>(lowDetailCost, null);
-            case "high":
-                if (fetchSize)
-                    try
-                    {
-                        (width, height) = await imageService.GetImageSize(url);
-                    }
-                    catch (Exception e)
-                    {
-                        return new Tuple<int, Exception>(0, e);
-                    }
-
-                if (width > 2048 || height > 2048)
-                {
-                    var ratio = 2048.0 / Math.Max(width, height);
-                    width = (int)(width * ratio);
-                    height = (int)(height * ratio);
-                }
-
-                if (width > 768 && height > 768)
-                {
-                    var ratio = 768.0 / Math.Min(width, height);
-                    width = (int)(width * ratio);
-                    height = (int)(height * ratio);
-                }
-
-                var numSquares = (int)Math.Ceiling((double)width / 512) * (int)Math.Ceiling((double)height / 512);
-                var result = numSquares * highDetailCostPerTile + additionalCost;
-                return new Tuple<int, Exception>(result, null);
-            default:
-                return new Tuple<int, Exception>(0, new Exception("Invalid detail option"));
-        }
-    }
 }

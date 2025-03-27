@@ -43,7 +43,7 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
         }
 
         var result = await response.Content
-            .ReadFromJsonAsync<ThorChatCompletionsResponse>(cancellationToken: cancellationToken)
+            .ReadFromJsonAsync<ThorChatCompletionsResponse>(ThorJsonSerializer.DefaultOptions, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
 
 

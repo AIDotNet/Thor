@@ -8,6 +8,7 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Abstractions.Responses;
 using Thor.AzureOpenAI.Extensions;
 using Thor.Claude.Extensions;
 using Thor.Core.DataAccess;
@@ -42,7 +43,19 @@ using Product = Thor.Service.Domain.Product;
 
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
+    Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
+    var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
+    {
+        Args = args,
+        ContentRootPath = AppContext.BaseDirectory,
+    });
+
+    // 添加Windows服务支持
+    if (OperatingSystem.IsWindows())
+    {
+        builder.Host.UseWindowsService(options => { options.ServiceName = "ThorService"; });
+    }
 
     builder.HostEnvironment();
 
@@ -527,6 +540,10 @@ try
         await UserService.UploadAvatarAsync(context))
         .RequireAuthorization();
 
+    user.MapPost("/upload-avatar", async (UserService UserService, HttpContext context) =>
+            await UserService.UploadAvatarAsync(context))
+        .RequireAuthorization();
+
     #endregion
 
     #region ModelMapService
@@ -824,6 +841,11 @@ try
 
     tracker.MapGet("request-user", (TrackerService service) => service.GetUserRequest())
         .WithDescription("获取用户请求")
+        .WithOpenApi();
+
+    app.MapPost("/v1/responses", (ResponsesService responsesService, HttpContext context, ResponsesInput input) =>
+            responsesService.ExecuteAsync(context, input))
+        .WithDescription("OpenAI Responses")
         .WithOpenApi();
 
     // 对话补全请求
