@@ -54,7 +54,9 @@ public sealed class ChannelService(
     {
         var group = token?.Groups ?? (user).Groups;
         return (await GetChannelsAsync()).Where(x =>
-            x.Models.Contains(model) &&
+            x.Models.Contains(model)
+            // 防止重试重复分配
+            && !ChannelAsyncLocal.ChannelIds.Contains(x.Id) &&
             (group.Length == 0 || x.Groups.Select(x => x.ToLower()).Intersect(group).Any()));
     }
 
