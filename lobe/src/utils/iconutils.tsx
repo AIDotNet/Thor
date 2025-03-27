@@ -178,11 +178,6 @@ export function getIconByName(name: string, size: number = 36) {
                 icon: <IconAvatar Icon={Zhipu} size={size} />,
                 label: 'Zhipu'
             };
-        case 'Wenxin':
-            return {
-                icon: <IconAvatar Icon={Wenxin} size={size} />,
-                label: 'Wenxin'
-            };
         default:
             return {
                 icon: <IconAvatar Icon={OpenAI} size={size} />,

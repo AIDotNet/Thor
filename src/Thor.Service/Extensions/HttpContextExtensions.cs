@@ -76,6 +76,12 @@ public static class HttpContextExtensions
         await context.Response.Body.FlushAsync();
     }
 
+    public static async ValueTask WriteAsEventStreamAsync(this HttpContext context, string @event)
+    {
+        await context.Response.WriteAsync($"{@event}\n", Encoding.UTF8);
+        await context.Response.Body.FlushAsync();
+    }
+
     /// <summary>
     /// 往响应内容写入事件流结束数据
     /// </summary>

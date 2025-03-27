@@ -4,11 +4,11 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
+using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Extensions;
-using Thor.Claude.Chats.Dto;
 using ThorChatCompletionsResponse =
     Thor.Abstractions.Chats.Dtos.ThorChatCompletionsResponse;
 
@@ -144,16 +144,16 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             Id = value.id,
             Usage = new ThorUsageResponse()
             {
-                CompletionTokens = value.usage.output_tokens,
-                PromptTokens = value.usage.input_tokens
+                CompletionTokens = value.Usage.output_tokens,
+                PromptTokens = value.Usage.input_tokens
             }
         };
 
-        if (value.usage.cache_read_input_tokens != null)
+        if (value.Usage.cache_read_input_tokens != null)
         {
             thor.Usage.PromptTokensDetails ??= new ThorUsageResponsePromptTokensDetails()
             {
-                CachedTokens = value.usage.cache_read_input_tokens.Value,
+                CachedTokens = value.Usage.cache_read_input_tokens.Value,
             };
         }
 
@@ -521,8 +521,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                         Id = result?.message?.id,
                         Usage = new ThorUsageResponse()
                         {
-                            CompletionTokens = result?.message?.usage?.output_tokens,
-                            PromptTokens = result?.message?.usage?.input_tokens,
+                            CompletionTokens = result?.message?.Usage?.output_tokens,
+                            PromptTokens = result?.message?.Usage?.input_tokens,
                         }
                     };
                 }
@@ -555,7 +555,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                         Model = input.Model,
                         Usage = new ThorUsageResponse()
                         {
-                            PromptTokens = result?.message?.usage?.input_tokens,
+                            PromptTokens = result?.message?.Usage?.input_tokens,
                         }
                     };
                 }
@@ -578,8 +578,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                         Id = result?.message?.id,
                         Usage = new ThorUsageResponse()
                         {
-                            CompletionTokens = result?.message?.usage?.output_tokens,
-                            PromptTokens = result?.message?.usage?.input_tokens,
+                            CompletionTokens = result?.message?.Usage?.output_tokens,
+                            PromptTokens = result?.message?.Usage?.input_tokens,
                         }
                     };
                 }
@@ -625,7 +625,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                     Model = input.Model,
                     Usage = new ThorUsageResponse()
                     {
-                        PromptTokens = result?.message?.usage?.input_tokens,
+                        PromptTokens = result?.message?.Usage?.input_tokens,
                     }
                 };
             }
@@ -653,7 +653,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                     Model = input.Model,
                     Usage = new ThorUsageResponse()
                     {
-                        PromptTokens = result?.message?.usage?.input_tokens,
+                        PromptTokens = result?.message?.Usage?.input_tokens,
                     }
                 };
                 continue;
@@ -677,7 +677,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                     Model = input.Model,
                     Usage = new ThorUsageResponse()
                     {
-                        PromptTokens = result?.message?.usage?.input_tokens,
+                        PromptTokens = result?.message?.Usage?.input_tokens,
                     }
                 };
 
@@ -702,7 +702,7 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                     Model = input.Model,
                     Usage = new ThorUsageResponse()
                     {
-                        CompletionTokens = result.usage.output_tokens,
+                        CompletionTokens = result.Usage.output_tokens,
                     }
                 };
 
@@ -756,8 +756,8 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
                 Id = result.message.id,
                 Usage = new ThorUsageResponse()
                 {
-                    CompletionTokens = result.message.usage.output_tokens,
-                    PromptTokens = result.message.usage.input_tokens,
+                    CompletionTokens = result.message.Usage.output_tokens,
+                    PromptTokens = result.message.Usage.input_tokens,
                 }
             };
         }

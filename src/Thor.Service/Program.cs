@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Serilog;
+using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Embeddings.Dtos;
@@ -36,6 +37,7 @@ using Thor.Service.Infrastructure;
 using Thor.Service.Infrastructure.Middlewares;
 using Thor.Service.Options;
 using Thor.Service.Service;
+using Thor.Service.Service.OpenAI;
 using Thor.SiliconFlow.Extensions;
 using Thor.SparkDesk.Extensions;
 using Thor.VolCenGine.Extensions;
@@ -535,15 +537,10 @@ try
     user.MapPut("/update-password", async (UserService service, UpdatePasswordInput input) =>
             await service.UpdatePasswordAsync(input))
         .RequireAuthorization();
-    
-    user.MapPost("/upload-avatar",async (UserService UserService,HttpContext context) =>
-        await UserService.UploadAvatarAsync(context))
-        .RequireAuthorization();
 
     user.MapPost("/upload-avatar", async (UserService UserService, HttpContext context) =>
             await UserService.UploadAvatarAsync(context))
         .RequireAuthorization();
-
     #endregion
 
     #region ModelMapService
@@ -855,6 +852,12 @@ try
         .WithGroupName("OpenAI")
         .WithDescription("Get completions from OpenAI")
         .WithOpenApi();
+
+    app.MapPost("/v1/messages",
+        (async (HttpContext context, AnthropicChatService service, AnthropicInput input) =>
+        {
+            await service.MessageAsync(context, input);
+        }));
 
     // 文本补全接口,不建议使用，使用对话补全即可
     app.MapPost("/v1/completions", async (ChatService service, HttpContext context, CompletionCreateRequest input) =>
