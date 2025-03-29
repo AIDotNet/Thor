@@ -78,7 +78,6 @@ public class AnthropicChatService(
                     throw new BusinessException($"并未实现：{channel.Type} 的服务", "400");
                 }
 
-
                 // 记录请求模型 / 请求用户
                 logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", request.Model, user?.UserName,
                     channel.Name);
@@ -484,7 +483,7 @@ public class AnthropicChatService(
                 isFirst = false;
             }
 
-            if (!string.IsNullOrEmpty(@event))
+            if (item == null && !string.IsNullOrEmpty(@event))
             {
                 await context.WriteAsEventStreamAsync(@event).ConfigureAwait(false);
                 continue;
@@ -507,7 +506,14 @@ public class AnthropicChatService(
             }
 
             responseMessage.Append(item?.delta?.text ?? item?.message?.content?.FirstOrDefault()?.text);
-            await context.WriteAsEventStreamDataAsync(item).ConfigureAwait(false);
+            if (@event.StartsWith("data:"))
+            {
+                await context.WriteAsEventAsync(@event + "\n\n").ConfigureAwait(false);
+            }
+            else
+            {
+                await context.WriteAsEventAsync(@event).ConfigureAwait(false);
+            }
         }
 
         await context.WriteAsEventStreamEndAsync();

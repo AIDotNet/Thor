@@ -122,6 +122,7 @@ public class AnthropicChatCompletionsService(ILogger<AnthropicChatCompletionsSer
 
         string? toolId = null;
         string? toolName = null;
+        string? data = null;
         while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
@@ -135,32 +136,36 @@ public class AnthropicChatCompletionsService(ILogger<AnthropicChatCompletionsSer
             }
 
             if (line.StartsWith(OpenAIConstant.Data))
-                line = line[OpenAIConstant.Data.Length..];
+            {
+                data = line[OpenAIConstant.Data.Length..].Trim();
+            }
 
-            line = line.Trim();
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
 
-            if (string.IsNullOrWhiteSpace(line)) continue;
-
-            if (line == OpenAIConstant.Done)
+            if (data == OpenAIConstant.Done)
             {
                 break;
             }
 
             if (line.StartsWith(':'))
             {
+                yield return (line, null);
                 continue;
             }
 
-            if (line.StartsWith("event: ", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(data))
             {
                 yield return (line, null);
                 continue;
             }
 
-            var result = JsonSerializer.Deserialize<ClaudeStreamDto>(line,
+            var result = JsonSerializer.Deserialize<ClaudeStreamDto>(data,
                 ThorJsonSerializer.DefaultOptions);
 
-            yield return (string.Empty, result);
+            yield return (line, result);
         }
     }
 }
