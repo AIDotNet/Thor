@@ -161,6 +161,14 @@ namespace Thor.GCPClaude.Chats
                 var result = JsonSerializer.Deserialize<ClaudeStreamDto>(line,
                     ThorJsonSerializer.DefaultOptions);
 
+                if (result?.type == "error")
+                {
+                    logger.LogInformation("GCP对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
+                       line);
+                
+                    throw new Exception("GCP对话异常" + line);
+                }
+
                 if (result?.type == "content_block_delta")
                 {
                     if (result.delta.type is "text" or "text_delta")
