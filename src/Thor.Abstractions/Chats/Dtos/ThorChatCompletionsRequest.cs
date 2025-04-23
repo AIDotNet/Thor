@@ -16,13 +16,27 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     {
         Messages = new List<ThorChatMessage>();
     }
+    
+    [JsonPropertyName("store")]
+    public bool? Store { get; set; }
+
+    /// <summary>
+    /// 表示对话中支持的模态类型数组。可以为 null。
+    /// </summary>
+    [JsonPropertyName("modalities")]
+    public string[]? Modalities { get; set; }
+
+    /// <summary>
+    /// 表示对话中的音频请求参数。可以为 null。
+    /// </summary>
+    [JsonPropertyName("audio")] public ThorChatAudioRequest? Audio { get; set; }
 
     /// <summary>
     /// 包含迄今为止对话的消息列表
     /// </summary>
     [JsonPropertyName("messages")]
     public List<ThorChatMessage> Messages { get; set; }
-
+    
     /// <summary>
     /// 模型唯一编码值，如 gpt-4，gpt-3.5-turbo,moonshot-v1-8k，看底层具体平台定义
     /// </summary>
@@ -36,7 +50,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// 默认 1
     /// </summary>
     [JsonPropertyName("top_p")]
-    public float? TopP { get; set; } 
+    public float? TopP { get; set; }
 
     /// <summary>
     /// 使用什么采样温度，介于 0 和 2 之间。
@@ -56,7 +70,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     /// </para>
     /// </summary>
     [JsonPropertyName("n")]
-    public int? N { get; set; } 
+    public int? N { get; set; }
 
     /// <summary>
     /// 如果设置，将发送部分消息增量，就像在 ChatGPT 中一样。

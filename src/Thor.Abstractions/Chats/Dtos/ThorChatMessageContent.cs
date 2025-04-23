@@ -32,6 +32,12 @@ public class ThorChatMessageContent
     public ThorVisionImageUrl? ImageUrl { get; set; }
 
     /// <summary>
+    /// 音频消息内容，包含音频数据和格式信息。
+    /// </summary>
+    [JsonPropertyName("input_audio")]
+    public ThorChatMessageAudioContent? InputAudio { get; set; }
+
+    /// <summary>
     /// 创建文本类消息
     /// <param name="text">文本内容</param>
     /// </summary>
