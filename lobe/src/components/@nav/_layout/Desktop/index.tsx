@@ -265,6 +265,7 @@ const Nav = memo(() => {
       if (element.children) {
         for (let j = 0; j < element.children.length; j++) {
           const child = element.children[j];
+          // @ts-ignore
           if (child.onClick && path.includes(child.key)) {
             setSidebarKey(element.key);
             // 确保父菜单项展开

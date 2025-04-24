@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useEffect, useRef } from 'react';
 import { message, Input, Button, Form, Card,  Spin, Typography } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone, UserOutlined, MailOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons';
-import { Avatar,  useCreateStore } from '@lobehub/ui';
+import { Avatar } from '@lobehub/ui';
 import styled from 'styled-components';
 import { create, GetEmailCode } from '../../services/UserService';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -132,7 +132,6 @@ const RegisterPage = memo(() => {
   const [countDown, setCountDown] = useState(0);
   const [form] = Form.useForm();
   const enableEmailRegister = IsEnableEmailRegister();
-  const store = useCreateStore();
   const easterEggTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [explosionPosition, setExplosionPosition] = useState({ top: '0px', left: '0px' });
