@@ -3,8 +3,7 @@ using System.Text.Json;
 
 namespace Thor.Service.Infrastructure;
 
-[Registration(typeof(IUserContext))]
-public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext, IScopeDependency
+public sealed class DefaultUserContext(IHttpContextAccessor httpContextAccessor) : IUserContext
 {
     public string CurrentUserId
     {

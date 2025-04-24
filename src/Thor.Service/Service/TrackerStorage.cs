@@ -3,7 +3,7 @@ using Thor.Abstractions.Tracker;
 
 namespace Thor.Service.Service;
 
-public class TrackerStorage(IServiceCache serviceCache) : ITrackerStorage, ISingletonDependency
+public class TrackerStorage(IServiceCache serviceCache) : ITrackerStorage
 {
     private const string CacheKey = "TrackerData";
 

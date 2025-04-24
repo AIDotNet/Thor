@@ -2,7 +2,7 @@
 
 namespace Thor.Service.Infrastructure.Middlewares;
 
-public class OpenTelemetryMiddlewares : IMiddleware, ISingletonDependency
+public class OpenTelemetryMiddlewares : IMiddleware
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {

@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
-using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
 public class RateLimitModelService(IServiceProvider serviceProvider, IServiceCache serviceCache)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     private const string CacheKey = "CacheKey:RateLimitModel";
 

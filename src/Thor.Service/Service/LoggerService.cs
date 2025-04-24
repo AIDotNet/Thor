@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Thor.BuildingBlocks.Event;
-using Thor.Service.Model;
 using Thor.Service.Options;
 
 namespace Thor.Service.Service;
@@ -9,7 +8,7 @@ public sealed class LoggerService(
     IServiceProvider serviceProvider,
     IEventBus<ChatLogger> eventBus,
     IServiceCache serviceCache)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {

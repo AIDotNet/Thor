@@ -3,13 +3,12 @@ using Aop.Api.Request;
 using Newtonsoft.Json;
 using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
-using Thor.Service.Infrastructure;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Thor.Service.Service;
 
 public class ProductService(IServiceProvider serviceProvider, LoggerService loggerService, UserService userService)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask<List<Product>> GetProductsAsync()
     {

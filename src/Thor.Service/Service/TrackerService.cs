@@ -9,7 +9,7 @@ namespace Thor.Service.Service;
 /// </summary>
 /// <param name="trackerStorage"></param>
 public class TrackerService(ITrackerStorage trackerStorage, IServiceProvider serviceProvider)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async Task<List<TrackerDto>> GetAsync()
     {

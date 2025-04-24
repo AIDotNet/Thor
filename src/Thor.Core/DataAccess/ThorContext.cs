@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Thor.Core.DataAccess;
+using Thor.Domain.Chats;
 using Thor.Domain.Users;
 using Thor.Service.DataAccess;
 using Thor.Service.Domain;

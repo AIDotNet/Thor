@@ -9,7 +9,7 @@ public sealed class UserGroupService(
     IServiceProvider serviceProvider,
     IServiceCache serviceCache,
     IUserContext userContext)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async Task<ResultDto> CreateAsync(UserGroup userGroup)
     {
@@ -125,7 +125,7 @@ public sealed class UserGroupService(
     /// <returns></returns>
     public async Task<UserGroup?> GetAsync(string[] code)
     {
-        return (await GetEnableListAsync()).Where(x => code.Contains(x.Code)).MinBy(x => x.Rate);
+        return (await GetEnableListAsync()).Where(x => code.Contains(x.Code)).OrderBy(x => x.Rate).FirstOrDefault();
     }
 
     /// <summary>

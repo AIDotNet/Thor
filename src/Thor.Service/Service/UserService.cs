@@ -14,7 +14,7 @@ public partial class UserService(
     EmailService emailService,
     IEventBus<CreateUserEto> eventBus,
     IServiceCache memoryCache)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask<User> CreateAsync(CreateUserInput input)
     {

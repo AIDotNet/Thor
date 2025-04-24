@@ -7,8 +7,7 @@ namespace Thor.Service.EventBus;
 /// <summary>
 /// 创建用户事件处理器
 /// </summary>
-[Registration(typeof(IEventHandler<CreateUserEto>))]
-public class CreateUserEventHandler : IEventHandler<CreateUserEto>, IDisposable, IScopeDependency
+public class CreateUserEventHandler : IEventHandler<CreateUserEto>, IDisposable
 {
     private readonly ILogger<CreateUserEventHandler> _logger;
     private readonly TokenService _tokenService;

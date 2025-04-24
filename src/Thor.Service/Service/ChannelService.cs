@@ -12,6 +12,7 @@ using Thor.Claude;
 using Thor.Core;
 using Thor.Hunyuan;
 using Thor.DeepSeek;
+using Thor.Domain.Chats;
 using Thor.Service.Infrastructure;
 using Thor.SparkDesk;
 
@@ -28,7 +29,7 @@ public sealed class ChannelService(
     IServiceCache cache,
     UserService userService,
     IUserContext userContext)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     private const string CacheKey = "CacheKey:Channel";
 

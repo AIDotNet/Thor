@@ -4,7 +4,7 @@ using System.Net.Mail;
 
 namespace Thor.Service.Service;
 
-public class EmailService(ILogger<EmailService> logger): IScopeDependency
+public class EmailService(ILogger<EmailService> logger)
 {
     private static readonly ConcurrentDictionary<string, Lazy<SmtpClient>> Factory = new();
 

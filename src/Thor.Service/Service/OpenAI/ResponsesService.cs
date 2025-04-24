@@ -26,7 +26,7 @@ public sealed class ResponsesService(
     UserService userService,
     ImageService imageService
 )
-    : AIService(serviceProvider, imageService), IScopeDependency
+    : AIService(serviceProvider, imageService)
 {
     public async Task ExecuteAsync(HttpContext context, ResponsesInput request)
     {

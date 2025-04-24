@@ -1,36 +1,41 @@
-using System.Text.Json.Serialization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Serilog;
+using System.Text.Json.Serialization;
 using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.Responses;
+using Thor.Abstractions.Tracker;
+using Thor.AWSClaude.Extensions;
 using Thor.AzureOpenAI.Extensions;
+using Thor.BuildingBlocks.Event;
 using Thor.Claude.Extensions;
 using Thor.Core.DataAccess;
 using Thor.Core.Extensions;
+using Thor.DeepSeek.Extensions;
+using Thor.Domain.Chats;
+using Thor.Domain.Users;
 using Thor.ErnieBot.Extensions;
+using Thor.GCPClaude.Extensions;
 using Thor.Hunyuan.Extensions;
 using Thor.LocalEvent;
 using Thor.LocalMemory.Cache;
 using Thor.MetaGLM.Extensions;
+using Thor.MiniMax.Extensions;
 using Thor.Moonshot.Extensions;
 using Thor.Ollama.Extensions;
-using Thor.DeepSeek.Extensions;
-using Thor.GCPClaude.Extensions;
-using Thor.AWSClaude.Extensions;
-using Thor.Domain.Users;
-using Thor.MiniMax.Extensions;
 using Thor.Provider;
 using Thor.Qiansail.Extensions;
 using Thor.RabbitMQEvent;
 using Thor.RedisMemory.Cache;
 using Thor.Service.BackgroundTask;
+using Thor.Service.Eto;
+using Thor.Service.EventBus;
 using Thor.Service.Extensions;
 using Thor.Service.Filters;
 using Thor.Service.Infrastructure;
@@ -113,10 +118,35 @@ try
     builder.Services.AddMvcCore().AddApiExplorer();
     builder.Services
         .AddEndpointsApiExplorer()
-        .AddAutoGnarly()
         .AddSwaggerGen()
         .AddCustomAuthentication()
         .AddHttpContextAccessor()
+        .AddScoped<IEventHandler<ChatLogger>,ChatLoggerEventHandler>()
+		.AddScoped<IEventHandler<CreateUserEto>, CreateUserEventHandler>()
+		.AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
+        .AddTransient<JwtHelper>()
+		.AddSingleton<OpenTelemetryMiddlewares>()
+		.AddSingleton<UnitOfWorkMiddleware>()
+		.AddScoped<AuthorizeService>()
+		.AddScoped<ChannelService>()
+		.AddScoped<EmailService>()
+		.AddScoped<ImageService>()
+		.AddScoped<LoggerService>()
+		.AddScoped<ModelManagerService>()
+		.AddScoped<AnthropicChatService>()
+		.AddScoped<ResponsesService>()
+		.AddScoped<ProductService>()
+		.AddScoped<RateLimitModelService>()
+		.AddScoped<SystemService>()
+		.AddScoped<ChatService>()
+		.AddScoped<ITrackerStorage, TrackerStorage>()
+		.AddScoped<RedeemCodeService>()
+		.AddScoped<TokenService>()
+		.AddScoped<UserGroupService>()
+		.AddScoped<TrackerService>()
+		.AddScoped<ModelMapService>()
+		.AddScoped<UserService>()
+		.AddScoped<IUserContext,DefaultUserContext>()
         .AddHostedService<StatisticBackgroundTask>()
         .AddHostedService<LoggerBackgroundTask>()
         .AddHostedService<TrackerBackgroundTask>()

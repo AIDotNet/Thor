@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Thor.Domain.Chats;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
 
@@ -9,7 +10,7 @@ public sealed class TokenService(
     UserService userService,
     JwtHelper jwtHelper,
     ILogger<TokenService> logger)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask<string> CreateAsync(TokenInput input, string? createId = null)
     {

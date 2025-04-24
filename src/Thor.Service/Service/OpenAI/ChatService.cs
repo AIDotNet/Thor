@@ -42,7 +42,7 @@ public sealed class ChatService(
     ILogger<ChatService> logger,
     ModelMapService modelMapService,
     LoggerService loggerService)
-    : AIService(serviceProvider,imageService), IScopeDependency
+    : AIService(serviceProvider, imageService)
 {
 
     public async Task CreateImageAsync(HttpContext context, ImageCreateRequest request)
@@ -123,7 +123,7 @@ public sealed class ChatService(
 
             sw.Stop();
 
-            quota = (int)((decimal)userGroup.Rate * quota);
+            // quota = (int)((decimal)userGroup.Rate * quota);
 
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0, userGroup.Rate),
                 request.Model,

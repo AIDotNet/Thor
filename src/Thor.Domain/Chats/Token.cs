@@ -1,6 +1,6 @@
 ﻿using Thor.Service.Domain.Core;
 
-namespace Thor.Service.Domain;
+namespace Thor.Domain.Chats;
 
 public sealed class Token : Entity<string>, ISoftDeletion
 {

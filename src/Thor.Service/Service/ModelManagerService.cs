@@ -12,7 +12,7 @@ namespace Thor.Service.Service;
 public sealed class ModelManagerService(
     IServiceProvider serviceProvider,
     IEventBus<UpdateModelManagerCache> eventBus)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public static ConcurrentDictionary<string, ModelManager> PromptRate { get; } = new();
 

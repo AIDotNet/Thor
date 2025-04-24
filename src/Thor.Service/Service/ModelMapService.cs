@@ -9,7 +9,7 @@ namespace Thor.Service.Service;
 /// <param name="serviceProvider"></param>
 /// <param name="serviceCache"></param>
 public sealed class ModelMapService(IServiceProvider serviceProvider, IServiceCache serviceCache)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async ValueTask<string> ModelMap(string model)
     {

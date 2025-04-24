@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Thor.Service.Infrastructure.Helper;
 
-public class JwtHelper(IConfiguration configuration) : ITransientDependency
+public class JwtHelper(IConfiguration configuration)
 {
     public string CreateToken(User user)
     {

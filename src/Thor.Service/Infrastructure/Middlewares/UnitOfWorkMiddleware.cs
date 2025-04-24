@@ -3,7 +3,7 @@ using Thor.Core.DataAccess;
 
 namespace Thor.Service.Infrastructure.Middlewares;
 
-public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddleware, ISingletonDependency
+public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddleware
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {

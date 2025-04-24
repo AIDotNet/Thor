@@ -3,7 +3,7 @@ using SkiaSharp;
 
 namespace Thor.Service.Service;
 
-public class ImageService(IHttpClientFactory httpClientFactory):IScopeDependency
+public class ImageService(IHttpClientFactory httpClientFactory)
 {
     private static readonly Regex DataUrlPattern = new(@"data:image/([^;]+);base64,(.*)", RegexOptions.Compiled);
 

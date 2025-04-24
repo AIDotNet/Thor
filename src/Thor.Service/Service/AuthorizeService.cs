@@ -12,7 +12,7 @@ public class AuthorizeService(
     ILogger<AuthorizeService> logger,
     IConfiguration configuration,
     JwtHelper jwtHelper)
-    : ApplicationService(serviceProvider), IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     private static readonly HttpClient HttpClient = new(new SocketsHttpHandler
     {

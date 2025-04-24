@@ -8,7 +8,7 @@ public class RedeemCodeService(
     IServiceProvider serviceProvider,
     LoggerService loggerService,
     UserService userService)
-    : ApplicationService(serviceProvider),IScopeDependency
+    : ApplicationService(serviceProvider)
 {
     public async Task<IEnumerable<string>> CreateAsync(RedeemCodeInput input)
     {

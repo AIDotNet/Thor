@@ -9,9 +9,8 @@ namespace Thor.Service.EventBus;
 /// 当模型映射缓存更新事件触发时，更新模型管理器缓存
 /// </summary>
 /// <param name="thorContext"></param>
-[Registration(typeof(IEventHandler<UpdateModelManagerCache>))]
 public sealed class ModelManagerEventHandler(IThorContext thorContext)
-    : IEventHandler<UpdateModelManagerCache>, IScopeDependency
+    : IEventHandler<UpdateModelManagerCache>
 {
     public async Task HandleAsync(UpdateModelManagerCache @event)
     {

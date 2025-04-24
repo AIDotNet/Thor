@@ -21,7 +21,7 @@ public class AnthropicChatService(
     LoggerService loggerService,
     UserService userService,
     ILogger<AnthropicChatService> logger)
-    : AIService(serviceProvider, imageService), IScopeDependency
+    : AIService(serviceProvider, imageService)
 {
     public async Task MessageAsync(HttpContext context, AnthropicInput request)
     {

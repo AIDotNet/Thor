@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
+using Thor.Domain.Chats;
 using Thor.Domain.Users;
 using Thor.Service.Domain;
 

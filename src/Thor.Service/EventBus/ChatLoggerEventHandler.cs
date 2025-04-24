@@ -3,11 +3,10 @@ using Thor.Core.DataAccess;
 
 namespace Thor.Service.EventBus;
 
-[Registration(typeof(IEventHandler<ChatLogger>))]
 public sealed class ChatLoggerEventHandler(
     ILogger<ChatLoggerEventHandler> logger,
     ILoggerDbContext loggerDbContext)
-    : IEventHandler<ChatLogger>, IDisposable, IScopeDependency
+    : IEventHandler<ChatLogger>, IDisposable
 {
     public async Task HandleAsync(ChatLogger @event)
     {
