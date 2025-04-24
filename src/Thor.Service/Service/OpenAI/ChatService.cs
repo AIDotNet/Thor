@@ -123,9 +123,9 @@ public sealed class ChatService(
 
             sw.Stop();
 
-            // quota = (int)((decimal)userGroup.Rate * quota);
+            quota = (int)((decimal)userGroup.Rate * quota);
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 request.Model,
                 0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
