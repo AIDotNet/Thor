@@ -44,6 +44,276 @@ public sealed class ChatService(
     LoggerService loggerService)
     : AIService(serviceProvider, imageService)
 {
+    public async Task VariationsAsync(HttpContext context)
+    {
+        try
+        {
+            using var image =
+                Activity.Current?.Source.StartActivity("图片变体");
+
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
+
+            var request = new ImageVariationCreateRequest();
+            // 读取表单数据
+            if (context.Request.HasFormContentType)
+            {
+                var form = await context.Request.ReadFormAsync(context.RequestAborted);
+                request.N = int.TryParse(form["n"], out var n) ? n : 1;
+                request.Size = form["size"];
+                request.Model = form["model"];
+                request.ResponseFormat = form["response_format"];
+
+                // 文件stream转换byte
+
+                var imageFile = form.Files.GetFile("image");
+                if (imageFile != null)
+                {
+                    await using var stream = new MemoryStream();
+                    await imageFile.CopyToAsync(stream, context.RequestAborted);
+                    request.Image = stream.ToArray();
+                    request.ImageName = imageFile.FileName;
+                }
+            }
+
+
+            if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
+
+            var imageCostRatio = GetImageCostRatio(request.Model, request.Size);
+
+            var rate = ModelManagerService.PromptRate[request.Model];
+
+            var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+            await rateLimitModelService.CheckAsync(request.Model, user.Id);
+            TokenService.CheckModel(request.Model, token, context);
+
+            request.Model = await modelMapService.ModelMap(request.Model);
+
+            request.N ??= 1;
+
+            var quota = (int)(rate.PromptRate * imageCostRatio) * request.N;
+
+            if (request == null) throw new Exception("模型校验异常");
+
+            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("您的账号钱包余额不足请在控制台充值。");
+
+            // 获取渠道 通过算法计算权重
+            var channel =
+                CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
+
+            if (channel == null)
+                throw new NotModelException(
+                    $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+
+            var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+            if (userGroup == null)
+            {
+                throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+            }
+
+            // 获取渠道指定的实现类型的服务
+            var openService = GetKeyedService<IThorImageService>(channel.Type);
+
+            if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
+
+            var sw = Stopwatch.StartNew();
+
+            var response = await openService.CreateImageVariation(request, new ThorPlatformOptions
+            {
+                ApiKey = channel.Key,
+                Address = channel.Address,
+                Other = channel.Other
+            });
+
+            // 计算createdAT
+            var createdAt = DateTime.Now;
+            var created = (int)createdAt.ToUnixTimeSeconds();
+            await context.Response.WriteAsJsonAsync(new ThorImageCreateResponse
+            {
+                data = response.Results,
+                created = created,
+                successful = response.Successful
+            });
+
+            sw.Stop();
+
+            quota = (int)((decimal)userGroup.Rate * quota);
+
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+                request.Model,
+                0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
+                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                organizationId);
+
+            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
+        }
+        catch (PaymentRequiredException)
+        {
+            context.Response.StatusCode = 402;
+            await context.WriteErrorAsync("账号余额不足请充值", "402");
+        }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            context.Response.StatusCode = 401;
+        }
+        catch (Exception e)
+        {
+            logger.LogError("对话模型请求异常：{e}", e);
+            await context.WriteErrorAsync(e.Message);
+        }
+    }
+
+
+    public async Task EditsImageAsync(HttpContext context)
+    {
+        try
+        {
+            using var image =
+                Activity.Current?.Source.StartActivity("图片修改图片");
+
+            var organizationId = string.Empty;
+            if (context.Request.Headers.TryGetValue("OpenAI-Organization", out var organizationIdHeader))
+            {
+                organizationId = organizationIdHeader.ToString();
+            }
+
+            var request = new ImageEditCreateRequest();
+            // 读取表单数据
+            if (context.Request.HasFormContentType)
+            {
+                var form = await context.Request.ReadFormAsync(context.RequestAborted);
+                request.Prompt = form["prompt"];
+                request.N = int.TryParse(form["n"], out var n) ? n : 1;
+                request.Size = form["size"];
+                request.Model = form["model"];
+                request.ResponseFormat = form["response_format"];
+
+                // 文件stream转换byte
+
+                var imageFile = form.Files.GetFile("image");
+                if (imageFile != null)
+                {
+                    await using var stream = new MemoryStream();
+                    await imageFile.CopyToAsync(stream, context.RequestAborted);
+                    request.Image = stream.ToArray();
+                    request.ImageName = imageFile.FileName;
+                }
+
+                // 先判断Mask是否
+                var mask = form.Files.GetFile("mask");
+
+                if (mask != null)
+                {
+                    await using var stream = new MemoryStream();
+                    await mask.CopyToAsync(stream, context.RequestAborted);
+                    request.Mask = stream.ToArray();
+                    request.MaskName = mask.FileName;
+                }
+            }
+
+
+            if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
+
+            var imageCostRatio = GetImageCostRatio(request.Model, request.Size);
+
+            var rate = ModelManagerService.PromptRate[request.Model];
+
+            var (token, user) = await tokenService.CheckTokenAsync(context, rate);
+
+            await rateLimitModelService.CheckAsync(request.Model, user.Id);
+            TokenService.CheckModel(request.Model, token, context);
+
+            request.Model = await modelMapService.ModelMap(request.Model);
+
+
+            request.N ??= 1;
+
+            var quota = (int)(rate.PromptRate * imageCostRatio) * request.N;
+
+            if (request == null) throw new Exception("模型校验异常");
+
+            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+
+            // 获取渠道 通过算法计算权重
+            var channel =
+                CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
+
+            if (channel == null)
+                throw new NotModelException(
+                    $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+
+            var userGroup = await userGroupService.GetAsync(channel.Groups);
+
+            if (userGroup == null)
+            {
+                throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
+            }
+
+            // 获取渠道指定的实现类型的服务
+            var openService = GetKeyedService<IThorImageService>(channel.Type);
+
+            if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
+
+            var sw = Stopwatch.StartNew();
+
+            var response = await openService.CreateImageEdit(request, new ThorPlatformOptions
+            {
+                ApiKey = channel.Key,
+                Address = channel.Address,
+                Other = channel.Other
+            });
+
+            // 计算createdAT
+            var createdAt = DateTime.Now;
+            var created = (int)createdAt.ToUnixTimeSeconds();
+            await context.Response.WriteAsJsonAsync(new ThorImageCreateResponse
+            {
+                data = response.Results,
+                created = created,
+                successful = response.Successful
+            });
+
+            sw.Stop();
+
+            quota = (int)((decimal)userGroup.Rate * quota);
+
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+                request.Model,
+                0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
+                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                organizationId);
+
+            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
+        }
+        catch (PaymentRequiredException)
+        {
+            context.Response.StatusCode = 402;
+            await context.WriteErrorAsync("账号余额不足请充值", "402");
+        }
+        catch (RateLimitException)
+        {
+            context.Response.StatusCode = 429;
+        }
+        catch (UnauthorizedAccessException e)
+        {
+            context.Response.StatusCode = 401;
+        }
+        catch (Exception e)
+        {
+            logger.LogError("对话模型请求异常：{e}", e);
+            await context.WriteErrorAsync(e.Message);
+        }
+    }
+
 
     public async Task CreateImageAsync(HttpContext context, ImageCreateRequest request)
     {
@@ -1554,6 +1824,20 @@ public sealed class ChatService(
         return imageCostRatio;
     }
 
+
+    /// <summary>
+    /// 计算图片倍率
+    /// </summary>
+    /// <param name="model"></param>
+    /// <param name="size"></param>
+    /// <returns></returns>
+    private static decimal GetImageCostRatio(string model, string size)
+    {
+        var imageCostRatio = GetImageSizeRatio(model, size);
+
+        return imageCostRatio;
+    }
+
     /// <summary>
     /// 计算图片倍率
     /// </summary>
@@ -1568,5 +1852,4 @@ public sealed class ChatService(
 
         return 1;
     }
-
 }

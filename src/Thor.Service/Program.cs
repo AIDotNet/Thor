@@ -910,7 +910,20 @@ try
         .WithDescription("Image")
         .WithOpenApi();
 
+    app.MapPost("/v1/images/edits",
+            async (ChatService imageService, HttpContext context) =>
+                await imageService.EditsImageAsync(context))
+        .WithDescription("OpenAI")
+        .WithDescription("Image")
+        .WithOpenApi();
 
+    app.MapPost("v1/images/variations",
+            async (ChatService imageService, HttpContext context) =>
+                await imageService.EditsImageAsync(context))
+        .WithDescription("OpenAI")
+        .WithDescription("Image")
+        .WithOpenApi();
+    
     app.MapGet("/v1/models", async (HttpContext context) => { return await ModelService.GetAsync(context); })
         .WithDescription("获取模型列表")
         .WithOpenApi();

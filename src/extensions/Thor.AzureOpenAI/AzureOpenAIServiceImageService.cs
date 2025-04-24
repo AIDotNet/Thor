@@ -3,6 +3,7 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseModel;
 using Azure.AI.OpenAI;
 using OpenAI.Images;
+using Thor.Abstractions.Extensions;
 using Thor.Abstractions.Images;
 
 namespace Thor.AzureOpenAI;
@@ -58,11 +59,51 @@ public class AzureOpenAIServiceImageService : IThorImageService
         return ret;
     }
 
-    public Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
+    public async Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default(CancellationToken))
     {
-        throw new NotImplementedException();
+        var url = AzureOpenAIFactory.GetEditImageAddress(options, imageEditCreateRequest.Model);
+        
+        var multipartContent = new MultipartFormDataContent();
+        if (imageEditCreateRequest.User != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.User), "user");
+        }
+
+        if (imageEditCreateRequest.ResponseFormat != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.ResponseFormat), "response_format");
+        }
+
+        if (imageEditCreateRequest.Size != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.Size), "size");
+        }
+
+        if (imageEditCreateRequest.N != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.N.ToString()!), "n");
+        }
+
+        if (imageEditCreateRequest.Model != null)
+        {
+            multipartContent.Add(new StringContent(imageEditCreateRequest.Model!), "model");
+        }
+
+        if (imageEditCreateRequest.Mask != null)
+        {
+            multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Mask), "mask",
+                imageEditCreateRequest.MaskName);
+        }
+
+        multipartContent.Add(new StringContent(imageEditCreateRequest.Prompt), "prompt");
+        multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image",
+            imageEditCreateRequest.ImageName);
+
+        return await HttpClientFactory.GetHttpClient(url).PostFileAndReadAsAsync<ImageCreateResponse>(
+            url,
+            multipartContent, cancellationToken);
     }
 
     public Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,

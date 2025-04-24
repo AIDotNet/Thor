@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using System.ClientModel;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.Images;
@@ -25,45 +27,53 @@ public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorIma
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var multipartContent = new MultipartFormDataContent();
+        var multipartContent = new MultiPartFormDataBinaryContent();
         if (imageEditCreateRequest.User != null)
         {
-            multipartContent.Add(new StringContent(imageEditCreateRequest.User), "user");
+            multipartContent.Add(imageEditCreateRequest.User, "user");
         }
 
         if (imageEditCreateRequest.ResponseFormat != null)
         {
-            multipartContent.Add(new StringContent(imageEditCreateRequest.ResponseFormat), "response_format");
+            multipartContent.Add(imageEditCreateRequest.ResponseFormat, "response_format");
         }
 
         if (imageEditCreateRequest.Size != null)
         {
-            multipartContent.Add(new StringContent(imageEditCreateRequest.Size), "size");
+            multipartContent.Add(imageEditCreateRequest.Size, "size");
         }
 
         if (imageEditCreateRequest.N != null)
         {
-            multipartContent.Add(new StringContent(imageEditCreateRequest.N.ToString()!), "n");
+            multipartContent.Add(imageEditCreateRequest.N.ToString(), "n");
         }
 
         if (imageEditCreateRequest.Model != null)
         {
-            multipartContent.Add(new StringContent(imageEditCreateRequest.Model!), "model");
+            multipartContent.Add(imageEditCreateRequest.Model!, "model");
         }
 
         if (imageEditCreateRequest.Mask != null)
         {
-            multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Mask), "mask",
+            multipartContent.Add(imageEditCreateRequest.Mask, "mask",
                 imageEditCreateRequest.MaskName);
         }
 
-        multipartContent.Add(new StringContent(imageEditCreateRequest.Prompt), "prompt");
-        multipartContent.Add(new ByteArrayContent(imageEditCreateRequest.Image), "image",
+        multipartContent.Add(imageEditCreateRequest.Prompt, "prompt");
+        multipartContent.Add(imageEditCreateRequest.Image, "image",
             imageEditCreateRequest.ImageName);
 
-        return await HttpClientFactory.GetHttpClient(options.Address).PostFileAndReadAsAsync<ImageCreateResponse>(
-            options.Address.TrimEnd('/') + "/v1/images/edits",
-            multipartContent, cancellationToken);
+        var client = HttpClientFactory.GetHttpClient(options.Address);
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Post, options.Address.TrimEnd('/') + "/v1/images/edits");
+
+        requestMessage.Content = multipartContent.HttpContent;
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer",options.ApiKey);
+        
+        var response =await client.SendAsync(requestMessage, cancellationToken);
+
+        return await response.Content.ReadFromJsonAsync<ImageCreateResponse>();
+
     }
 
     public async Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,
@@ -100,6 +110,6 @@ public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorIma
             imageEditCreateRequest.ImageName);
 
         return await HttpClientFactory.GetHttpClient(options.Address).PostFileAndReadAsAsync<ImageCreateResponse>(
-            options!.Address!.TrimEnd('/') + "/v1//images/variations", multipartContent, cancellationToken);
+            options!.Address!.TrimEnd('/') + "/v1/images/variations", multipartContent, cancellationToken);
     }
 }
