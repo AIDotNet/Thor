@@ -7,6 +7,7 @@ import { create, GetEmailCode } from '../../services/UserService';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { login } from '../../services/AuthorizeService';
 import { IsEnableEmailRegister } from '../../services/SettingService';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
@@ -124,6 +125,7 @@ const Explosion = styled.div<{ top: string; left: string }>`
 `;
 
 const RegisterPage = memo(() => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
@@ -198,233 +200,273 @@ const RegisterPage = memo(() => {
       const distance = Math.random() * 100 + 20; // 随机距离
 
       // 计算粒子的起始位置（相对于爆炸中心）
-      const offsetX = Math.cos(angle) * distance;
-      const offsetY = Math.sin(angle) * distance;
+      const x = centerX + Math.cos(angle) * distance;
+      const y = centerY + Math.sin(angle) * distance;
 
       return {
         id: i,
         color: colors[Math.floor(Math.random() * colors.length)],
         size: Math.random() * 10 + 5,
-        left: `${centerX + offsetX}px`,
-        top: `${centerY + offsetY}px`,
-        animationDuration: `${Math.random() * 2 + 1}s`,
-        delay: `${Math.random() * 0.3}s`
+        left: `${x}px`,
+        top: `${y}px`,
+        animationDuration: `${0.5 + Math.random() * 1}s`,
+        delay: `${Math.random() * 0.2}s`,
       };
     });
 
     setConfettiItems(newConfetti);
     setShowConfetti(true);
 
-    // 5秒后清除彩蛋
+    // 5秒后清除粒子
     setTimeout(() => {
       setShowConfetti(false);
-    }, 2000);
+      setConfettiItems([]);
+    }, 5000);
   }, []);
 
-  const handleRegister = useCallback(async (values: any) => {
-    const { username, email, password, code, inviteCode } = values;
-
-    if (enableEmailRegister && !code) {
-      message.error('请输入验证码');
-      return;
+  const playEasterEgg = useCallback(() => {
+    if (registerButtonRef.current) {
+      generateConfetti(registerButtonRef.current);
     }
+  }, [generateConfetti]);
 
-    setLoading(true);
+  const onFinish = useCallback(async (values: any) => {
     try {
-      const res = await create({
-        userName: username,
-        email,
-        password,
-        code: code || '',
-        inviteCode: inviteCode || ''
+      if (!enableEmailRegister) {
+        message.error(t('register.emailNotAllowed'));
+        return;
+      }
+
+      setLoading(true);
+      const resp = await create({
+        userName: values.username,
+        email: values.email,
+        password: values.password,
+        confirmPassword: values.confirmPassword,
+        code: values.verificationCode,
+        inviteCode: values.inviteCode
       });
 
-      if (res.success) {
-        message.success('注册成功');
-
-        // 触发彩蛋效果
-        if (registerButtonRef.current) {
-          generateConfetti(registerButtonRef.current);
-        }
-        const loginRes = await login({ account: username, pass: password });
-        if (loginRes.success) {
-          easterEggTimer.current = setTimeout(async () => {
-            localStorage.setItem('token', loginRes.data.token);
-            localStorage.setItem('role', loginRes.data.role);
-            message.success('登录成功，即将跳转到首页');
+      if (resp.success) {
+        message.success(t('register.registerSuccess'));
+        
+        // 触发彩蛋动画
+        playEasterEgg();
+        
+        // 自动登录
+        easterEggTimer.current = setTimeout(async () => {
+          const loginResp = await login({
+            account: values.username,
+            pass: values.password
+          });
+          
+          if (loginResp.success) {
+            localStorage.setItem('token', loginResp.data.token);
+            localStorage.setItem('role', loginResp.data.role);
             setTimeout(() => navigate('/panel'), 1000);
-          }, 2000);
-        } else {
-          message.error(`登录失败: ${loginRes.message}`);
-          setLoading(false);
-        }
+          } else {
+            setTimeout(() => navigate('/login'), 1500);
+          }
+        }, 2000);
       } else {
-        message.error(`注册失败: ${res.message}`);
-        setLoading(false);
+        message.error(t('register.userCreationFailed') + ': ' + resp.message);
       }
     } catch (error) {
-      console.error(error);
-      message.error('注册过程中发生错误');
+      message.error(t('register.registerError'));
+      console.error('Registration error:', error);
+    } finally {
       setLoading(false);
     }
-  }, [enableEmailRegister, navigate, generateConfetti]);
+  }, [enableEmailRegister, navigate, playEasterEgg, t]);
 
-  const handleGetEmailCode = useCallback(() => {
-    form.validateFields(['email']).then(({ email }) => {
-      GetEmailCode(email).then((res) => {
-        if (res.success) {
-          message.success('验证码已发送到您的邮箱');
-          setCountDown(60);
-        } else {
-          message.error(res.message || '获取验证码失败');
-        }
-      }).catch(() => {
-        message.error('网络错误，请稍后重试');
-      });
-    }).catch(() => {
-      message.error('请先输入有效的邮箱地址');
-    });
-  }, [form]);
-
-  // 清除定时器
-  useEffect(() => {
-    return () => {
-      if (easterEggTimer.current) {
-        clearTimeout(easterEggTimer.current);
+  const handleGetCode = useCallback(async () => {
+    try {
+      const email = form.getFieldValue('email');
+      if (!email) {
+        message.error(t('register.emailRequired'));
+        return;
       }
-    };
-  }, []);
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        message.error(t('register.emailInvalid'));
+        return;
+      }
+      
+      setCountDown(60);
+      const resp = await GetEmailCode(email);
+      
+      if (resp.success) {
+        message.success(t('register.verificationCodeSent'));
+      } else {
+        message.error(resp.message || 'Failed to send verification code');
+        setCountDown(0); // 失败时重置倒计时
+      }
+    } catch (error) {
+      console.error('Error sending verification code:', error);
+      message.error('Failed to send verification code');
+      setCountDown(0);
+    }
+  }, [form, t]);
 
   return (
     <PageContainer>
-      <Spin spinning={loading} tip="处理中...">
-        <StyledCard>
-          <LogoContainer>
-            <Avatar src='/logo.png' {...control} />
-            <Title level={2} style={{ marginTop: 16, marginBottom: 0 }}>创建账号</Title>
-            <Text type="secondary">加入我们，开始您的旅程</Text>
-          </LogoContainer>
-
+      <StyledCard>
+        <LogoContainer>
+          <Avatar size={80} shape="square" src="/logo.png" />
+          <Title level={2} style={{ marginTop: 16, marginBottom: 4 }}>{t('register.title')}</Title>
+          <Text type="secondary">{t('register.subtitle')}</Text>
+        </LogoContainer>
+        
+        <Spin spinning={loading}>
           <Form
             form={form}
             layout="vertical"
-            requiredMark={false}
-            onFinish={handleRegister}
+            onFinish={onFinish}
             autoComplete="off"
+            requiredMark={false}
           >
             <Form.Item
               name="username"
-              rules={[{ required: true, message: '请输入用户名' }]}
-            >
-              <Input
-                prefix={<UserOutlined />}
-                size="large"
-                placeholder="用户名"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="email"
+              label={t('register.usernameLabel')}
               rules={[
-                { required: true, message: '请输入邮箱' },
-                { type: 'email', message: '请输入有效的邮箱地址' }
+                { required: true, message: t('register.usernameRequired') }
               ]}
             >
-              <Input
-                prefix={<MailOutlined />}
-                size="large"
-                placeholder="邮箱地址"
-                suffix={enableEmailRegister ? (
-                  <Button
-                    type="link"
-                    disabled={countDown > 0}
-                    onClick={handleGetEmailCode}
-                    style={{ padding: '0 8px' }}
-                  >
-                    {countDown > 0 ? `${countDown}秒` : '获取验证码'}
-                  </Button>
-                ) : null}
+              <Input 
+                prefix={<UserOutlined />} 
+                placeholder={t('register.usernamePlaceholder')} 
+                size="large" 
               />
             </Form.Item>
-
-            {enableEmailRegister && (
-              <Form.Item
-                name="code"
-                rules={[{ required: true, message: '请输入验证码' }]}
-              >
-                <Input
-                  prefix={<SafetyOutlined />}
-                  size="large"
-                  placeholder="验证码"
-                />
-              </Form.Item>
-            )}
-
+            
+            <Form.Item
+              name="email"
+              label={t('register.emailLabel')}
+              rules={[
+                { required: true, message: t('register.emailRequired') },
+                { type: 'email', message: t('register.emailInvalid') }
+              ]}
+            >
+              <Input 
+                prefix={<MailOutlined />} 
+                placeholder={t('register.emailPlaceholder')} 
+                size="large" 
+              />
+            </Form.Item>
+            
             <Form.Item
               name="password"
+              label={t('register.passwordLabel')}
               rules={[
-                { required: true, message: '请输入密码' },
-                { min: 6, message: '密码长度不能少于6位' }
+                { required: true, message: t('register.passwordRequired') },
+                { min: 6, message: t('register.passwordLength') }
               ]}
             >
               <Input.Password
                 prefix={<LockOutlined />}
+                placeholder={t('register.passwordPlaceholder')}
                 size="large"
-                placeholder="密码"
                 iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
               />
             </Form.Item>
-
+            
             <Form.Item
-              name="inviteCode"
-              label="邀请码"
+              name="confirmPassword"
+              label={t('register.confirmPasswordLabel')}
+              dependencies={['password']}
+              rules={[
+                { required: true, message: t('register.confirmPasswordRequired') },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error(t('register.passwordMismatch')));
+                  },
+                }),
+              ]}
             >
-              <Input
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder={t('register.confirmPasswordPlaceholder')}
                 size="large"
-                placeholder="邀请码（可选）"
+                iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
               />
             </Form.Item>
-
-            <ActionsContainer>
-              <Button
-                type="primary"
-                htmlType="submit"
+            
+            <Form.Item
+              name="verificationCode"
+              label={t('register.verificationCodeLabel')}
+              rules={[
+                { required: true, message: t('register.verificationCodePlaceholder') }
+              ]}
+            >
+              <Input
+                prefix={<SafetyOutlined />}
+                placeholder={t('register.verificationCodePlaceholder')}
                 size="large"
+                addonAfter={
+                  <Button 
+                    type="link" 
+                    disabled={countDown > 0}
+                    onClick={handleGetCode}
+                    style={{ padding: 0, height: 'auto', width: '100%' }}
+                  >
+                    {countDown > 0 
+                      ? t('register.resendCode', { count: countDown }) 
+                      : t('register.getVerificationCode')}
+                  </Button>
+                }
+              />
+            </Form.Item>
+            
+            <Form.Item
+              name="inviteCode"
+              label={t('register.inviteCodeLabel')}
+            >
+              <Input
+                placeholder={t('register.inviteCodePlaceholder')}
+                size="large"
+              />
+            </Form.Item>
+            
+            <ActionsContainer>
+              <Button 
+                type="primary" 
+                size="large" 
+                htmlType="submit" 
                 block
-                style={{ height: '46px', borderRadius: '8px' }}
+                loading={loading}
                 ref={registerButtonRef}
               >
-                注册
+                {t('register.registerButton')}
               </Button>
-
-              <Divider plain><Text type="secondary">或者</Text></Divider>
-
+              
               <LoginLink onClick={() => navigate('/login')}>
-                已有账号？点击登录
+                {t('register.loginLink')}
               </LoginLink>
             </ActionsContainer>
           </Form>
-        </StyledCard>
-      </Spin>
-
-      {/* 彩蛋爆炸效果 */}
+        </Spin>
+      </StyledCard>
+      
+      {/* 彩蛋效果 */}
       {showConfetti && (
-        <>
+        <ConfettiContainer>
           <Explosion top={explosionPosition.top} left={explosionPosition.left} />
-          <ConfettiContainer>
-            {confettiItems.map(item => (
-              <Confetti
-                key={item.id}
-                color={item.color}
-                size={item.size}
-                left={item.left}
-                top={item.top}
-                animationDuration={item.animationDuration}
-                delay={item.delay}
-              />
-            ))}
-          </ConfettiContainer>
-        </>
+          {confettiItems.map(item => (
+            <Confetti 
+              key={item.id}
+              color={item.color}
+              size={item.size}
+              left={item.left}
+              top={item.top}
+              animationDuration={item.animationDuration}
+              delay={item.delay}
+            />
+          ))}
+        </ConfettiContainer>
       )}
     </PageContainer>
   );

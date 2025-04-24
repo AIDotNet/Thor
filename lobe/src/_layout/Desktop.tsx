@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import { LayoutProps } from "./type";
 import { Outlet } from "react-router-dom";
@@ -8,6 +8,8 @@ import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
 import useThemeStore from "../store/theme";
 import { Flexbox } from "react-layout-kit";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 const { Content, Footer, Sider } = Layout;
 const LayoutPage = memo<LayoutProps>(({ nav }) => {
@@ -16,6 +18,36 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
   } = theme.useToken();
   const { themeMode, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
+  
+  // 使用useMemo创建下拉菜单项，这样语言变化时会重新生成
+  const dropdownItems = useMemo(() => ({
+    items: [
+      {
+        key: 'account',
+        label: t('nav.setting'),
+        onClick: () => {
+          navigate('/current')
+        }
+      },
+      {
+        key: 'current',
+        label: t('nav.current'),
+        onClick: () => {
+          navigate('/current')
+        }
+      },
+      {
+        key: 'logout',
+        label: t('common.logout'),
+        onClick: () => {
+          localStorage.removeItem('token')
+          navigate('/login')
+        }
+      }
+    ]
+  }), [t, i18n.language, navigate]); // 依赖i18n.language以响应语言变化
+  
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
@@ -53,36 +85,12 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
             <Button type="text" onClick={() => {
               navigate('/model')
             }}>
-              查看模型价格
+              {t('nav.model')}
             </Button>
+            <LanguageSwitcher />
             <ThemeSwitch onThemeSwitch={(model) => toggleTheme(model)}
               themeMode={themeMode} />
-            <Dropdown menu={{
-              items: [
-                {
-                  key: 'account',
-                  label: '账户设置',
-                  onClick: () => {
-                    navigate('/current')
-                  }
-                },
-                {
-                  key: 'current',
-                  label: '个人信息',
-                  onClick: () => {
-                    navigate('/current')
-                  }
-                },
-                {
-                  key: 'logout',
-                  label: '退出登录',
-                  onClick: () => {
-                    localStorage.removeItem('token')
-                    navigate('/login')
-                  }
-                }
-              ]
-            }}>
+            <Dropdown menu={dropdownItems}>
               <Avatar src='/logo.png' size={48} />
             </Dropdown>
           </>

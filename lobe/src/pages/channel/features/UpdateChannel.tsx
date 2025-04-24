@@ -325,8 +325,6 @@ export default function UpdateChannel({
             <Select
               placeholder="请选择组"
               mode="tags"
-              maxTagCount={1}
-              maxCount={1}
               options={groups?.map((group: any) => {
                 return {
                   label: <Flexbox gap={8} horizontal>

@@ -7,11 +7,13 @@ import { InitSetting, SystemSetting } from '../../services/SettingService';
 import { useNavigate } from 'react-router-dom';
 import Gitee from '../../components/Icon/Gitee';
 import Casdoor from '../../components/Icon/Casdoor';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Paragraph } = Typography;
 const { Content } = Layout;
 
 const Login = memo(() => {
+    const { t } = useTranslation();
     const { token: themeToken } = theme.useToken();
     const params = new URLSearchParams(location.search);
     const redirect_uri = params.get('redirect_uri');
@@ -28,7 +30,7 @@ const Login = memo(() => {
     const handleGithub = () => {
         const clientId = InitSetting.find(s => s.key === SystemSetting.GithubClientId)?.value;
         if (!clientId) {
-            message.error('请联系管理员配置 Github ClientId');
+            message.error(t('login.configGithubClientId'));
             return;
         }
         handleAuthRedirect(`https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${location.origin}/auth&response_type=code`);
@@ -49,7 +51,7 @@ const Login = memo(() => {
             if (token.success) {
                 localStorage.setItem('token', token.data.token);
                 localStorage.setItem('role', token.data.role);
-                message.success('登录成功，即将跳转到首页');
+                message.success(t('login.loginSuccess'));
                 if (redirect_uri) {
                     const url = new URL(redirect_uri);
                     url.searchParams.append('token', token.data.token);
@@ -58,10 +60,10 @@ const Login = memo(() => {
                 }
                 setTimeout(() => navigate('/panel'), 1000);
             } else {
-                message.error(`登录失败: ${token.message}`);
+                message.error(`${t('login.loginFailed')}: ${token.message}`);
             }
         } catch (e) {
-            message.error('登录过程中出现错误，请重试');
+            message.error(t('login.loginError'));
         } finally {
             setLoading(false);
         }
@@ -70,12 +72,12 @@ const Login = memo(() => {
     const handlerGitee = () => {
         const enable = InitSetting.find(s => s.key === SystemSetting.EnableGiteeLogin)?.value;
         if (!enable) {
-            message.error('请联系管理员开启 Gitee 登录');
+            message.error(t('login.enableGiteeLogin'));
             return;
         }
         const clientId = InitSetting.find(s => s.key === SystemSetting.GiteeClientId)?.value;
         if (!clientId) {
-            message.error('请联系管理员配置 Gitee ClientId');
+            message.error(t('login.configGiteeClientId'));
             return;
         }
         handleAuthRedirect(`https://gitee.com/oauth/authorize?client_id=${clientId}&redirect_uri=${location.origin}/auth/gitee&response_type=code`);
@@ -84,12 +86,12 @@ const Login = memo(() => {
     const handleCasdoorAuth = () => {
         let casdoorEndipoint = InitSetting.find(s => s.key === SystemSetting.CasdoorEndipoint)?.value as string;
         if (!casdoorEndipoint) {
-            message.error('请联系管理员配置 Casdoor Endipoint');
+            message.error(t('login.configCasdoorEndpoint'));
             return;
         }
         const casdoorClientId = InitSetting.find(s => s.key === SystemSetting.CasdoorClientId)?.value;
         if (!casdoorClientId) {
-            message.error('请联系管理员配置 Casdoor ClientId');
+            message.error(t('login.configCasdoorClientId'));
             return;
         }
         if (casdoorEndipoint.endsWith('/')) {
@@ -122,8 +124,8 @@ const Login = memo(() => {
                 >
                     <Space direction="vertical" size="large" style={{ width: '100%' }}>
                         <div style={{ textAlign: 'center' }}>
-                            <Title level={2} style={{ margin: '0 0 8px', color: themeToken.colorPrimary }}>TokenAI</Title>
-                            <Paragraph type="secondary">输入您的账号信息进行登录</Paragraph>
+                            <Title level={2} style={{ margin: '0 0 8px', color: themeToken.colorPrimary }}>{t('login.title')}</Title>
+                            <Paragraph type="secondary">{t('login.inputAccountInfo')}</Paragraph>
                         </div>
                         
                         <Form
@@ -134,21 +136,21 @@ const Login = memo(() => {
                         >
                             <Form.Item
                                 name="username"
-                                rules={[{ required: true, message: '请输入您的账号' }]}
+                                rules={[{ required: true, message: t('login.accountRequired') }]}
                             >
                                 <Input 
                                     prefix={<UserOutlined />} 
-                                    placeholder="请输入账号" 
+                                    placeholder={t('login.accountPlaceholder')} 
                                 />
                             </Form.Item>
                             
                             <Form.Item
                                 name="password"
-                                rules={[{ required: true, message: '请输入您的密码' }]}
+                                rules={[{ required: true, message: t('login.passwordRequired') }]}
                             >
                                 <Input.Password
                                     prefix={<LockOutlined />}
-                                    placeholder="请输入密码"
+                                    placeholder={t('login.passwordPlaceholder')}
                                     iconRender={visible => (visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />)}
                                 />
                             </Form.Item>
@@ -160,7 +162,7 @@ const Login = memo(() => {
                                     loading={loading}
                                     block
                                 >
-                                    登录
+                                    {t('login.loginButton')}
                                 </Button>
                             </Form.Item>
                         </Form>
@@ -169,12 +171,12 @@ const Login = memo(() => {
                                 type="link" 
                                 onClick={() => window.location.href = '/register'}
                             >
-                                没有账号？立即注册
+                                {t('login.registerNow')}
                             </Button>
                         </div>
-                        <Divider plain>第三方登录</Divider>
+                        <Divider plain>{t('login.thirdPartyLogin')}</Divider>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-                            <Tooltip title="Github 登录">
+                            <Tooltip title={t('login.githubLogin')}>
                                 <Button 
                                     type="default"
                                     shape="circle" 
@@ -183,7 +185,7 @@ const Login = memo(() => {
                                     size="large"
                                 />
                             </Tooltip>
-                            <Tooltip title="Gitee 登录">
+                            <Tooltip title={t('login.giteeLogin')}>
                                 <Button 
                                     type="default"
                                     shape="circle" 
@@ -193,7 +195,7 @@ const Login = memo(() => {
                                 />
                             </Tooltip>
                             {enableCasdoorAuth && (
-                                <Tooltip title="Casdoor 登录">
+                                <Tooltip title={t('login.casdoorLogin')}>
                                     <Button 
                                         type="default"
                                         shape="circle" 
