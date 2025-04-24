@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useEffect, useRef } from 'react';
-import { message, Input, Button, Form, Card, Divider, Spin, Typography } from 'antd';
+import { message, Input, Button, Form, Card,  Spin, Typography } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone, UserOutlined, MailOutlined, LockOutlined, SafetyOutlined } from '@ant-design/icons';
-import { Avatar, LogoProps, useControls, useCreateStore } from '@lobehub/ui';
+import { Avatar,  useCreateStore } from '@lobehub/ui';
 import styled from 'styled-components';
 import { create, GetEmailCode } from '../../services/UserService';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -146,22 +146,6 @@ const RegisterPage = memo(() => {
     delay: string;
   }>>([]);
   const registerButtonRef = useRef<HTMLButtonElement>(null);
-
-  const control: LogoProps | any = useControls(
-    {
-      size: {
-        max: 240,
-        min: 16,
-        step: 4,
-        value: 80,
-      },
-      type: {
-        options: ['3d', 'flat', 'high-contrast', 'text', 'combine'],
-        value: 'high-contrast',
-      },
-    },
-    { store },
-  );
 
   useEffect(() => {
     if (countDown > 0) {
