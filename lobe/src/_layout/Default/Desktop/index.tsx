@@ -4,16 +4,63 @@ import ThorFooter from "../../../components/Footer";
 import { Header } from "antd/es/layout/layout";
 import { MenuOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Button, Menu } from "antd";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../../components/LanguageSwitcher";
 
 
 export default function DesktopPage() {
     const navigate = useNavigate()
     const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+    const { t, i18n } = useTranslation();
 
     const toggleMobileMenu = () => {
         setMobileMenuVisible(!mobileMenuVisible);
     };
+
+    // 使用useMemo创建菜单项，这样语言变化时菜单会重新生成
+    const menuItems = useMemo(() => [
+        { key: 'home', label: t('nav.welcome') },
+        { key: 'models', label: t('nav.model') },
+        { key: 'docs', label: t('nav.doc') },
+        { key: 'pricing', label: t('nav.product') },
+        { key: 'community', label: t('common.community') },
+    ], [t, i18n.language]); // 依赖i18n.language以响应语言变化
+
+    // 使用useMemo创建移动端菜单项
+    const mobileMenuItems = useMemo(() => [
+        {
+            key: 'home',
+            label: t('nav.welcome'),
+            onClick: () => {
+                navigate('/');
+                toggleMobileMenu();
+            }
+        },
+        {
+            key: 'models',
+            label: t('nav.model'),
+            onClick: () => {
+                navigate('/model');
+                toggleMobileMenu();
+            }
+        },
+        {
+            key: 'docs',
+            label: t('nav.doc'),
+            onClick: () => {
+                navigate('/doc');
+                toggleMobileMenu();
+            }
+        },
+        {
+            key: 'community',
+            label: t('common.community'),
+            onClick: () => {
+                window.open('https://github.com/AIDotNet/');
+            }
+        },
+    ], [t, i18n.language, navigate]); // 依赖i18n.language以响应语言变化
 
     return (
         <Layout >
@@ -44,29 +91,24 @@ export default function DesktopPage() {
                             mode="horizontal"
                             defaultSelectedKeys={['home']}
                             style={{ background: '#141414', border: 'none' }}
-                            items={[
-                                { key: 'home', label: '首页' },
-                                { key: 'models', label: '模型库' },
-                                { key: 'docs', label: '开发文档' },
-                                { key: 'pricing', label: '价格方案' },
-                                { key: 'community', label: '社区' },
-                            ]}
+                            items={menuItems}
                         />
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <LanguageSwitcher />
                     <Button type="primary"
                         onClick={() => {
                             navigate('/panel')
                         }}
                         style={{ marginRight: 8, background: '#1890ff' }}>
-                        进入系统
+                        {t('nav.enterSystem')}
                     </Button>
                     <Button
                         onClick={() => {
                             navigate('/register')
                         }}
-                    >注册</Button>
+                    >{t('nav.register')}</Button>
                     <Button
                         icon={<MenuOutlined />}
                         type="text"
@@ -85,39 +127,7 @@ export default function DesktopPage() {
                         theme="dark"
                         mode="inline"
                         style={{ background: '#1f1f1f', border: 'none' }}
-                        items={[
-                            {
-                                key: 'home',
-                                label: '首页',
-                                onClick: () => {
-                                    navigate('/');
-                                    toggleMobileMenu()
-                                }
-                            },
-                            {
-                                key: 'models',
-                                label: '模型库',
-                                onClick: () => {
-                                    navigate('/model');
-                                    toggleMobileMenu()
-                                }
-                            },
-                            {
-                                key: 'docs',
-                                label: '开发文档',
-                                onClick: () => {
-                                    navigate('/doc');
-                                    toggleMobileMenu()
-                                }
-                            },
-                            {
-                                key: 'community',
-                                label: '社区',
-                                onClick: () => {
-                                    window.open('https://github.com/AIDotNet/')
-                                }
-                            },
-                        ]}
+                        items={mobileMenuItems}
                     />
                 </div>
             )}

@@ -5,19 +5,22 @@ import { Enable, Remove, getRedeemCodes } from "../../services/RedeemCodeService
 import { renderQuota } from "../../utils/render";
 import CreateRedeemCode from "./features/CreateRedeemCode";
 import UpdateRedeemCode from "./features/UpdateRedeemCode";
+import { useTranslation } from "react-i18next";
 
 const Header = styled.header`
 
 `
 
 export default function RedeemCode() {
+  const { t } = useTranslation();
+  
   const columns = [
     {
-      title: '名称',
+      title: t('redeemCode.name'),
       dataIndex: 'name',
     },
     {
-      title: '是否禁用',
+      title: t('redeemCode.disabled'),
       dataIndex: 'disabled',
       render: (value: any, item: any) => {
         return <Switch
@@ -25,13 +28,13 @@ export default function RedeemCode() {
             Enable(item.id)
               .then((item) => {
                 item.success ? message.success({
-                  content: '操作成功',
+                  content: t('common.operateSuccess'),
                 }) : message.error({
-                  content: '操作失败',
+                  content: t('common.operateFailed'),
                 });
                 loadingData();
               }), () => message.error({
-                content: '操作失败',
+                content: t('common.operateFailed'),
               });
           }} style={{
             width: '50px',
@@ -39,40 +42,40 @@ export default function RedeemCode() {
       }
     },
     {
-      title: '额度',
+      title: t('redeemCode.quota'),
       dataIndex: 'quota',
       render: (value: any) => {
         return <span>{renderQuota(value, 2)}</span>
       }
     },
     {
-      title: '创建时间',
+      title: t('redeemCode.createdAt'),
       dataIndex: 'createdAt',
     },
     {
-      title: '兑换人',
+      title: t('redeemCode.redeemedUser'),
       dataIndex: 'redeemedUserName',
       render: (value: any) => {
         if (value) {
           return <Tag color='green'>{value}</Tag>;
         } else {
-          return '暂无';
+          return t('common.noData');
         }
       }
     },
     {
-      title: '兑换时间',
+      title: t('redeemCode.redeemedTime'),
       dataIndex: 'redeemedTime',
       render: (value: any) => {
         if (value) {
           return value;
         } else {
-          return '未兑换';
+          return t('redeemCode.notRedeemed');
         }
       }
     },
     {
-      title: '操作',
+      title: t('common.operate'),
       dataIndex: 'operate',
       render: (_v: any, item: any) => {
         return <>
@@ -81,7 +84,7 @@ export default function RedeemCode() {
               items: [
                 {
                   key: 1,
-                  label: '编辑',
+                  label: t('common.edit'),
                   onClick: () => {
                     setUpdateTokenVisible(true);
                     setUpdateTokenValue(item);
@@ -89,20 +92,20 @@ export default function RedeemCode() {
                 },
                 {
                   key: 2,
-                  label: '复制',
+                  label: t('common.copy'),
                   onClick: () => {
                     copyKey(item.code);
                   }
                 },
                 {
                   key: 3,
-                  label: '删除',
+                  label: t('common.delete'),
                   onClick: () => removeRedeemCode(item.id)
                 }
               ]
             }}
           >
-            <Button >操作</Button>
+            <Button>{t('common.operate')}</Button>
           </Dropdown>
         </>;
       },
@@ -122,20 +125,19 @@ export default function RedeemCode() {
 
   function copyKey(key: string) {
     try {
-
       navigator.clipboard.writeText(key).then(() => {
         message.success({
-          content: '复制成功',
+          content: t('common.copySuccess'),
         })
       }).catch(() => {
         message.error({
-          content: '复制失败:' + key,
+          content: `${t('common.copyFailed')}: ${key}`,
           duration: 10,
         })
       });
     } catch (e) {
       message.error({
-        content: '复制失败:' + key,
+        content: `${t('common.copyFailed')}: ${key}`,
         duration: 10,
       })
     }
@@ -147,11 +149,11 @@ export default function RedeemCode() {
         if (v.success) {
           loadingData();
           message.success({
-            content: '删除成功',
+            content: t('common.deleteSuccess'),
           })
         } else {
           message.error({
-            content: '删除失败',
+            content: t('common.deleteFailed'),
           })
         }
       })
@@ -188,7 +190,7 @@ export default function RedeemCode() {
           fontSize: '1.5rem',
           fontWeight: 'bold',
         }}>
-          兑换码管理
+          {t('redeemCode.title')}
         </span>
 
         <Dropdown
@@ -196,7 +198,7 @@ export default function RedeemCode() {
             items: [
               {
                 key: 1,
-                label: '创建令牌',
+                label: t('redeemCode.createRedeemCode'),
                 onClick: () => {
                   setCreateTokenVisible(true)
                 }
@@ -206,12 +208,12 @@ export default function RedeemCode() {
         >
           <Button style={{
             float: 'right',
-          }}>操作</Button>
+          }}>{t('common.operate')}</Button>
         </Dropdown>
         <Button style={{
           marginRight: '0.5rem',
           float: 'right',
-        }}>搜索</Button>
+        }}>{t('common.search')}</Button>
         <Input value={input.keyword} onChange={(v) => {
           setInput({
             ...input,
@@ -221,7 +223,7 @@ export default function RedeemCode() {
           width: '150px',
           float: 'right',
           marginRight: '1rem',
-        }} placeholder='搜索关键字'></Input>
+        }} placeholder={t('common.search')}></Input>
       </Header>
       <Table style={{
         marginTop: '1rem',
@@ -242,20 +244,16 @@ export default function RedeemCode() {
             pageSize,
           });
         },
-
       }} />
       <CreateRedeemCode visible={createTokenVisible} onCancel={() =>
         setCreateTokenVisible(false)} onSuccess={() => {
           setCreateTokenVisible(false);
           loadingData();
-        }} />
-      <UpdateRedeemCode value={updateTokenValue} visible={updateTokenVisible} onCancel={() => {
-        setUpdateTokenValue({} as any);
-        setUpdateTokenVisible(false)
-      }} onSuccess={() => {
-        setUpdateTokenVisible(false);
-        setUpdateTokenValue({} as any);
-        loadingData();
+      }} />
+      <UpdateRedeemCode visible={updateTokenVisible} value={updateTokenValue} onCancel={() =>
+        setUpdateTokenVisible(false)} onSuccess={() => {
+          setUpdateTokenVisible(false);
+          loadingData();
       }} />
     </div>
   )

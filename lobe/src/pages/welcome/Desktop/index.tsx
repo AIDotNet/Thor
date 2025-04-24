@@ -19,6 +19,7 @@ import { useState, useEffect } from 'react';
 import { modelHot } from '../../../services/LoggerService';
 import { BarList, DonutChart } from '@lobehub/charts';
 import { getIconByName } from '../../../utils/iconutils';
+import { useTranslation } from 'react-i18next';
 
 const { Content } = Layout;
 const { Title, Paragraph, Text } = Typography;
@@ -285,6 +286,7 @@ const ThorWebsite = () => {
     const { styles } = useStyles();
     const navigate = useNavigate();
     const { token } = theme.useToken();
+    const { t } = useTranslation();
     
     // 创建滚动检测钩子
     const [featuresRef, featuresInView] = useInView({
@@ -386,7 +388,7 @@ const ThorWebsite = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.6, delay: 0.2 }}
                         >
-                            Thor 雷神托尔
+                            {t('welcome.title')}
                         </MotionTitle>
                         <MotionParagraph 
                           style={{ color: '#d9d9d9', fontSize: 18, marginBottom: 24 }}
@@ -394,7 +396,7 @@ const ThorWebsite = () => {
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.6, delay: 0.4 }}
                         >
-                            使用标准的OpenAI接口协议访问<Text style={{ color: '#1890ff', fontWeight: 'bold' }}>68+</Text>模型，不限时间、按量计费、拒绝逆向、极速对话、明细透明，无隐藏消费。
+                            {t('welcome.description')} <Text style={{ color: '#1890ff', fontWeight: 'bold' }}>68+</Text>
                         </MotionParagraph>
                         <MotionParagraph 
                           style={{ color: '#d9d9d9', fontSize: 18, marginBottom: 32 }}
@@ -402,7 +404,7 @@ const ThorWebsite = () => {
                           animate={{ opacity: 1 }}
                           transition={{ duration: 0.6, delay: 0.5 }}
                         >
-                            —— 为您提供最好的AI服务！
+                            —— {t('welcome.tagline')}
                         </MotionParagraph>
                         <Space size="large" className={styles.heroButtons}>
                             <MotionButton
@@ -418,7 +420,7 @@ const ThorWebsite = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                <RocketOutlined /> 立即开始使用
+                                <RocketOutlined /> {t('welcome.startNow')}
                             </MotionButton>
                             <MotionButton
                                 size="large"
@@ -437,7 +439,7 @@ const ThorWebsite = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                <GithubOutlined /> 给项目 Star
+                                <GithubOutlined /> {t('welcome.giveStar')}
                             </MotionButton>
                         </Space>
                     </motion.div>
@@ -462,9 +464,9 @@ const ThorWebsite = () => {
                             }}
                             transition={{ duration: 0.3 }}
                         >
-                            <Title level={3} style={{ color: 'white' }}>强大的社区</Title>
+                            <Title level={3} style={{ color: 'white' }}>{t('welcome.community.title')}</Title>
                             <Paragraph style={{ color: '#d9d9d9', marginBottom: 24 }}>
-                                Thor由AIDotNet社区维护，社区拥有丰富的AI资源，包括模型、数据集、工具等。
+                                {t('welcome.community.description')}
                             </Paragraph>
                             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                                 <motion.div 
@@ -475,9 +477,9 @@ const ThorWebsite = () => {
                                 >
                                     <DollarOutlined style={{ color: '#1890ff', fontSize: 20, marginTop: 4, marginRight: 16 }} />
                                     <div>
-                                        <Text strong style={{ color: 'white', fontSize: 16 }}>按量付费</Text>
+                                        <Text strong style={{ color: 'white', fontSize: 16 }}>{t('welcome.community.payPerUse.title')}</Text>
                                         <Paragraph style={{ color: '#8c8c8c', marginBottom: 0 }}>
-                                            支持用户额度管理，用户可自定义Token 管理，按量计费。
+                                            {t('welcome.community.payPerUse.description')}
                                         </Paragraph>
                                     </div>
                                 </motion.div>
@@ -489,9 +491,9 @@ const ThorWebsite = () => {
                                 >
                                     <AppstoreOutlined style={{ color: '#1890ff', fontSize: 20, marginTop: 4, marginRight: 16 }} />
                                     <div>
-                                        <Text strong style={{ color: 'white', fontSize: 16 }}>应用支持</Text>
+                                        <Text strong style={{ color: 'white', fontSize: 16 }}>{t('welcome.community.appSupport.title')}</Text>
                                         <Paragraph style={{ color: '#8c8c8c', marginBottom: 0 }}>
-                                            支持OpenAi官方库、大部分开源聊天应用、Utools GPT插件
+                                            {t('welcome.community.appSupport.description')}
                                         </Paragraph>
                                     </div>
                                 </motion.div>
@@ -503,9 +505,9 @@ const ThorWebsite = () => {
                                 >
                                     <CheckCircleOutlined style={{ color: '#1890ff', fontSize: 20, marginTop: 4, marginRight: 16 }} />
                                     <div>
-                                        <Text strong style={{ color: 'white', fontSize: 16 }}>明细可查</Text>
+                                        <Text strong style={{ color: 'white', fontSize: 16 }}>{t('welcome.community.transparency.title')}</Text>
                                         <Paragraph style={{ color: '#8c8c8c', marginBottom: 0 }}>
-                                            统计每次请求消耗明细，价格透明，无隐藏消费，用的放心
+                                            {t('welcome.community.transparency.description')}
                                         </Paragraph>
                                     </div>
                                 </motion.div>
@@ -532,7 +534,7 @@ const ThorWebsite = () => {
                               whileHover={{ y: -5, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
                             >
                                 <CountUpStatistic
-                                    title="支持模型"
+                                    title={t('welcome.statistics.models')}
                                     value="200+"
                                     suffix="个"
                                     valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
@@ -546,7 +548,7 @@ const ThorWebsite = () => {
                               whileHover={{ y: -5, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
                             >
                                 <CountUpStatistic
-                                    title="社区用户"
+                                    title={t('welcome.statistics.users')}
                                     value="8000+"
                                     suffix="人"
                                     valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
@@ -560,7 +562,7 @@ const ThorWebsite = () => {
                               whileHover={{ y: -5, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
                             >
                                 <CountUpStatistic
-                                    title="每日请求量"
+                                    title={t('welcome.statistics.requests')}
                                     value="1M+"
                                     suffix="次"
                                     valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
@@ -574,7 +576,7 @@ const ThorWebsite = () => {
                               whileHover={{ y: -5, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
                             >
                                 <CountUpStatistic
-                                    title="代码贡献者"
+                                    title={t('welcome.statistics.contributors')}
                                     value="10+"
                                     suffix="位"
                                     valueStyle={{ color: '#1890ff', fontWeight: 'bold' }}
@@ -593,9 +595,9 @@ const ThorWebsite = () => {
                       animate={modelHotInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                       transition={{ duration: 0.6 }}
                     >
-                        <Title level={2} style={{ textAlign: 'center', marginBottom: 16 }}>模型热度排行</Title>
+                        <Title level={2} style={{ textAlign: 'center', marginBottom: 16 }}>{t('welcome.modelHot.title')}</Title>
                         <Paragraph style={{ textAlign: 'center', color: token.colorTextSecondary, marginBottom: 48, maxWidth: 700, margin: '0 auto 48px' }}>
-                            了解用户最喜爱的AI模型，选择最适合您需求的模型
+                            {t('welcome.modelHot.description')}
                         </Paragraph>
                     </motion.div>
                     
@@ -609,9 +611,9 @@ const ThorWebsite = () => {
                                     boxShadow: `0 15px 30px ${token.colorPrimary}` 
                                 }}
                             >
-                                <Title level={4}>模型使用分布</Title>
+                                <Title level={4}>{t('welcome.modelHot.distribution')}</Title>
                                 <Paragraph style={{ color: token.colorTextSecondary, marginBottom: 24 }}>
-                                    基于用户实际使用情况的模型热度分布图
+                                    {t('welcome.modelHot.distributionDesc')}
                                 </Paragraph>
                                 {!modelHotLoading && modelHotData.length > 0 && (
                                     <motion.div
@@ -643,9 +645,9 @@ const ThorWebsite = () => {
                                     boxShadow: `0 15px 30px ${token.colorPrimary}` 
                                 }}
                             >
-                                <Title level={4}>热门模型排行</Title>
+                                <Title level={4}>{t('welcome.modelHot.ranking')}</Title>
                                 <Paragraph style={{ color: token.colorTextSecondary, marginBottom: 24 }}>
-                                    最受欢迎的AI模型排名
+                                    {t('welcome.modelHot.rankingDesc')}
                                 </Paragraph>
                                 {!modelHotLoading && modelHotData.length > 0 && (
                                     <motion.div
@@ -683,9 +685,9 @@ const ThorWebsite = () => {
                       animate={featuresInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                       transition={{ duration: 0.6 }}
                     >
-                        <Title level={2} style={{ textAlign: 'center', marginBottom: 16 }}>我们的优势</Title>
+                        <Title level={2} style={{ textAlign: 'center', marginBottom: 16 }}>{t('welcome.features.title')}</Title>
                         <Paragraph style={{ textAlign: 'center', color: '#595959', marginBottom: 48, maxWidth: 700, margin: '0 auto 48px' }}>
-                            Thor雷神托尔为开发者提供一站式AI模型调用服务，简化您的AI应用开发流程
+                            {t('welcome.features.description')}
                         </Paragraph>
                     </motion.div>
                     <MotionRow 
@@ -710,11 +712,11 @@ const ThorWebsite = () => {
                                 >
                                   <ApiOutlined style={{ fontSize: 36, color: '#1890ff', marginBottom: 16 }} />
                                 </motion.div>
-                                <Title level={4}>多模型支持</Title>
+                                <Title level={4}>{t('welcome.features.multiModel.title')}</Title>
                                 <Paragraph style={{ color: '#595959' }}>
-                                    支持200+模型，包括主流的大型语言模型和专业领域模型，满足各种AI应用场景。
+                                    {t('welcome.features.multiModel.description')}
                                 </Paragraph>
-                                <Button type="link" style={{ padding: 0 }}>了解支持的模型 →</Button>
+                                <Button type="link" style={{ padding: 0 }}>{t('welcome.features.multiModel.action')} →</Button>
                             </MotionFeatureCard>
                         </MotionCol>
                         <MotionCol xs={24} md={8} variants={cardVariants}>
@@ -733,11 +735,11 @@ const ThorWebsite = () => {
                                 >
                                   <ThunderboltOutlined style={{ fontSize: 36, color: '#722ed1', marginBottom: 16 }} />
                                 </motion.div>
-                                <Title level={4}>高速响应</Title>
+                                <Title level={4}>{t('welcome.features.fastResponse.title')}</Title>
                                 <Paragraph style={{ color: '#595959' }}>
-                                    优化的服务架构，确保极速对话体验，减少等待时间，提高工作效率。
+                                    {t('welcome.features.fastResponse.description')}
                                 </Paragraph>
-                                <Button type="link" style={{ padding: 0 }}>查看性能测试 →</Button>
+                                <Button type="link" style={{ padding: 0 }}>{t('welcome.features.fastResponse.action')} →</Button>
                             </MotionFeatureCard>
                         </MotionCol>
                         <MotionCol xs={24} md={8} variants={cardVariants}>
@@ -756,11 +758,11 @@ const ThorWebsite = () => {
                                 >
                                   <TeamOutlined style={{ fontSize: 36, color: '#52c41a', marginBottom: 16 }} />
                                 </motion.div>
-                                <Title level={4}>社区驱动</Title>
+                                <Title level={4}>{t('welcome.features.community.title')}</Title>
                                 <Paragraph style={{ color: '#595959' }}>
-                                    由AIDotNet社区维护，持续更新，提供专业的技术支持和丰富的资源分享。
+                                    {t('welcome.features.community.description')}
                                 </Paragraph>
-                                <Button type="link" style={{ padding: 0 }}>加入我们的社区 →</Button>
+                                <Button type="link" style={{ padding: 0 }}>{t('welcome.features.community.action')} →</Button>
                             </MotionFeatureCard>
                         </MotionCol>
                     </MotionRow>
@@ -818,9 +820,9 @@ const ThorWebsite = () => {
                       transition={{ duration: 0.6 }}
                       viewport={{ once: true, amount: 0.3 }}
                     >
-                        <Title level={2} style={{ color: 'white', marginBottom: 16 }}>准备好开始使用Thor雷神托尔了吗？</Title>
+                        <Title level={2} style={{ color: 'white', marginBottom: 16 }}>{t('welcome.callToAction.title')}</Title>
                         <Paragraph style={{ color: 'rgba(255,255,255,0.8)', marginBottom: 32, maxWidth: 700, margin: '0 auto 32px' }}>
-                            立即注册并获取免费额度，开始您的AI开发之旅
+                            {t('welcome.callToAction.description')}
                         </Paragraph>
                     </motion.div>
                     <Space size="large">
@@ -843,7 +845,7 @@ const ThorWebsite = () => {
                             whileTap={{ scale: 0.95 }}
                             viewport={{ once: true, amount: 0.3 }}
                         >
-                            免费注册账号
+                            {t('welcome.callToAction.register')}
                         </MotionButton>
                         <MotionButton
                             size="large"
@@ -865,7 +867,7 @@ const ThorWebsite = () => {
                             whileTap={{ scale: 0.95 }}
                             viewport={{ once: true, amount: 0.3 }}
                         >
-                            查看开发文档
+                            {t('welcome.callToAction.docs')}
                         </MotionButton>
                     </Space>
                 </div>
@@ -879,7 +881,7 @@ const ThorWebsite = () => {
                       animate={projectsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
                       transition={{ duration: 0.6 }}
                     >
-                        <Title level={2} style={{ textAlign: 'center', marginBottom: 48 }}>相关开源项目</Title>
+                        <Title level={2} style={{ textAlign: 'center', marginBottom: 48 }}>{t('welcome.projects.title')}</Title>
                     </motion.div>
                     <MotionRow 
                       gutter={[24, 24]}
@@ -895,16 +897,16 @@ const ThorWebsite = () => {
                                 boxShadow: '0 15px 30px rgba(0,0,0,0.1)' 
                               }}
                             >
-                                <Title level={4}>AIDotNet</Title>
+                                <Title level={4}>{t('welcome.projects.aidotnet.title')}</Title>
                                 <Paragraph style={{ color: '#595959' }}>
-                                    AIDotNet社区是一个热衷于AI开发者组成的社区，旨在推动AI技术的发展，为AI开发者提供更好的学习和交流平台。
+                                    {t('welcome.projects.aidotnet.description')}
                                 </Paragraph>
                                 <Button 
                                     onClick={()=>{
                                         window.open('https://github.com/AIDotNet/', '_blank')
                                     }}
                                     type="link" style={{ padding: 0 }}
-                                >了解更多 →</Button>
+                                >{t('welcome.projects.aidotnet.action')} →</Button>
                             </MotionProjectCard>
                         </MotionCol>
                         <MotionCol xs={24} md={12} variants={cardVariants}>
@@ -915,16 +917,16 @@ const ThorWebsite = () => {
                                 boxShadow: '0 15px 30px rgba(0,0,0,0.1)' 
                               }}
                             >
-                                <Title level={4}>FastWiki</Title>
+                                <Title level={4}>{t('welcome.projects.fastwiki.title')}</Title>
                                 <Paragraph style={{ color: '#595959' }}>
-                                    一个智能知识库的开源项目，可用于开发企业级智能客服管理系统。支持多种知识库格式，提供高效的检索和答案生成能力。
+                                    {t('welcome.projects.fastwiki.description')}
                                 </Paragraph>
                                 <Button 
                                     onClick={()=>{
                                         window.open('https://github.com/AIDotNet/fast-wiki/', '_blank')
                                     }}
                                     type="link" style={{ padding: 0 }}
-                                >了解更多 →</Button>
+                                >{t('welcome.projects.fastwiki.action')} →</Button>
                             </MotionProjectCard>
                         </MotionCol>
                     </MotionRow>
