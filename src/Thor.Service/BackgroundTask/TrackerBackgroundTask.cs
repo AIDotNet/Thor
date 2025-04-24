@@ -7,7 +7,7 @@ using Thor.Service.Options;
 namespace Thor.Service.BackgroundTask;
 
 public class TrackerBackgroundTask(
-    ITrackerStorage trackerStorage,
+    IServiceProvider serviceProvider,
     IHttpClientFactory httpClientFactory,
     ILogger<TrackerBackgroundTask> logger)
     : BackgroundService
@@ -41,6 +41,9 @@ public class TrackerBackgroundTask(
             };
 
             client.DefaultRequestHeaders.Add("Authorization", TrackerOptions.ApiKey);
+
+            var scope = serviceProvider.CreateAsyncScope();
+            var trackerStorage = scope.ServiceProvider.GetRequiredService<ITrackerStorage>();
 
             while (!stoppingToken.IsCancellationRequested)
             {

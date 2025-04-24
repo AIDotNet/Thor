@@ -76,7 +76,7 @@ public sealed class ChatService(
 
             request.N ??= 1;
 
-            var quota = (int)(rate.PromptRate * imageCostRatio * 1000) * request.N;
+            var quota = (int)(rate.PromptRate * imageCostRatio) * request.N;
 
             if (request == null) throw new Exception("模型校验异常");
 
