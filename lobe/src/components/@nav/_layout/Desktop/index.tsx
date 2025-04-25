@@ -16,13 +16,15 @@ import {
   Shuffle,
   Handshake,
   BrainCog,
-  UsersRound
+  UsersRound,
+  Home,
+  ChevronRight
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
 import BottomActions from "./BottomActions";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu } from "antd";
+import { Menu, Typography, Badge, Divider } from "antd";
 import {
   GeneralSetting,
   InitSetting,
@@ -30,10 +32,25 @@ import {
 import { SlidersOutlined } from "@ant-design/icons";
 import { info } from "../../../../services/UserService";
 import { useTranslation } from "react-i18next";
+import Avatar from "./Avatar";
+
+const { Text } = Typography;
+
+// Define type for menu items to match expected structure
+interface MenuItem {
+  icon: JSX.Element;
+  label: React.ReactNode;
+  enable: boolean;
+  key: string;
+  role?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  children?: MenuItem[];
+}
 
 const Nav = memo(() => {
   const { t, i18n } = useTranslation();
-  const [sidebarKey, setSidebarKey] = useState(useActiveTabKey());
+  const [sidebarKey, setSidebarKey] = useState<SidebarTabKey>(useActiveTabKey());
   const location = useLocation();
   const navigate = useNavigate();
   const chatDisabled = InitSetting.find(
@@ -44,20 +61,24 @@ const Nav = memo(() => {
   const [openKeys, setOpenKeys] = useState<string[]>([]);
 
   // 使用 useMemo 并依赖 i18n.language，这样语言变化时菜单会重新生成
-  const getMenuItems = useMemo(() => {
-    const items = [
+  const getMenuItems = useMemo((): MenuItem[] => {
+    const items: MenuItem[] = [
+      // Core navigation section
       {
-        icon: <BarChart3 />,
-        label: t('sidebar.panel'),
+        icon: <Home />,
+        label: <Badge dot={false}>{t('sidebar.panel')}</Badge>,
         enable: true,
         key: SidebarTabKey.Panel,
         role: "user,admin",
         onClick: () => {
           navigate("/panel");
         },
-      }, {
+      },
+      
+      // AI section with expanded capabilities
+      {
         key: SidebarTabKey.AI,
-        label: t('sidebar.ai'),
+        label: <Text strong>{t('sidebar.ai')}</Text>,
         enable: true,
         icon: <Brain />,
         role: "user,admin",
@@ -75,7 +96,7 @@ const Nav = memo(() => {
           {
             disabled: chatDisabled.value === undefined || chatDisabled.value === "",
             icon: <BotMessageSquare />,
-            label: t('sidebar.chat'),
+            label: <Badge dot={true} color="blue">{t('sidebar.chat')}</Badge>,
             enable: false,
             key: SidebarTabKey.Chat,
             onClick: () => {
@@ -108,6 +129,8 @@ const Nav = memo(() => {
           }
         ]
       },
+      
+      // Token management
       {
         icon: <KeyRound />,
         enable: true,
@@ -118,9 +141,11 @@ const Nav = memo(() => {
         },
         role: "user,admin",
       },
+      
+      // Business section
       {
         key: SidebarTabKey.Business,
-        label: t('sidebar.business'),
+        label: <Text strong>{t('sidebar.business')}</Text>,
         icon: <Handshake />,
         enable: true,
         role: "admin",
@@ -147,6 +172,8 @@ const Nav = memo(() => {
           },
         ]
       },
+      
+      // User section
       {
         icon: <CircleUserRound />,
         label: t('sidebar.current'),
@@ -157,9 +184,11 @@ const Nav = memo(() => {
         },
         role: "user,admin",
       },
+      
+      // System settings
       {
         icon: <Settings />,
-        label: t('sidebar.setting'),
+        label: <Text strong>{t('sidebar.setting')}</Text>,
         enable: true,
         key: SidebarTabKey.Setting,
         children: [
@@ -221,10 +250,12 @@ const Nav = memo(() => {
     if (userRole) {
       return items.filter((item) => {
         if (item.children) {
-          item.children = item.children.filter((child: any) => {
+          item.children = item.children.filter((child) => {
             if (!child.role) return true;
             return child.role.split(",").includes(userRole);
           });
+          // Only return items with children
+          return item.children.length > 0 && (item.role ? item.role.split(",").includes(userRole) : true);
         }
         if (!item.role) return true;
         return item.role.split(",").includes(userRole);
@@ -234,7 +265,7 @@ const Nav = memo(() => {
     return items;
   }, [t, i18n.language, navigate, chatDisabled, userRole]); // 依赖 i18n.language 确保语言变化时重新计算
 
-  const [items, setItems] = useState(getMenuItems);
+  const [items, setItems] = useState<MenuItem[]>(getMenuItems);
 
   useEffect(() => {
     loadUser();
@@ -259,7 +290,7 @@ const Nav = memo(() => {
     for (let index = 0; index < items.length; index++) {
       const element = items[index];
       if (element.onClick && path.includes(element.key)) {
-        setSidebarKey(element.key);
+        setSidebarKey(element.key as SidebarTabKey);
         return;
       }
       if (element.children) {
@@ -267,7 +298,7 @@ const Nav = memo(() => {
           const child = element.children[j];
           // @ts-ignore
           if (child.onClick && path.includes(child.key)) {
-            setSidebarKey(element.key);
+            setSidebarKey(child.key as SidebarTabKey);
             // 确保父菜单项展开
             if (!openKeys.includes(element.key)) {
               setOpenKeys([...openKeys, element.key]);
@@ -290,8 +321,20 @@ const Nav = memo(() => {
         display: "flex",
         flexDirection: "column",
         height: "100%",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
       }}
     >
+      <div
+        style={{
+          padding: "12px 16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Avatar />
+      </div>
+      <Divider style={{ margin: "0 0 8px 0" }} />
       <div
         style={{
           flex: 1,
@@ -302,13 +345,16 @@ const Nav = memo(() => {
           mode="inline"
           style={{
             border: "none",
+            padding: "0 4px",
           }}
           items={items}
           selectedKeys={[sidebarKey]}
           openKeys={openKeys}
           onOpenChange={handleOpenChange}
+          expandIcon={({ isOpen }) => <ChevronRight size={16} style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />}
         />
       </div>
+      <Divider style={{ margin: "8px 0 0 0" }} />
       <BottomActions />
     </div>
   );
