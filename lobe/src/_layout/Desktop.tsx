@@ -1,5 +1,4 @@
 import { memo, useMemo, useCallback } from "react";
-import { useLocation } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { Layout, theme, Button, Tooltip,  } from "antd";
 import { Avatar, Header, ThemeSwitch } from "@lobehub/ui";
