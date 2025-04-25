@@ -2,7 +2,64 @@
     width: 100%;
 }
 
+/* Selected menu item styling */
 .ant-menu-item-selected{
     background-color: #323131 !important;
-    transition: background-color 0.3s ease;
+    border-radius: 6px !important;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect for menu items */
+.ant-menu-item:hover,
+.ant-menu-submenu-title:hover {
+    background-color: rgba(50, 49, 49, 0.1) !important;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+/* Menu title text styling */
+.ant-menu-submenu-title .ant-typography {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Menu item icons styling */
+.ant-menu-item .anticon,
+.ant-menu-submenu-title .anticon,
+.ant-menu-item svg,
+.ant-menu-submenu-title svg {
+    font-size: 18px;
+    margin-right: 10px;
+    transition: transform 0.2s ease;
+}
+
+/* Badge styling in menu */
+.ant-menu-item .ant-badge {
+    line-height: 1;
+}
+
+/* Animated expand icon */
+.ant-menu-submenu-expand-icon {
+    transition: transform 0.3s ease;
+}
+
+/* Custom divider style */
+.ant-divider {
+    margin: 0;
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Improve menu padding */
+.ant-menu-inline {
+    padding: 4px 8px;
+}
+
+/* Animation for submenu expansion */
+.ant-menu-submenu-inline > .ant-menu-submenu-title .ant-menu-submenu-arrow {
+    transition: transform 0.3s ease;
+}
+
+/* Submenu indentation */
+.ant-menu-submenu-inline .ant-menu-item {
+    padding-left: 46px !important;
 }
