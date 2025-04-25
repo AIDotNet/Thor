@@ -16,7 +16,6 @@ const CurrentPage = lazy(() => import('./pages/current/page'))
 const SettingPage = lazy(() => import('./pages/setting/page'))
 const LoginPage = lazy(() => import('./pages/login/page'))
 const RegisterPage = lazy(() => import('./pages/register/page'))
-const DocPage = lazy(() => import('./pages/doc/page'))
 const ModelPage = lazy(() => import('./pages/model/page'))
 const Auth = lazy(() => import('./pages/auth/page'))
 const RateLimit = lazy(() => import('./pages/rate-limit/page'))
@@ -136,17 +135,6 @@ function App() {
       {
         path: '', element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.welcome')} />}>
           <WelcomePage />
-        </Suspense>
-      },
-      {
-        path: "/doc",
-        element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.doc')} />}>
-          <DocPage />
-        </Suspense>
-      }, {
-        path: "/doc/*",
-        element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.doc')} />}>
-          <DocPage />
         </Suspense>
       }, {
         path: "/model",

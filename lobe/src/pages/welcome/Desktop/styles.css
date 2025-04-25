@@ -46,4 +46,219 @@
 /* 悬停效果 */
 .feature-card:hover, .project-card:hover {
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* 全局动画效果 */
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* 文字选择样式 */
+::selection {
+  background: rgba(24, 144, 255, 0.2);
+  color: #fff;
+}
+
+/* 卡片悬浮效果增强 */
+.ant-card {
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* 按钮悬浮效果增强 */
+.ant-btn {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* 标题文字增强效果 */
+h1, h2, h3, h4, h5 {
+  letter-spacing: -0.02em;
+}
+
+/* 加载优化 */
+.ant-card-loading-content {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 37%, rgba(255, 255, 255, 0.05) 63%);
+  background-size: 400% 100%;
+  animation: loadingAnimation 1.4s ease infinite;
+}
+
+@keyframes loadingAnimation {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* 圆形图标渐变效果 */
+.circle-icon-bg {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.2) 0%, rgba(24, 144, 255, 0.05) 100%);
+  box-shadow: 0 10px 20px rgba(24, 144, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.circle-icon-bg:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(24, 144, 255, 0.15);
+}
+
+/* 特殊文字渐变效果 */
+.gradient-text {
+  background: linear-gradient(90deg, #ffffff 0%, #d9d9d9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 主按钮效果增强 */
+.primary-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.5s;
+}
+
+.primary-button:hover::after {
+  left: 100%;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .gradient-text {
+    font-size: 32px !important;
+  }
+}
+
+/* 卡片内部视觉优化 */
+.stats-card {
+  overflow: hidden;
+  position: relative;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transform: rotate(45deg);
+  transition: all 0.5s;
+}
+
+.stats-card:hover::before {
+  opacity: 1;
+}
+
+/* 特性区域特殊效果 */
+.feature-icon {
+  position: relative;
+  z-index: 1;
+}
+
+.feature-icon::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0.5;
+  transform: scale(0.85);
+  filter: blur(10px);
+  transition: all 0.3s;
+}
+
+.feature-icon:hover::after {
+  transform: scale(1.2);
+  opacity: 0.7;
+}
+
+/* 项目卡片特殊效果 */
+.project-card {
+  position: relative;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+  opacity: 0;
+  transition: all 0.5s;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.project-card:hover::before {
+  opacity: 1;
 } 

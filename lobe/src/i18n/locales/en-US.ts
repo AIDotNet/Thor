@@ -47,6 +47,7 @@ const enUS = {
       view: 'View',
       refresh: 'Refresh',
       more: 'More',
+      optional: 'Optional',
     },
 
     // Navigation
@@ -146,7 +147,12 @@ const enUS = {
       configCasdoorClientId: 'Please contact administrator to configure Casdoor ClientId',
       loginSuccess: 'Login successful, redirecting to homepage',
       loginFailed: 'Login failed',
-      loginError: 'Error occurred during login, please try again'
+      loginError: 'Error occurred during login, please try again',
+      brandSlogan: 'Professional AI gateway management platform to help you easily manage multi-channel AI',
+      feature1Title: 'Efficient & Intelligent',
+      feature1Desc: 'Quickly respond to your needs intelligently, improving work efficiency',
+      feature2Title: 'Secure & Reliable',
+      feature2Desc: 'Data encryption, ensuring your privacy and information security'
     },
 
     // Register Page
@@ -173,6 +179,7 @@ const enUS = {
       getVerificationCode: 'Get Code',
       verificationCodeSent: 'Verification code sent',
       resendCode: 'Resend ({count}s)',
+      verificationCodeOptional: 'Failed to send code, but you can continue registration',
       inviteCodeLabel: 'Invitation Code (Optional)',
       inviteCodePlaceholder: 'Enter invitation code if you have one',
       registerButton: 'Register',
@@ -180,7 +187,16 @@ const enUS = {
       registerSuccess: 'Registration successful! Redirecting to homepage',
       emailNotAllowed: 'The system does not allow registration with email',
       userCreationFailed: 'User creation failed',
-      registerError: 'Error occurred during registration, please try again'
+      registerError: 'Error occurred during registration, please try again',
+      // New step navigation translations
+      step1: 'Account Info',
+      step2: 'Set Password',
+      nextStep: 'Next Step',
+      prevStep: 'Previous',
+      // Brand promotion area translations
+      brandSlogan: 'A professional ai gateway management platform to help you easily manage multi-channel AI',
+      feature1Title: 'Intelligent forwarding',
+      feature1Desc: 'One-click usage, easily access multi-channel AI'
     },
 
     // Home Page
@@ -248,13 +264,14 @@ const enUS = {
       },
       projects: {
         title: 'Related Open Source Projects',
+        description: 'AIDotNet community maintains multiple open source projects, aiming to promote the development of AI technology and provide a better learning and communication platform for AI developers.',
         aidotnet: {
           title: 'AIDotNet',
           description: 'AIDotNet Community is a community of AI developers, aiming to promote the development of AI technology and provide a better learning and communication platform for AI developers.',
           action: 'Learn More'
         },
-        fastwiki: {
-          title: 'FastWiki',
+        koala: {
+          title: 'Koala AI',
           description: 'An open-source project for intelligent knowledge base, which can be used to develop enterprise-level intelligent customer service management systems. Supporting multiple knowledge base formats, providing efficient retrieval and answer generation capabilities.',
           action: 'Learn More'
         }

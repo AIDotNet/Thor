@@ -47,6 +47,7 @@ const zhCN = {
       view: '查看',
       refresh: '刷新',
       more: '更多',
+      optional: '可选',
     },
 
     // 导航
@@ -146,7 +147,12 @@ const zhCN = {
       configCasdoorClientId: '请联系管理员配置 Casdoor ClientId',
       loginSuccess: '登录成功，即将跳转到首页',
       loginFailed: '登录失败',
-      loginError: '登录过程中出现错误，请重试'
+      loginError: '登录过程中出现错误，请重试',
+      brandSlogan: '专业的AI网关管理平台，帮助您轻松管理多渠道AI',
+      feature1Title: '高效智能',
+      feature1Desc: '快速智能地响应您的需求，提升工作效率',
+      feature2Title: '安全可靠',
+      feature2Desc: '数据加密，保障您的隐私与信息安全'
     },
 
     // 注册页面
@@ -173,6 +179,7 @@ const zhCN = {
       getVerificationCode: '获取验证码',
       verificationCodeSent: '验证码已发送',
       resendCode: '重新发送 ({count}s)',
+      verificationCodeOptional: '验证码发送失败，但您仍可继续注册',
       inviteCodeLabel: '邀请码 (可选)',
       inviteCodePlaceholder: '如果有邀请码请输入',
       registerButton: '注册',
@@ -180,7 +187,13 @@ const zhCN = {
       registerSuccess: '注册成功！即将为您跳转到主页',
       emailNotAllowed: '当前系统不允许使用邮箱进行注册',
       userCreationFailed: '用户创建失败',
-      registerError: '注册过程中出现错误，请重试'
+      registerError: '注册过程中出现错误，请重试',
+      step1: '账户信息',
+      step2: '设置密码',
+      nextStep: '下一步',
+      prevStep: '上一步',
+      feature1Title: '智能转发',
+      feature1Desc: '一键式使用，轻松接入多渠道AI'
     },
 
     // 首页
@@ -248,13 +261,14 @@ const zhCN = {
       },
       projects: {
         title: '相关开源项目',
+        description: 'AIDotNet社区维护的多个开源项目，旨在推动AI技术的发展，为AI开发者提供更好的学习和交流平台。',
         aidotnet: {
           title: 'AIDotNet',
           description: 'AIDotNet社区是一个热衷于AI开发者组成的社区，旨在推动AI技术的发展，为AI开发者提供更好的学习和交流平台。',
           action: '了解更多'
         },
-        fastwiki: {
-          title: 'FastWiki',
+        koala: {
+          title: 'KoalaAI',
           description: '一个智能知识库的开源项目，可用于开发企业级智能客服管理系统。支持多种知识库格式，提供高效的检索和答案生成能力。',
           action: '了解更多'
         }

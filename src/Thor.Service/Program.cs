@@ -919,7 +919,7 @@ try
 
     app.MapPost("v1/images/variations",
             async (ChatService imageService, HttpContext context) =>
-                await imageService.EditsImageAsync(context))
+                await imageService.VariationsAsync(context))
         .WithDescription("OpenAI")
         .WithDescription("Image")
         .WithOpenApi();

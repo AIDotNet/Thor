@@ -16,10 +16,6 @@ export default function MobilePage() {
             label: '模型',
         },
         {
-            key: 'doc',
-            label: '文档',
-        },
-        {
             key: 'panel',
             label: '面板',
         }]

@@ -22,7 +22,6 @@ export default function DesktopPage() {
     const menuItems = useMemo(() => [
         { key: 'home', label: t('nav.welcome') },
         { key: 'models', label: t('nav.model') },
-        { key: 'docs', label: t('nav.doc') },
         { key: 'pricing', label: t('nav.product') },
         { key: 'community', label: t('common.community') },
     ], [t, i18n.language]); // 依赖i18n.language以响应语言变化
@@ -42,14 +41,6 @@ export default function DesktopPage() {
             label: t('nav.model'),
             onClick: () => {
                 navigate('/model');
-                toggleMobileMenu();
-            }
-        },
-        {
-            key: 'docs',
-            label: t('nav.doc'),
-            onClick: () => {
-                navigate('/doc');
                 toggleMobileMenu();
             }
         },
