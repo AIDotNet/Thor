@@ -1,7 +1,7 @@
 import { memo, useMemo, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { Outlet } from "react-router-dom";
-import { Layout, theme, Button, Tooltip, Spin } from "antd";
+import { Layout, theme, Button, Tooltip,  } from "antd";
 import { Avatar, Header, ThemeSwitch } from "@lobehub/ui";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -33,8 +33,6 @@ const StyledContent = styled(Content)`
 const ContentWrapper = styled(motion.div)`
   padding: 24px;
   min-height: 360px;
-  background: ${props => props.theme.token?.colorBgContainer};
-  border-radius: ${props => props.theme.token?.borderRadiusLG}px;
 `;
 
 const StyledFooter = styled(Footer)`
@@ -78,7 +76,7 @@ const useUserDropdownItems = () => {
 };
 
 // 侧边栏组件
-const Sidebar = memo(({ nav }) => {
+const Sidebar = memo(({ nav }: { nav: React.ReactNode }) => {
   const { token: { colorBgContainer } } = theme.useToken();
   const navigate = useNavigate();
   
@@ -111,7 +109,7 @@ const HeaderActions = memo(() => {
     navigate('/model');
   }, [navigate]);
   
-  const handleThemeSwitch = useCallback((model) => {
+  const handleThemeSwitch = useCallback((model: any) => {
     toggleTheme(model);
   }, [toggleTheme]);
   
@@ -144,7 +142,6 @@ FooterContent.displayName = "FooterContent";
 // 主内容区域
 const MainContent = memo(() => {
   const { token } = theme.useToken();
-  const location = useLocation();
   
   return (
     <StyledContent>

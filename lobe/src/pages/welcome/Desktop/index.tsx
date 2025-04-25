@@ -1,4 +1,4 @@
-import { theme, Button, Card, Layout, Space, Typography, Row, Col, Statistic } from 'antd';
+import {  Button, Card, Layout, Space, Typography, Row, Col, Statistic } from 'antd';
 import {
   GithubOutlined,
   RocketOutlined,
@@ -135,25 +135,6 @@ const useStyles = createStyles(({ token, css }) => ({
   `,
   // ... 其他样式
 }));
-
-// 添加动画版的 FeatureCard 组件
-const MotionFeatureCard = motion(styled(Card)`
-  height: 100%;
-  transition: all 0.3s;
-  &:hover {
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  }
-  border-top: 3px solid ${props => props.color || 'transparent'};
-`);
-
-// 添加动画版的项目卡片
-const MotionProjectCard = motion(styled(Card)`
-  height: 100%;
-  transition: all 0.3s;
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-`);
 
 // 添加3D悬浮卡片效果
 const MotionFeatureCard3D = motion(styled(Card)`
@@ -389,7 +370,6 @@ const CountUpStatistic = ({ title, value, suffix, valueStyle }: { title: string,
 const ThorWebsite = () => {
   const { styles } = useStyles();
   const navigate = useNavigate();
-  const { token } = theme.useToken();
   const { t } = useTranslation();
 
   // 创建滚动检测钩子
@@ -641,7 +621,7 @@ const ThorWebsite = () => {
               </Paragraph>
               <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <motion.div
-                  style={{ display: 'flex', alignItems: 'flex-start' }}
+                  style={{ display: 'flex', alignItems: 'flex-start',padding: 10, borderRadius: 12 }}
                   initial={{ opacity: 0, x: 30 }}
                   animate={heroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
                   transition={{ duration: 0.5, delay: 0.5 }}
@@ -651,7 +631,6 @@ const ThorWebsite = () => {
                     borderRadius: 12,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                   }}
-                  style={{ padding: 10, borderRadius: 12 }}
                 >
                   <div style={{
                     background: 'linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.05) 100%)',
@@ -673,7 +652,7 @@ const ThorWebsite = () => {
                   </div>
                 </motion.div>
                 <motion.div
-                  style={{ display: 'flex', alignItems: 'flex-start' }}
+                  style={{ display: 'flex', alignItems: 'flex-start',padding: 10, borderRadius: 12 }}
                   initial={{ opacity: 0, x: 30 }}
                   animate={heroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
                   transition={{ duration: 0.5, delay: 0.6 }}
@@ -683,7 +662,6 @@ const ThorWebsite = () => {
                     borderRadius: 12,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                   }}
-                  style={{ padding: 10, borderRadius: 12 }}
                 >
                   <div style={{
                     background: 'linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.05) 100%)',
@@ -705,7 +683,7 @@ const ThorWebsite = () => {
                   </div>
                 </motion.div>
                 <motion.div
-                  style={{ display: 'flex', alignItems: 'flex-start' }}
+                  style={{ display: 'flex', alignItems: 'flex-start',padding: 10, borderRadius: 12 }}
                   initial={{ opacity: 0, x: 30 }}
                   animate={heroInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
                   transition={{ duration: 0.5, delay: 0.7 }}
@@ -715,7 +693,6 @@ const ThorWebsite = () => {
                     borderRadius: 12,
                     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                   }}
-                  style={{ padding: 10, borderRadius: 12 }}
                 >
                   <div style={{
                     background: 'linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.05) 100%)',

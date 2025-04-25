@@ -1,5 +1,5 @@
 import { memo, useState, useEffect } from 'react';
-import { message, Input, Button, Form, Typography, Space, Divider, theme } from 'antd';
+import { message, Input, Button, Form, Typography,  Divider, theme } from 'antd';
 import { EyeInvisibleOutlined, EyeTwoTone, GithubOutlined, UserOutlined, LockOutlined } from '@ant-design/icons';
 import { Tooltip } from '@lobehub/ui';
 import { login } from '../../services/AuthorizeService';
