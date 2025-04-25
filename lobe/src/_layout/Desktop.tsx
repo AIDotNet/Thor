@@ -1,6 +1,6 @@
 import { memo, useMemo, useCallback } from "react";
 import { Outlet } from "react-router-dom";
-import { Layout, theme, Button, Tooltip,  } from "antd";
+import { Layout, theme, Button, Tooltip, Typography, ConfigProvider, Space, Divider } from "antd";
 import { Avatar, Header, ThemeSwitch } from "@lobehub/ui";
 import { Dropdown } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -11,32 +11,70 @@ import { useTranslation } from "react-i18next";
 import styled from "styled-components";
 import { motion } from "framer-motion";
 import { LayoutProps } from "./type";
+import { HomeOutlined } from "@ant-design/icons";
 
 const { Content, Footer, Sider } = Layout;
+const { Text, Title } = Typography;
 
 // 样式组件
-const LogoText = styled.span`
-  font-size: 24px;
-  font-weight: 600;
-  font-family: 'PingFang SC';
+const LogoContainer = styled(Flexbox)`
+  padding: 16px 0;
+  transition: all 0.3s;
+`;
+
+const LogoText = styled(Title)`
   cursor: pointer;
   user-select: none;
-  margin-top: 8px;
-  margin-bottom: 20px;
+  margin: 0 !important;
+  transition: all 0.3s;
 `;
 
-const StyledContent = styled(Content)`
-  margin: 16px;
+// 使用函数方式传递theme，避免类型错误
+const StyledContent = styled(Content)(({ theme }: any) => `
+  margin: ${theme?.token?.marginMD || 16}px;
+  transition: all 0.3s;
+  flex: 1;
+  overflow: auto;
+  overflow-x: hidden !important;
+  display: flex;
+  flex-direction: column;
+  
+  @media (max-width: 576px) {
+    margin: ${theme?.token?.marginSM || 8}px;
+  }
+`);
+
+const ContentWrapper = styled(motion.div)(({ theme }: any) => `
+  padding: ${theme?.token?.paddingLG || 24}px;
+  min-height: 0;
+  flex: 1;
+  background: ${theme?.token?.colorBgContainer || '#fff'};
+  border-radius: ${theme?.token?.borderRadiusLG || 8}px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s;
+  overflow: auto;
+  
+  @media (max-width: 576px) {
+    padding: ${theme?.token?.paddingMD || 16}px;
+  }
+`);
+
+const StyledSider = styled(Sider)`
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  
+  .ant-layout-sider-children {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
 `;
 
-const ContentWrapper = styled(motion.div)`
-  padding: 24px;
-  min-height: 360px;
-`;
-
-const StyledFooter = styled(Footer)`
+const StyledFooter = styled(Footer)(({ theme }: any) => `
   text-align: center;
-`;
+  background: transparent;
+  padding: ${theme?.token?.paddingSM || 8}px;
+`);
 
 // 页面过渡动画
 const pageVariants = {
@@ -63,12 +101,17 @@ const useUserDropdownItems = () => {
         onClick: () => navigate('/current')
       },
       {
+        key: 'divider',
+        type: 'divider' as const
+      },
+      {
         key: 'logout',
         label: t('common.logout'),
         onClick: () => {
           localStorage.removeItem('token');
           navigate('/login');
-        }
+        },
+        danger: true
       }
     ]
   }), [t, i18n.language, navigate]);
@@ -76,7 +119,7 @@ const useUserDropdownItems = () => {
 
 // 侧边栏组件
 const Sidebar = memo(({ nav }: { nav: React.ReactNode }) => {
-  const { token: { colorBgContainer } } = theme.useToken();
+  const { token } = theme.useToken();
   const navigate = useNavigate();
   
   const handleLogoClick = useCallback(() => {
@@ -84,14 +127,34 @@ const Sidebar = memo(({ nav }: { nav: React.ReactNode }) => {
   }, [navigate]);
   
   return (
-    <Sider style={{ background: colorBgContainer, paddingTop: "16px" }}>
-      <Tooltip title="Thor AI 平台管理系统">
-        <Flexbox gap={8} align="center" justify="center" horizontal>
-          <LogoText onClick={handleLogoClick}>Thor</LogoText>
-        </Flexbox>
-      </Tooltip>
-      {nav}
-    </Sider>
+    <StyledSider 
+      width={240} 
+      theme="light"
+      style={{ background: token.colorBgContainer }}
+    >
+      <LogoContainer align="center" justify="center">
+        <Tooltip title="Thor AI 平台管理系统" placement="right">
+          <Flexbox gap={token.marginXS} align="center" justify="center" horizontal onClick={handleLogoClick}>
+            <Avatar 
+              src='/logo.png' 
+              size={40} 
+              shape="square" 
+              style={{ 
+                borderRadius: token.borderRadiusSM,
+                boxShadow: `0 2px 8px ${token.colorPrimaryBg}` 
+              }} 
+            />
+            <LogoText level={4}>Thor</LogoText>
+          </Flexbox>
+        </Tooltip>
+      </LogoContainer>
+      
+      <Divider style={{ margin: `0 ${token.marginSM}px` }} />
+      
+      <div style={{ flex: 1, overflowY: 'auto', padding: `${token.paddingSM}px 0` }}>
+        {nav}
+      </div>
+    </StyledSider>
   );
 });
 
@@ -103,6 +166,7 @@ const HeaderActions = memo(() => {
   const { t } = useTranslation();
   const { themeMode, toggleTheme } = useThemeStore();
   const dropdownItems = useUserDropdownItems();
+  const { token } = theme.useToken();
   
   const handleModelClick = useCallback(() => {
     navigate('/model');
@@ -113,8 +177,11 @@ const HeaderActions = memo(() => {
   }, [toggleTheme]);
   
   return (
-    <>
-      <Button type="text" onClick={handleModelClick}>
+    <Space size={token.marginSM}>
+      <Button 
+        icon={<HomeOutlined />}
+        onClick={handleModelClick}
+      >
         {t('nav.model')}
       </Button>
       <LanguageSwitcher />
@@ -122,10 +189,17 @@ const HeaderActions = memo(() => {
         onThemeSwitch={handleThemeSwitch}
         themeMode={themeMode} 
       />
-      <Dropdown menu={dropdownItems}>
-        <Avatar src='/logo.png' size={48} />
+      <Dropdown menu={dropdownItems} trigger={['click']}>
+        <Avatar 
+          src='/logo.png' 
+          size={40} 
+          style={{ 
+            cursor: 'pointer',
+            boxShadow: `0 2px 8px ${token.colorPrimaryBg}`
+          }} 
+        />
       </Dropdown>
-    </>
+    </Space>
   );
 });
 
@@ -133,7 +207,15 @@ HeaderActions.displayName = "HeaderActions";
 
 // 页脚组件
 const FooterContent = memo(() => {
-  return <StyledFooter>Thor ©{new Date().getFullYear()} Created by Thor</StyledFooter>;
+  const { token } = theme.useToken();
+  
+  return (
+    <StyledFooter theme={{ token }}>
+      <Text type="secondary">
+        Thor ©{new Date().getFullYear()} Created by Thor
+      </Text>
+    </StyledFooter>
+  );
 });
 
 FooterContent.displayName = "FooterContent";
@@ -143,10 +225,15 @@ const MainContent = memo(() => {
   const { token } = theme.useToken();
   
   return (
-    <StyledContent>
+    <StyledContent theme={{ token }}>
       <ContentWrapper
         variants={pageVariants}
         initial="initial"
+        style={{
+          overflow: 'auto',
+          overflowX: 'hidden',
+          height: '100%',
+        }}
         animate="animate"
         exit="exit"
         transition={{ duration: 0.3 }}
@@ -162,15 +249,35 @@ MainContent.displayName = "MainContent";
 
 // 主布局组件
 const LayoutPage = memo<LayoutProps>(({ nav }) => {
+  const { token } = theme.useToken();
+  
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Sidebar nav={nav} />
-      <Layout>
-        <Header actions={<HeaderActions />} />
-        <MainContent />
-        <FooterContent />
+    <ConfigProvider
+      theme={{
+        components: {
+          Layout: {
+            siderBg: token.colorBgContainer,
+            headerBg: token.colorBgContainer,
+            bodyBg: token.colorBgLayout,
+          }
+        }
+      }}
+    >
+      <Layout style={{ minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
+        <Sidebar nav={nav} />
+        <Layout style={{ background: token.colorBgLayout, height: "100%", overflow: "auto" }}>
+          <Header 
+            actions={<HeaderActions />} 
+            style={{
+              boxShadow: `0 2px 8px rgba(0, 0, 0, 0.06)`,
+              zIndex: 9,
+            }}
+          />
+          <MainContent />
+          <FooterContent />
+        </Layout>
       </Layout>
-    </Layout>
+    </ConfigProvider>
   );
 });
 

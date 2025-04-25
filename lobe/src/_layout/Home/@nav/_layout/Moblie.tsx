@@ -24,6 +24,12 @@ const Nav = memo(() => {
             onClick: () => {
                 navigate('/model')
             }
+        }, {
+            key: "api_doc",
+            label: "API文档",
+            onClick: () => {
+                window.open('https://thor-ai.apifox.cn', '_blank')
+            }
         }
     ]
 

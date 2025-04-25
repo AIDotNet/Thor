@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import { getModels, getTypes } from "../../../services/ModelService";
 import { Add } from "../../../services/ChannelService";
-import { message, Drawer, Checkbox } from "antd";
-import { Button, Select, Form, Input } from "antd";
+import { message, Drawer, Checkbox, Space } from "antd";
+import { Button, Select, Form, Input, Typography } from "antd";
 import { getModelPrompt } from "../../../utils/render";
 import { getList } from "../../../services/UserGroupService";
 import { Flexbox } from "react-layout-kit";
+import { useTranslation } from "react-i18next";
+import { theme } from "antd";
+
 const { Option } = Select;
+const { Text } = Typography;
+
 interface ICreateChannelProps {
   onSuccess: () => void;
   visible: boolean;
@@ -18,13 +23,17 @@ export default function CreateChannel({
   visible,
   onCancel,
 }: ICreateChannelProps) {
+  const { t } = useTranslation();
+  const { token } = theme.useToken();
   const [groups, setGroups] = useState<any[]>([]);
 
   useEffect(() => {
     getList()
       .then((res) => {
-        setGroups(res.data);
-      })
+        if (res.success) {
+          setGroups(res.data);
+        }
+      });
   }, []);
 
   // 字典models key, value类型
@@ -57,9 +66,7 @@ export default function CreateChannel({
       if (res.success) {
         setTypes(res.data);
       } else {
-        message.error({
-          content: res.message,
-        });
+        message.error(res.message || t('common.operateFailed'));
       }
     });
 
@@ -67,9 +74,7 @@ export default function CreateChannel({
       if (res.success) {
         setModels(res.data);
       } else {
-        message.error({
-          content: res.message,
-        });
+        message.error(res.message || t('common.operateFailed'));
       }
     });
   }
@@ -89,22 +94,16 @@ export default function CreateChannel({
 
     // 判断是否选择了模型
     if (!values.models || values.models.length === 0) {
-      message.error({
-        content: "请选择模型",
-      });
+      message.error(t('channel.modelsRequired'));
       return;
     }
 
-    Add(values).then((item) => {
-      if (item.success) {
-        message.success({
-          content: "创建成功",
-        });
+    Add(values).then((response) => {
+      if (response.success) {
+        message.success(t('common.createSuccess'));
         onSuccess();
       } else {
-        message.error({
-          content: item.message,
-        });
+        message.error(response.message || t('common.operateFailed'));
       }
     });
   }
@@ -113,24 +112,49 @@ export default function CreateChannel({
     <Drawer
       open={visible}
       width={500}
-      title="创建渠道(Channel)"
-      onClose={() => onCancel()}
+      title={t('channel.createChannel')}
+      onClose={onCancel}
+      styles={{
+        body: {
+          paddingBottom: 80,
+        },
+      }}
+      footer={
+        <Space style={{ 
+          width: '100%', 
+          justifyContent: 'flex-end',
+          marginBottom: token.marginLG
+        }}>
+          <Button onClick={onCancel}>{t('common.cancel')}</Button>
+          <Button 
+            type="primary" 
+            form="createChannelForm" 
+            htmlType="submit"
+          >
+            {t('common.submit')}
+          </Button>
+        </Space>
+      }
     >
       <Form
-        onFinish={(values: any) => handleSubmit(values)}
-        style={{ width: 400 }}
+        id="createChannelForm"
+        onFinish={handleSubmit}
+        layout="vertical"
+        initialValues={{
+          cache: false
+        }}
       >
         <Form.Item<FieldType>
-          label="渠道名称"
+          label={t('channel.channelName')}
           name="name"
           rules={[
             {
               required: true,
-              message: "渠道名称不能为空",
+              message: t('channel.channelNameRequired'),
             },
             {
               min: 3,
-              message: "渠道名称长度不能小于3",
+              message: t('channel.channelNameMinLength'),
             },
           ]}
         >
@@ -139,7 +163,7 @@ export default function CreateChannel({
             onChange={(v) => {
               setInput({ ...input, name: v.target.value });
             }}
-            placeholder="请输入渠道名称"
+            placeholder={t('channel.enterChannelName')}
           />
         </Form.Item>
 
@@ -147,15 +171,14 @@ export default function CreateChannel({
           rules={[
             {
               required: true,
-              message: "平台类型不能为空",
+              message: t('channel.platformTypeRequired'),
             },
           ]}
           name="type"
-          label="平台类型"
-          style={{ width: "100%" }}
+          label={t('channel.channelType')}
         >
           <Select
-            placeholder="请选择平台类型"
+            placeholder={t('channel.selectPlatformType')}
             value={input.type}
             onChange={(v) => {
               setInput({ ...input, type: v });
@@ -173,17 +196,22 @@ export default function CreateChannel({
           </Select>
         </Form.Item>
 
-        <Form.Item<FieldType> label="代理地址" name="address">
-          <Input placeholder="请输入代理地址" />
+        <Form.Item<FieldType> 
+          label={t('channel.proxyAddress')} 
+          name="address"
+        >
+          <Input 
+            placeholder={t('channel.enterProxyAddress')} 
+          />
         </Form.Item>
+        
         {input.type === "AzureOpenAI" && (
           <Form.Item<FieldType>
             name="other"
-            label="版本"
-            style={{ width: "100%" }}
+            label={t('channel.version')}
           >
             <Select
-              placeholder="请选择版本"
+              placeholder={t('channel.version')}
               value={input.other}
               defaultActiveFirstOption={true}
               defaultValue={"2024-10-01-preview"}
@@ -213,14 +241,15 @@ export default function CreateChannel({
             </Select>
           </Form.Item>
         )}
+        
         {input.type === "AWSClaude" && (
           <Form.Item<FieldType>
             name="other"
-            label="区域"
+            label={t('channel.region')}
             rules={[
               {
                 required: true,
-                message: "区域不能为空",
+                message: t('channel.region'),
               },
             ]}
           >
@@ -229,19 +258,34 @@ export default function CreateChannel({
               onChange={(v) => {
                 setInput({ ...input, other: v.target.value });
               }}
-              placeholder="请输入区域"
+              placeholder={t('channel.region')}
             />
           </Form.Item>
         )}
+        
+        {input.type === "Claude" && (
+          <Form.Item<FieldType>
+            name="cache"
+            label={t('channel.cacheEnabled')}
+            valuePropName="checked"
+          >
+            <Checkbox
+              checked={input.cache}
+              onChange={(v) => {
+                setInput({ ...input, cache: v.target.checked });
+              }}
+            />
+          </Form.Item>
+        )}
+        
         {input.type === "Hunyuan" && (
           <Form.Item<FieldType>
             name="other"
-            label="资源地域"
-            style={{ width: "100%" }}
+            label={t('channel.region')}
           >
             <Select
-              placeholder="资源地域"
-              value={input.type}
+              placeholder={t('channel.region')}
+              value={input.other}
               onChange={(v) => {
                 setInput({ ...input, other: v });
               }}
@@ -256,28 +300,15 @@ export default function CreateChannel({
             </Select>
           </Form.Item>
         )}
-        {input.type === "Claude" && (
-          <Form.Item<FieldType>
-            name="cache"
-            label="是否启用缓存"
-          >
-            <Checkbox
-              checked={input.cache}
-              onChange={(v) => {
-                setInput({ ...input, cache: v.target.checked });
-              }}
-            >
-            </Checkbox>
-          </Form.Item>
-        )}
+        
         {input.type === "ErnieBot" && (
           <Form.Item<FieldType>
             name="other"
-            label="AppId"
+            label={t('channel.appId')}
             rules={[
               {
                 required: true,
-                message: "AppId不能为空",
+                message: t('channel.appId'),
               },
             ]}
           >
@@ -286,31 +317,36 @@ export default function CreateChannel({
               onChange={(v) => {
                 setInput({ ...input, other: v.target.value });
               }}
-              placeholder="请输入AppId"
+              placeholder={t('channel.appId')}
             />
-          </Form.Item>)}
-        <Form.Item<FieldType> label="密钥" name="key">
+          </Form.Item>
+        )}
+        
+        <Form.Item<FieldType> 
+          label={t('channel.key')} 
+          name="key"
+        >
           <Input.Password
             placeholder={getModelPrompt(input.type)}
             autoComplete="token"
           />
         </Form.Item>
+        
         <Form.Item<FieldType>
           name="groups"
-          label="组"
-          rules={[{ required: true, message: '请选择组' }]}
-          style={{ width: "100%" }}
+          label={t('channel.groups')}
+          rules={[{ required: true, message: t('channel.groupsRequired') }]}
         >
           <Select
-            placeholder="请选择组"
+            placeholder={t('channel.selectGroups')}
             mode="tags"
             options={groups?.map((group: any) => {
               return {
                 label: <Flexbox gap={8} horizontal>
                   <span>{group.name}</span>
-                  <span style={{ fontSize: 12, color: '#999' }}>{group.description}</span>
-                  <span style={{ fontSize: 12, color: '#999' }}>
-                    <span>倍率：</span>
+                  <span style={{ fontSize: 12, color: token.colorTextSecondary }}>{group.description}</span>
+                  <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                    <Text type="secondary">{t('channel.rate')}：</Text>
                     {group.rate}
                   </span>
                 </Flexbox>,
@@ -323,19 +359,19 @@ export default function CreateChannel({
             }}
           />
         </Form.Item>
+        
         <Form.Item
           name="models"
-          label="模型"
+          label={t('channel.models')}
           rules={[
             {
               required: true,
-              message: "请选择模型",
+              message: t('channel.modelsRequired'),
             },
           ]}
-          style={{ width: "100%" }}
         >
           <Select
-            placeholder="请选择模型"
+            placeholder={t('channel.selectModels')}
             defaultActiveFirstOption={true}
             mode="tags"
             value={input.models}
@@ -343,6 +379,8 @@ export default function CreateChannel({
               setInput({ ...input, models: v });
             }}
             allowClear
+            optionFilterProp="children"
+            showSearch
           >
             {models &&
               models.map((model: any) => {
@@ -354,10 +392,6 @@ export default function CreateChannel({
               })}
           </Select>
         </Form.Item>
-
-        <Button type="primary" block htmlType="submit">
-          提交
-        </Button>
       </Form>
     </Drawer>
   );

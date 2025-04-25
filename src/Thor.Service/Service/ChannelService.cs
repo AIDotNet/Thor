@@ -26,9 +26,7 @@ namespace Thor.Service.Service;
 public sealed class ChannelService(
     IServiceProvider serviceProvider,
     IMapper mapper,
-    IServiceCache cache,
-    UserService userService,
-    IUserContext userContext)
+    IServiceCache cache)
     : ApplicationService(serviceProvider)
 {
     private const string CacheKey = "CacheKey:Channel";
@@ -78,34 +76,71 @@ public sealed class ChannelService(
     }
 
     /// <summary>
-    /// 
+    /// 获取所有的Tags
     /// </summary>
-    /// <param name="page"></param>
-    /// <param name="pageSize"></param>
-    /// <param name="keyword"></param>
     /// <returns></returns>
-    public async ValueTask<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize, string? keyword)
+    public async Task<string[]> GetTagsAsync()
+    {
+        var channels = await DbContext.ModelManagers.AsNoTracking().ToArrayAsync();
+        var tags = channels.SelectMany(x => x.Tags).Distinct().ToArray();
+
+        return tags;
+    }
+
+    /// <summary>
+    /// Asynchronously retrieves a paginated list of chat channels based on the provided parameters.
+    /// </summary>
+    /// <param name="page">The page number to retrieve. Must be greater than zero.</param>
+    /// <param name="pageSize">The number of items per page. Must be greater than zero.</param>
+    /// <param name="keyword">An optional search keyword to filter channels by name. If null or empty, no filtering is applied.</param>
+    /// <param name="groups"></param>
+    /// <returns>A <see cref="ValueTask"/> representing the asynchronous operation, containing a <see cref="PagingDto{T}"/> of <see cref="GetChatChannelDto"/> with the total count and the paginated results.</returns>
+    public async ValueTask<PagingDto<GetChatChannelDto>> GetAsync(int page, int pageSize, string? keyword,
+        string[]? groups)
     {
         var query = DbContext.Channels.AsNoTracking();
-
 
         if (!string.IsNullOrWhiteSpace(keyword))
         {
             query = query.Where(x => x.Name.Contains(keyword));
         }
 
-        var total = await query.CountAsync();
-
-        if (total <= 0) return new PagingDto<GetChatChannelDto>(total, []);
+        if (groups is { Length: > 0 })
         {
+            // 如果走分组则需要通过直接查询分组来获取
             var result = await query
                 .AsNoTracking()
-                .OrderByDescending(x => x.CreatedAt)
+                .OrderByDescending(x => x.CreatedAt).ToArrayAsync();
+
+            result = result
+                .Where(x => x.Groups.Any(groups.Contains))
+                .ToArray();
+
+            var total = result.Length;
+
+            result = result
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToArray();
 
-            return new PagingDto<GetChatChannelDto>(total, mapper.Map<List<GetChatChannelDto>>(result));
+            return new PagingDto<GetChatChannelDto>(total,
+                mapper.Map<List<GetChatChannelDto>>(result));
+        }
+        else
+        {
+            var total = await query.CountAsync();
+
+            if (total <= 0) return new PagingDto<GetChatChannelDto>(total, []);
+            {
+                var result = await query
+                    .AsNoTracking()
+                    .OrderByDescending(x => x.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagingDto<GetChatChannelDto>(total, mapper.Map<List<GetChatChannelDto>>(result));
+            }
         }
     }
 
@@ -220,7 +255,7 @@ public sealed class ChannelService(
         {
             TopP = 0.7f,
             Temperature = 0.95f,
-            MaxTokens = 100,
+            MaxTokens = 1,
             Messages = [ThorChatMessage.CreateUserMessage("hello")]
         };
 

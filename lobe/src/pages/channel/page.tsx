@@ -1,264 +1,25 @@
 import { useEffect, useState } from "react";
-import { Button, Switch, message, Tag, Dropdown, InputNumber, Table } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
+import { Button, Switch, message, Tag, Dropdown, InputNumber, Table, Space, Card, Typography, Select, Row, Col } from 'antd';
+import { LoadingOutlined, ReloadOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test } from "../../services/ChannelService";
 import { renderQuota } from "../../utils/render";
 import { Input } from "@lobehub/ui";
 import { getTypes } from "../../services/ModelService";
 import CreateChannel from "./features/CreateChannel";
 import UpdateChannel from "./features/UpdateChannel";
+import { useTranslation } from "react-i18next";
+import { getList } from "../../services/UserGroupService";
+import { ConfigProvider, theme } from 'antd';
+import { Flexbox } from "react-layout-kit";
 
+const { Text, Title } = Typography;
+const { Option } = Select;
 
 export default function ChannelPage() {
+  const { t } = useTranslation();
+  const { token } = theme.useToken();
 
-  const columns = [
-    {
-      title: '名称',
-      dataIndex: 'name',
-      fixed: 'left',
-    },
-    {
-      title: '是否禁用',
-      width: '100px',
-      dataIndex: 'disable',
-      render: (value: any, item: any) => {
-        return <Switch
-          checkedChildren={<span style={{
-            color: "red"
-          }}>
-            禁
-          </span>}
-          unCheckedChildren={<span style={{
-            color: "green"
-          }}>
-            启
-          </span>}
-          value={value} onChange={() => {
-            disable(item.id)
-              .then((item) => {
-                item.success ? message.success({
-                  content: '操作成功'
-                }) : message.error({
-                  content: '操作失败'
-                });
-                loadingData();
-              }), () => message.error({
-                content: '操作失败'
-              });
-          }} style={{
-            width: '50px',
-          }} aria-label="a switch for semi demo"></Switch>
-      }
-    },
-    {
-      title: '自动检测',
-      width: '100px',
-      dataIndex: 'controlAutomatically',
-      render: (value: any, item: any) => {
-        return <Switch
-          onChange={() => {
-            controlAutomatically(item.id)
-              .then((item) => {
-                item.success ? message.success({
-                  content: '操作成功'
-                }) : message.error({
-                  content: '操作失败'
-                });
-                loadingData();
-              }), () => message.error({
-                content: '操作失败'
-              });
-          }}
-          checkedChildren={<span style={{
-            color: "red"
-          }}>
-            禁
-          </span>}
-          unCheckedChildren={'启'}
-          value={!value} style={{
-            width: '50px',
-          }} aria-label="a switch for semi demo"></Switch>
-      }
-    },
-    {
-      width: '100px',
-      title: '平台类型',
-      dataIndex: 'typeName',
-      render: (value: any) => {
-        return <Tag>{value}</Tag>
-      }
-    },
-    {
-      title: '响应时间',
-      width: '100px',
-      dataIndex: 'responseTime',
-      render: (value: any, item: any) => {
-        const isLoading = testingChannels.includes(item.id);
-        
-        if (value) {
-          // 小于3000毫秒显示绿色
-          let color;
-          if (value < 3000) {
-            color = 'green';
-          } else if (value < 5000) {
-            color = 'yellow';
-          } else {
-            color = 'red';
-          }
-
-          return <Tag
-            color={color as any} 
-            onClick={() => !isLoading && testToken(item.id)}
-            icon={isLoading ? <LoadingOutlined /> : null}
-          >
-            {isLoading ? '测试中...' : `${value / 1000}秒`}
-          </Tag>
-        } else {
-          return <Tag 
-            onClick={() => !isLoading && testToken(item.id)}
-            icon={isLoading ? <LoadingOutlined /> : null}
-          >
-            {isLoading ? '测试中...' : '未测试'}
-          </Tag>
-        }
-      }
-    },
-    {
-      title: '创建时间',
-      width: '150px',
-      dataIndex: 'createdAt',
-    },
-    {
-      title: '消耗总额',
-      dataIndex: 'quota',
-      render: (value: any) => {
-        return <Tag>{renderQuota(value, 2)}</Tag>
-      }
-    },
-    {
-      title: '额度',
-      dataIndex: 'remainQuota',
-      render: (value: any) => {
-        return <span>{value}</span>
-      }
-    },{
-      title: '组',
-      dataIndex: 'groups',
-      render: (value: any) => {
-        return <span>{value.map((item: any) => item.name).join(',')}</span>
-      }
-    },
-    {
-      title: '渠道权重',
-      
-      dataIndex: 'order',
-      render: (value: any, item: any) => {
-        return <InputNumber
-          onChange={(v) => {
-            item.order = v;
-            data.forEach((x: any) => {
-              if (x.id === item.id) {
-                x.order = v;
-              }
-            })
-            setData([...data]);
-          }}
-          onBlur={() => {
-            UpdateOrder(item.id, item.order)
-              .then((i) => {
-                i.success ? message.success({
-                  content: '操作成功',
-                }) : message.error({
-                  content: '操作失败',
-                });
-                loadingData();
-              }), () => message.error({
-                content: '操作失败',
-              });
-          }}
-
-          value={value} style={{
-            width: '80px',
-          }}></InputNumber>
-      }
-    },
-    {
-      title:'分组',
-      fiexd:'groups',
-      dataIndex:'groups',
-      width:'100px',
-      render:(value:string[])=>{
-        return value.map((item:string)=>{
-          return <Tag key={item}>{item}</Tag>
-        })
-      }
-    },
-    {
-      title: '操作',
-      fixed: 'right',
-      dataIndex: 'operate',
-      render: (_v: any, item: any) => {
-        return <>
-          <Dropdown
-            menu={{
-              items: [
-                {
-                  key: 1,
-                  label: '编辑',
-                  onClick: () => {
-                    setUpdateValue(item);
-                    setUpdateVisible(true);
-                  }
-                },
-                {
-                  key: 2,
-                  label: item.disable ? '启用渠道' : '禁用渠道',
-                  onClick: () => {
-                    disable(item.id)
-                      .then((item) => {
-                        item.success ? message.success({
-                          content: '操作成功',
-                        }) : message.error({
-                          content: '操作失败',
-                        });
-                        loadingData();
-                      }), () => message.error({
-                        content: '操作失败',
-                      });
-                  }
-                },
-                {
-                  key: 3,
-                  label: item.controlAutomatically ? '禁用自动检测' : '启用自动检测',
-                  onClick: () => {
-                    controlAutomatically(item.id)
-                      .then((item) => {
-                        item.success ? message.success({
-                          content: '操作成功',
-                        }) : message.error({
-                          content: '操作失败',
-                        });
-                        loadingData();
-                      }), () => message.error({
-                        content: '操作失败',
-                      });
-                  }
-                },
-                {
-                  key: 4,
-                  label: '删除',
-                  onClick: () => removeToken(item.id)
-                }
-              ] as any[]
-            }
-            }
-          >
-            <Button >操作</Button>
-          </Dropdown>
-        </>;
-      },
-    },
-  ];
+  const [columns, setColumns] = useState<any[]>([]);
   const [createVisible, setCreateVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -269,36 +30,270 @@ export default function ChannelPage() {
     page: 1,
     pageSize: 10,
     keyword: '',
+    group: '',
   });
   const [testingChannels, setTestingChannels] = useState<string[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+
+  useEffect(() => {
+    getList().then((res) => {
+      if (res.success) {
+        setGroups(res.data);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    setColumns([
+      {
+        title: t('channel.channelName'),
+        dataIndex: 'name',
+        fixed: 'left',
+        width: 150,
+      },
+      {
+        title: t('channel.status'),
+        width: 120,
+        dataIndex: 'disable',
+        render: (value: any, item: any) => {
+          return <Switch
+            checkedChildren={<Text type="danger">{t('channel.disable')}</Text>}
+            unCheckedChildren={<Text type="success">{t('channel.enable')}</Text>}
+            checked={value}
+            onChange={() => {
+              disable(item.id)
+                .then((response) => {
+                  response.success 
+                    ? message.success(t('channel.operationSuccess'))
+                    : message.error(t('channel.operationFailed'));
+                  loadingData();
+                }, () => message.error(t('channel.operationFailed')));
+            }}
+            style={{ width: '50px' }}
+          />
+        }
+      },
+      {
+        title: t('channel.autoCheck'),
+        width: 120,
+        dataIndex: 'controlAutomatically',
+        render: (value: any, item: any) => {
+          return <Switch
+            onChange={() => {
+              controlAutomatically(item.id)
+                .then((response) => {
+                  response.success 
+                    ? message.success(t('channel.operationSuccess'))
+                    : message.error(t('channel.operationFailed'));
+                  loadingData();
+                }, () => message.error(t('channel.operationFailed')));
+            }}
+            checkedChildren={<Text type="danger">{t('channel.disable')}</Text>}
+            unCheckedChildren={<Text type="success">{t('channel.enable')}</Text>}
+            checked={!value}
+            style={{ width: '50px' }}
+          />
+        }
+      },
+      {
+        width: 120,
+        title: t('channel.channelType'),
+        dataIndex: 'typeName',
+        render: (value: any) => {
+          return <Tag color={token.colorBgBlur}>{value}</Tag>
+        }
+      },
+      {
+        title: t('channel.responseTime'),
+        width: 120,
+        dataIndex: 'responseTime',
+        render: (value: any, item: any) => {
+          const isLoading = testingChannels.includes(item.id);
+          
+          if (value) {
+            // Color based on response time
+            let color = token.colorSuccess;
+            if (value < 3000) {
+              color = token.colorSuccess;
+            } else if (value < 5000) {
+              color = token.colorWarning;
+            } else {
+              color = token.colorError;
+            }
+
+            return <Tag
+              color={color}
+              onClick={() => !isLoading && testToken(item.id)}
+              icon={isLoading ? <LoadingOutlined /> : null}
+              style={{ cursor: 'pointer' }}
+            >
+              {isLoading ? t('channel.testing') : `${(value / 1000).toFixed(1)} ${t('channel.seconds')}`}
+            </Tag>
+          } else {
+            return <Tag 
+              onClick={() => !isLoading && testToken(item.id)}
+              icon={isLoading ? <LoadingOutlined /> : null}
+              style={{ cursor: 'pointer' }}
+            >
+              {isLoading ? t('channel.testing') : t('channel.notTested')}
+            </Tag>
+          }
+        }
+      },
+      {
+        title: t('channel.createdAt'),
+        width: 150,
+        dataIndex: 'createdAt',
+      },
+      {
+        title: t('channel.totalConsumption'),
+        dataIndex: 'quota',
+        width: 120,
+        render: (value: any) => {
+          return <Tag color={token.colorPrimary}>{renderQuota(value, 2)}</Tag>
+        }
+      },
+      {
+        title: t('channel.quota'),
+        dataIndex: 'remainQuota',
+        width: 100,
+        render: (value: any) => {
+          return <Text
+            style={{
+              color: token.colorPrimary,
+            }}
+          >{value}</Text>
+        }
+      },
+      {
+        title: t('channel.groups'),
+        dataIndex: 'groups',
+        width: 150,
+        render: (value: any) => {
+          return (
+            <Space wrap>
+              {value.map((item: any, index: number) => (
+                <Tag key={index} color={token.colorPrimaryBg}>{item}</Tag>
+              ))}
+            </Space>
+          );
+        }
+      },
+      {
+        title: t('channel.channelWeight'),
+        width: 120,
+        dataIndex: 'order',
+        render: (value: any, item: any) => {
+          return <InputNumber
+            onChange={(v) => {
+              if (v !== null) {
+                item.order = v;
+                data.forEach((x: any) => {
+                  if (x.id === item.id) {
+                    x.order = v;
+                  }
+                })
+                setData([...data]);
+              }
+            }}
+            onBlur={() => {
+              UpdateOrder(item.id, item.order)
+                .then((response) => {
+                  response.success 
+                    ? message.success(t('channel.operationSuccess'))
+                    : message.error(t('channel.operationFailed'));
+                  loadingData();
+                }, () => message.error(t('channel.operationFailed')));
+            }}
+            value={value}
+            style={{ width: '80px' }}
+            min={0}
+          />
+        }
+      },
+      {
+        title: t('channel.operations'),
+        fixed: 'right',
+        width: 100,
+        dataIndex: 'operate',
+        render: (_v: any, item: any) => {
+          return (
+            <Dropdown
+              menu={{
+                items: [
+                  {
+                    key: 1,
+                    label: t('common.edit'),
+                    onClick: () => {
+                      setUpdateValue(item);
+                      setUpdateVisible(true);
+                    }
+                  },
+                  {
+                    key: 2,
+                    label: item.disable ? t('channel.enable') : t('channel.disable'),
+                    onClick: () => {
+                      disable(item.id)
+                        .then((response) => {
+                          response.success 
+                            ? message.success(t('channel.operationSuccess'))
+                            : message.error(t('channel.operationFailed'));
+                          loadingData();
+                        }, () => message.error(t('channel.operationFailed')));
+                    }
+                  },
+                  {
+                    key: 3,
+                    label: item.controlAutomatically ? t('channel.enableAutoCheck') : t('channel.disableAutoCheck'),
+                    onClick: () => {
+                      controlAutomatically(item.id)
+                        .then((response) => {
+                          response.success 
+                            ? message.success(t('channel.operationSuccess'))
+                            : message.error(t('channel.operationFailed'));
+                          loadingData();
+                        }, () => message.error(t('channel.operationFailed')));
+                    }
+                  },
+                  {
+                    key: 4,
+                    label: t('common.delete'),
+                    danger: true,
+                    onClick: () => removeToken(item.id)
+                  }
+                ]
+              }}
+            >
+              <Button type="primary">{t('common.operate')}</Button>
+            </Dropdown>
+          );
+        },
+      },
+    ]);
+  }, [t, testingChannels, token, data]);
 
   function removeToken(id: string) {
     Remove(id)
-      .then((v) => {
-        if (v.success) {
+      .then((response) => {
+        if (response.success) {
+          message.success(t('common.deleteSuccess'));
           loadingData();
         } else {
-          message.error({
-            content: '删除失败',
-          })
+          message.error(t('common.deleteFailed'));
         }
-      })
+      });
   }
 
   function testToken(id: string) {
     setTestingChannels(prev => [...prev, id]);
     
     test(id)
-      .then((v) => {
-        if (v.success) {
-          message.success({
-            content: '测试成功',
-          })
+      .then((response) => {
+        if (response.success) {
+          message.success(t('channel.connectionSuccess'));
           loadingData();
         } else {
-          message.error({
-            content: v.message,
-          })
+          message.error(response.message || t('channel.connectionFailed'));
         }
       })
       .finally(() => {
@@ -308,10 +303,10 @@ export default function ChannelPage() {
 
   function loadingData() {
     setLoading(true);
-    getChannels(input.page, input.pageSize,  input.keyword)
-      .then((v: any) => {
-        if (v.success) {
-          const values = v.data.items as any[];
+    getChannels(input.page, input.pageSize, input.keyword, input.group ? [input.group] : undefined)
+      .then((response: any) => {
+        if (response.success) {
+          const values = response.data.items as any[];
           getTypes()
             .then(res => {
               if (res.success) {
@@ -323,109 +318,140 @@ export default function ChannelPage() {
                       break;
                     }
                   }
-                })
-                setData([...values]);
-                setTotal(v.data.total);
-              } else {
-                message.error({
-                  content: res.message
                 });
+                setData([...values]);
+                setTotal(response.data.total);
+              } else {
+                message.error(res.message || t('common.operateFailed'));
               }
-            })
+            });
         } else {
-          message.error({
-            content: v.message,
-          });
+          message.error(response.message || t('common.operateFailed'));
         }
       })
       .finally(() => {
         setLoading(false);
-      })
+      });
   }
 
   useEffect(() => {
     loadingData();
   }, [input]);
 
-
   return (
-    <>
-      <div style={{
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}>
-        <span style={{
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-        }}>
-          渠道管理
-        </span>
+    <ConfigProvider theme={{
+      components: {
+        Card: {
+          headerBg: token.colorBgContainer,
+          headerFontSize: 16,
+          headerFontSizeSM: 14,
+        },
+        Table: {
+          headerBg: token.colorBgContainer,
+        }
+      }
+    }}>
+      <Card 
+        bordered={false}
+        style={{ marginBottom: token.marginMD }}
+      >
+        <Flexbox gap={token.marginLG}>
+          <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+            <Col xs={24} md={12}>
+              <Title level={4} style={{ margin: 0 }}>{t('channel.title')}</Title>
+            </Col>
+            <Col xs={24} md={12}>
+              <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
+                <Input 
+                  value={input.keyword} 
+                  onChange={(e) => {
+                    setInput({
+                      ...input,
+                      keyword: e.target.value,
+                    });
+                  }} 
+                  style={{ width: 200 }} 
+                  placeholder={t('common.search')}
+                  prefix={<SearchOutlined />}
+                />
+                
+                <Select
+                  placeholder={t('channel.selectGroups')}
+                  allowClear
+                  style={{ width: 200 }}
+                  value={input.group || undefined}
+                  onChange={(value) => {
+                    setInput({
+                      ...input,
+                      group: value,
+                    });
+                  }}
+                >
+                  {groups.map((group) => (
+                    <Option key={group.code} value={group.code}>
+                      <Flexbox gap={8} horizontal>
+                        <span>{group.name}</span>
+                        <span style={{ fontSize: 12, color: token.colorTextSecondary }}>{group.description}</span>
+                        <span style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                          <span>{t('channel.rate')}：</span>
+                          {group.rate}
+                        </span>
+                      </Flexbox>
+                    </Option>
+                  ))}
+                </Select>
+                
+                <Button 
+                  icon={<ReloadOutlined />}
+                  onClick={() => loadingData()}
+                >
+                  {t('common.refresh')}
+                </Button>
+                
+                <Button 
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => setCreateVisible(true)}
+                >
+                  {t('channel.createChannel')}
+                </Button>
+              </Space>
+            </Col>
+          </Row>
+        </Flexbox>
+      </Card>
 
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: 1,
-                label: "创建渠道",
-                onClick: () => setCreateVisible(true)
-              }
-            ]
+      <Card bordered={false}>
+        <Table
+          columns={columns}
+          dataSource={data}
+          scroll={{
+            y: 'calc(100vh - 350px)',
+            x: 'max-content'
           }}
-        >
-          <Button style={{
-            float: 'right',
-          }}>操作</Button>
-        </Dropdown>
-        <Button
-          onClick={() => {
-            loadingData()
+          loading={loading}
+          rowKey={row => row.id}
+          pagination={{
+            total: total,
+            pageSize: input.pageSize,
+            current: input.page,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total) => `${t('common.total')}: ${total}`,
+            onChange: (page, pageSize) => {
+              setInput({
+                ...input,
+                page,
+                pageSize,
+              });
+            },
           }}
-          style={{
-            marginRight: '0.5rem',
-            float: 'right',
-          }}>
-            刷新
-          </Button>
-        <Input value={input.keyword} onChange={(v) => {
-          setInput({
-            ...input,
-            keyword: v.target.value,
-          });
-        }} style={{
-          width: '150px',
-          float: 'right',
-          marginRight: '1rem',
-        }} placeholder='搜索关键字'></Input>
-      </div>
-      <Table
-        style={{
-          marginTop: '1rem',
-        }}
-        columns={columns as any}
-        dataSource={data}
-        scroll={{
-          y: 'calc(100vh - 350px)',
-          x: 'max-content'
-        }}
-        loading={loading}
-        rowKey={row => row.id}
-        pagination={{
-          total: total,
-          pageSize: input.pageSize,
-          defaultPageSize: input.page,
-          onChange: (page, pageSize) => {
-            setInput({
-              ...input,
-              page,
-              pageSize,
-            });
-          },
+        />
+      </Card>
 
-        }} />
       <CreateChannel visible={createVisible} onSuccess={() => {
         setCreateVisible(false);
         loadingData();
-
       }} onCancel={() => {
         setCreateVisible(false);
       }} />
@@ -438,6 +464,6 @@ export default function ChannelPage() {
         setUpdateVisible(false);
         setUpdateValue({} as any);
       }} />
-    </>
+    </ConfigProvider>
   );
 }

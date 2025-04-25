@@ -41,6 +41,16 @@ public class ProductService(IServiceProvider serviceProvider, LoggerService logg
     /// <param name="id">产品id</param>
     public async Task<StartPayPayloadResult> StartPayPayloadAsync(string id)
     {
+#if DEBUG
+        // 返回假数据
+        return new StartPayPayloadResult
+        {
+            Qr = "https://img.alicdn.com/imgextra/i3/2200751952050/O1CN01v2xX4R1j5c6k7a8gG_!!2200751952050-0-lubanu-s.jpg",
+            Id = Guid.NewGuid().ToString("N")
+        };
+        
+#endif
+        
         var product = await DbContext.Products.FirstOrDefaultAsync(x => x.Id == id);
         if (product == null) throw new Exception("Product does not exist");
 

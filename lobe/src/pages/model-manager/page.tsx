@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { DeleteModelManager, EnableModelManager, GetModelManagerList } from "../../services/ModelManagerService";
-import { Button, Dropdown, message, Table, Space, Input as AntInput, Switch } from "antd";
+import { Button, Dropdown, message, Table, Space, Input as AntInput, Switch, Typography, ConfigProvider, theme } from "antd";
 import { Header, Tag } from "@lobehub/ui";
 import { getCompletionRatio, renderQuota } from "../../utils/render";
 import CreateModelManagerPage from "./features/CreateModelManager";
 import { getIconByName } from "../../utils/iconutils";
 import { IconAvatar, OpenAI } from "@lobehub/icons";
+import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import UpdateModelManagerPage from "./features/UpdateModelManager";
+import { useTranslation } from "react-i18next";
+import { useResponsive } from "antd-style";
+import type { ColumnsType } from 'antd/es/table';
 
 export default function ModelManager() {
+    const { t } = useTranslation();
+    const { mobile } = useResponsive();
+    const { token } = theme.useToken();
+    
     const [createOpen, setCreateOpen] = useState<boolean>(false);
     const [updateValue, setUpdateValue] = useState<any>({
         value: {},
@@ -39,220 +47,275 @@ export default function ModelManager() {
         loadData();
     }, [input]);
 
-    return (
-        <div>
-            <Header
-                nav={'模型倍率管理'}
-                actions={
-                    <Space>
-                        <Switch value={isK} checkedChildren={<Tag >K</Tag>} unCheckedChildren={<Tag >M</Tag>} defaultChecked onChange={(checked) => {
-                            setIsK(checked);
-                        }
-                        } />
-                        <AntInput.Search
-                            placeholder="请输入需要搜索的模型"
-                            value={input.model}
-                            onChange={(e) => setInput({ ...input, model: e.target.value })}
-                            onSearch={() => loadData()}
-                            style={{ width: 200 }}
-                        />
-                        <Button type="primary" onClick={() => setCreateOpen(true)}>
-                            新增模型
-                        </Button>
-                    </Space>
-                }
-            />
-            <Table
-                rowKey={row => row.id}
-                pagination={{
-                    total: total,
-                    pageSize: input.pageSize,
-                    current: input.page,
-                    onChange: (page, pageSize) => {
-                        setInput({
-                            ...input,
-                            page,
-                            pageSize,
-                        });
-                    }
-                }}
-                loading={loading}
-                dataSource={data}
-                scroll={{
-                    y: 'calc(100vh - 340px)',
-                    x: 'max-content'
-                }}
-                columns={[
-                    {
-                        key: 'icon',
-                        title: '图标',
-                        fixed: 'left',
-                        dataIndex: 'icon',
-                        width: 60,
-                        render: (value: any) => {
-                            const icon = getIconByName(value);
-                            return icon?.icon ?? <IconAvatar size={36} Icon={OpenAI} />;
-                        }
-                    },
-                    {
-                        key: 'model',
-                        title: '模型',
-                        fixed: 'left',
-                        dataIndex: 'model'
-                    },
-                    {
-                        key: 'description',
-                        title: '描述',
-                        dataIndex: 'description'
-                    },
-                    {
-                        key: 'price',
-                        title: '模型价格',
-                        dataIndex: 'price',
-                        width: 180,
-                        render: (_: any, item: any) => {
+    const renderPrice = (item: any) => {
+        if (isK) {
+            if (item.quotaType === 1) {
+                return (<>
+                    <div>
+                        <Tag color='cyan'>{t('modelManager.perPrompt')}{renderQuota(item.promptRate * 1000, 6)}/1K tokens</Tag>
+                        {item.completionRate ? <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.perCompletion')}{renderQuota(item.completionRate * 1000, 6)}/1K tokens</Tag></> : <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.perCompletion')}{renderQuota(getCompletionRatio(item.model) * 1000, 6)}/1K tokens</Tag></>}
+                    </div>
+                    {item.isVersion2 && <div>
+                        <Tag color='cyan'>{t('modelManager.audioInput')}{renderQuota(item.audioPromptRate * 1000)}/1K tokens</Tag>
+                        {item.completionRate ? <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.audioOutput')}{renderQuota(item.audioOutputRate * 1000)}/1K tokens</Tag></> : <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.audioOutput')}{renderQuota(getCompletionRatio(item.model) * 1000)}/1K tokens</Tag></>}
+                    </div>}
+                </>)
+            } else {
+                return (
+                    <Tag style={{ marginTop: 8 }} color='geekblue'>
+                        {t('modelManager.perUsage')}{renderQuota(item.promptRate, 6)}
+                    </Tag>)
+            }
+        } else {
+            if (item.quotaType === 1) {
+                return (<>
+                    <div>
+                        <Tag color='cyan'>{t('modelManager.perPrompt')}{renderQuota(item.promptRate * 1000000)}/1M tokens</Tag>
+                        {item.completionRate ? <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.perCompletion')}{renderQuota(item.completionRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.perCompletion')}{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
+                    </div>
+                    {item.isVersion2 && <div>
+                        <Tag color='cyan'>{t('modelManager.audioInput')}{renderQuota(item.audioPromptRate * 1000000)}/1M tokens</Tag>
+                        {item.completionRate ? <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.audioOutput')}{renderQuota(item.audioOutputRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
+                            marginTop: 8
+                        }} color='geekblue'>{t('modelManager.audioOutput')}{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
+                    </div>}
+                </>)
+            } else {
+                return (
+                    <Tag style={{ marginTop: 8 }} color='geekblue'>
+                        {t('modelManager.perUsage')}{renderQuota(item.promptRate, 6)}
+                    </Tag>)
+            }
+        }
+    };
 
-                            if (isK) {
-                                if (item.quotaType === 1) {
-                                    return (<>
-                                        <div>
-                                            <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000, 6)}/1K tokens</Tag>
-                                            {item.completionRate ? <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>完成{renderQuota(item.completionRate * 1000, 6)}/1K tokens</Tag></> : <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000, 6)}/1K tokens</Tag></>}
-                                        </div>
-                                        {item.isVersion2 && <div>
-                                            <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000)}/1M tokens</Tag>
-                                            {item.completionRate ? <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>音频完成{renderQuota(item.audioOutputRate * 1000)}/1M tokens</Tag></> : <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000)}/1M tokens</Tag></>}
-                                        </div>}
-                                    </>)
-                                } else {
-                                    return (
-                                        <Tag style={{ marginTop: 8 }} color='geekblue'>
-                                            每次{renderQuota(item.promptRate, 6)}
-                                        </Tag>)
+    const columns: ColumnsType<any> = [
+        {
+            key: 'icon',
+            title: t('modelManager.modelIcon'),
+            fixed: 'left' as const,
+            dataIndex: 'icon',
+            width: 60,
+            render: (value: any) => {
+                const icon = getIconByName(value);
+                return icon?.icon ?? <IconAvatar size={36} Icon={OpenAI} />;
+            }
+        },
+        {
+            key: 'model',
+            title: t('modelManager.modelName'),
+            fixed: 'left' as const,
+            dataIndex: 'model'
+        },
+        {
+            key: 'description',
+            title: t('modelManager.modelDescription'),
+            dataIndex: 'description',
+            responsive: ['md']
+        },
+        {
+            key: 'price',
+            title: t('modelManager.modelPrice'),
+            dataIndex: 'price',
+            width: mobile ? 120 : 180,
+            render: (_: any, item: any) => renderPrice(item)
+        },
+        {
+            key: 'quotaType',
+            title: t('modelManager.modelType'),
+            dataIndex: 'quotaType',
+            responsive: ['lg'],
+            render: (value: any) => (value === 1 ? t('modelManager.volumeBilling') : t('modelManager.perUseBilling'))
+        },
+        {
+            key: 'quotaMax',
+            title: t('modelManager.modelMaxContext'),
+            dataIndex: 'quotaMax',
+            responsive: ['xl']
+        },
+        {
+            key: "tags",
+            title: t('modelManager.modelTags'),
+            dataIndex: 'tags',
+            responsive: ['lg'],
+            render: (value: any) => value.map((tag: any) => <Tag key={tag} color='blue'>{tag}</Tag>)
+        },
+        {
+            key: 'enable',
+            title: t('modelManager.modelStatus'),
+            dataIndex: 'enable',
+            responsive: ['md'],
+            render: (value: any) => (value ? t('modelManager.modelEnabled') : t('modelManager.modelDisabled'))
+        },
+        {
+            key: 'actions',
+            title: t('common.action'),
+            fixed: mobile ? undefined : 'right' as const,
+            render: (_: any, item: any) => (
+                <Dropdown
+                    menu={{
+                        items: [
+                            {
+                                key: 'edit',
+                                label: t('common.edit'),
+                                onClick: () => setUpdateValue({ value: item, open: true })
+                            },
+                            {
+                                key: "enable",
+                                label: item.enable ? t('common.disable') : t('common.enable'),
+                                onClick: () => {
+                                    EnableModelManager(item.id)
+                                        .then((res) => {
+                                            if (res.success) {
+                                                message.success(t('common.operateSuccess'));
+                                                loadData();
+                                            } else {
+                                                message.error(res.message);
+                                            }
+                                        });
                                 }
-                            } else {
-                                if (item.quotaType === 1) {
-
-                                    return (<>
-                                        <div>
-                                            <Tag color='cyan'>提示{renderQuota(item.promptRate * 1000000)}/1M tokens</Tag>
-                                            {item.completionRate ? <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>完成{renderQuota(item.completionRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
-                                        </div>
-                                        {item.isVersion2 && <div>
-                                            <Tag color='cyan'>音频输入{renderQuota(item.audioPromptRate * 1000000)}/1M tokens</Tag>
-                                            {item.completionRate ? <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>音频完成{renderQuota(item.audioOutputRate * 1000000)}/1M tokens</Tag></> : <><Tag style={{
-                                                marginTop: 8
-                                            }} color='geekblue'>音频完成{renderQuota(getCompletionRatio(item.model) * 1000000)}/1M tokens</Tag></>}
-                                        </div>}
-                                    </>)
-                                } else {
-
-                                    return (
-                                        <Tag style={{ marginTop: 8 }} color='geekblue'>
-                                            每次{renderQuota(item.promptRate, 6)}
-                                        </Tag>)
+                            },
+                            {
+                                key: 'delete',
+                                label: t('common.delete'),
+                                danger: true,
+                                onClick: () => {
+                                    DeleteModelManager(item.id)
+                                        .then((res) => {
+                                            if (res.success) {
+                                                message.success(t('common.deleteSuccess'));
+                                                loadData();
+                                            } else {
+                                                message.error(res.message);
+                                            }
+                                        });
                                 }
                             }
-                        }
-                    },
-                    {
-                        key: 'quotaType',
-                        title: '模型类型',
-                        dataIndex: 'quotaType',
-                        render: (value: any) => (value === 1 ? '按量计费' : '按次计费')
-                    },
-                    {
-                        key: 'quotaMax',
-                        title: '模型额度最大上文',
-                        dataIndex: 'quotaMax'
-                    },
-                    {
-                        key: "tags",
-                        title: '标签',
-                        dataIndex: 'tags',
-                        render: (value: any) => value.map((tag: any) => <Tag key={tag} color='blue'>{tag}</Tag>)
-                    },
-                    {
-                        key: 'enable',
-                        title: '状态',
-                        dataIndex: 'enable',
-                        render: (value: any) => (value ? '启用' : '禁用')
-                    },
-                    {
-                        key: 'actions',
-                        title: '操作',
-                        fixed: 'right',
-                        render: (_: any, item: any) => (
-                            <Dropdown
-                                menu={{
-                                    items: [
-                                        {
-                                            key: 'edit',
-                                            label: '编辑',
-                                            onClick: () => setUpdateValue({ value: item, open: true })
-                                        },
-                                        {
-                                            key: "enable",
-                                            label: item.enable ? '禁用' : '启用',
-                                            onClick: () => {
-                                                EnableModelManager(item.id)
-                                                    .then((res) => {
-                                                        if (res.success) {
-                                                            message.success('操作成功');
-                                                            loadData();
-                                                        } else {
-                                                            message.error(res.message);
-                                                        }
-                                                    });
-                                            }
-                                        },
-                                        {
-                                            key: 'delete',
-                                            label: '删除',
-                                            style: { color: 'red' },
-                                            onClick: () => {
-                                                DeleteModelManager(item.id)
-                                                    .then((res) => {
-                                                        if (res.success) {
-                                                            message.success('删除成功');
-                                                            loadData();
-                                                        } else {
-                                                            message.error(res.message);
-                                                        }
-                                                    });
-                                            }
-                                        }
-                                    ] as any[]
-                                }}
+                        ] as any[]
+                    }}
+                    placement="bottomRight"
+                    trigger={['click']}
+                >
+                    <Button size={mobile ? "small" : "middle"}>{t('common.operate')}</Button>
+                </Dropdown>
+            )
+        }
+    ];
+
+    return (
+        <ConfigProvider theme={{
+            components: {
+                Table: {
+                    headerBg: token.colorBgContainer,
+                    headerSplitColor: token.colorBorderSecondary,
+                    rowHoverBg: token.colorFillAlter,
+                }
+            }
+        }}>
+            <div style={{ height: '100%', display: 'flex', flexDirection: 'column'}}>
+                <Typography.Title level={4} style={{ margin: 0, marginBottom: 16, display: mobile ? 'none' : 'block' }}>
+                    {t('modelManager.title')}
+                </Typography.Title>
+                
+                <Header
+                    nav={mobile ? t('modelManager.title') : ''}
+                    style={{ 
+                        marginBottom: 16, 
+                        padding: mobile ? '12px 16px' : '16px 24px', 
+                        backgroundColor: token.colorBgContainer,
+                        borderRadius: token.borderRadiusLG 
+                    }}
+                    actions={
+                        <Space wrap={mobile}>
+                            <Switch 
+                                value={isK} 
+                                checkedChildren={<Tag>{t('modelManager.modelPricePerK')}</Tag>} 
+                                unCheckedChildren={<Tag>{t('modelManager.modelPricePerM')}</Tag>} 
+                                defaultChecked 
+                                onChange={(checked) => setIsK(checked)} 
+                            />
+                            <AntInput.Search
+                                placeholder={t('modelManager.searchModel')}
+                                value={input.model}
+                                onChange={(e) => setInput({ ...input, model: e.target.value })}
+                                onSearch={() => loadData()}
+                                style={{ width: mobile ? '100%' : 240 }}
+                                prefix={<SearchOutlined style={{ color: token.colorTextDisabled }} />}
+                                allowClear
+                            />
+                            <Button 
+                                type="primary" 
+                                icon={<PlusOutlined />} 
+                                onClick={() => setCreateOpen(true)}
                             >
-                                <Button>操作</Button>
-                            </Dropdown>
-                        )
+                                {mobile ? '' : t('modelManager.createModel')}
+                            </Button>
+                        </Space>
                     }
-                ]}
-            />
-            <CreateModelManagerPage open={createOpen} onClose={() => setCreateOpen(false)} onOk={() => {
-                loadData();
-                setCreateOpen(false);
-            }} />
-            <UpdateModelManagerPage open={updateValue.open} onClose={() => setUpdateValue({ ...updateValue, open: false })} onOk={() => {
-                loadData();
-                setUpdateValue({ ...updateValue, open: false });
-            }} value={updateValue.value} />
-        </div>
+                />
+                
+                <div style={{ 
+                    flex: 1, 
+                    backgroundColor: token.colorBgContainer, 
+                    borderRadius: token.borderRadiusLG,
+                    overflow: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    <Table
+                        rowKey={row => row.id}
+                        pagination={{
+                            total: total,
+                            pageSize: input.pageSize,
+                            current: input.page,
+                            onChange: (page, pageSize) => {
+                                setInput({
+                                    ...input,
+                                    page,
+                                    pageSize,
+                                });
+                            },
+                            showSizeChanger: !mobile,
+                            showTotal: (total) => `${total} ${t('common.items')}`,
+                            style: { margin: 0, padding: mobile ? '8px' : '12px' },
+                            position: ['bottomCenter']
+                        }}
+                        loading={loading}
+                        dataSource={data}
+                        scroll={{
+                            x: 'max-content',
+                            scrollToFirstRowOnChange: true
+                        }}
+                        columns={columns}
+                        size={mobile ? "small" : "middle"}
+                        style={{ height: '100%' }}
+                    />
+                </div>
+                
+                <CreateModelManagerPage open={createOpen} onClose={() => setCreateOpen(false)} onOk={() => {
+                    loadData();
+                    setCreateOpen(false);
+                }} />
+                
+                <UpdateModelManagerPage open={updateValue.open} onClose={() => setUpdateValue({ ...updateValue, open: false })} onOk={() => {
+                    loadData();
+                    setUpdateValue({ ...updateValue, open: false });
+                }} value={updateValue.value} />
+            </div>
+        </ConfigProvider>
     );
 }

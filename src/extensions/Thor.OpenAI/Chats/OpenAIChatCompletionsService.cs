@@ -138,23 +138,28 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             var result = JsonSerializer.Deserialize<ThorChatCompletionsResponse>(line,
                 ThorJsonSerializer.DefaultOptions);
 
+            if (result == null)
+            {
+                continue;
+            }
+
             var content = result?.Choices?.FirstOrDefault()?.Delta;
 
-            if (first && content.Content == OpenAIConstant.ThinkStart)
+            if (first && content?.Content == OpenAIConstant.ThinkStart)
             {
                 isThink = true;
                 continue;
                 // 需要将content的内容转换到其他字段
             }
 
-            if (isThink && content.Content.Contains(OpenAIConstant.ThinkEnd))
+            if (isThink && content?.Content?.Contains(OpenAIConstant.ThinkEnd) == true)
             {
                 isThink = false;
                 // 需要将content的内容转换到其他字段
                 continue;
             }
 
-            if (isThink)
+            if (isThink && result?.Choices != null)
             {
                 // 需要将content的内容转换到其他字段
                 foreach (var choice in result.Choices)

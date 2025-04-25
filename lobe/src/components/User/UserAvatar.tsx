@@ -44,7 +44,7 @@ const UserAvatar = memo<UserAvatarProps>(
     const { styles, cx } = useStyles();
 
     function getAvatar() {
-      return user?.avatar || '/vite.svg'
+      return user?.avatar || '/logo.png'
     }
 
     return (

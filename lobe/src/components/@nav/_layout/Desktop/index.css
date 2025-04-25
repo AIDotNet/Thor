@@ -63,3 +63,7 @@
 .ant-menu-submenu-inline .ant-menu-item {
     padding-left: 46px !important;
 }
+
+.ant-layout-sider-trigger{
+    background-color: transparent !important;
+}

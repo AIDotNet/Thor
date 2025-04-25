@@ -2,7 +2,6 @@ import { memo, useEffect, useState, useMemo } from "react";
 
 import { useActiveTabKey } from "../../../../hooks/useActiveTabKey";
 import {
-  BarChart3,
   BarChart,
   KeyRound,
   ShipWheel,
@@ -18,11 +17,11 @@ import {
   BrainCog,
   UsersRound,
   Home,
-  ChevronRight
+  ChevronRight,
+  Bug
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
-import BottomActions from "./BottomActions";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, Typography, Badge, Divider } from "antd";
 import {
@@ -32,7 +31,6 @@ import {
 import { SlidersOutlined } from "@ant-design/icons";
 import { info } from "../../../../services/UserService";
 import { useTranslation } from "react-i18next";
-import Avatar from "./Avatar";
 
 const { Text } = Typography;
 
@@ -63,7 +61,6 @@ const Nav = memo(() => {
   // 使用 useMemo 并依赖 i18n.language，这样语言变化时菜单会重新生成
   const getMenuItems = useMemo((): MenuItem[] => {
     const items: MenuItem[] = [
-      // Core navigation section
       {
         icon: <Home />,
         label: <Badge dot={false}>{t('sidebar.panel')}</Badge>,
@@ -74,8 +71,6 @@ const Nav = memo(() => {
           navigate("/panel");
         },
       },
-      
-      // AI section with expanded capabilities
       {
         key: SidebarTabKey.AI,
         label: <Text strong>{t('sidebar.ai')}</Text>,
@@ -129,8 +124,15 @@ const Nav = memo(() => {
           }
         ]
       },
-      
-      // Token management
+      {
+        icon: <Bug />,
+        enable: true,
+        label: t('sidebar.playground'),
+        key: SidebarTabKey.Playground,
+        onClick: () => {
+          navigate("/playground");
+        },
+      },
       {
         icon: <KeyRound />,
         enable: true,
@@ -245,8 +247,6 @@ const Nav = memo(() => {
         ],
       },
     ];
-
-    // 如果已经获取了用户角色，则按照角色过滤菜单项
     if (userRole) {
       return items.filter((item) => {
         if (item.children) {
@@ -324,16 +324,6 @@ const Nav = memo(() => {
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
       }}
     >
-      <div
-        style={{
-          padding: "12px 16px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Avatar />
-      </div>
       <Divider style={{ margin: "0 0 8px 0" }} />
       <div
         style={{
@@ -346,16 +336,21 @@ const Nav = memo(() => {
           style={{
             border: "none",
             padding: "0 4px",
+            backgroundColor: 'transparent',
           }}
           items={items}
           selectedKeys={[sidebarKey]}
           openKeys={openKeys}
           onOpenChange={handleOpenChange}
-          expandIcon={({ isOpen }) => <ChevronRight size={16} style={{ transform: isOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />}
+          expandIcon={({ isOpen }) => <ChevronRight 
+          size={16} style={{
+            transform: isOpen ? 'rotate(90deg)' : 'none',
+            transition: 'transform 0.2s',
+            color: 'inherit',
+          }} />}
         />
       </div>
       <Divider style={{ margin: "8px 0 0 0" }} />
-      <BottomActions />
     </div>
   );
 });

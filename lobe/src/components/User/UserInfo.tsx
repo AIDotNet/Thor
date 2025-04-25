@@ -6,9 +6,9 @@ import { renderNumber, renderQuota } from '../../utils/render';
 import { InviteInfo } from '../../services/SystemService';
 import type { UploadProps } from 'antd';
 import '../../styles/userInfo.css'; // 导入样式文件
+import { useTranslation } from 'react-i18next';
 
 const { TabPane } = Tabs;
-
 const { useToken } = theme;
 
 interface UserInfoProps {
@@ -17,6 +17,7 @@ interface UserInfoProps {
 }
 
 const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
+  const { t } = useTranslation();
   const { token } = useToken();
   const [form] = Form.useForm();
   const [passwordForm] = Form.useForm();
@@ -43,12 +44,12 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
           });
         }
       } catch (error) {
-        console.error('获取邀请信息失败', error);
+        console.error(t('common.failed'), error);
       }
     };
     
     fetchInviteInfo();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (user) {
@@ -68,14 +69,14 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
       });
       
       if (response.success) {
-        message.success('信息更新成功');
+        message.success(t('userProfile.updateSuccess'));
         setIsEditing(false);
         if (onUpdate) onUpdate();
       } else {
-        message.error(response.message || '更新失败');
+        message.error(response.message || t('userProfile.updateFailed'));
       }
     } catch (error) {
-      message.error('更新过程中出错');
+      message.error(t('userProfile.updateFailed'));
       console.error(error);
     } finally {
       setLoading(false);
@@ -92,15 +93,15 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
       });
       
       if (response.success) {
-        message.success('密码修改成功');
+        message.success(t('userProfile.passwordSuccess'));
         setPasswordModalVisible(false);
         passwordForm.resetFields();
       } else {
-        message.error(response.message || '密码修改失败');
+        message.error(response.message || t('userProfile.passwordFailed'));
       }
     } catch (error) {
-      console.error('密码修改出错:', error);
-      message.error('密码修改失败,请稍后重试');
+      console.error(t('userProfile.passwordFailed'), error);
+      message.error(t('userProfile.passwordFailed'));
     } finally {
       setLoading(false);
     }
@@ -159,7 +160,7 @@ const UserInfo = ({ user, onUpdate }: UserInfoProps) => {
   const copyInviteUrl = () => {
     const url = getInviteUrl();
     navigator.clipboard.writeText(url);
-    message.success('邀请链接已复制到剪贴板');
+    message.success(t('userProfile.inviteCopied'));
   };
 
   const renderUserInfo = () => (

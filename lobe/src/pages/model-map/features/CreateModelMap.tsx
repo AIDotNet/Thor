@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { Modal, Form, Button, message, Select, InputNumber } from 'antd';
+import { useState, useEffect } from 'react';
+import { Modal, Form, Button, message, Select, InputNumber, Typography, } from 'antd';
 import { createModelMap, ModelMap } from "../../../services/ModelMapService";
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { getModelList } from '../../../services/ModelService';
-import { useEffect } from 'react';
 import { getList } from "../../../services/UserGroupService";
 import { Flexbox } from "react-layout-kit";
+import { useTranslation } from 'react-i18next';
+import { useTheme } from 'antd-style';
 
 interface CreateModelMapProps {
   visible: boolean;
@@ -14,30 +15,34 @@ interface CreateModelMapProps {
 }
 
 export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateModelMapProps) {
+  const { t } = useTranslation();
+  const theme = useTheme();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [models, setModels] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
 
   useEffect(() => {
-    // 加载模型列表
-    getModelList().then((res: any) => {
-      if (res.success) {
-        setModels(res.data);
-      } else {
-        message.error('加载模型列表失败');
-      }
-    });
-    
-    // 加载用户组列表
-    getList().then((res) => {
-      if (res.success) {
-        setGroups(res.data);
-      } else {
-        message.error('加载用户组列表失败');
-      }
-    });
-  }, []);
+    if (visible) {
+      // 加载模型列表
+      getModelList().then((res: any) => {
+        if (res.success) {
+          setModels(res.data);
+        } else {
+          message.error(t('modelMap.loadError'));
+        }
+      });
+      
+      // 加载用户组列表
+      getList().then((res) => {
+        if (res.success) {
+          setGroups(res.data);
+        } else {
+          message.error(t('modelMap.loadError'));
+        }
+      });
+    }
+  }, [visible, t]);
 
   const handleSubmit = async () => {
     try {
@@ -63,11 +68,11 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
       const response = await createModelMap(data);
 
       if (response.success) {
-        message.success('创建成功');
+        message.success(t('modelMap.createSuccess'));
         form.resetFields();
         onSuccess();
       } else {
-        message.error(response.message || '创建失败');
+        message.error(response.message || t('common.operateFailed'));
       }
     } catch (error) {
       console.error('Validate Failed:', error);
@@ -78,15 +83,15 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
 
   return (
     <Modal
-      title="创建模型映射"
+      title={<Typography.Title level={5} style={{ margin: 0 }}>{t('modelMap.createMap')}</Typography.Title>}
       open={visible}
       onCancel={onCancel}
       footer={[
         <Button key="back" onClick={onCancel}>
-          取消
+          {t('common.cancel')}
         </Button>,
         <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
-          创建
+          {t('common.create')}
         </Button>
       ]}
       width={700}
@@ -98,11 +103,11 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
       >
         <Form.Item
           name="modelId"
-          label="源模型ID"
-          rules={[{ required: true, message: '请选择源模型ID' }]}
+          label={t('modelMap.sourceModelId')}
+          rules={[{ required: true, message: t('modelMap.pleaseSelectSourceModel') }]}
         >
           <Select
-            placeholder="请选择模型ID"
+            placeholder={t('modelMap.sourceModelId')}
             showSearch
             defaultActiveFirstOption={true}
             mode="tags"
@@ -120,19 +125,19 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
 
         <Form.Item
           name="group"
-          label="分组"
-          rules={[{ required: true, message: '请选择分组' }]}
+          label={t('modelMap.group')}
+          rules={[{ required: true, message: t('modelMap.pleaseSelectGroup') }]}
         >
           <Select
             mode="tags"
-            placeholder="请选择分组"
+            placeholder={t('modelMap.group')}
             options={groups?.map((group: any) => {
               return {
                 label: <Flexbox gap={8} horizontal>
                   <span>{group.name}</span>
-                  <span style={{ fontSize: 12, color: '#999' }}>{group.description}</span>
-                  <span style={{ fontSize: 12, color: '#999' }}>
-                    <span>倍率：</span>
+                  <span style={{ fontSize: 12, color: theme.colorTextSecondary }}>{group.description}</span>
+                  <span style={{ fontSize: 12, color: theme.colorTextSecondary }}>
+                    <span>{t('rate')}：</span>
                     {group.rate}
                   </span>
                 </Flexbox>,
@@ -143,19 +148,23 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
           />
         </Form.Item>
 
+        <Typography.Title level={5} style={{ marginTop: theme.marginLG }}>
+          {t('modelMap.addMappingItem')}
+        </Typography.Title>
+
         <Form.List name="modelMapItems">
           {(fields, { add, remove }) => (
             <>
               {fields.map(({ key, name, ...restField }) => (
-                <div key={key} style={{ display: 'flex', marginBottom: 8, alignItems: 'baseline' }}>
+                <Flexbox key={key} horizontal align="center" gap={8} style={{ marginBottom: theme.marginMD }}>
                   <Form.Item
                     {...restField}
                     name={[name, 'modelId']}
-                    rules={[{ required: true, message: '请选择目标模型ID' }]}
-                    style={{ flex: 1, marginRight: 8 }}
+                    rules={[{ required: true, message: t('modelMap.pleaseSelectTargetModel') }]}
+                    style={{ flex: 1, marginBottom: 0 }}
                   >
                     <Select
-                      placeholder="请选择目标模型ID"
+                      placeholder={t('modelMap.targetModelId')}
                       showSearch
                       optionFilterProp="children"
                       defaultActiveFirstOption={true}
@@ -173,27 +182,29 @@ export default function CreateModelMap({ visible, onSuccess, onCancel }: CreateM
                   <Form.Item
                     {...restField}
                     name={[name, 'order']}
-                    rules={[{ required: true, message: '请输入权重' }]}
-                    style={{ width: 120 }}
+                    rules={[{ required: true, message: t('modelMap.pleaseEnterWeight') }]}
+                    style={{ width: 120, marginBottom: 0 }}
                   >
-                    <InputNumber placeholder="权重" style={{ width: '100%' }} />
+                    <InputNumber placeholder={t('modelMap.weight')} style={{ width: '100%' }} />
                   </Form.Item>
                   {fields.length > 1 ? (
-                    <MinusCircleOutlined
+                    <Button 
+                      type="text" 
+                      danger
+                      icon={<MinusCircleOutlined />}
                       onClick={() => remove(name)}
-                      style={{ marginLeft: 8 }}
                     />
                   ) : null}
-                </div>
+                </Flexbox>
               ))}
-              <Form.Item>
+              <Form.Item style={{ marginTop: theme.marginSM }}>
                 <Button
                   type="dashed"
                   onClick={() => add()}
                   block
                   icon={<PlusOutlined />}
                 >
-                  添加映射项
+                  {t('modelMap.addMappingItem')}
                 </Button>
               </Form.Item>
             </>

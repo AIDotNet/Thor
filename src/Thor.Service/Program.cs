@@ -121,32 +121,32 @@ try
         .AddSwaggerGen()
         .AddCustomAuthentication()
         .AddHttpContextAccessor()
-        .AddScoped<IEventHandler<ChatLogger>,ChatLoggerEventHandler>()
-		.AddScoped<IEventHandler<CreateUserEto>, CreateUserEventHandler>()
-		.AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
+        .AddScoped<IEventHandler<ChatLogger>, ChatLoggerEventHandler>()
+        .AddScoped<IEventHandler<CreateUserEto>, CreateUserEventHandler>()
+        .AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
         .AddTransient<JwtHelper>()
-		.AddSingleton<OpenTelemetryMiddlewares>()
-		.AddSingleton<UnitOfWorkMiddleware>()
-		.AddScoped<AuthorizeService>()
-		.AddScoped<ChannelService>()
-		.AddScoped<EmailService>()
-		.AddScoped<ImageService>()
-		.AddScoped<LoggerService>()
-		.AddScoped<ModelManagerService>()
-		.AddScoped<AnthropicChatService>()
-		.AddScoped<ResponsesService>()
-		.AddScoped<ProductService>()
-		.AddScoped<RateLimitModelService>()
-		.AddScoped<SystemService>()
-		.AddScoped<ChatService>()
-		.AddScoped<ITrackerStorage, TrackerStorage>()
-		.AddScoped<RedeemCodeService>()
-		.AddScoped<TokenService>()
-		.AddScoped<UserGroupService>()
-		.AddScoped<TrackerService>()
-		.AddScoped<ModelMapService>()
-		.AddScoped<UserService>()
-		.AddScoped<IUserContext,DefaultUserContext>()
+        .AddSingleton<OpenTelemetryMiddlewares>()
+        .AddSingleton<UnitOfWorkMiddleware>()
+        .AddScoped<AuthorizeService>()
+        .AddScoped<ChannelService>()
+        .AddScoped<EmailService>()
+        .AddScoped<ImageService>()
+        .AddScoped<LoggerService>()
+        .AddScoped<ModelManagerService>()
+        .AddScoped<AnthropicChatService>()
+        .AddScoped<ResponsesService>()
+        .AddScoped<ProductService>()
+        .AddScoped<RateLimitModelService>()
+        .AddScoped<SystemService>()
+        .AddScoped<ChatService>()
+        .AddScoped<ITrackerStorage, TrackerStorage>()
+        .AddScoped<RedeemCodeService>()
+        .AddScoped<TokenService>()
+        .AddScoped<UserGroupService>()
+        .AddScoped<TrackerService>()
+        .AddScoped<ModelMapService>()
+        .AddScoped<UserService>()
+        .AddScoped<IUserContext, DefaultUserContext>()
         .AddHostedService<StatisticBackgroundTask>()
         .AddHostedService<LoggerBackgroundTask>()
         .AddHostedService<TrackerBackgroundTask>()
@@ -428,8 +428,8 @@ try
     channel.MapPost("", async (ChannelService service, ChatChannelInput input) =>
         await service.CreateAsync(input));
 
-    channel.MapGet("list", async (ChannelService service, int page, int pageSize, string? keyword) =>
-        await service.GetAsync(page, pageSize, keyword));
+    channel.MapGet("list", async (ChannelService service, int page, int pageSize, string? keyword, string[] groups) =>
+        await service.GetAsync(page, pageSize, keyword, groups));
 
     channel.MapDelete("{id}", async (ChannelService service, string id) =>
         await service.RemoveAsync(id));
@@ -451,6 +451,9 @@ try
 
     channel.MapPut("/order/{id}", async (ChannelService services, string id, int order) =>
         await services.UpdateOrderAsync(id, order));
+
+    channel.MapGet("/tag", async (ChannelService services) =>
+        await services.GetTagsAsync());
 
     #endregion
 
@@ -571,6 +574,7 @@ try
     user.MapPost("/upload-avatar", async (UserService UserService, HttpContext context) =>
             await UserService.UploadAvatarAsync(context))
         .RequireAuthorization();
+
     #endregion
 
     #region ModelMapService
@@ -923,7 +927,7 @@ try
         .WithDescription("OpenAI")
         .WithDescription("Image")
         .WithOpenApi();
-    
+
     app.MapGet("/v1/models", async (HttpContext context) => { return await ModelService.GetAsync(context); })
         .WithDescription("获取模型列表")
         .WithOpenApi();

@@ -30,9 +30,8 @@ public static class ModelService
 
         var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
         var loggerDbContext = context.RequestServices.GetRequiredService<ILoggerDbContext>();
-
         // 获取模型
-        var channels = await dbContext.Channels.ToListAsync();
+        var channels = await dbContext.Channels.Where(x => x.Disable == false).ToListAsync();
 
         var value = channels.SelectMany(x => x.Models).Distinct()
             .Select(x => new UseModelDto
@@ -61,8 +60,6 @@ public static class ModelService
             if (value[i].Count > 100) value[i].Hot = true;
         }
 
-        await cache.CreateAsync("UseModels", value, TimeSpan.FromHours(5));
-
         return value;
     }
 
@@ -70,10 +67,49 @@ public static class ModelService
     {
         var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
 
-        var models = await dbContext.ModelManagers
-            .OrderBy(x => x.CreatedAt)
-            .Where(x => x.Enable)
-            .ToListAsync();
+
+        var token = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "").Trim();
+
+
+        List<ModelManager> models;
+        // 如果是sk-开头的token，说明是自定义的token
+        if (token.StartsWith("sk-"))
+        {
+            // 获取tokens
+            var tokens = await dbContext.Tokens
+                .Where(x => x.Key == token)
+                .FirstOrDefaultAsync();
+
+
+            if (tokens == null)
+            {
+                context.Response.StatusCode = 401;
+                throw new UnauthorizedAccessException("Token不存在");
+            }
+
+            // 获取这个key的分组支持的渠道 
+            var tokenGroups = tokens.Groups;
+
+            var supportedModelsList = await dbContext.Channels
+                .Where(x=>x.Disable == false)
+                .ToListAsync();
+
+            var supportedModels = supportedModelsList
+                .Where(x => tokenGroups.Any(a => x.Groups.Contains(a)))
+                .SelectMany(x => x.Models).Distinct();
+
+            models = await dbContext.ModelManagers
+                .Where(x => x.Enable && supportedModels.Contains(x.Model))
+                .OrderBy(x => x.CreatedAt)
+                .ToListAsync();
+        }
+        else
+        {
+            models = await dbContext.ModelManagers
+                .OrderBy(x => x.CreatedAt)
+                .Where(x => x.Enable)
+                .ToListAsync();
+        }
 
         var modelsListDto = new ModelsListDto();
 
@@ -90,47 +126,48 @@ public static class ModelService
 
         return modelsListDto;
     }
-    
+
     /// <summary>
     /// 获取所有渠道
     /// </summary>
     /// <returns></returns>
-    public static async Task<Dictionary<string,string?>> GetProviderAsync(IThorContext context)
+    public static async Task<Dictionary<string, string?>> GetProviderAsync(IThorContext context)
     {
         var channels = await context.ModelManagers.Select(x => x.Icon).Distinct().ToListAsync();
-        
+
         var result = new Dictionary<string, string?>();
-        foreach (var channel in channels.Where(x=>!string.IsNullOrEmpty(x)))
+        foreach (var channel in channels.Where(x => !string.IsNullOrEmpty(x)))
         {
             switch (channel)
             {
                 case "OpenAI":
-                    result.Add("OpenAI","OpenAI");
+                    result.Add("OpenAI", "OpenAI");
                     break;
                 case "DeepSeek":
-                    result.Add("DeepSeek","深度求索");
+                    result.Add("DeepSeek", "深度求索");
                     break;
                 case "Claude":
-                    result.Add("Claude","Claude");
+                    result.Add("Claude", "Claude");
                     break;
                 case "ChatGLM":
-                    result.Add("ChatGLM","ChatGLM");
+                    result.Add("ChatGLM", "ChatGLM");
                     break;
                 case "SiliconCloud":
-                    result.Add("SiliconCloud","硅基流动");
+                    result.Add("SiliconCloud", "硅基流动");
                     break;
                 case "Moonshot":
-                    result.Add("Moonshot","Moonshot");
+                    result.Add("Moonshot", "Moonshot");
                     break;
                 case "Mistral":
-                    result.Add("Mistral","Mistral");
+                    result.Add("Mistral", "Mistral");
                     break;
                 default:
                     result.Add(channel, channel);
                     break;
             }
         }
-        result.Add("其他",null);
+
+        result.Add("其他", null);
         return result;
     }
 }

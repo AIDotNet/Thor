@@ -33,4 +33,6 @@ export enum SidebarTabKey {
   ModelMap = "model-map",
 
   UserGroup = 'user-group',
+
+  Playground = 'playground',
 }

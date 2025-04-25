@@ -45,8 +45,9 @@ public static class EndpointRouteExtensions
 
         modelManager.MapGet(string.Empty,
                 async (ModelManagerService modelManagerService, string? model, int page, int pageSize, string? type,
+                        string[]? tags = null,
                         bool isPublic = false) =>
-                    await modelManagerService.GetListAsync(model, page, pageSize, isPublic, type))
+                    await modelManagerService.GetListAsync(model, page, pageSize, isPublic, type,tags))
             .WithDescription("获取模型列表")
             .AllowAnonymous()
             .WithName("获取模型列表");

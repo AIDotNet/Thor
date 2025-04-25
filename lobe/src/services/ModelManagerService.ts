@@ -27,5 +27,5 @@ export {
     UpdateModelManager,
     DeleteModelManager,
     GetModelManagerList,
-    EnableModelManager
+    EnableModelManager,
 }

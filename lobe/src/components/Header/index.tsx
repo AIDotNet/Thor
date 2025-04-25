@@ -29,6 +29,9 @@ export default function ThorHeader() {
                             case 'welcome':
                                 navigate('/');
                                 break;
+                            case 'api_doc':
+                                window.open('https://thor-ai.apifox.cn', '_blank');
+                                break;
                         }
                         setKey(key);
                     }}
@@ -48,6 +51,10 @@ export default function ThorHeader() {
                         {
                             key: 'panel',
                             label: '面板',
+                        },
+                        {
+                            key: 'api_doc',
+                            label: 'API文档',
                         }
                     ]}
                 />

@@ -99,7 +99,7 @@ public sealed class ModelManagerService(
     }
 
     public async ValueTask<PagingDto<ModelManager>> GetListAsync(string? model, int page, int pageSize, bool isPublic,
-        string? type)
+        string? type, string[]? tags)
     {
         var query = DbContext.ModelManagers.AsQueryable();
 
@@ -118,16 +118,42 @@ public sealed class ModelManagerService(
             query = query.Where(x => x.Icon == type);
         }
 
-        var total = await query.CountAsync();
+        if (tags is { Length: > 0 })
+        {
+            // 如果需要过滤tag则先查询到内存
+            var tagsList = await DbContext.ModelManagers
+                .AsNoTracking()
+                .ToListAsync();
 
-        var data = await query
-            .OrderByDescending(x => x.Enable)
-            .ThenByDescending(x => x.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+            tagsList = tagsList
+                .Where(x => x.Tags.Any(tags.Contains))
+                .ToList();
 
-        return new PagingDto<ModelManager>(total, data);
+            var total = tagsList.Count;
+
+            tagsList = tagsList
+                .Where(x => x.Enable)
+                .OrderByDescending(x => x.Enable)
+                .ThenByDescending(x => x.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagingDto<ModelManager>(total, tagsList);
+        }
+        else
+        {
+            var total = await query.CountAsync();
+
+            var data = await query
+                .OrderByDescending(x => x.Enable)
+                .ThenByDescending(x => x.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagingDto<ModelManager>(total, data);
+        }
     }
 
     public async ValueTask EnableAsync(Guid id)

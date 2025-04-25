@@ -1,13 +1,83 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Thor AI 平台管理系统</title>
+    <link rel="icon" type="image/svg+xml" href="/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="description" content="Thor AI 平台管理系统 - 专业的人工智能管理平台" />
+    <meta name="keywords" content="Thor AI, 人工智能, AI平台, 管理系统" />
+    <meta name="author" content="Thor AI Team" />
+    
+    <!-- PWA主题色 - 同时支持亮色和暗色模式 -->
+    <meta name="theme-color" content="#1890ff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#177ddc" media="(prefers-color-scheme: dark)" />
+    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta property="og:title" content="Thor AI 平台管理系统" />
+    <meta property="og:description" content="专业的人工智能管理平台" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://yourwebsite.com" />
+    <meta property="og:image" content="/logo.png" />
+    <link rel="canonical" href="https://yourwebsite.com" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Thor AI 平台管理系统 | 专业的人工智能管理平台</title>
+    <!-- Preconnect to critical origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Add any custom fonts if needed -->
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Thor AI 平台管理系统",
+        "description": "专业的人工智能管理平台",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "CNY"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Thor AI",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://yourwebsite.com/logo.png"
+          }
+        },
+        "screenshot": "https://yourwebsite.com/logo.png",
+        "softwareVersion": "1.0",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "1000"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>您需要启用JavaScript来运行这个应用。</noscript>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(error => {
+              console.error('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

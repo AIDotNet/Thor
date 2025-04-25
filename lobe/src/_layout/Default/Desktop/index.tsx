@@ -24,6 +24,13 @@ export default function DesktopPage() {
         { key: 'models', label: t('nav.model') },
         { key: 'pricing', label: t('nav.product') },
         { key: 'community', label: t('common.community') },
+        { 
+            key: 'api_doc', 
+            label: 'API文档',
+            onClick: () => {
+                window.open('https://thor-ai.apifox.cn', '_blank');
+            } 
+        },
     ], [t, i18n.language]); // 依赖i18n.language以响应语言变化
 
     // 使用useMemo创建移动端菜单项
@@ -49,6 +56,13 @@ export default function DesktopPage() {
             label: t('common.community'),
             onClick: () => {
                 window.open('https://github.com/AIDotNet/');
+            }
+        },
+        {
+            key: 'api_doc',
+            label: 'API文档',
+            onClick: () => {
+                window.open('https://thor-ai.apifox.cn', '_blank');
             }
         },
     ], [t, i18n.language, navigate]); // 依赖i18n.language以响应语言变化

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://yourwebsite.com/sitemap.xml
+
+# Disallow sensitive directories if any
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_layout/ 

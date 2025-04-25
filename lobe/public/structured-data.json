@@ -1,0 +1,28 @@
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Thor AI 平台管理系统",
+  "description": "专业的人工智能管理平台",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CNY"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Thor AI",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://yourwebsite.com/logo.png"
+    }
+  },
+  "screenshot": "https://yourwebsite.com/images/screenshot.png",
+  "softwareVersion": "1.0",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "1000"
+  }
+} 

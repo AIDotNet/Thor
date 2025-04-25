@@ -18,6 +18,9 @@ const Nav = memo(() => {
                 case 'model':
                     navigate('/model');
                     break;
+                case 'api_doc':
+                    window.open('https://thor-ai.apifox.cn', '_blank');
+                    break;
             }
             setKey(key);
         }}
@@ -36,6 +39,9 @@ const Nav = memo(() => {
             }, {
                 key: "model",
                 label: "可用模型"
+            }, {
+                key: "api_doc",
+                label: "API文档"
             }
         ]}
         variant='compact'

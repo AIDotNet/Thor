@@ -2,12 +2,17 @@ import { del, fetch, get, postJson, put, putJson } from "../utils/fetch";
 
 const prefix = "/api/v1/channel";
 
-export const getChannels = (page: number, pageSize: number,  keyword?: string) => {
+export const getChannels = (page: number, pageSize: number,  keyword?: string,groups?:string[]) => {
   const params = new URLSearchParams();
   params.set("page", page.toString());
   params.set("pageSize", pageSize.toString());
   if (keyword) {
     params.set("keyword", keyword);
+  }
+  if (groups) {
+    groups.forEach((group) => {
+      params.append("groups", group);
+    });
   }
 
   return fetch(prefix + "/list?" + params.toString(), {
@@ -46,4 +51,8 @@ export const controlAutomatically = (id: string) => {
 
 export const UpdateOrder = (id: string, order: number) => {
   return put(prefix + "/order/" + id + "?order=" + order);
+}
+
+export const getTags = () => {
+  return get(prefix + "/tag");
 }

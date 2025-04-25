@@ -3,8 +3,10 @@ import FullscreenLoading from './components/Loading'
 import { ThemeProvider } from '@lobehub/ui'
 import MainLayout from './_layout'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import PwaWrapper from './components/PwaWrapper'
+import { updatePwaThemeColor, listenForThemeUpdates } from './utils/pwa'
 
 import Nav from './components/@nav/default'
 import useThemeStore from './store/theme'
@@ -27,10 +29,31 @@ const ModelManager = lazy(() => import('./pages/model-manager/page'))
 const PanelPage = lazy(() => import('./pages/panel/page'))
 const ModelMapPage = lazy(() => import('./pages/model-map/page'))
 const UserGroupPage = lazy(() => import('./pages/user-group/page'))
+const PlaygroundPage = lazy(() => import('./pages/playground'))
 
 function App() {
   const { themeMode, toggleTheme } = useThemeStore();
   const { t } = useTranslation();
+
+  // 在应用启动和主题变化时同步PWA主题色
+  useEffect(() => {
+    updatePwaThemeColor(themeMode);
+  }, [themeMode]);
+  
+  // 监听来自Service Worker的主题更新消息
+  useEffect(() => {
+    // 仅在支持Service Worker的环境中启用
+    if ('serviceWorker' in navigator) {
+      const cleanup = listenForThemeUpdates((updatedThemeMode) => {
+        // 如果收到主题更新消息，更新应用主题
+        if (updatedThemeMode !== themeMode) {
+          toggleTheme(updatedThemeMode);
+        }
+      });
+      
+      return cleanup;
+    }
+  }, [themeMode, toggleTheme]);
 
   const router = createBrowserRouter([{
     element: <MainLayout nav={<Nav />} />,
@@ -99,6 +122,11 @@ function App() {
         path: 'user-group', element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.userGroup')} />}>
           <UserGroupPage />
         </Suspense>
+      },
+      {
+        path: 'playground', element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.playground')} />}>
+          <PlaygroundPage />
+        </Suspense>
       }
     ]
   }, {
@@ -154,7 +182,9 @@ function App() {
       style={{
         height: '100%'
       }}>
-      <RouterProvider router={router} />
+      <PwaWrapper>
+        <RouterProvider router={router} />
+      </PwaWrapper>
     </ThemeProvider>
   )
 }

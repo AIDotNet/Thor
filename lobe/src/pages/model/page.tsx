@@ -1,21 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { Header, Input, Tag, Tooltip } from "@lobehub/ui";
 import { IconAvatar, OpenAI } from "@lobehub/icons";
-import { Button, Empty, Switch, Table, message, theme } from "antd";
-import type { AlignType } from "rc-table/lib/interface";
+import { Button, Card, Col, Descriptions, Divider, Empty, Modal, Row, Select, Space, Switch, Typography, message, theme } from "antd";
 import { getCompletionRatio, renderQuota } from "../../utils/render";
 import { getIconByName } from "../../utils/iconutils";
 import { GetModelManagerList } from "../../services/ModelManagerService";
-import { Search } from "lucide-react";
+import { Copy, Info, Search, Tag as TagIcon } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Flexbox } from "react-layout-kit";
 import { getProvider } from "../../services/ModelService";
 import { motion } from "framer-motion";
 import { createStyles } from "antd-style";
+import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
+import { getTags } from "../../services/ChannelService";
 
+const { Title, Paragraph } = Typography;
 const MotionTag = motion(Tag);
 const MotionButton = motion(Button);
 const MotionDiv = motion.div;
+const MotionCard = motion(Card);
 
 const useStyles = createStyles(({ token, css }) => ({
     modelContainer: css`
@@ -26,12 +29,38 @@ const useStyles = createStyles(({ token, css }) => ({
         position: relative;
         overflow: hidden;
     `,
+    searchContainer: css`
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 16px 16px 0 16px;
+        padding: 16px;
+        border-radius: ${token.borderRadius}px;
+        background-color: ${token.colorBgContainer};
+        box-shadow: ${token.boxShadowSecondary};
+        position: relative;
+        z-index: 2;
+        
+        @media (max-width: 768px) {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 12px;
+            margin: 12px 12px 0 12px;
+        }
+    `,
     searchInput: css`
         width: 240px;
         transition: all 0.3s;
         &:focus, &:hover {
             width: 280px;
             box-shadow: 0 0 8px ${token.colorPrimaryBg};
+        }
+        
+        @media (max-width: 768px) {
+            width: 100%;
+            &:focus, &:hover {
+                width: 100%;
+            }
         }
     `,
     iconFilter: css`
@@ -46,6 +75,13 @@ const useStyles = createStyles(({ token, css }) => ({
         position: relative;
         overflow: hidden;
         z-index: 1;
+        
+        @media (max-width: 768px) {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding: 12px;
+            margin: 12px 12px 0 12px;
+        }
     `,
     iconItem: css`
         cursor: pointer;
@@ -73,22 +109,44 @@ const useStyles = createStyles(({ token, css }) => ({
             color: ${token.colorTextLightSolid};
         }
     `,
-    tableContainer: css`
+    modelsContainer: css`
         margin: 16px;
-        border-radius: ${token.borderRadius}px;
-        box-shadow: ${token.boxShadowSecondary};
-        padding: 16px;
         flex: 1;
         overflow: auto;
-        background-color: ${token.colorBgContainer};
+        overflow-x: hidden !important;
         position: relative;
         z-index: 1;
+        
+        @media (max-width: 768px) {
+            margin: 12px;
+        }
+    `,
+    modelCard: css`
+        border-radius: ${token.borderRadius}px;
+        overflow: hidden;
+        height: 100%;
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         backdrop-filter: blur(10px);
+        background-color: ${token.colorBgContainer};
+        box-shadow: ${token.boxShadowSecondary};
+        
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+    `,
+    modelCardMeta: css`
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
     `,
     modelName: css`
         cursor: pointer;
         color: ${token.colorPrimary};
         transition: color 0.3s;
+        font-weight: 500;
+        font-size: 14px;
+        max-width: 180px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -113,10 +171,45 @@ const useStyles = createStyles(({ token, css }) => ({
             transition: width 0.3s ease;
         }
     `,
+    modelDescription: css`
+        font-size: 12px;
+        color: ${token.colorTextSecondary};
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 36px;
+    `,
     modelTags: css`
         display: flex;
         flex-wrap: wrap;
-        gap: 6px;
+        gap: 4px;
+        margin-bottom: 8px;
+    `,
+    modelPriceSection: css`
+        margin-top: 12px;
+    `,
+    modelStats: css`
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+    `,
+    modelStat: css`
+        text-align: center;
+    `,
+    modelStatValue: css`
+        font-weight: 500;
+        color: ${token.colorText};
+        font-size: 13px;
+    `,
+    modelStatLabel: css`
+        font-size: 11px;
+        color: ${token.colorTextSecondary};
+    `,
+    pagination: css`
+        margin-top: 24px;
+        text-align: center;
     `,
     primaryButton: css`
         background: linear-gradient(90deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
@@ -128,7 +221,223 @@ const useStyles = createStyles(({ token, css }) => ({
             transform: translateY(-2px);
             box-shadow: 0 6px 15px ${token.colorPrimaryBgHover};
         }
-    `
+    `,
+    tagSelect: css`
+        min-width: 200px;
+        
+        @media (max-width: 768px) {
+            width: 100%;
+        }
+    `,
+    modelDetailModal: css`
+        .ant-modal-content {
+            background: linear-gradient(145deg, ${token.colorBgContainer} 0%, ${token.colorBgElevated} 100%);
+            border-radius: ${token.borderRadiusLG}px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .ant-modal-header {
+            background: transparent;
+            border-bottom: 1px solid ${token.colorBorderSecondary};
+            padding: 16px 24px;
+        }
+        
+        .ant-modal-body {
+            padding: 24px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .ant-modal-footer {
+            border-top: 1px solid ${token.colorBorderSecondary};
+            padding: 16px 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .ant-modal-body {
+                padding: 16px;
+                max-height: 80vh;
+            }
+        }
+    `,
+    modelDetailHeader: css`
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 16px;
+        
+        @media (max-width: 768px) {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+    `,
+    modelDetailIcon: css`
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        background-color: ${token.colorBgContainer};
+        border-radius: ${token.borderRadiusLG}px;
+        box-shadow: ${token.boxShadowSecondary};
+        padding: 12px;
+        
+        @media (max-width: 768px) {
+            width: 48px;
+            height: 48px;
+            padding: 8px;
+        }
+    `,
+    modelDetailInfo: css`
+        flex: 1;
+    `,
+    modelDetailName: css`
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    `,
+    modelDetailTitle: css`
+        margin: 0;
+        font-size: 20px;
+        font-weight: 600;
+        color: ${token.colorText};
+        
+        @media (max-width: 768px) {
+            font-size: 18px;
+        }
+    `,
+    modelDetailDescription: css`
+        color: ${token.colorTextSecondary};
+        font-size: 14px;
+    `,
+    modelDetailTags: css`
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+        
+        @media (max-width: 768px) {
+            margin-top: 12px;
+        }
+    `,
+    modelDetailSection: css`
+        margin-bottom: 24px;
+        
+        @media (max-width: 768px) {
+            margin-bottom: 16px;
+        }
+    `,
+    modelDetailSectionTitle: css`
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 16px;
+        color: ${token.colorTextHeading};
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        @media (max-width: 768px) {
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+    `,
+    modelDetailPricing: css`
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        
+        @media (max-width: 768px) {
+            gap: 12px;
+        }
+    `,
+    modelDetailPriceCard: css`
+        background-color: ${token.colorBgContainer};
+        border-radius: ${token.borderRadius}px;
+        padding: 16px;
+        flex: 1;
+        min-width: 200px;
+        box-shadow: ${token.boxShadowSecondary};
+        
+        @media (max-width: 768px) {
+            min-width: 100%;
+            padding: 12px;
+        }
+    `,
+    modelDetailPriceTitle: css`
+        font-size: 14px;
+        font-weight: 500;
+        color: ${token.colorTextSecondary};
+        margin-bottom: 8px;
+    `,
+    modelDetailPriceValue: css`
+        font-size: 18px;
+        font-weight: 600;
+        color: ${token.colorPrimary};
+        
+        @media (max-width: 768px) {
+            font-size: 16px;
+        }
+    `,
+    modelDetailStats: css`
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+        
+        @media (max-width: 768px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+    `,
+    modelDetailStat: css`
+        background-color: ${token.colorBgContainer};
+        border-radius: ${token.borderRadius}px;
+        padding: 16px;
+        text-align: center;
+        box-shadow: ${token.boxShadowSecondary};
+        
+        @media (max-width: 768px) {
+            padding: 12px;
+        }
+    `,
+    modelDetailStatValue: css`
+        font-size: 18px;
+        font-weight: 600;
+        color: ${token.colorText};
+        
+        @media (max-width: 768px) {
+            font-size: 16px;
+        }
+    `,
+    modelDetailStatLabel: css`
+        font-size: 13px;
+        color: ${token.colorTextSecondary};
+        margin-top: 4px;
+    `,
+    copyButton: css`
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: ${token.borderRadius}px;
+        background-color: ${token.colorBgContainer};
+        border: 1px solid ${token.colorBorder};
+        cursor: pointer;
+        transition: all 0.3s;
+        
+        &:hover {
+            background-color: ${token.colorBgTextHover};
+            border-color: ${token.colorPrimaryBorder};
+        }
+        
+        @media (max-width: 768px) {
+            width: 24px;
+            height: 24px;
+        }
+    `,
 }));
 
 export default function DesktopLayout() {
@@ -139,17 +448,22 @@ export default function DesktopLayout() {
     const [isK, setIsK] = useState<boolean>(false);
     const [provider, setProvider] = useState<any>({});    
     const [total, setTotal] = useState<number>(0);
+    const [allTags, setAllTags] = useState<string[]>([]);
+    const [selectedModel, setSelectedModel] = useState<any>(null);
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
     const [input, setInput] = useState({
         page: 1,
-        pageSize: 10,
+        pageSize: 16,
         model: '',
         isFirst: true,
-        type: ''
+        type: '',
+        tags: [] as string[]
     });
 
     const { styles } = useStyles();
-    
     const { token } = theme.useToken();
+    const screens = useBreakpoint();
+    const isMobile = !screens.md;
 
     const loadProvider = () => {
         getProvider().then((res) => {
@@ -171,6 +485,30 @@ export default function DesktopLayout() {
                 setLoading(false);
             });
     }
+
+    const loadTags = () => {
+        getTags()
+            .then((res) => {
+                if (res.data && Array.isArray(res.data)) {
+                    setAllTags(res.data);
+                }
+            })
+            .catch((error) => {
+                console.error('Failed to load tags:', error);
+                message.error('加载标签失败');
+            });
+    }
+
+    const filterDataByTags = () => {
+        if (!input.tags || input.tags.length === 0) return data;
+        
+        return data.filter(item => {
+            if (!item.tags || !Array.isArray(item.tags)) return false;
+            return input.tags.some(tag => item.tags.includes(tag));
+        });
+    }
+
+    const filteredData = useMemo(() => filterDataByTags(), [data, input.tags]);
 
     const copyModelName = (modelName: string) => {
         try {
@@ -204,135 +542,22 @@ export default function DesktopLayout() {
         });
     };
 
-    const columns = useMemo(() => [
-        {
-            key: 'icon',
-            title: '图标',
-            dataIndex: 'icon',
-            width: 70,
-            align: 'center' as AlignType,
-            render: (value: any) => {
-                const icon = getIconByName(value);
-                return (
-                    <motion.div 
-                        className="model-icon"
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                    >
-                        {icon?.icon ?? <IconAvatar size={36} Icon={OpenAI} />}
-                    </motion.div>
-                );
-            }
-        },
-        {
-            key: 'model',
-            title: '模型',
-            dataIndex: 'model',
-            width: 260,
-            render: (mode: string) => (
-                <div 
-                    className={styles.modelName}
-                    onClick={() => copyModelName(mode)}
-                >
-                    {mode}
-                </div>
-            )
-        },
-        {
-            key: 'isRealTime',
-            title: '实时接口',
-            dataIndex: 'isVersion2',
-            width: 90,
-            align: 'center' as AlignType,
-            render: (value: boolean) => (
-                <MotionTag 
-                    color={value ? 'green' : 'default'}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                    {value ? '是' : '否'}
-                </MotionTag>
-            )
-        },
-        {
-            key: 'description',
-            title: '描述',
-            dataIndex: 'description',
-            render: (value: string) => (
-                <Tooltip title={value}>
-                    <div className="model-description">{value}</div>
-                </Tooltip>
-            )
-        },
-        {
-            key: 'price',
-            title: '模型价格',
-            dataIndex: 'price',
-            render: (_: any, item: any) => renderPriceInfo(item)
-        },
-        {
-            key: 'quotaType',
-            title: '模型类型',
-            dataIndex: 'quotaType',
-            align: 'center' as AlignType,
-            render: (value: number) => (
-                <MotionTag 
-                    color={value === 1 ? 'blue' : 'orange'}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                    {value === 1 ? '按量计费' : '按次计费'}
-                </MotionTag>
-            )
-        },
-        {
-            key: 'quotaMax',
-            title: '最大上文',
-            dataIndex: 'quotaMax',
-            align: 'center' as AlignType
-        },
-        {
-            key: "tags",
-            title: '标签',
-            dataIndex: 'tags',
-            render: (tags: string[]) => (
-                <div className={styles.modelTags}>
-                    {tags.map((tag: string, index: number) => (
-                        <MotionTag 
-                            key={tag} 
-                            color='blue'
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ 
-                                delay: index * 0.05,
-                                type: "spring", 
-                                stiffness: 400, 
-                                damping: 10 
-                            }}
-                            whileHover={{ scale: 1.05 }}
-                        >
-                            {tag}
-                        </MotionTag>
-                    ))}
-                </div>
-            )
-        },
-        {
-            key: 'enable',
-            title: '状态',
-            dataIndex: 'enable',
-            align: 'center' as AlignType,
-            render: (value: boolean) => (
-                <MotionTag 
-                    color={value ? 'green' : 'red'}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                    {value ? '可用' : '不可用'}
-                </MotionTag>
-            )
-        }
-    ], [isK, styles.modelName, styles.modelTags]);
+    const handleTagsChange = (tags: string[]) => {
+        setInput({
+            ...input,
+            tags,
+            page: 1
+        });
+    };
+
+    const handleModelClick = (item: any) => {
+        setSelectedModel(item);
+        setModalVisible(true);
+    };
+
+    const handleModalClose = () => {
+        setModalVisible(false);
+    };
 
     const renderPriceInfo = (item: any) => {
         if (item.quotaType === 1) {
@@ -344,20 +569,21 @@ export default function DesktopLayout() {
                     <div>
                         <MotionTag 
                             color='cyan'
+                            style={{ fontSize: '11px' }}
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
-                            提示{renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit} tokens
+                            提示{renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}
                         </MotionTag>
                         <MotionTag 
                             color='geekblue' 
-                            style={{ marginTop: 8 }}
+                            style={{ marginTop: 4, fontSize: '11px' }}
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
                             完成{renderQuota((item.completionRate ? 
                                 item.promptRate * multiplier * item.completionRate : 
-                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit} tokens
+                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}
                         </MotionTag>
                     </div>
                     
@@ -365,20 +591,21 @@ export default function DesktopLayout() {
                         <div className="audio-price">
                             <MotionTag 
                                 color='cyan'
+                                style={{ fontSize: '11px' }}
                                 whileHover={{ scale: 1.05 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                             >
-                                音频输入{renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit} tokens
+                                音频输入{renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}
                             </MotionTag>
                             <MotionTag 
                                 color='geekblue' 
-                                style={{ marginTop: 8 }}
+                                style={{ marginTop: 4, fontSize: '11px' }}
                                 whileHover={{ scale: 1.05 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                             >
                                 音频完成{renderQuota((item.completionRate ? 
                                     item.audioPromptRate * multiplier * item.audioOutputRate : 
-                                    getCompletionRatio(item.model) * multiplier))}/{tokenUnit} tokens
+                                    getCompletionRatio(item.model) * multiplier))}/{tokenUnit}
                             </MotionTag>
                         </div>
                     )}
@@ -388,6 +615,7 @@ export default function DesktopLayout() {
             return (
                 <MotionTag 
                     color='geekblue'
+                    style={{ fontSize: '11px' }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
@@ -418,6 +646,10 @@ export default function DesktopLayout() {
     useEffect(() => {
         loadData();
     }, [input.page, input.pageSize, input.type]);
+    
+    useEffect(() => {
+        loadTags();
+    }, []);
 
     const hasProviders = useMemo(() => Object.keys(provider).length > 0, [provider]);
 
@@ -443,6 +675,20 @@ export default function DesktopLayout() {
                 damping: 24
             }
         }
+    };
+
+    const cardVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: (i: number) => ({ 
+            y: 0, 
+            opacity: 1,
+            transition: {
+                delay: i * 0.05,
+                type: "spring",
+                stiffness: 300,
+                damping: 24
+            }
+        })
     };
 
     const AnimatedBackground = () => (
@@ -498,6 +744,409 @@ export default function DesktopLayout() {
         </>
     );
 
+    const renderAllTags = (tags: string[]) => {
+        if (!tags || !Array.isArray(tags) || tags.length === 0) return null;
+        
+        return (
+            <div className={styles.modelDetailTags}>
+                {tags.map((tag, index) => (
+                    <MotionTag
+                        key={tag}
+                        color="blue"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ scale: 1.05 }}
+                    >
+                        {tag}
+                    </MotionTag>
+                ))}
+            </div>
+        );
+    };
+
+    const renderDetailedPriceInfo = (item: any) => {
+        if (!item) return null;
+        
+        const tokenUnit = isK ? '1K' : '1M';
+        const multiplier = isK ? 1000 : 1000000;
+        
+        if (item.quotaType === 1) {
+            return (
+                <div className={styles.modelDetailPricing}>
+                    <MotionDiv 
+                        className={styles.modelDetailPriceCard}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        <div className={styles.modelDetailPriceTitle}>提示词价格</div>
+                        <div className={styles.modelDetailPriceValue}>
+                            {renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}
+                        </div>
+                    </MotionDiv>
+                    
+                    <MotionDiv 
+                        className={styles.modelDetailPriceCard}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <div className={styles.modelDetailPriceTitle}>完成价格</div>
+                        <div className={styles.modelDetailPriceValue}>
+                            {renderQuota((item.completionRate ? 
+                                item.promptRate * multiplier * item.completionRate : 
+                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}
+                        </div>
+                    </MotionDiv>
+                    
+                    {item.isVersion2 && (
+                        <>
+                            <MotionDiv 
+                                className={styles.modelDetailPriceCard}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                <div className={styles.modelDetailPriceTitle}>音频输入价格</div>
+                                <div className={styles.modelDetailPriceValue}>
+                                    {renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}
+                                </div>
+                            </MotionDiv>
+                            
+                            <MotionDiv 
+                                className={styles.modelDetailPriceCard}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 }}
+                            >
+                                <div className={styles.modelDetailPriceTitle}>音频完成价格</div>
+                                <div className={styles.modelDetailPriceValue}>
+                                    {renderQuota((item.completionRate ? 
+                                        item.audioPromptRate * multiplier * item.audioOutputRate : 
+                                        getCompletionRatio(item.model) * multiplier))}/{tokenUnit}
+                                </div>
+                            </MotionDiv>
+                        </>
+                    )}
+                </div>
+            );
+        } else {
+            return (
+                <div className={styles.modelDetailPricing}>
+                    <MotionDiv 
+                        className={styles.modelDetailPriceCard}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                    >
+                        <div className={styles.modelDetailPriceTitle}>每次调用价格</div>
+                        <div className={styles.modelDetailPriceValue}>
+                            {renderQuota(item.promptRate, 6)}
+                        </div>
+                    </MotionDiv>
+                </div>
+            );
+        }
+    };
+
+    const renderModelStats = (item: any) => {
+        if (!item) return null;
+        
+        // Define stats to display
+        const stats = [
+            { label: '最大上下文', value: item.quotaMax || '-' },
+            { label: '模型版本', value: item.isVersion2 ? '实时版' : '非实时版' },
+            { label: '计费方式', value: item.quotaType === 1 ? '按量计费' : '按次计费' },
+            { label: '状态', value: item.enable ? '可用' : '不可用' },
+        ];
+        
+        return (
+            <div className={styles.modelDetailStats}>
+                {stats.map((stat, index) => (
+                    <MotionDiv 
+                        key={stat.label}
+                        className={styles.modelDetailStat}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 + index * 0.1 }}
+                    >
+                        <div className={styles.modelDetailStatValue}>{stat.value}</div>
+                        <div className={styles.modelDetailStatLabel}>{stat.label}</div>
+                    </MotionDiv>
+                ))}
+            </div>
+        );
+    };
+
+    const renderModelDetailModal = () => {
+        if (!selectedModel) return null;
+        
+        const icon = getIconByName(selectedModel.icon);
+        
+        return (
+            <Modal
+                title={null}
+                open={modalVisible}
+                onCancel={handleModalClose}
+                footer={[
+                    <Button key="back" onClick={handleModalClose}>
+                        关闭
+                    </Button>,
+                    <Button 
+                        key="copy" 
+                        type="primary"
+                        onClick={() => copyModelName(selectedModel.model)}
+                        className={styles.primaryButton}
+                    >
+                        复制模型名称
+                    </Button>,
+                ]}
+                width={800}
+                className={styles.modelDetailModal}
+                destroyOnClose
+                centered
+            >
+                <div className={styles.modelDetailHeader}>
+                    <MotionDiv 
+                        className={styles.modelDetailIcon}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    >
+                        {icon?.icon ?? <IconAvatar size={isMobile ? 32 : 40} Icon={OpenAI} />}
+                    </MotionDiv>
+                    
+                    <div className={styles.modelDetailInfo}>
+                        <div className={styles.modelDetailName}>
+                            <Title level={4} className={styles.modelDetailTitle}>
+                                {selectedModel.model}
+                            </Title>
+                            <MotionDiv 
+                                className={styles.copyButton}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => copyModelName(selectedModel.model)}
+                            >
+                                <Copy size={16} color={token.colorTextSecondary} />
+                            </MotionDiv>
+                        </div>
+                        <Paragraph className={styles.modelDetailDescription}>
+                            {selectedModel.description}
+                        </Paragraph>
+                        {renderAllTags(selectedModel.tags)}
+                    </div>
+                </div>
+                
+                <Divider />
+                
+                <div className={styles.modelDetailSection}>
+                    <div className={styles.modelDetailSectionTitle}>
+                        <Info size={16} color={token.colorTextSecondary} />
+                        模型统计
+                    </div>
+                    {renderModelStats(selectedModel)}
+                </div>
+                
+                <div className={styles.modelDetailSection}>
+                    <div className={styles.modelDetailSectionTitle}>
+                        <Info size={16} color={token.colorTextSecondary} />
+                        价格信息 ({isK ? 'K' : 'M'} 单位)
+                    </div>
+                    {renderDetailedPriceInfo(selectedModel)}
+                </div>
+                
+                {selectedModel.capabilities && (
+                    <div className={styles.modelDetailSection}>
+                        <div className={styles.modelDetailSectionTitle}>
+                            <Info size={16} color={token.colorTextSecondary} />
+                            模型能力
+                        </div>
+                        <Descriptions
+                            bordered
+                            column={{ xs: 1, sm: 2 }}
+                            size="small"
+                        >
+                            {Object.entries(selectedModel.capabilities).map(([key, value]: any) => (
+                                <Descriptions.Item key={key} label={key}>
+                                    {value ? '支持' : '不支持'}
+                                </Descriptions.Item>
+                            ))}
+                        </Descriptions>
+                    </div>
+                )}
+            </Modal>
+        );
+    };
+
+    const renderModelCard = (item: any, index: number) => {
+        const icon = getIconByName(item.icon);
+        
+        return (
+            <Col xs={12} sm={8} md={6} lg={6} xl={4} xxl={3} key={item.id}>
+                <MotionCard
+                    className={styles.modelCard}
+                    loading={loading}
+                    custom={index}
+                    variants={cardVariants}
+                    whileHover={{ y: -8, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
+                    size="small"
+                    onClick={() => handleModelClick(item)}
+                    style={{ cursor: 'pointer' }}
+                >
+                    <div className={styles.modelCardMeta}>
+                        <motion.div 
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                            style={{ marginRight: 8 }}
+                        >
+                            {icon?.icon ?? <IconAvatar size={28} Icon={OpenAI} />}
+                        </motion.div>
+                        <div 
+                            className={styles.modelName}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                copyModelName(item.model);
+                            }}
+                        >
+                            {item.model}
+                        </div>
+                    </div>
+
+                    <Tooltip title={item.description}>
+                        <div className={styles.modelDescription}>
+                            {item.description}
+                        </div>
+                    </Tooltip>
+
+                    <div className={styles.modelTags}>
+                        <MotionTag 
+                            color={item.enable ? 'green' : 'red'}
+                            whileHover={{ scale: 1.05 }}
+                            style={{ fontSize: '11px' }}
+                        >
+                            {item.enable ? '可用' : '不可用'}
+                        </MotionTag>
+                        <MotionTag 
+                            color={item.isVersion2 ? 'green' : 'default'}
+                            whileHover={{ scale: 1.05 }}
+                            style={{ fontSize: '11px' }}
+                        >
+                            {item.isVersion2 ? '实时' : '非实时'}
+                        </MotionTag>
+                        <MotionTag 
+                            color={item.quotaType === 1 ? 'blue' : 'orange'}
+                            whileHover={{ scale: 1.05 }}
+                            style={{ fontSize: '11px' }}
+                        >
+                            {item.quotaType === 1 ? '按量' : '按次'}
+                        </MotionTag>
+                    </div>
+
+                    {item.tags && item.tags.length > 0 && (
+                        <div className={styles.modelTags}>
+                            {item.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                <MotionTag 
+                                    key={tag} 
+                                    color='blue'
+                                    style={{ fontSize: '11px' }}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    whileHover={{ scale: 1.05 }}
+                                >
+                                    {tag}
+                                </MotionTag>
+                            ))}
+                            {item.tags.length > 2 && (
+                                <MotionTag color="default" style={{ fontSize: '11px' }}>+{item.tags.length - 2}</MotionTag>
+                            )}
+                        </div>
+                    )}
+
+                    <div className={styles.modelPriceSection}>
+                        {renderPriceInfo(item)}
+                    </div>
+
+                    <div className={styles.modelStats}>
+                        <div className={styles.modelStat}>
+                            <div className={styles.modelStatValue}>{item.quotaMax || '-'}</div>
+                            <div className={styles.modelStatLabel}>最大上下文</div>
+                        </div>
+                    </div>
+                </MotionCard>
+            </Col>
+        );
+    };
+
+    const renderSearchSection = () => (
+        <MotionDiv 
+            className={styles.searchContainer}
+            variants={itemVariants}
+        >
+            <Space wrap={isMobile} style={{ width: isMobile ? '100%' : 'auto' }}>
+                <Input
+                    placeholder="请输入需要搜索的模型"
+                    value={input.model}
+                    className={styles.searchInput}
+                    onPressEnter={() => {
+                        loadData();
+                        loadTags();
+                    }}
+                    prefix={<Search size={16} color={token.colorTextSecondary} />}
+                    onChange={(e) => {
+                        setInput({
+                            ...input,
+                            model: e.target.value
+                        });
+                    }}
+                />
+                    
+                <Select
+                    mode="multiple"
+                    allowClear
+                    placeholder="选择标签过滤"
+                    value={input.tags}
+                    onChange={handleTagsChange}
+                    className={styles.tagSelect}
+                    maxTagCount={3}
+                    options={allTags.map(tag => ({
+                        label: tag,
+                        value: tag,
+                    }))}
+                    suffixIcon={<TagIcon size={16} color={token.colorTextSecondary} />}
+                />
+                
+                <MotionButton
+                    type='primary'
+                    icon={<Search size={16} />}
+                    className={styles.primaryButton}
+                    onClick={() => {
+                        loadData();
+                        loadTags();
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    搜索
+                </MotionButton>
+            </Space>
+            
+            <div style={{ marginLeft: 'auto' }}>
+                <Space>
+                    <span className="switch-label">单位：</span>
+                    <Switch
+                        value={isK}
+                        checkedChildren={<Tag color="blue">K</Tag>}
+                        unCheckedChildren={<Tag color="green">M</Tag>}
+                        defaultChecked
+                        onChange={setIsK}
+                    />
+                </Space>
+            </div>
+        </MotionDiv>
+    );
+
     return (
         <MotionDiv 
             className={styles.modelContainer}
@@ -508,49 +1157,10 @@ export default function DesktopLayout() {
             <AnimatedBackground />
             
             <MotionDiv variants={itemVariants}>
-                <Header
-                    nav={'模型列表'}
-                    actions={
-                        <div className="header-actions">
-                            <div className="unit-switch">
-                                <span className="switch-label">单位：</span>
-                                <Switch
-                                    value={isK}
-                                    checkedChildren={<Tag color="blue">K</Tag>}
-                                    unCheckedChildren={<Tag color="green">M</Tag>}
-                                    defaultChecked
-                                    onChange={setIsK}
-                                />
-                            </div>
-                            <div className="search-wrapper">
-                                <Input
-                                    placeholder="请输入需要搜索的模型"
-                                    value={input.model}
-                                    className={styles.searchInput}
-                                    onPressEnter={() => loadData()}
-                                    suffix={
-                                        <MotionButton
-                                            type='primary'
-                                            size="small"
-                                            className={styles.primaryButton}
-                                            icon={<Search size={16} />}
-                                            onClick={() => loadData()}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                        />
-                                    }
-                                    onChange={(e) => {
-                                        setInput({
-                                            ...input,
-                                            model: e.target.value
-                                        });
-                                    }}
-                                />
-                            </div>
-                        </div>
-                    }
-                />
+                <Header nav={'模型列表'} />
             </MotionDiv>
+            
+            {renderSearchSection()}
             
             {hasProviders && (
                 <MotionDiv 
@@ -593,41 +1203,56 @@ export default function DesktopLayout() {
             )}
             
             <MotionDiv 
-                className={styles.tableContainer}
+                className={styles.modelsContainer}
                 variants={itemVariants}
             >
-                <Table
-                    rowKey={row => row.id}
-                    pagination={{
-                        total: total,
-                        pageSize: input.pageSize,
-                        current: input.page,
-                        showSizeChanger: true,
-                        showQuickJumper: true,
-                        showTotal: (total) => `共 ${total} 条记录`,
-                        onChange: (page, pageSize) => {
-                            setInput({
-                                ...input,
-                                page,
-                                pageSize,
-                            });
-                        }
-                    }}
-                    loading={loading}
-                    dataSource={data}
-                    className="model-table"
-                    locale={{
-                        emptyText: <Empty description="暂无数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                    }}
-                    columns={columns}
-                />
+                {loading && <Empty description="加载中..." image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+                
+                {!loading && filteredData.length === 0 && (
+                    <Empty description="暂无数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                )}
+                
+                {!loading && filteredData.length > 0 && (
+                    <Row gutter={[12, 12]}>
+                        {filteredData.map((item, index) => renderModelCard(item, index))}
+                    </Row>
+                )}
+                
+                {total > 0 && (
+                    <div className={styles.pagination}>
+                        <Button.Group>
+                            <Button 
+                                disabled={input.page === 1}
+                                onClick={() => setInput({...input, page: input.page - 1})}
+                            >
+                                上一页
+                            </Button>
+                            <Button type="primary">
+                                {input.page} / {Math.ceil(total / input.pageSize)}
+                            </Button>
+                            <Button 
+                                disabled={input.page >= Math.ceil(total / input.pageSize)}
+                                onClick={() => setInput({...input, page: input.page + 1})}
+                            >
+                                下一页
+                            </Button>
+                        </Button.Group>
+                    </div>
+                )}
             </MotionDiv>
             
+            {renderModelDetailModal()}
+            
             <style>{`
-                .model-manager-container {
+                .mobile-header {
                     display: flex;
                     flex-direction: column;
-                    height: 100%;
+                    width: 100%;
+                }
+                
+                .mobile-search {
+                    padding: 0 16px;
+                    margin-top: 12px;
                 }
                 
                 .header-actions {
@@ -649,34 +1274,6 @@ export default function DesktopLayout() {
                 
                 .search-wrapper {
                     position: relative;
-                }
-                
-                .model-table {
-                    margin: 0;
-                }
-                
-                .model-icon {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                }
-                
-                .model-description {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 1;
-                    -webkit-box-orient: vertical;
-                }
-                
-                .model-price {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-                
-                .audio-price {
-                    margin-top: 4px;
                 }
                 
                 /* 滚动条美化 */
@@ -703,17 +1300,6 @@ export default function DesktopLayout() {
                     .header-actions {
                         flex-direction: column;
                         align-items: flex-start;
-                    }
-                    
-                    .icon-filter {
-                        overflow-x: auto;
-                        flex-wrap: nowrap;
-                        padding: 12px;
-                    }
-                    
-                    .table-container {
-                        margin: 12px;
-                        padding: 12px;
                     }
                 }
             `}</style>
