@@ -1,6 +1,7 @@
 import { Button, Card, Collapse, Form, Input, InputNumber, Switch, notification } from "antd";
 import { GeneralSetting, UpdateSetting } from "../../../services/SettingService";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ServiceSetupProps {
     settings: any[];
@@ -12,6 +13,7 @@ export default function ServiceSetup({
     setSettings
 }: ServiceSetupProps) {
     const [input, setInput] = useState<any>([]);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const initialValues = settings.reduce((acc, setting) => {
@@ -22,13 +24,12 @@ export default function ServiceSetup({
     }, [settings])
 
     function handleSubmit() {
-
         UpdateSetting(settings)
             .then((res) => {
                 res.success ? notification.success({
-                    message: '修改成功',
+                    message: t('settingPage.general.saveSuccess'),
                 }) : notification.error({
-                    message: '修改失败',
+                    message: t('settingPage.general.saveFailed'),
                 });
             });
     }
@@ -47,87 +48,87 @@ export default function ServiceSetup({
     };
 
     return (
-        <Card title='通用设置' style={{ maxWidth: '100%' }}>
+        <Card title={t('settingPage.general.title')} style={{ maxWidth: '100%' }}>
             <Form>
                 <Collapse>
-                    <Collapse.Panel key={1} header="通用设置">
-                        <Form.Item label='充值地址'>
+                    <Collapse.Panel key={1} header={t('settingPage.general.title')}>
+                        <Form.Item label={t('settingPage.service.rechargeAddress')}>
                             <Input
                                 value={input[GeneralSetting.RechargeAddress]}
                                 onChange={(e) => handleInputChange(GeneralSetting.RechargeAddress, e.target.value)}
-                                placeholder='请输入充值地址'
+                                placeholder={t('settingPage.service.rechargeAddress')}
                             />
                         </Form.Item>
-                        <Form.Item label='对话链接'>
+                        <Form.Item label={t('settingPage.service.chatLink')}>
                             <Input
                                 value={input[GeneralSetting.ChatLink]}
                                 onChange={(e) => handleInputChange(GeneralSetting.ChatLink, e.target.value)}
-                                placeholder='请输入对话链接'
+                                placeholder={t('settingPage.service.chatLink')}
                             />
                         </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
 
                 <Collapse accordion>
-                    <Collapse.Panel key={1} header="额度设置">
-                        <Form.Item label='新用户初始额度'>
+                    <Collapse.Panel key={1} header={t('settingPage.service.quotaSettings')}>
+                        <Form.Item label={t('settingPage.service.newUserQuota')}>
                             <InputNumber
                                 value={input[GeneralSetting.NewUserQuota]}
                                 onChange={(value) => handleInputChange(GeneralSetting.NewUserQuota, value)}
-                                placeholder='请输入新用户初始额度'
+                                placeholder={t('settingPage.service.newUserQuota')}
                             />
                         </Form.Item>
-                        <Form.Item label='请求预扣额度'>
+                        <Form.Item label={t('settingPage.service.requestQuota')}>
                             <InputNumber
                                 value={input[GeneralSetting.RequestQuota]}
                                 onChange={(value) => handleInputChange(GeneralSetting.RequestQuota, value)}
-                                placeholder='请输入请求预扣额度'
+                                placeholder={t('settingPage.service.requestQuota')}
                             />
                         </Form.Item>
-                        <Form.Item label='邀请奖励额度'>
+                        <Form.Item label={t('settingPage.service.inviteQuota')}>
                             <InputNumber
                                 value={input[GeneralSetting.InviteQuota]}
                                 onChange={(value) => handleInputChange(GeneralSetting.InviteQuota, value)}
-                                placeholder='请输入邀请奖励额度'
+                                placeholder={t('settingPage.service.inviteQuota')}
                             />
                         </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
 
                 <Collapse>
-                    <Collapse.Panel key={1} header="日志设置">
-                        <Form.Item label='启用定时清理日志'>
+                    <Collapse.Panel key={1} header={t('settingPage.service.logSettings')}>
+                        <Form.Item label={t('settingPage.service.enableClearLog')}>
                             <Switch
                                 checked={input[GeneralSetting.EnableClearLog] === 'true'}
                                 onChange={(value) => handleInputChange(GeneralSetting.EnableClearLog, value ? 'true' : 'false')}
                             />
                         </Form.Item>
-                        <Form.Item label='间隔天数'>
+                        <Form.Item label={t('settingPage.service.intervalDays')}>
                             <InputNumber
                                 value={input[GeneralSetting.IntervalDays]}
                                 onChange={(value) => handleInputChange(GeneralSetting.IntervalDays, value)}
-                                placeholder='请输入间隔天数'
+                                placeholder={t('settingPage.service.intervalDays')}
                             />
                         </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
 
                 <Collapse>
-                    <Collapse.Panel key={1} header="渠道监控">
-                        <Form.Item label='启用自动检测渠道策略'>
+                    <Collapse.Panel key={1} header={t('settingPage.service.channelMonitoring')}>
+                        <Form.Item label={t('settingPage.service.enableAutoCheckChannel')}>
                             <Switch
                                 checked={input[GeneralSetting.EnableAutoCheckChannel] === 'true'}
                                 onChange={(value) => handleInputChange(GeneralSetting.EnableAutoCheckChannel, value ? 'true' : 'false')}
                             />
                         </Form.Item>
-                        <Form.Item label='检测间隔 (分钟)'>
+                        <Form.Item label={t('settingPage.service.checkInterval')}>
                             <InputNumber
                                 value={input[GeneralSetting.CheckInterval]}
                                 onChange={(value) => handleInputChange(GeneralSetting.CheckInterval, value)}
-                                placeholder='请输入检测间隔'
+                                placeholder={t('settingPage.service.checkInterval')}
                             />
                         </Form.Item>
-                        <Form.Item label='自动禁用异常渠道'>
+                        <Form.Item label={t('settingPage.service.autoDisableChannel')}>
                             <Switch
                                 checked={input[GeneralSetting.AutoDisableChannel] === 'true'}
                                 onChange={(value) => handleInputChange(GeneralSetting.AutoDisableChannel, value ? 'true' : 'false')}
@@ -137,61 +138,61 @@ export default function ServiceSetup({
                 </Collapse>
 
                 <Collapse>
-                    <Collapse.Panel key={1} header="支付宝设置">
-                        <Form.Item label='支付宝回调地址'>
+                    <Collapse.Panel key={1} header={t('settingPage.service.alipaySettings')}>
+                        <Form.Item label={t('settingPage.service.alipayNotifyUrl')}>
                             <Input
                                 value={input[GeneralSetting.AlipayNotifyUrl]}
                                 onChange={(e) => handleInputChange(GeneralSetting.AlipayNotifyUrl, e.target.value)}
-                                placeholder='请输入支付宝回调地址'
+                                placeholder={t('settingPage.service.alipayNotifyUrl')}
                             />
                         </Form.Item>
-                        <Form.Item label='支付宝AppId'>
+                        <Form.Item label={t('settingPage.service.alipayAppId')}>
                             <Input
                                 value={input[GeneralSetting.AlipayAppId]}
                                 onChange={(e) => handleInputChange(GeneralSetting.AlipayAppId, e.target.value)}
-                                placeholder='请输入支付宝AppId'
+                                placeholder={t('settingPage.service.alipayAppId')}
                             />
                         </Form.Item>
-                        <Form.Item label='支付宝应用私钥'>
+                        <Form.Item label={t('settingPage.service.alipayPrivateKey')}>
                             <Input
                                 value={input[GeneralSetting.AlipayPrivateKey]}
                                 onChange={(e) => handleInputChange(GeneralSetting.AlipayPrivateKey, e.target.value)}
-                                placeholder='请输入支付宝应用私钥'
+                                placeholder={t('settingPage.service.alipayPrivateKey')}
                             />
                         </Form.Item>
-                        <Form.Item label='支付宝公钥'>
+                        <Form.Item label={t('settingPage.service.alipayPublicKey')}>
                             <Input
                                 value={input[GeneralSetting.AlipayPublicKey]}
                                 onChange={(e) => handleInputChange(GeneralSetting.AlipayPublicKey, e.target.value)}
-                                placeholder='请输入支付宝公钥'
+                                placeholder={t('settingPage.service.alipayPublicKey')}
                             />
                         </Form.Item>
-                        <Form.Item label='支付宝应用公钥证书路径'>
+                        <Form.Item label={t('settingPage.service.alipayAppCertPath')}>
                             <Input
                                 value={input[GeneralSetting.AlipayAppCertPath]}
                                 onChange={(e) => handleInputChange(GeneralSetting.AlipayAppCertPath, e.target.value)}
-                                placeholder='请输入支付宝应用公钥证书路径'
+                                placeholder={t('settingPage.service.alipayAppCertPath')}
                             />
                         </Form.Item>
-                        <Form.Item label='支付宝根证书路径'>
+                        <Form.Item label={t('settingPage.service.alipayRootCertPath')}>
                             <Input
                                 value={input[GeneralSetting.AlipayRootCertPath]}
                                 onChange={(e) => handleInputChange(GeneralSetting.AlipayRootCertPath, e.target.value)}
-                                placeholder='请输入支付宝根证书路径'
+                                placeholder={t('settingPage.service.alipayRootCertPath')}
                             />
                         </Form.Item>
-                        <Form.Item label='支付宝公钥证书路径'>
+                        <Form.Item label={t('settingPage.service.alipayPublicCertPath')}>
                             <Input
                                 value={input[GeneralSetting.AlipayPublicCertPath]}
                                 onChange={(e) => handleInputChange(GeneralSetting.AlipayPublicCertPath, e.target.value)}
-                                placeholder='请输入支付宝公钥证书路径'
+                                placeholder={t('settingPage.service.alipayPublicCertPath')}
                             />
                         </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
 
                 <Button block onClick={handleSubmit} type="primary">
-                    保存设置
+                    {t('settingPage.general.save')}
                 </Button>
             </Form>
         </Card>

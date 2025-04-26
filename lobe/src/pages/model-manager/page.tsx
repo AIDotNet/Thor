@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { DeleteModelManager, EnableModelManager, GetModelManagerList } from "../../services/ModelManagerService";
-import { Button, Dropdown, message, Table, Space, Input as AntInput, Switch, Typography, ConfigProvider, theme } from "antd";
+import { Button, Dropdown, message, Table, Space, Input as AntInput, Switch, Typography, ConfigProvider, theme, Tag as AntTag } from "antd";
 import { Header, Tag } from "@lobehub/ui";
 import { getCompletionRatio, renderQuota } from "../../utils/render";
 import CreateModelManagerPage from "./features/CreateModelManager";
@@ -16,6 +16,7 @@ export default function ModelManager() {
     const { t } = useTranslation();
     const { mobile } = useResponsive();
     const { token } = theme.useToken();
+
     
     const [createOpen, setCreateOpen] = useState<boolean>(false);
     const [updateValue, setUpdateValue] = useState<any>({
@@ -31,6 +32,7 @@ export default function ModelManager() {
         pageSize: 10,
         model: '',
     });
+
 
     function loadData() {
         setLoading(true);
@@ -103,6 +105,17 @@ export default function ModelManager() {
         }
     };
 
+    const renderModelType = (value: number) => {
+        switch (value) {
+            case 1:
+                return <AntTag color="blue">{t('modelManager.volumeBilling')}</AntTag>;
+            case 2:
+                return <AntTag color="green">{t('modelManager.perUseBilling')}</AntTag>;
+            default:
+                return null;
+        }
+    };
+
     const columns: ColumnsType<any> = [
         {
             key: 'icon',
@@ -139,7 +152,31 @@ export default function ModelManager() {
             title: t('modelManager.modelType'),
             dataIndex: 'quotaType',
             responsive: ['lg'],
-            render: (value: any) => (value === 1 ? t('modelManager.volumeBilling') : t('modelManager.perUseBilling'))
+            render: (value: any) => renderModelType(value)
+        },
+        {
+            key: 'type',
+            title: t('modelManager.modelCategory'),
+            dataIndex: 'type',
+            responsive: ['lg'],
+            render: (value: any) => {
+                switch (value) {
+                    case 'chat':
+                        return <AntTag color="processing">{t('modelManager.typeChat')}</AntTag>;
+                    case 'audio':
+                        return <AntTag color="orange">{t('modelManager.typeAudio')}</AntTag>;
+                    case 'image':
+                        return <AntTag color="gold">{t('modelManager.typeImage')}</AntTag>;
+                    case 'stt':
+                        return <AntTag color="purple">{t('modelManager.typeSTT')}</AntTag>;
+                    case 'tts':
+                        return <AntTag color="magenta">{t('modelManager.typeTTS')}</AntTag>;
+                    case 'embedding':
+                        return <AntTag color="cyan">{t('modelManager.typeEmbedding')}</AntTag>;
+                    default:
+                        return value;
+                }
+            }
         },
         {
             key: 'quotaMax',
@@ -159,7 +196,11 @@ export default function ModelManager() {
             title: t('modelManager.modelStatus'),
             dataIndex: 'enable',
             responsive: ['md'],
-            render: (value: any) => (value ? t('modelManager.modelEnabled') : t('modelManager.modelDisabled'))
+            render: (value: any) => (
+                value ? 
+                <AntTag color="success">{t('modelManager.modelEnabled')}</AntTag> : 
+                <AntTag color="error">{t('modelManager.modelDisabled')}</AntTag>
+            )
         },
         {
             key: 'actions',

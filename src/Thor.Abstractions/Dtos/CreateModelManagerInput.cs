@@ -1,4 +1,5 @@
-﻿using Thor.Service.Domain.Core;
+﻿using Thor.Abstractions;
+using Thor.Service.Domain.Core;
 
 namespace Thor.Service.Dto;
 
@@ -80,4 +81,10 @@ public class CreateModelManagerInput
     /// 是否v2版本
     /// </summary>
     public bool IsVersion2 { get; set; } = false;
+    
+    /// <summary>
+    /// 模型类型
+    /// chat|image|audio
+    /// </summary>
+    public string Type { get; set; } = ModelManagerType.Chat;
 }

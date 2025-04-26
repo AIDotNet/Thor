@@ -33,3 +33,7 @@ export const getModelList = async () => {
 export const getProvider = () => {
     return get(prefix + '/provider')
 }
+
+export const getModelInfo = () => {
+    return get(prefix + '/info' )
+}

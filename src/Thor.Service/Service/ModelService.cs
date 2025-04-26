@@ -1,4 +1,5 @@
-﻿using Thor.Core.DataAccess;
+﻿using Thor.Abstractions.Dtos;
+using Thor.Core.DataAccess;
 using Thor.Service.Model;
 
 namespace Thor.Service.Service;
@@ -16,9 +17,7 @@ public static class ModelService
 
     public static string[] GetModels()
     {
-        var result = ModelManagerService.PromptRate.Select(x => x.Key).ToArray();
-
-        return result;
+        return ModelManagerService.PromptRate.Select(x => x.Key).ToArray();
     }
 
     public static async ValueTask<List<UseModelDto>> GetUseModels(HttpContext context)
@@ -91,7 +90,7 @@ public static class ModelService
             var tokenGroups = tokens.Groups;
 
             var supportedModelsList = await dbContext.Channels
-                .Where(x=>x.Disable == false)
+                .Where(x => x.Disable == false)
                 .ToListAsync();
 
             var supportedModels = supportedModelsList
@@ -120,11 +119,54 @@ public static class ModelService
                 Created = model.CreatedAt.ToUnixTimeSeconds(),
                 Id = model.Model,
                 @object = "model",
-                OwnedBy = "openai",
+                OwnedBy = model.Icon?.ToLower() ?? "openai",
+                Type = model.Type,
             });
         }
 
         return modelsListDto;
+    }
+
+    public static async Task<ModelInfoDto> GetModelInfoAsync(HttpContext context)
+    {
+        var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
+
+        var models = await dbContext.ModelManagers
+            .AsNoTracking()
+            .Where(x => x.Enable && !string.IsNullOrEmpty(x.Type))
+            .ToArrayAsync();
+
+        var types = models
+            .Select(x => x.Type)
+            .Distinct()
+            .ToList();
+
+        var modelInfo = new ModelInfoDto();
+
+        foreach (var type in types)
+        {
+            modelInfo.ModelTypeCounts.Add(new ModelTypeCountDto()
+            {
+                Type = type,
+                Count = await dbContext.ModelManagers.CountAsync(x => x.Type == type)
+            });
+        }
+
+        // 根据type分组
+        var modelType = models
+            .GroupBy(x => x.Type)
+            .ToDictionary(x => x.Key, x => x.ToList());
+
+        foreach (var type in modelType)
+        {
+            modelInfo.ModelTypes.Add(new ModelTypeDto()
+            {
+                Type = type.Key,
+                Models = type.Value.Select(x => x.Model).ToArray()
+            });
+        }
+
+        return modelInfo;
     }
 
     /// <summary>

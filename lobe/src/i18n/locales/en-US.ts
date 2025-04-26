@@ -50,7 +50,8 @@ const enUS = {
       optional: 'Optional',
       total: 'Total',
       createSuccess: 'Created successfully',
-      updateSuccess: 'Updated successfully'
+      updateSuccess: 'Updated successfully',
+      installApp: 'Install App'
     },
 
     // Navigation
@@ -368,6 +369,15 @@ const enUS = {
       modelPricePerK: 'K',
       modelPricePerM: 'M',
       modelMaxContext: 'Max Context',
+      modelCategory: 'Model Category',
+      selectCategory: 'Select model category',
+      typeRequired: 'Please select model category',
+      typeChat: 'Chat',
+      typeAudio: 'Audio',
+      typeImage: 'Image',
+      typeSTT: 'Speech to Text',
+      typeTTS: 'Text to Speech',
+      typeEmbedding: 'Embedding',
       promptRate: 'Prompt Rate',
       completionRate: 'Completion Rate',
       perUsageFee: 'Per Usage Fee',
@@ -412,7 +422,10 @@ const enUS = {
       perUsage: 'Per Usage',
       tokens: 'tokens',
       confirm: 'Confirm',
-      searchModel: 'Enter model name to search'
+      searchModel: 'Enter model name to search',
+      basicInfo: 'Basic Information',
+      rateConfiguration: 'Rate Configuration',
+      advancedSettings: 'Advanced Settings'
     },
 
     // Product Page
@@ -575,6 +588,197 @@ const enUS = {
       pleaseSelectTargetModel: 'Please select target model ID',
       pleaseEnterWeight: 'Please enter weight',
       pleaseSelectGroup: 'Please select group'
+    },
+
+    // PWA Installation
+    install: {
+      title: 'Install Thor AI Platform',
+      description: 'Add Thor AI Platform to your home screen for offline use and faster access.',
+      later: 'Later',
+      install: 'Install Now',
+      browser: 'You can always install the app from your browser menu'
+    },
+
+    // Setting Page
+    settingPage: {
+      tabs: {
+        serviceSetup: 'Service Setup',
+        systemSetup: 'System Setup',
+        otherSettings: 'Other Settings'
+      },
+      general: {
+        title: 'General Settings',
+        save: 'Save Settings',
+        saveSuccess: 'Settings updated successfully',
+        saveFailed: 'Settings update failed'
+      },
+      service: {
+        rechargeAddress: 'Recharge Address',
+        chatLink: 'Chat Link',
+        quotaSettings: 'Quota Settings',
+        newUserQuota: 'New User Initial Quota',
+        requestQuota: 'Request Reserved Quota',
+        inviteQuota: 'Invitation Reward Quota',
+        logSettings: 'Log Settings',
+        enableClearLog: 'Enable Timed Log Cleaning',
+        intervalDays: 'Interval Days',
+        channelMonitoring: 'Channel Monitoring',
+        enableAutoCheckChannel: 'Enable Auto Channel Detection',
+        checkInterval: 'Check Interval (Minutes)',
+        autoDisableChannel: 'Auto Disable Abnormal Channels',
+        alipaySettings: 'Alipay Settings',
+        alipayNotifyUrl: 'Alipay Callback URL',
+        alipayAppId: 'Alipay AppId',
+        alipayPrivateKey: 'Alipay Private Key',
+        alipayPublicKey: 'Alipay Public Key',
+        alipayAppCertPath: 'Alipay App Certificate Path',
+        alipayRootCertPath: 'Alipay Root Certificate Path',
+        alipayPublicCertPath: 'Alipay Public Certificate Path'
+      },
+      system: {
+        serverAddress: 'Server Address',
+        accountSettings: 'Account Settings',
+        enableRegister: 'Enable Account Registration',
+        gitHubSettings: 'If allowing Github login, fill in the following information',
+        enableGithubLogin: 'Allow Github Login',
+        githubClientId: 'Github Client Id',
+        githubClientSecret: 'Github Client Secret',
+        giteeSettings: 'If allowing Gitee login, fill in the following information',
+        enableGiteeLogin: 'Allow Gitee Login',
+        giteeClientId: 'Gitee Client Id',
+        giteeClientSecret: 'Gitee Client Secret',
+        emailSettings: 'If enabling email registration verification, fill in the following information',
+        enableEmailRegister: 'Enable Email Registration Verification',
+        emailAddress: 'Sender Email',
+        emailPassword: 'Sender Email Password',
+        smtpAddress: 'SMTP Address',
+        casdoorSettings: 'If enabling Casdoor authorization, fill in the following information',
+        enableCasdoorAuth: 'Enable Casdoor Authorization',
+        casdoorEndpoint: 'Casdoor Custom Endpoint',
+        casdoorClientId: 'Casdoor Client Id',
+        casdoorClientSecret: 'Casdoor Client Secret'
+      },
+      other: {
+        siteSettings: 'Site Settings',
+        webTitle: 'Website Title',
+        webLogo: 'Website Logo URL',
+        indexContent: 'Homepage Content'
+      }
+    },
+
+    // Playground page
+    playground: {
+      title: 'AI Assistant',
+      selectToken: 'Select Token',
+      selectModel: 'Select Model',
+      inputMessage: 'Enter message...',
+      send: 'Send',
+      clearChat: 'Clear Chat',
+      saveChat: 'Save Chat',
+      chatHistory: 'Chat History',
+      systemPrompt: 'System Prompt',
+      temperature: 'Temperature',
+      precise: 'Precise',
+      lowCreativity: 'Low Creativity',
+      balanced: 'Balanced',
+      highCreativity: 'High Creativity',
+      chatSettings: 'Chat Settings',
+      saveChatTitle: 'Save Chat',
+      saveChatInputTitle: 'Chat Title',
+      saveChatInputTags: 'Add Tags',
+      enterChatTitle: 'Name this conversation',
+      enterTagsHint: 'Enter tag names and press Enter to add',
+      editChatInfo: 'Edit Chat Info',
+      confirmDelete: 'Are you sure you want to delete this message?',
+      delete: 'Delete',
+      regenerate: 'Regenerate',
+      newChatFromMessage: 'New chat from this message',
+      copyContent: 'Copy content',
+      tabs: {
+        chat: 'Chat',
+        image: 'Image'
+      },
+      emptyChat: {
+        title: 'AI Assistant',
+        description: 'Select a Token and model to start chatting with the AI assistant. The AI assistant can help you answer questions, create content, and more.',
+        suggestion1: 'Write a short story',
+        suggestion2: 'Explain quantum computing'
+      },
+      pinned: 'Pinned Chats',
+      allChats: 'All Chats',
+      searchChats: 'Search chat titles or tags',
+      filterTags: 'Filter by tags',
+      sortBy: {
+        newest: 'Newest',
+        oldest: 'Oldest'
+      },
+      performance: {
+        firstToken: 'First token',
+        completion: 'Completion',
+        tokens: 'Tokens',
+        rate: 'Rate'
+      },
+      noChatsFound: 'No matching chats found',
+      chatPinned: 'Chat pinned',
+      chatUnpinned: 'Chat unpinned',
+      chatInfoUpdated: 'Chat information updated',
+      chatDeleted: 'Chat deleted',
+      chatLoaded: 'Chat loaded',
+      confirmDeleteChat: 'Are you sure you want to delete this chat?',
+      togglePin: 'Pin/Unpin chat',
+      editChat: 'Edit chat information',
+      deleteChat: 'Delete chat',
+      addTag: 'Add tag',
+      enterTagPress: 'Enter tag and press Enter',
+      errorMessages: {
+        enterMessage: 'Please enter a message',
+        selectModel: 'Please select a model',
+        selectToken: 'Please select a Token',
+        noContent: 'No chat content to save',
+        regenerateFailed: 'Failed to regenerate, please check Token and model settings',
+        responseFailed: 'Failed to get response, please check Token and model settings',
+        createChatFailed: 'Failed to create new chat'
+      }
+    },
+
+    // Image Feature
+    imageFeature: {
+      title: 'AI Image Generation',
+      useSourceImage: 'Use Source Image',
+      selectImage: 'Select Image',
+      changeImage: 'Change Image',
+      sourceImage: 'Source Image',
+      sourceImages: 'Source Images',
+      prompt: 'Prompt',
+      promptPlaceholder: 'Describe the image you want to generate...',
+      transformationPrompt: 'Transformation Prompt',
+      transformationPromptPlaceholder: 'Describe how you want to transform the image...',
+      negativePrompt: 'Negative Prompt',
+      negativePromptPlaceholder: 'Elements to avoid in the generated image...',
+      transformationStrength: 'Transformation Strength',
+      subtle: 'Subtle',
+      complete: 'Complete',
+      token: 'Token',
+      selectToken: 'Select a token',
+      model: 'Model',
+      selectModel: 'Select a model',
+      imageSize: 'Image Size',
+      square: 'Square',
+      landscape: 'Landscape',
+      portrait: 'Portrait',
+      generateImage: 'Generate Image',
+      transformImage: 'Transform Image',
+      generatedImages: 'Generated Images',
+      noImagesYet: 'No images generated yet',
+      promptRequired: 'Please enter a prompt',
+      tokenRequired: 'Please select a token',
+      modelRequired: 'Please select a model',
+      generateSuccess: 'Image generated successfully',
+      generateFailed: 'Image generation failed',
+      noTokensAvailable: 'No tokens available, please add a token first',
+      dragImageHint: 'Click or drag image file to this area to upload',
+      supportMultipleFiles: 'Support for uploading multiple files simultaneously',
+      clearAllImages: 'Clear All Images'
     }
   }
 };

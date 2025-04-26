@@ -23,4 +23,6 @@ public class ModelsDataDto
     [JsonPropertyName("created")] public long Created { get; set; }
 
     [JsonPropertyName("owned_by")] public string OwnedBy { get; set; }
+    
+    [JsonPropertyName("type")] public string Type { get; set; }
 }

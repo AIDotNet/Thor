@@ -12,6 +12,7 @@ import styled from "styled-components";
 import { motion } from "framer-motion";
 import { LayoutProps } from "./type";
 import { HomeOutlined } from "@ant-design/icons";
+import PwaInstall from "../components/PwaInstall";
 
 const { Content, Footer, Sider } = Layout;
 const { Text, Title } = Typography;
@@ -184,6 +185,17 @@ const HeaderActions = memo(() => {
       >
         {t('nav.model')}
       </Button>
+      <PwaInstall 
+        buttonMode={true}
+        buttonText={t('common.installApp')}
+        buttonType="default"
+        buttonSize="middle"
+        buttonStyle={{ 
+          display: 'flex',
+          alignItems: 'center'
+        }}
+        logoUrl='/logo.png'
+      />
       <LanguageSwitcher />
       <ThemeSwitch 
         onThemeSwitch={handleThemeSwitch}

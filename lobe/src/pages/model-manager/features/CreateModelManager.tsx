@@ -1,11 +1,13 @@
 import { Modal, Tag } from "@lobehub/ui";
-import { Button, Form, Input, InputNumber, message, Select, Space } from "antd";
+import { Button, Form, Input, InputNumber, message, Select, Space, Typography, Divider, Col, Row, Tooltip, theme } from "antd";
 import { CreateModelManager } from "../../../services/ModelManagerService";
 import { getIconByNames } from "../../../utils/iconutils";
 import { useState } from "react";
 import { renderQuota } from "../../../utils/render";
 import { useTranslation } from "react-i18next";
 import { useResponsive } from "antd-style";
+import { InfoCircleOutlined, QuestionCircleOutlined } from "@ant-design/icons";
+import { MODEL_TYPES } from "../constants/modelTypes";
 
 interface CreateModelManagerProps {
     open: boolean;
@@ -20,6 +22,7 @@ export default function CreateModelManagerPage({
 }: CreateModelManagerProps) {
     const { t } = useTranslation();
     const { mobile } = useResponsive();
+    const { token } = theme.useToken();
     
     const [form] = Form.useForm();
     const [promptRate, setPromptRate] = useState(0);
@@ -36,22 +39,36 @@ export default function CreateModelManagerPage({
             });
     }
 
+    const formItemLayout = {
+        labelCol: { span: 24 },
+        wrapperCol: { span: 24 }
+    };
+
     return (
         <Modal 
             open={open} 
             onCancel={onClose} 
             onClose={onClose} 
-            footer={[]} 
+            footer={null} 
             title={t('modelManager.createModel')}
-            style={{ maxWidth: '100%' }}
+            style={{ maxWidth: '100%', width: mobile ? '100%' : '580px' }}
+            bodyStyle={{ padding: '16px 24px' }}
         >
             <Form 
                 form={form} 
                 onFinish={save}
-                layout={mobile ? "vertical" : "horizontal"}
-                labelCol={mobile ? undefined : { span: 8 }}
-                wrapperCol={mobile ? undefined : { span: 16 }}
+                layout="vertical"
+                requiredMark={false}
+                size="large"
+                {...formItemLayout}
+                style={{ 
+                    color: token.colorTextSecondary
+                }}
             >
+                <Typography.Title level={5} style={{ marginBottom: 16, color: token.colorTextSecondary }}>
+                    {t('modelManager.basicInfo')}
+                </Typography.Title>
+                
                 <Form.Item 
                     rules={[
                         {
@@ -60,137 +77,69 @@ export default function CreateModelManagerPage({
                         }
                     ]} 
                     name="model" 
-                    label={t('modelManager.modelName')}
+                    label={
+                        <Space>
+                            {t('modelManager.modelName')}
+                            {!mobile && (
+                                <Tooltip title={t('modelManager.modelDescription')}>
+                                    <QuestionCircleOutlined style={{ color: token.colorTextQuaternary, cursor: 'pointer' }} />
+                                </Tooltip>
+                            )}
+                        </Space>
+                    }
                 >
                     <Input placeholder={t('modelManager.enterModelName')} />
                 </Form.Item>
+                
+                <Row gutter={16}>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item 
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t('modelManager.modelTypeRequired')
+                                }
+                            ]} 
+                            name="quotaType" 
+                            label={t('modelManager.modelType')}
+                        >
+                            <Select>
+                                <Select.Option value={1}>{t('modelManager.volumeBilling')}</Select.Option>
+                                <Select.Option value={2}>{t('modelManager.perUseBilling')}</Select.Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item 
+                            name="isVersion2" 
+                            label={t('modelManager.isRealTimeModel')}
+                        >
+                            <Select defaultValue={false}>
+                                <Select.Option value={false}>{t('modelManager.no')}</Select.Option>
+                                <Select.Option value={true}>{t('modelManager.yes')}</Select.Option>
+                            </Select>
+                        </Form.Item>
+                    </Col>
+                </Row>
                 
                 <Form.Item 
                     rules={[
                         {
                             required: true,
-                            message: t('modelManager.modelTypeRequired')
+                            message: t('modelManager.typeRequired')
                         }
                     ]} 
-                    name="quotaType" 
-                    label={t('modelManager.modelType')}
+                    name="type" 
+                    label={t('modelManager.modelCategory')}
                 >
-                    <Select>
-                        <Select.Option value={1}>{t('modelManager.volumeBilling')}</Select.Option>
-                        <Select.Option value={2}>{t('modelManager.perUseBilling')}</Select.Option>
+                    <Select placeholder={t('modelManager.selectCategory')}>
+                        <Select.Option value={MODEL_TYPES.CHAT}>{t('modelManager.typeChat')}</Select.Option>
+                        <Select.Option value={MODEL_TYPES.AUDIO}>{t('modelManager.typeAudio')}</Select.Option>
+                        <Select.Option value={MODEL_TYPES.IMAGE}>{t('modelManager.typeImage')}</Select.Option>
+                        <Select.Option value={MODEL_TYPES.STT}>{t('modelManager.typeSTT')}</Select.Option>
+                        <Select.Option value={MODEL_TYPES.TTS}>{t('modelManager.typeTTS')}</Select.Option>
+                        <Select.Option value={MODEL_TYPES.EMBEDDING}>{t('modelManager.typeEmbedding')}</Select.Option>
                     </Select>
-                </Form.Item>
-                
-                <Form.Item 
-                    style={{ padding: 0, margin: 0 }} 
-                    shouldUpdate={(prevValues, currentValues) => prevValues.quotaType !== currentValues.quotaType}
-                >
-                    {({ getFieldValue }) => {
-                        const quotaType = getFieldValue('quotaType');
-                        return quotaType === 1 ? (
-                            <Form.Item
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t('modelManager.promptRateRequired')
-                                    },
-                                    {
-                                        validator: (_, value) => {
-                                            return value > 0 
-                                                ? Promise.resolve() 
-                                                : Promise.reject(t('modelManager.promptRatePositive'));
-                                        }
-                                    },
-                                ]} 
-                                name="promptRate" 
-                                label={t('modelManager.promptRate')}
-                            >
-                                <InputNumber 
-                                    style={{ width: '100%' }} 
-                                    placeholder={t('modelManager.enterPromptRate')}
-                                />
-                            </Form.Item>
-                        ) : quotaType === 2 ? (
-                            <Form.Item
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: t('modelManager.promptRateRequired')
-                                    },
-                                    {
-                                        validator: (_, value) => {
-                                            return value > 0 
-                                                ? Promise.resolve() 
-                                                : Promise.reject(t('modelManager.promptRatePositive'));
-                                        }
-                                    },
-                                ]} 
-                                style={{ padding: 0, margin: 0 }}
-                                name="promptRate" 
-                                label={t('modelManager.perUsageFee')}
-                            >
-                                <InputNumber
-                                    onChange={(value) => setPromptRate(value ?? 0)}
-                                    value={promptRate}
-                                    suffix={<Tag>{renderQuota(promptRate, 6)}</Tag>}
-                                    style={{ width: '100%' }} 
-                                    placeholder={t('modelManager.enterPerUsageFee')}
-                                />
-                            </Form.Item>
-                        ) : null;
-                    }}
-                </Form.Item>
-                
-                <Form.Item 
-                    style={{ padding: 0, margin: 0 }} 
-                    shouldUpdate={(prevValues, currentValues) => prevValues.quotaType !== currentValues.quotaType}
-                >
-                    {({ getFieldValue }) => {
-                        return getFieldValue('quotaType') === 1 ? (
-                            <Form.Item name="completionRate" label={t('modelManager.completionRate')}>
-                                <InputNumber 
-                                    style={{ width: '100%' }} 
-                                    placeholder={t('modelManager.enterCompletionRate')}
-                                />
-                            </Form.Item>
-                        ) : null;
-                    }}
-                </Form.Item>
-
-                <Form.Item name="isVersion2" label={t('modelManager.isRealTimeModel')}>
-                    <Select defaultValue={false}>
-                        <Select.Option value={true}>{t('modelManager.yes')}</Select.Option>
-                        <Select.Option value={false}>{t('modelManager.no')}</Select.Option>
-                    </Select>
-                </Form.Item>
-                
-                <Form.Item name="audioPromptRate" label={t('modelManager.audioPromptRate')}>
-                    <Input placeholder={t('modelManager.enterAudioPromptRate')} />
-                </Form.Item>
-                
-                <Form.Item name="AudioOutputRate" label={t('modelManager.audioCompletionRate')}>
-                    <Input placeholder={t('modelManager.enterAudioCompletionRate')} />
-                </Form.Item>
-                
-                <Form.Item name="cacheRate" label={t('modelManager.cacheWriteRate')}>
-                    <InputNumber 
-                        style={{ width: '100%' }} 
-                        placeholder={t('modelManager.enterCacheWriteRate')} 
-                    />
-                </Form.Item>
-                
-                <Form.Item name="cacheHitRate" label={t('modelManager.cacheHitRate')}>
-                    <InputNumber 
-                        style={{ width: '100%' }} 
-                        placeholder={t('modelManager.enterCacheHitRate')} 
-                    />
-                </Form.Item>
-                
-                <Form.Item name="audioCacheRate" label={t('modelManager.audioCacheRate')}>
-                    <InputNumber 
-                        style={{ width: '100%' }} 
-                        placeholder={t('modelManager.enterAudioCacheRate')} 
-                    />
                 </Form.Item>
                 
                 <Form.Item 
@@ -206,41 +155,232 @@ export default function CreateModelManagerPage({
                     <Input placeholder={t('modelManager.enterDescription')} />
                 </Form.Item>
                 
-                <Form.Item name="quotaMax" label={t('modelManager.modelMaxContext')}>
-                    <Input placeholder={t('modelManager.enterMaxContext')} />
-                </Form.Item>
+                <Row gutter={16}>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item 
+                            rules={[
+                                {
+                                    required: true,
+                                    message: t('modelManager.iconRequired')
+                                }
+                            ]} 
+                            name="icon" 
+                            label={t('modelManager.modelIcon')}
+                        >
+                            <Select 
+                                options={getIconByNames(25)} 
+                                placeholder={t('modelManager.selectIcon')}
+                                showSearch
+                                optionFilterProp="label"
+                                dropdownStyle={{ 
+                                    minWidth: '300px'
+                                }}
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item 
+                            name="tags" 
+                            label={`${t('modelManager.modelTags')} (${t('common.optional')})`}
+                        >
+                            <Select
+                                mode="tags"
+                                options={[
+                                    { label: '文本', value: '文本' },
+                                    { label: "视觉", value: "视觉" },
+                                    { label: "多模态", value: "多模态" },
+                                    { label: "图像分析", value: "图像分析" },
+                                    { label: "文件分析", value: "文件分析" }
+                                ]}
+                                placeholder={t('modelManager.enterTags')}
+                                maxTagCount={3}
+                                maxTagTextLength={10}
+                                dropdownStyle={{ 
+                                    minWidth: '300px'
+                                }}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                
+                <Divider style={{ margin: '16px 0', borderColor: token.colorBorderSecondary }} />
+                
+                <Typography.Title level={5} style={{ marginBottom: 16, display: 'flex', alignItems: 'center', color: token.colorTextSecondary }}>
+                    {t('modelManager.rateConfiguration')}
+                    <Tooltip title="Configure pricing rates for this model">
+                        <InfoCircleOutlined style={{ marginLeft: 8, fontSize: 14, color: token.colorTextQuaternary, cursor: 'pointer' }} />
+                    </Tooltip>
+                </Typography.Title>
                 
                 <Form.Item 
-                    rules={[
-                        {
-                            required: true,
-                            message: t('modelManager.iconRequired')
-                        }
-                    ]} 
-                    name="icon" 
-                    label={t('modelManager.modelIcon')}
+                    style={{ marginBottom: 0 }} 
+                    shouldUpdate={(prevValues, currentValues) => prevValues.quotaType !== currentValues.quotaType}
                 >
-                    <Select options={getIconByNames(25)} placeholder={t('modelManager.selectIcon')} />
+                    {({ getFieldValue }) => {
+                        const quotaType = getFieldValue('quotaType');
+                        return quotaType === 1 ? (
+                            <Row gutter={16}>
+                                <Col span={mobile ? 24 : 12}>
+                                    <Form.Item
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: t('modelManager.promptRateRequired')
+                                            },
+                                            {
+                                                validator: (_, value) => {
+                                                    return value > 0 
+                                                        ? Promise.resolve() 
+                                                        : Promise.reject(t('modelManager.promptRatePositive'));
+                                                }
+                                            },
+                                        ]} 
+                                        name="promptRate" 
+                                        label={t('modelManager.promptRate')}
+                                    >
+                                        <InputNumber 
+                                            style={{ width: '100%' }} 
+                                            placeholder={t('modelManager.enterPromptRate')}
+                                            min={0}
+                                            step={0.1}
+                                            precision={4}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                                <Col span={mobile ? 24 : 12}>
+                                    <Form.Item 
+                                        name="completionRate" 
+                                        label={t('modelManager.completionRate')}
+                                    >
+                                        <InputNumber 
+                                            style={{ width: '100%' }} 
+                                            placeholder={t('modelManager.enterCompletionRate')}
+                                            min={0}
+                                            step={0.1}
+                                            precision={4}
+                                        />
+                                    </Form.Item>
+                                </Col>
+                            </Row>
+                        ) : quotaType === 2 ? (
+                            <Form.Item
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: t('modelManager.promptRateRequired')
+                                    },
+                                    {
+                                        validator: (_, value) => {
+                                            return value > 0 
+                                                ? Promise.resolve() 
+                                                : Promise.reject(t('modelManager.promptRatePositive'));
+                                        }
+                                    },
+                                ]} 
+                                name="promptRate" 
+                                label={t('modelManager.perUsageFee')}
+                            >
+                                <InputNumber
+                                    onChange={(value) => setPromptRate(value ?? 0)}
+                                    value={promptRate}
+                                    suffix={<Tag>{renderQuota(promptRate, 6)}</Tag>}
+                                    style={{ width: '100%' }} 
+                                    placeholder={t('modelManager.enterPerUsageFee')}
+                                    min={0}
+                                    step={0.1}
+                                    precision={4}
+                                />
+                            </Form.Item>
+                        ) : null;
+                    }}
                 </Form.Item>
                 
-                <Form.Item name="tags" label={t('modelManager.modelTags')}>
-                    <Select
-                        mode="tags"
-                        options={[
-                            { label: '文本', value: '文本' },
-                            { label: "视觉", value: "视觉" },
-                            { label: "多模态", value: "多模态" },
-                            { label: "图像分析", value: "图像分析" },
-                            { label: "文件分析", value: "文件分析" }
-                        ]}
-                        placeholder={t('modelManager.enterTags')}
-                    />
-                </Form.Item>
+                <Divider style={{ margin: '16px 0', borderColor: token.colorBorderSecondary }} />
                 
-                <Form.Item wrapperCol={mobile ? undefined : { offset: 8, span: 16 }}>
-                    <Space style={{ width: '100%', justifyContent: 'flex-end' }}>
-                        <Button onClick={onClose}>{t('common.cancel')}</Button>
-                        <Button type="primary" htmlType="submit">{t('modelManager.confirm')}</Button>
+                <Typography.Title level={5} style={{ marginBottom: 16, color: token.colorTextSecondary }}>
+                    {t('modelManager.advancedSettings')}
+                </Typography.Title>
+                
+                <Row gutter={16}>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item name="audioPromptRate" label={t('modelManager.audioPromptRate')}>
+                            <InputNumber 
+                                style={{ width: '100%' }} 
+                                placeholder={t('modelManager.enterAudioPromptRate')}
+                                min={0}
+                                step={0.1}
+                                precision={4}
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item name="AudioOutputRate" label={t('modelManager.audioCompletionRate')}>
+                            <InputNumber 
+                                style={{ width: '100%' }} 
+                                placeholder={t('modelManager.enterAudioCompletionRate')}
+                                min={0}
+                                step={0.1}
+                                precision={4}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                
+                <Row gutter={16}>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item name="cacheRate" label={t('modelManager.cacheWriteRate')}>
+                            <InputNumber 
+                                style={{ width: '100%' }} 
+                                placeholder={t('modelManager.enterCacheWriteRate')}
+                                min={0}
+                                step={0.1}
+                                precision={4}
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item name="cacheHitRate" label={t('modelManager.cacheHitRate')}>
+                            <InputNumber 
+                                style={{ width: '100%' }} 
+                                placeholder={t('modelManager.enterCacheHitRate')}
+                                min={0}
+                                step={0.1}
+                                precision={4}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                
+                <Row gutter={16}>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item name="audioCacheRate" label={t('modelManager.audioCacheRate')}>
+                            <InputNumber 
+                                style={{ width: '100%' }} 
+                                placeholder={t('modelManager.enterAudioCacheRate')}
+                                min={0}
+                                step={0.1}
+                                precision={4}
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item name="quotaMax" label={t('modelManager.modelMaxContext')}>
+                            <InputNumber 
+                                style={{ width: '100%' }} 
+                                placeholder={t('modelManager.enterMaxContext')}
+                                min={0}
+                                step={512}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                
+                <Divider style={{ margin: '16px 0', borderColor: token.colorBorderSecondary }} />
+                
+                <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+                    <Space>
+                        <Button onClick={onClose} size="middle">{t('common.cancel')}</Button>
+                        <Button type="primary" htmlType="submit" size="middle">{t('modelManager.confirm')}</Button>
                     </Space>
                 </Form.Item>
             </Form>

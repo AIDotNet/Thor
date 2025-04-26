@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { LayoutProps } from './type';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { Layout, ConfigProvider, theme, Button, Drawer, Typography, Avatar, Space } from 'antd';
+import { Layout, ConfigProvider, theme, Button, Drawer, Typography, Avatar, Space, Tooltip } from 'antd';
 import styled from 'styled-components';
 import { Flexbox } from 'react-layout-kit';
 import { MenuOutlined, HomeOutlined } from '@ant-design/icons';
@@ -10,6 +10,7 @@ import useThemeStore from '../store/theme';
 import { motion } from 'framer-motion';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import PwaInstall from '../components/PwaInstall';
 
 const { Header, Content, Footer } = Layout;
 const { Text, Title } = Typography;
@@ -122,6 +123,16 @@ const MobileLayout = memo(({ nav }: LayoutProps) => {
           </LogoContainer>
           
           <Space>
+            <Tooltip title={t('common.installApp')}>
+              <PwaInstall 
+                buttonMode={true}
+                buttonText=""
+                buttonType="text"
+                buttonSize="small"
+                buttonStyle={{ padding: '4px 8px' }}
+                logoUrl='/logo.png'
+              />
+            </Tooltip>
             <LanguageSwitcher />
             <ThemeSwitch
               onThemeSwitch={handleThemeSwitch}

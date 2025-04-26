@@ -1,4 +1,5 @@
-﻿using Thor.Service.Domain.Core;
+﻿using Thor.Abstractions;
+using Thor.Service.Domain.Core;
 
 namespace Thor.Service.Domain;
 
@@ -87,4 +88,15 @@ public sealed class ModelManager : Entity<Guid>
     /// 是否v2版本
     /// </summary>
     public bool IsVersion2 { get; set; } = false;
+
+    /// <summary>
+    /// 模型类型
+    /// chat|image|audio
+    /// </summary>
+    public string Type { get; set; } = ModelManagerType.Chat;
+    
+    /// <summary>
+    /// 扩展字段
+    /// </summary>
+    public Dictionary<string, string> Extension { get; set; } = new();
 }

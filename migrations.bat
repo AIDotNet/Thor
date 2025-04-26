@@ -1,5 +1,5 @@
 @echo off
-set MIGRATION_NAME=UpdateGroup
+set MIGRATION_NAME=UpdateModelType
 
 set DBType=sqllite
 dotnet ef migrations add --project src\Provider\Thor.Provider.Sqlite\Thor.Provider.Sqlite.csproj --startup-project src\Thor.Service\Thor.Service.csproj --context Thor.Provider.SqliteThorContext --configuration Debug %MIGRATION_NAME%   --output-dir Thor

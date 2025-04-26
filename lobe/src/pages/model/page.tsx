@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 import { Header, Input, Tag, Tooltip } from "@lobehub/ui";
 import { IconAvatar, OpenAI } from "@lobehub/icons";
-import { Button, Card, Col, Descriptions, Divider, Empty, Modal, Row, Select, Space, Switch, Typography, message, theme } from "antd";
+import { Button, Card, Col, Descriptions, Divider, Empty, Modal, Row, Select, Space, Switch, Typography, message, theme, Badge } from "antd";
 import { getCompletionRatio, renderQuota } from "../../utils/render";
 import { getIconByName } from "../../utils/iconutils";
 import { GetModelManagerList } from "../../services/ModelManagerService";
-import { Copy, Info, Search, Tag as TagIcon } from "lucide-react";
+import { Copy, Info, Search, Tag as TagIcon, MessageSquare, Image, Mic, Headphones, FileText, Layers } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Flexbox } from "react-layout-kit";
 import { getProvider } from "../../services/ModelService";
 import { motion } from "framer-motion";
 import { createStyles } from "antd-style";
 import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
+import { getModelInfo } from "../../services/ModelService";
 import { getTags } from "../../services/ChannelService";
+import MODEL_TYPES from "../model-manager/constants/modelTypes";
 
 const { Title, Paragraph } = Typography;
 const MotionTag = motion(Tag);
@@ -109,6 +111,63 @@ const useStyles = createStyles(({ token, css }) => ({
             color: ${token.colorTextLightSolid};
         }
     `,
+    modelTypeFilter: css`
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 16px 0 16px;
+        padding: 16px;
+        border-radius: ${token.borderRadius}px;
+        background-color: ${token.colorBgContainer};
+        box-shadow: ${token.boxShadowSecondary};
+        position: relative;
+        z-index: 1;
+        
+        @media (max-width: 768px) {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding: 12px;
+            margin: 12px 12px 0 12px;
+        }
+    `,
+    modelTypeFilterItem: css`
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: ${token.borderRadiusSM}px;
+        transition: all 0.3s;
+        border: 1px solid ${token.colorBorderSecondary};
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        &:hover {
+            border-color: ${token.colorPrimaryBorderHover};
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        &.selected {
+            border-color: ${token.colorPrimary};
+            background-color: ${token.colorPrimaryBg};
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px ${token.colorPrimaryBgHover};
+        }
+    `,
+    resultSummary: css`
+        margin: 16px 16px 0;
+        font-size: 14px;
+        color: ${token.colorTextSecondary};
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        @media (max-width: 768px) {
+            margin: 12px 12px 0;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+    `,
     modelsContainer: css`
         margin: 16px;
         flex: 1;
@@ -129,6 +188,8 @@ const useStyles = createStyles(({ token, css }) => ({
         backdrop-filter: blur(10px);
         background-color: ${token.colorBgContainer};
         box-shadow: ${token.boxShadowSecondary};
+        display: flex;
+        flex-direction: column;
         
         &:hover {
             transform: translateY(-4px);
@@ -139,6 +200,41 @@ const useStyles = createStyles(({ token, css }) => ({
         display: flex;
         align-items: center;
         margin-bottom: 12px;
+    `,
+    modelCardContent: css`
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    `,
+    modelCardFooter: css`
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid ${token.colorBorderSecondary};
+    `,
+    modelCardHeader: css`
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    `,
+    modelCardSection: css`
+        margin-bottom: 8px;
+    `,
+    modelGridView: css`
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+        
+        @media (max-width: 768px) {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+    `,
+    viewToggle: css`
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
     `,
     modelName: css`
         cursor: pointer;
@@ -438,6 +534,41 @@ const useStyles = createStyles(({ token, css }) => ({
             height: 24px;
         }
     `,
+    modelTypeIcon: css`
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: ${token.colorPrimaryBg};
+        margin-right: 4px;
+    `,
+    modelTypeBadge: css`
+        position: absolute;
+        top: 12px;
+        right: 12px;
+    `,
+    modelTypeSummary: css`
+        display: flex;
+        gap: 12px;
+        margin: 16px 16px 0 16px;
+        padding: 16px;
+        border-radius: ${token.borderRadius}px;
+        background-color: ${token.colorBgContainer};
+        box-shadow: ${token.boxShadowSecondary};
+        position: relative;
+        z-index: 1;
+        overflow-x: auto;
+        
+        @media (max-width: 768px) {
+            flex-wrap: nowrap;
+        }
+        
+        @media (min-width: 769px) {
+            flex-wrap: wrap;
+        }
+    `,
 }));
 
 export default function DesktopLayout() {
@@ -457,14 +588,29 @@ export default function DesktopLayout() {
         model: '',
         isFirst: true,
         type: '',
-        tags: [] as string[]
+        tags: [] as string[],
+        modelType: ''
     });
-
+    const [selectedModelType, setSelectedModelType] = useState<string>('');
+    const [isGridView, setIsGridView] = useState<boolean>(true);
+    const modelTypes = useMemo(() => Object.values(MODEL_TYPES), []);
+    
     const { styles } = useStyles();
     const { token } = theme.useToken();
     const screens = useBreakpoint();
     const isMobile = !screens.md;
+    const [modelInfo, setModelInfo] = useState<any>({});
 
+    useEffect(() => {
+        loadModelInfo();
+    }, []);
+
+    function loadModelInfo() {
+        getModelInfo()
+            .then((res) => {
+                setModelInfo(res.data);
+            });
+    }
     const loadProvider = () => {
         getProvider().then((res) => {
             setProvider(res.data);
@@ -473,7 +619,7 @@ export default function DesktopLayout() {
 
     const loadData = () => {
         setLoading(true);
-        GetModelManagerList(input.model, input.page, input.pageSize, true, input.type)
+        GetModelManagerList(input.model, input.page, input.pageSize, true, input.type, input.modelType)
             .then((res) => {
                 setData(res.data.items);
                 setTotal(res.data.total);
@@ -508,7 +654,40 @@ export default function DesktopLayout() {
         });
     }
 
-    const filteredData = useMemo(() => filterDataByTags(), [data, input.tags]);
+    // Count models by type
+    const modelCountByType = useMemo(() => {
+        const counts: Record<string, number> = {};
+        data.forEach(item => {
+            if (item.type) {
+                counts[item.type] = (counts[item.type] || 0) + 1;
+            }
+        });
+        return counts;
+    }, [data]);
+    
+    // Filter data by model type
+    const filterDataByModelType = (data: any[]) => {
+        if (!input.modelType) return data;
+        return data.filter(item => item.type?.toLowerCase() === input.modelType.toLowerCase());
+    };
+    
+    // Combined filters
+    const filteredData = useMemo(() => {
+        let filtered = filterDataByTags();
+        filtered = filterDataByModelType(filtered);
+        return filtered;
+    }, [data, input.tags, input.modelType]);
+    
+    const handleModelTypeSelect = (type: string) => {
+        const newType = selectedModelType === type ? '' : type;
+        setSelectedModelType(newType);
+        // When a model type is selected, update the input.modelType to filter the data
+        setInput({
+            ...input,
+            modelType: newType, // Toggle the model type filter
+            page: 1 // Reset to first page
+        });
+    };
 
     const copyModelName = (modelName: string) => {
         try {
@@ -565,47 +744,51 @@ export default function DesktopLayout() {
             const multiplier = isK ? 1000 : 1000000;
             
             return (
-                <div className="model-price">
-                    <div>
+                <div className="model-price" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                         <MotionTag 
                             color='cyan'
-                            style={{ fontSize: '11px' }}
+                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
-                            提示{renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}
+                            <span style={{ fontWeight: 'bold' }}>提示:</span>
+                            <span>{renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}</span>
                         </MotionTag>
                         <MotionTag 
                             color='geekblue' 
-                            style={{ marginTop: 4, fontSize: '11px' }}
+                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
-                            完成{renderQuota((item.completionRate ? 
+                            <span style={{ fontWeight: 'bold' }}>完成:</span>
+                            <span>{renderQuota((item.completionRate ? 
                                 item.promptRate * multiplier * item.completionRate : 
-                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}
+                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}</span>
                         </MotionTag>
                     </div>
                     
                     {item.isVersion2 && (
-                        <div className="audio-price">
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
                             <MotionTag 
                                 color='cyan'
-                                style={{ fontSize: '11px' }}
+                                style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
                                 whileHover={{ scale: 1.05 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                             >
-                                音频输入{renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}
+                                <span style={{ fontWeight: 'bold' }}>音频输入:</span>
+                                <span>{renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}</span>
                             </MotionTag>
                             <MotionTag 
                                 color='geekblue' 
-                                style={{ marginTop: 4, fontSize: '11px' }}
+                                style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
                                 whileHover={{ scale: 1.05 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                             >
-                                音频完成{renderQuota((item.completionRate ? 
+                                <span style={{ fontWeight: 'bold' }}>音频完成:</span>
+                                <span>{renderQuota((item.completionRate ? 
                                     item.audioPromptRate * multiplier * item.audioOutputRate : 
-                                    getCompletionRatio(item.model) * multiplier))}/{tokenUnit}
+                                    getCompletionRatio(item.model) * multiplier))}/{tokenUnit}</span>
                             </MotionTag>
                         </div>
                     )}
@@ -615,11 +798,12 @@ export default function DesktopLayout() {
             return (
                 <MotionTag 
                     color='geekblue'
-                    style={{ fontSize: '11px' }}
+                    style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
-                    每次{renderQuota(item.promptRate, 6)}
+                    <span style={{ fontWeight: 'bold' }}>每次:</span>
+                    <span>{renderQuota(item.promptRate, 6)}</span>
                 </MotionTag>
             );
         }
@@ -645,7 +829,7 @@ export default function DesktopLayout() {
 
     useEffect(() => {
         loadData();
-    }, [input.page, input.pageSize, input.type]);
+    }, [input.page, input.pageSize, input.type, input.modelType]);
     
     useEffect(() => {
         loadTags();
@@ -856,7 +1040,7 @@ export default function DesktopLayout() {
         // Define stats to display
         const stats = [
             { label: '最大上下文', value: item.quotaMax || '-' },
-            { label: '模型版本', value: item.isVersion2 ? '实时版' : '非实时版' },
+            { label: '模型类型', value: item.type },
             { label: '计费方式', value: item.quotaType === 1 ? '按量计费' : '按次计费' },
             { label: '状态', value: item.enable ? '可用' : '不可用' },
         ];
@@ -879,10 +1063,50 @@ export default function DesktopLayout() {
         );
     };
 
+    const getModelTypeIcon = (type: string) => {
+        switch(type?.toLowerCase()) {
+            case MODEL_TYPES.CHAT:
+                return <MessageSquare size={14} color={token.colorPrimary} />;
+            case MODEL_TYPES.IMAGE:
+                return <Image size={14} color={token.colorSuccess} />;
+            case MODEL_TYPES.AUDIO:
+                return <Headphones size={14} color={token.colorWarning} />;
+            case MODEL_TYPES.STT:
+                return <Mic size={14} color={token.colorInfo} />;
+            case MODEL_TYPES.TTS:
+                return <Headphones size={14} color={token.colorWarning} />;
+            case MODEL_TYPES.EMBEDDING:
+                return <Layers size={14} color={token.colorError} />;
+            default:
+                return <FileText size={14} color={token.colorTextSecondary} />;
+        }
+    };
+
+    const getModelTypeColor = (type: string) => {
+        switch(type?.toLowerCase()) {
+            case MODEL_TYPES.CHAT:
+                return 'blue';
+            case MODEL_TYPES.IMAGE:
+                return 'green';
+            case MODEL_TYPES.AUDIO:
+                return 'gold';
+            case MODEL_TYPES.STT:
+                return 'cyan';
+            case MODEL_TYPES.TTS:
+                return 'orange';
+            case MODEL_TYPES.EMBEDDING:
+                return 'magenta';
+            default:
+                return 'default';
+        }
+    };
+
     const renderModelDetailModal = () => {
         if (!selectedModel) return null;
         
         const icon = getIconByName(selectedModel.icon);
+        const modelTypeIcon = getModelTypeIcon(selectedModel.type);
+        const modelTypeColor = getModelTypeColor(selectedModel.type);
         
         return (
             <Modal
@@ -930,6 +1154,13 @@ export default function DesktopLayout() {
                             >
                                 <Copy size={16} color={token.colorTextSecondary} />
                             </MotionDiv>
+                            <MotionTag 
+                                color={modelTypeColor}
+                                style={{ marginLeft: 8 }}
+                                icon={modelTypeIcon}
+                            >
+                                {selectedModel.type}
+                            </MotionTag>
                         </div>
                         <Paragraph className={styles.modelDetailDescription}>
                             {selectedModel.description}
@@ -952,6 +1183,14 @@ export default function DesktopLayout() {
                     <div className={styles.modelDetailSectionTitle}>
                         <Info size={16} color={token.colorTextSecondary} />
                         价格信息 ({isK ? 'K' : 'M'} 单位)
+                        <Switch
+                            checked={isK}
+                            size="small"
+                            style={{ marginLeft: 8 }}
+                            checkedChildren="K"
+                            unCheckedChildren="M"
+                            onChange={setIsK}
+                        />
                     </div>
                     {renderDetailedPriceInfo(selectedModel)}
                 </div>
@@ -969,7 +1208,11 @@ export default function DesktopLayout() {
                         >
                             {Object.entries(selectedModel.capabilities).map(([key, value]: any) => (
                                 <Descriptions.Item key={key} label={key}>
-                                    {value ? '支持' : '不支持'}
+                                    {value ? (
+                                        <Tag color="green">支持</Tag>
+                                    ) : (
+                                        <Tag color="red">不支持</Tag>
+                                    )}
                                 </Descriptions.Item>
                             ))}
                         </Descriptions>
@@ -981,6 +1224,8 @@ export default function DesktopLayout() {
 
     const renderModelCard = (item: any, index: number) => {
         const icon = getIconByName(item.icon);
+        const modelTypeIcon = getModelTypeIcon(item.type);
+        const modelTypeColor = getModelTypeColor(item.type);
         
         return (
             <Col xs={12} sm={8} md={6} lg={6} xl={4} xxl={3} key={item.id}>
@@ -992,8 +1237,28 @@ export default function DesktopLayout() {
                     whileHover={{ y: -8, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
                     size="small"
                     onClick={() => handleModelClick(item)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'pointer', position: 'relative' }}
                 >
+                    <Badge 
+                        className={styles.modelTypeBadge}
+                        count={
+                            <Tooltip title={`模型类型: ${item.type}`}>
+                                <div style={{ 
+                                    backgroundColor: token.colorBgContainer,
+                                    borderRadius: '50%',
+                                    width: 28, 
+                                    height: 28,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: token.boxShadowSecondary
+                                }}>
+                                    {modelTypeIcon}
+                                </div>
+                            </Tooltip>
+                        }
+                    />
+                    
                     <div className={styles.modelCardMeta}>
                         <motion.div 
                             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -1028,11 +1293,12 @@ export default function DesktopLayout() {
                             {item.enable ? '可用' : '不可用'}
                         </MotionTag>
                         <MotionTag 
-                            color={item.isVersion2 ? 'green' : 'default'}
+                            color={modelTypeColor}
                             whileHover={{ scale: 1.05 }}
                             style={{ fontSize: '11px' }}
+                            icon={modelTypeIcon}
                         >
-                            {item.isVersion2 ? '实时' : '非实时'}
+                            {item.type}
                         </MotionTag>
                         <MotionTag 
                             color={item.quotaType === 1 ? 'blue' : 'orange'}
@@ -1064,14 +1330,16 @@ export default function DesktopLayout() {
                         </div>
                     )}
 
-                    <div className={styles.modelPriceSection}>
-                        {renderPriceInfo(item)}
-                    </div>
+                    <div style={{ marginTop: 'auto' }}>
+                        <div className={styles.modelPriceSection}>
+                            {renderPriceInfo(item)}
+                        </div>
 
-                    <div className={styles.modelStats}>
-                        <div className={styles.modelStat}>
-                            <div className={styles.modelStatValue}>{item.quotaMax || '-'}</div>
-                            <div className={styles.modelStatLabel}>最大上下文</div>
+                        <div className={styles.modelStats}>
+                            <div className={styles.modelStat}>
+                                <div className={styles.modelStatValue}>{item.quotaMax || '-'}</div>
+                                <div className={styles.modelStatLabel}>最大上下文</div>
+                            </div>
                         </div>
                     </div>
                 </MotionCard>
@@ -1147,6 +1415,393 @@ export default function DesktopLayout() {
         </MotionDiv>
     );
 
+    // Render model type summary
+    const renderModelTypeSummary = () => {
+        if (!modelInfo.modelTypeCounts || modelInfo.modelTypeCounts.length === 0) return null;
+        
+        return (
+            <MotionDiv 
+                className={styles.modelTypeSummary}
+                variants={itemVariants}
+            >
+                {modelInfo.modelTypeCounts.map((item: any, index: number) => {
+                    const type = item.type;
+                    const count = item.count;
+                    const typeIcon = getModelTypeIcon(type);
+                    const typeColor = getModelTypeColor(type);
+                    
+                    // Safely determine background color
+                    let bgColor = token.colorBgContainer;
+                    if (typeColor !== 'default') {
+                        switch(typeColor) {
+                            case 'blue':
+                                bgColor = token.colorPrimaryBg;
+                                break;
+                            case 'green':
+                                bgColor = token.colorSuccessBg;
+                                break;
+                            case 'gold':
+                            case 'orange':
+                                bgColor = token.colorWarningBg;
+                                break;
+                            case 'cyan':
+                                bgColor = token.colorInfoBg;
+                                break;
+                            case 'magenta':
+                                bgColor = token.colorErrorBg;
+                                break;
+                            default:
+                                bgColor = token.colorBgContainer;
+                        }
+                    }
+                    
+                    return (
+                        <MotionDiv
+                            key={type}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            onClick={() => handleModelTypeSelect(type)}
+                            style={{
+                                cursor: 'pointer',
+                                padding: '12px 16px',
+                                borderRadius: token.borderRadiusSM + 'px',
+                                backgroundColor: selectedModelType === type ? token.colorPrimaryBg : token.colorBgElevated,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '8px',
+                                minWidth: '100px',
+                                boxShadow: selectedModelType === type ? `0 6px 16px ${token.colorPrimaryBgHover}` : token.boxShadowSecondary,
+                                transition: 'all 0.3s',
+                                border: `1px solid ${selectedModelType === type ? token.colorPrimaryBorder : 'transparent'}`
+                            }}
+                        >
+                            <div style={{ 
+                                width: 40, 
+                                height: 40, 
+                                borderRadius: '50%', 
+                                backgroundColor: bgColor,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: token.boxShadowSecondary
+                            }}>
+                                {typeIcon}
+                            </div>
+                            <div style={{ 
+                                fontWeight: 500, 
+                                textTransform: 'capitalize',
+                                color: selectedModelType === type ? token.colorPrimaryText : token.colorText
+                            }}>
+                                {type}
+                            </div>
+                            <Badge 
+                                count={count} 
+                                overflowCount={999} 
+                                style={{ 
+                                    backgroundColor: selectedModelType === type ? token.colorPrimary : token.colorTextSecondary
+                                }} 
+                            />
+                        </MotionDiv>
+                    );
+                })}
+            </MotionDiv>
+        );
+    };
+
+    // Rendering the provider filter section
+    const renderProviderFilter = () => (
+        <MotionDiv 
+            className={styles.iconFilter}
+            variants={itemVariants}
+        >
+            {Object.entries(provider).map(([key, value]: any, index: number) => {
+                const providerCount = data.filter(item => item.provider === key).length;
+                
+                return (
+                    <MotionDiv
+                        key={key}
+                        className={`${styles.iconItem} ${input.type === key ? 'selected' : ''}`}
+                        onClick={() => handleProviderFilter(key)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ 
+                            delay: index * 0.05,
+                            type: "spring", 
+                            stiffness: 300, 
+                            damping: 24 
+                        }}
+                    >
+                        <Flexbox horizontal gap={8}>
+                            {getIconByName(key, 24)?.icon ?? <IconAvatar size={24} Icon={OpenAI} />}
+                            <Flexbox gap={4}>
+                                <span className="provider-name" style={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 1,
+                                    WebkitBoxOrient: 'vertical',
+                                    maxWidth: 120,
+                                    color: input.type === key ? token.colorTextLightSolid : token.colorText
+                                }}>
+                                    {value || '其他'}
+                                </span>
+                                <Badge count={providerCount} size="small" style={{ backgroundColor: input.type === key ? token.colorTextLightSolid : token.colorPrimary }} />
+                            </Flexbox>
+                        </Flexbox>
+                    </MotionDiv>
+                );
+            })}
+        </MotionDiv>
+    );
+    
+    // Rendering the model type filter
+    const renderModelTypeFilter = () => (
+        <MotionDiv 
+            className={styles.modelTypeFilter}
+            variants={itemVariants}
+        >
+            {modelTypes.map((type, index) => {
+                const typeIcon = getModelTypeIcon(type);
+                const typeColor = getModelTypeColor(type);
+                // Use modelInfo.modelTypeCounts to get the count
+                const typeData = modelInfo.modelTypeCounts?.find((item: any) => item.type === type.toLowerCase());
+                const count = typeData ? typeData.count : modelCountByType[type] || 0;
+                
+                // Map color names to corresponding background colors
+                const getBgColorByType = (colorName: string): string => {
+                    switch(colorName) {
+                        case 'blue': return token.colorPrimaryBg;
+                        case 'green': return token.colorSuccessBg;
+                        case 'gold': return token.colorWarningBg;
+                        case 'cyan': return token.colorInfoBg;
+                        case 'orange': return token.colorWarningBg;
+                        case 'magenta': return token.colorErrorBg;
+                        default: return token.colorBgContainer;
+                    }
+                };
+                
+                return (
+                    <MotionDiv
+                        key={type}
+                        className={`${styles.modelTypeFilterItem} ${selectedModelType === type ? 'selected' : ''}`}
+                        onClick={() => handleModelTypeSelect(type)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ 
+                            delay: index * 0.05,
+                            type: "spring", 
+                            stiffness: 300, 
+                            damping: 24 
+                        }}
+                    >
+                        <div style={{ 
+                            width: 24, 
+                            height: 24, 
+                            borderRadius: '50%', 
+                            backgroundColor: getBgColorByType(typeColor),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            {typeIcon}
+                        </div>
+                        <span>{type}</span>
+                        <Badge count={count} size="small" style={{ backgroundColor: selectedModelType === type ? token.colorPrimary : token.colorTextSecondary }} />
+                    </MotionDiv>
+                );
+            })}
+        </MotionDiv>
+    );
+    
+    // Render a grid view of model cards
+    const renderModelGrid = () => (
+        <div className={styles.modelGridView}>
+            {filteredData.map((item, index) => (
+                <MotionCard
+                    key={item.id}
+                    className={styles.modelCard}
+                    loading={loading}
+                    custom={index}
+                    variants={cardVariants}
+                    whileHover={{ y: -8, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
+                    size="small"
+                    onClick={() => handleModelClick(item)}
+                    style={{ cursor: 'pointer', position: 'relative' }}
+                >
+                    <Badge 
+                        className={styles.modelTypeBadge}
+                        count={
+                            <Tooltip title={`模型类型: ${item.type}`}>
+                                <div style={{ 
+                                    backgroundColor: token.colorBgContainer,
+                                    borderRadius: '50%',
+                                    width: 28, 
+                                    height: 28,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: token.boxShadowSecondary
+                                }}>
+                                    {getModelTypeIcon(item.type)}
+                                </div>
+                            </Tooltip>
+                        }
+                    />
+                    
+                    <div className={styles.modelCardHeader}>
+                        <div className={styles.modelCardMeta}>
+                            <motion.div 
+                                whileHover={{ scale: 1.1, rotate: 5 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                style={{ marginRight: 8 }}
+                            >
+                                {getIconByName(item.icon)?.icon ?? <IconAvatar size={28} Icon={OpenAI} />}
+                            </motion.div>
+                            <div 
+                                className={styles.modelName}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyModelName(item.model);
+                                }}
+                            >
+                                {item.model}
+                            </div>
+                        </div>
+                        
+                        <MotionTag 
+                            color={item.enable ? 'green' : 'red'}
+                            whileHover={{ scale: 1.05 }}
+                            style={{ fontSize: '11px' }}
+                        >
+                            {item.enable ? '可用' : '不可用'}
+                        </MotionTag>
+                    </div>
+
+                    <div className={styles.modelCardContent}>
+                        <div className={styles.modelCardSection}>
+                            <Tooltip title={item.description}>
+                                <div className={styles.modelDescription}>
+                                    {item.description}
+                                </div>
+                            </Tooltip>
+                        </div>
+
+                        <div className={styles.modelCardSection}>
+                            <div className={styles.modelTags}>
+                                <MotionTag 
+                                    color={getModelTypeColor(item.type)}
+                                    whileHover={{ scale: 1.05 }}
+                                    style={{ fontSize: '11px' }}
+                                    icon={getModelTypeIcon(item.type)}
+                                >
+                                    {item.type}
+                                </MotionTag>
+                                <MotionTag 
+                                    color={item.quotaType === 1 ? 'blue' : 'orange'}
+                                    whileHover={{ scale: 1.05 }}
+                                    style={{ fontSize: '11px' }}
+                                >
+                                    {item.quotaType === 1 ? '按量' : '按次'}
+                                </MotionTag>
+                            </div>
+                        </div>
+
+                        {item.tags && item.tags.length > 0 && (
+                            <div className={styles.modelCardSection}>
+                                <div className={styles.modelTags}>
+                                    {item.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                        <MotionTag 
+                                            key={tag} 
+                                            color='blue'
+                                            style={{ fontSize: '11px' }}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.05 }}
+                                            whileHover={{ scale: 1.05 }}
+                                        >
+                                            {tag}
+                                        </MotionTag>
+                                    ))}
+                                    {item.tags.length > 2 && (
+                                        <MotionTag color="default" style={{ fontSize: '11px' }}>+{item.tags.length - 2}</MotionTag>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className={styles.modelCardFooter}>
+                        <div className={styles.modelPriceSection}>
+                            {renderPriceInfo(item)}
+                        </div>
+
+                        <div className={styles.modelStats}>
+                            <div className={styles.modelStat}>
+                                <div className={styles.modelStatValue}>{item.quotaMax || '-'}</div>
+                                <div className={styles.modelStatLabel}>最大上下文</div>
+                            </div>
+                        </div>
+                    </div>
+                </MotionCard>
+            ))}
+        </div>
+    );
+
+    // Render results summary with view toggle
+    const renderResultSummary = () => {
+        const modelTypeName = input.modelType ? 
+            modelInfo.modelTypeCounts?.find((item: any) => 
+                item.type.toLowerCase() === input.modelType.toLowerCase()
+            )?.name || input.modelType : '';
+            
+        return (
+            <div className={styles.resultSummary}>
+                <div>
+                    共找到 <Typography.Text strong>{filteredData.length}</Typography.Text> 个结果
+                    {input.modelType && (
+                        <>, 模型类型: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{modelTypeName}</Typography.Text></>
+                    )}
+                    {input.type && (
+                        <>, 提供商: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{provider[input.type] || input.type}</Typography.Text></>
+                    )}
+                </div>
+                
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    {(input.modelType || input.type || input.tags.length > 0) && (
+                        <Button 
+                            size="small" 
+                            onClick={() => {
+                                setSelectedModelType('');
+                                setInput({...input, type: '', tags: [], modelType: ''});
+                            }}
+                        >
+                            清除筛选
+                        </Button>
+                    )}
+                    
+                    <div className={styles.viewToggle}>
+                        <span>视图:</span>
+                        <Switch
+                            checked={isGridView}
+                            size="small"
+                            onChange={(checked) => setIsGridView(checked)}
+                            checkedChildren="卡片"
+                            unCheckedChildren="列表"
+                        />
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <MotionDiv 
             className={styles.modelContainer}
@@ -1162,45 +1817,13 @@ export default function DesktopLayout() {
             
             {renderSearchSection()}
             
-            {hasProviders && (
-                <MotionDiv 
-                    className={styles.iconFilter}
-                    variants={itemVariants}
-                >
-                    {Object.entries(provider).map(([key, value]: any, index: number) => (
-                        <MotionDiv
-                            key={key}
-                            className={`${styles.iconItem} ${input.type === key ? 'selected' : ''}`}
-                            onClick={() => handleProviderFilter(key)}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ 
-                                delay: index * 0.05,
-                                type: "spring", 
-                                stiffness: 300, 
-                                damping: 24 
-                            }}
-                        >
-                            <Flexbox horizontal gap={8}>
-                                {getIconByName(key, 24)?.icon ?? <IconAvatar size={24} Icon={OpenAI} />}
-                                <span className="provider-name" style={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 1,
-                                    WebkitBoxOrient: 'vertical',
-                                    maxWidth: 120,
-                                    color: input.type === key ? token.colorTextLightSolid : token.colorText
-                                }}>
-                                    {value || '其他'}
-                                </span>
-                            </Flexbox>
-                        </MotionDiv>
-                    ))}
-                </MotionDiv>
-            )}
+            {modelInfo.modelTypeCounts && modelInfo.modelTypeCounts.length > 0 && renderModelTypeSummary()}
+            
+            {hasProviders && renderProviderFilter()}
+            
+            {renderModelTypeFilter()}
+            
+            {renderResultSummary()}
             
             <MotionDiv 
                 className={styles.modelsContainer}
@@ -1209,13 +1832,15 @@ export default function DesktopLayout() {
                 {loading && <Empty description="加载中..." image={Empty.PRESENTED_IMAGE_SIMPLE} />}
                 
                 {!loading && filteredData.length === 0 && (
-                    <Empty description="暂无数据" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                    <Empty description="没有符合条件的模型" image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 )}
                 
                 {!loading && filteredData.length > 0 && (
-                    <Row gutter={[12, 12]}>
-                        {filteredData.map((item, index) => renderModelCard(item, index))}
-                    </Row>
+                    isGridView ? renderModelGrid() : (
+                        <Row gutter={[12, 12]}>
+                            {filteredData.map((item, index) => renderModelCard(item, index))}
+                        </Row>
+                    )
                 )}
                 
                 {total > 0 && (

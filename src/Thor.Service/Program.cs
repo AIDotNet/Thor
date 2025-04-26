@@ -481,6 +481,10 @@ try
         .WithDescription("获取所有模型提供商")
         .WithOpenApi();
 
+    model.MapGet("/info", async (HttpContext context) => { return await ModelService.GetModelInfoAsync(context); })
+        .WithDescription("获取模型信息")
+        .WithOpenApi();
+
     #endregion
 
     #region Logger

@@ -1,5 +1,4 @@
 import React from 'react';
-import PwaInstall from '../PwaInstall';
 import OfflineIndicator from '../OfflineIndicator';
 
 /**
@@ -7,7 +6,7 @@ import OfflineIndicator from '../OfflineIndicator';
  * 
  * Wraps the application with PWA-related components
  * - Offline indicator
- * - PWA installation prompt
+ * - No longer shows auto PWA installation prompt (now available in settings)
  */
 const PwaWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -17,9 +16,6 @@ const PwaWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       
       {/* Main application content */}
       {children}
-      
-      {/* PWA install prompt (only shown when eligible) */}
-      <PwaInstall />
     </>
   );
 };

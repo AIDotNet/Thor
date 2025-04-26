@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button, Card, Collapse, Form, Input, notification } from 'antd';
 import { OtherSetting, UpdateSetting } from '../../../services/SettingService';
+import { useTranslation } from 'react-i18next';
 
 interface OtherSettingsProps {
     settings: any[];
@@ -12,6 +13,7 @@ export default function OtherSettings({
     setSettings
 }: OtherSettingsProps) {
     const [input, setInput] = useState<any>([]);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const initialValues = settings.reduce((acc, setting) => {
@@ -26,11 +28,11 @@ export default function OtherSettings({
             .then((res) => {
                 if (res.success) {
                     notification.success({
-                        message: '修改成功',
+                        message: t('settingPage.general.saveSuccess'),
                     });
                 } else {
                     notification.error({
-                        message: '修改失败',
+                        message: t('settingPage.general.saveFailed'),
                     });
                 }
             });
@@ -50,17 +52,16 @@ export default function OtherSettings({
     };
     return (
         <Card
-            title="通用设置"
+            title={t('settingPage.general.title')}
             style={{ maxWidth: '100%' }}
         >
-            <Form
-            >
+            <Form>
                 <Collapse>
                     <Collapse.Panel
-                        header="站点设置"
+                        header={t('settingPage.other.siteSettings')}
                         key="1">
                         <Form.Item
-                            label="网站标题"
+                            label={t('settingPage.other.webTitle')}
                             rules={[{ required: true, message: '请输入网站标题' }]}
                         >
                             <Input
@@ -71,7 +72,7 @@ export default function OtherSettings({
                             />
                         </Form.Item>
                         <Form.Item
-                            label="网站Logo地址"
+                            label={t('settingPage.other.webLogo')}
                             rules={[{ required: true, message: '请输入网站Logo地址' }]}
                         >
                             <Input
@@ -82,7 +83,7 @@ export default function OtherSettings({
                             />
                         </Form.Item>
                         <Form.Item
-                            label="首页内容"
+                            label={t('settingPage.other.indexContent')}
                             rules={[{ required: true, message: '请输入首页内容' }]}
                         >
                             <Input.TextArea
@@ -92,7 +93,7 @@ export default function OtherSettings({
                                 }}
                             />
                         </Form.Item>
-                        <Button block type="primary" onClick={()=>handleSubmit()}>保存设置</Button>
+                        <Button block type="primary" onClick={()=>handleSubmit()}>{t('settingPage.general.save')}</Button>
                     </Collapse.Panel>
                 </Collapse>
             </Form>

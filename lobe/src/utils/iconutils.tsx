@@ -22,6 +22,10 @@ import {
     Gemini,
     Ollama,
     SiliconCloud,
+    Gemma,
+    AssemblyAI,
+    Doubao,
+    Stability
 } from '@lobehub/icons';
 
 export function getIconByNames(size: number = 24) {
@@ -50,6 +54,10 @@ export function getIconByNames(size: number = 24) {
         "Yi",
         "Zhipu",
         "Wenxin",
+        "Gemma",
+        "AssemblyAI",
+        "Doubao",
+        "Stability"
     ]
 
     return models.map((name) => {
@@ -177,6 +185,26 @@ export function getIconByName(name: string, size: number = 36) {
             return {
                 icon: <IconAvatar Icon={Zhipu} size={size} />,
                 label: 'Zhipu'
+            };
+        case 'Gemma':
+            return {
+                icon: <IconAvatar Icon={Gemma} size={size} />,
+                label: 'Gemma'
+            };
+        case 'AssemblyAI':
+            return {
+                icon: <IconAvatar Icon={AssemblyAI} size={size} />,
+                label: 'AssemblyAI'
+            };
+        case 'Doubao':
+            return {
+                icon: <IconAvatar Icon={Doubao} size={size} />,
+                label: 'Doubao'
+            };
+        case 'Stability':
+            return {
+                icon: <IconAvatar Icon={Stability} size={size} />,
+                label: 'Stability'
             };
         default:
             return {

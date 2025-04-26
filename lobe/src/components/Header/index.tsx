@@ -2,10 +2,14 @@ import { Header, Logo, TabsNav, ThemeSwitch } from "@lobehub/ui";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useThemeStore from '../../store/theme';
+import PwaInstall from '../PwaInstall';
+import { Space } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 export default function ThorHeader() {
     const navigate = useNavigate();
     const { themeMode, toggleTheme } = useThemeStore();
+    const { t } = useTranslation();
 
     const [key, setKey] = useState(window.location.pathname.split('/')[1] || 'welcome');
     
@@ -61,8 +65,23 @@ export default function ThorHeader() {
             }
         >
             <header>
-            <ThemeSwitch onThemeSwitch={(model) => toggleTheme(model)}
-              themeMode={themeMode} />
+                <Space size={8}>
+                    <PwaInstall 
+                        buttonMode={true}
+                        buttonText={t('common.installApp')}
+                        buttonType='text'
+                        buttonSize='middle'
+                        buttonStyle={{ 
+                            display: 'flex',
+                            alignItems: 'center'
+                        }}
+                        logoUrl='/logo.png'
+                    />
+                    <ThemeSwitch 
+                        onThemeSwitch={(model) => toggleTheme(model)}
+                        themeMode={themeMode} 
+                    />
+                </Space>
             </header>
         </Header>
     )

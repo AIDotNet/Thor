@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Card, Collapse, Divider, Form, Input, Switch, notification } from 'antd';
 import { SystemSetting, UpdateSetting } from '../../../services/SettingService';
+import { useTranslation } from 'react-i18next';
 
 interface SystemSetupProps {
     settings: any[];
@@ -12,6 +13,7 @@ export default function SystemSetup({
     setSettings
 }: SystemSetupProps) {
     const [input, setInput] = useState<any>([]);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const initialValues = settings.reduce((acc, setting) => {
@@ -25,9 +27,9 @@ export default function SystemSetup({
         UpdateSetting(settings)
             .then((res) => {
                 res.success ? notification.success({
-                    message: '修改成功',
+                    message: t('settingPage.general.saveSuccess'),
                 }) : notification.error({
-                    message: '修改失败',
+                    message: t('settingPage.general.saveFailed'),
                 });
             });
     }
@@ -47,30 +49,30 @@ export default function SystemSetup({
 
     return (
         <Card
-            title='通用设置'
+            title={t('settingPage.general.title')}
             style={{ maxWidth: '100%' }}
         >
             <Form
                 initialValues={input}
             >
                 <Collapse>
-                    <Collapse.Panel key='1' header='通用设置'>
+                    <Collapse.Panel key='1' header={t('settingPage.general.title')}>
                         <Form.Item
-                            label='服务器地址'
+                            label={t('settingPage.system.serverAddress')}
                             rules={[{ required: true, message: '服务器地址不能为空' }]}
                         >
                             <Input
                                 value={input[SystemSetting.ServerAddress]}
                                 onChange={(e) => handleInputChange(SystemSetting.ServerAddress, e.target.value)}
-                                placeholder='请输入服务器地址'
+                                placeholder={t('settingPage.system.serverAddress')}
                             />
                         </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
                 <Collapse>
-                    <Collapse.Panel key='2' header='账号设置'>
+                    <Collapse.Panel key='2' header={t('settingPage.system.accountSettings')}>
                         <Form.Item
-                            label='启用账号注册'
+                            label={t('settingPage.system.enableRegister')}
                             valuePropName="checked"
                         >
                             <Switch
@@ -78,9 +80,9 @@ export default function SystemSetup({
                                 onChange={(checked) => handleInputChange(SystemSetting.EnableRegister, checked ? 'true' : 'false')}
                             />
                         </Form.Item>
-                        <Divider>如果允许Github登录，请填写以下信息</Divider>
+                        <Divider>{t('settingPage.system.gitHubSettings')}</Divider>
                         <Form.Item
-                            label='允许Github登录'
+                            label={t('settingPage.system.enableGithubLogin')}
                             valuePropName="checked"
                         >
                             <Switch
@@ -89,26 +91,26 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
-                            label='Github Client Id'
+                            label={t('settingPage.system.githubClientId')}
                         >
                             <Input
                                 value={input[SystemSetting.GithubClientId]}
                                 onChange={(e) => handleInputChange(SystemSetting.GithubClientId, e.target.value)}
-                                placeholder='请输入Github Client Id'
+                                placeholder={t('settingPage.system.githubClientId')}
                             />
                         </Form.Item>
                         <Form.Item
-                            label='Github Client Secret'
+                            label={t('settingPage.system.githubClientSecret')}
                         >
                             <Input
                                 value={input[SystemSetting.GithubClientSecret]}
                                 onChange={(e) => handleInputChange(SystemSetting.GithubClientSecret, e.target.value)}
-                                placeholder='请输入Github Client Secret'
+                                placeholder={t('settingPage.system.githubClientSecret')}
                             />
                         </Form.Item>
-                        <Divider>如果允许Gitee登录，请填写以下信息</Divider>
+                        <Divider>{t('settingPage.system.giteeSettings')}</Divider>
                         <Form.Item
-                            label='允许Gitee登录'
+                            label={t('settingPage.system.enableGiteeLogin')}
                             valuePropName="checked"
                         >
                             <Switch
@@ -117,26 +119,26 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
-                            label='Gitee Client Id'
+                            label={t('settingPage.system.giteeClientId')}
                         >
                             <Input
                                 value={input[SystemSetting.GiteeClientId]}
                                 onChange={(e) => handleInputChange(SystemSetting.GiteeClientId, e.target.value)}
-                                placeholder='请输入Gitee Client Id'
+                                placeholder={t('settingPage.system.giteeClientId')}
                             />
                         </Form.Item>
                         <Form.Item
-                            label='Gitee Client Secret'
+                            label={t('settingPage.system.giteeClientSecret')}
                         >
                             <Input
                                 value={input[SystemSetting.GiteeClientSecret]}
                                 onChange={(e) => handleInputChange(SystemSetting.GiteeClientSecret, e.target.value)}
-                                placeholder='请输入Gitee Client Secret'
+                                placeholder={t('settingPage.system.giteeClientSecret')}
                             />
                         </Form.Item>
-                        <Divider>如果启用邮箱注册验证，请填写以下信息</Divider>
+                        <Divider>{t('settingPage.system.emailSettings')}</Divider>
                         <Form.Item
-                            label='是否启用邮箱注册验证'
+                            label={t('settingPage.system.enableEmailRegister')}
                             valuePropName="checked"
                         >
                             <Switch
@@ -145,37 +147,37 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
-                            label='发送邮箱'
+                            label={t('settingPage.system.emailAddress')}
                         >
                             <Input
                                 value={input[SystemSetting.EmailAddress]}
                                 onChange={(e) => handleInputChange(SystemSetting.EmailAddress, e.target.value)}
-                                placeholder='请输入发送邮箱'
+                                placeholder={t('settingPage.system.emailAddress')}
                             />
                         </Form.Item>
                         <Form.Item
-                            label='发送邮箱密码'
+                            label={t('settingPage.system.emailPassword')}
                         >
                             <Input
                                 value={input[SystemSetting.EmailPassword]}
                                 onChange={(e) => handleInputChange(SystemSetting.EmailPassword, e.target.value)}
-                                placeholder='请输入发送邮箱密码'
+                                placeholder={t('settingPage.system.emailPassword')}
                             />
                         </Form.Item>
                         <Form.Item
-                            label='SMTP地址'
+                            label={t('settingPage.system.smtpAddress')}
                         >
                             <Input
                                 value={input[SystemSetting.SmtpAddress]}
                                 onChange={(e) => handleInputChange(SystemSetting.SmtpAddress, e.target.value)}
-                                placeholder='SMTP地址'
+                                placeholder={t('settingPage.system.smtpAddress')}
                             />
                         </Form.Item>
 
-                        <Divider>如果启用Casdoor授权，请填写以下信息</Divider>
+                        <Divider>{t('settingPage.system.casdoorSettings')}</Divider>
                         
                         <Form.Item
-                            label='是否启用Casdoor授权'
+                            label={t('settingPage.system.enableCasdoorAuth')}
                             valuePropName="checked"
                         >
                             <Switch
@@ -184,30 +186,30 @@ export default function SystemSetup({
                             />
                         </Form.Item>
                         <Form.Item
-                            label='Casdoor 自定义端点'
+                            label={t('settingPage.system.casdoorEndpoint')}
                         >
                             <Input
                                 value={input[SystemSetting.CasdoorEndipoint]}
                                 onChange={(e) => handleInputChange(SystemSetting.CasdoorEndipoint, e.target.value)}
-                                placeholder='请输入Casdoor 自定义端点'
+                                placeholder={t('settingPage.system.casdoorEndpoint')}
                             />
                         </Form.Item>
                         <Form.Item
-                            label='Casdoor Client Id'
+                            label={t('settingPage.system.casdoorClientId')}
                         >
                             <Input
                                 value={input[SystemSetting.CasdoorClientId]}
                                 onChange={(e) => handleInputChange(SystemSetting.CasdoorClientId, e.target.value)}
-                                placeholder='请输入Casdoor Client Id'
+                                placeholder={t('settingPage.system.casdoorClientId')}
                             />
                         </Form.Item>
                         <Form.Item
-                            label='Casdoor Client Secret'
+                            label={t('settingPage.system.casdoorClientSecret')}
                         >
                             <Input
                                 value={input[SystemSetting.CasdoorClientSecret]}
                                 onChange={(e) => handleInputChange(SystemSetting.CasdoorClientSecret, e.target.value)}
-                                placeholder='Casdoor Client Secret'
+                                placeholder={t('settingPage.system.casdoorClientSecret')}
                             />
                         </Form.Item>
                     </Collapse.Panel>
@@ -215,7 +217,7 @@ export default function SystemSetup({
                 <Form.Item>
                     <Button type="primary" onClick={()=>{
                         handleSubmit()
-                    }} block>保存设置</Button>
+                    }} block>{t('settingPage.general.save')}</Button>
                 </Form.Item>
             </Form>
         </Card>
