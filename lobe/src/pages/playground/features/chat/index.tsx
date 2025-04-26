@@ -113,30 +113,22 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                 
                 // Fetch models from OpenAI API
                 const response = await openai.models.list();
-                console.log('OpenAI models response:', response);
                 
                 // Check if response follows the expected structure
                 if (response && Array.isArray(response.data)) {
                     // Extract model IDs from the response
                     const availableModels = response.data.map(model => model.id);
-                    console.log('Available models from OpenAI:', availableModels);
-                    
                     // Filter models based on modelInfo
                     let filteredModels: string[] = [];
-                    debugger
                     if (modelInfo && modelInfo.modelTypes) {
                         // Find the chat type models from modelInfo
                         const chatTypeInfo = modelInfo.modelTypes.find((type: any) => type.type === 'chat');
                         
                         if (chatTypeInfo && chatTypeInfo.models) {
-                            console.log('Chat models from modelInfo:', chatTypeInfo.models);
-                            
                             // Filter models that exist in both the API response and modelInfo
                             filteredModels = chatTypeInfo.models.filter((model: string) => 
                                 availableModels.includes(model)
                             );
-                            
-                            console.log('Filtered models (intersection):', filteredModels);
                         }
                     }
                     
@@ -148,7 +140,6 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                         message.info('没有可用的聊天模型');
                     }
                 } else {
-                    console.error('Unexpected OpenAI API response structure:', response);
                     message.error('OpenAI API返回了意外的响应结构');
                     throw new Error('Unexpected OpenAI API response structure');
                 }
@@ -157,13 +148,8 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                 console.error('Error details:', apiError.message, apiError.status, apiError.headers);
                 message.error(`获取OpenAI模型列表失败: ${apiError.message || '未知错误'}`);
                 
-                // Fallback to regular model fetch if OpenAI API fails
-                console.log('Falling back to getModels API');
-                
                 try {
                     const res = await getModels();
-                    console.log('Fallback getModels response:', res);
-                    
                     if (res && res.data) {
                         // Filter for chat models based on modelInfo
                         let chatModels: string[] = [];
@@ -187,7 +173,6 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                             );
                         }
                         
-                        console.log('Filtered fallback models:', chatModels);
                         setModelOptions(chatModels);
                         if (chatModels.length > 0) {
                             setSelectedModel(chatModels[0]);
