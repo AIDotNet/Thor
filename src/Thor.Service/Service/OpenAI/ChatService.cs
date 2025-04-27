@@ -677,7 +677,7 @@ public sealed class ChatService(
             request.MaxCompletionTokens = null;
         }
 
-        if (request.Model == "o3-mini")
+        if (request.Model is "o3-mini" or "o4-mini")
         {
             request.MaxCompletionTokens = request.MaxTokens;
             request.MaxTokens = null;
