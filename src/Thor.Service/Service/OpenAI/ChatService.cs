@@ -438,6 +438,9 @@ public sealed class ChatService(
                 organizationId = organizationIdHeader.ToString();
             }
 
+            logger.LogInformation("请求参数：{query}", input);
+
+
             if (ModelManagerService.PromptRate.TryGetValue(input.Model, out var rate))
             {
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
