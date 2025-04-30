@@ -10,7 +10,7 @@ FROM node:20.18-alpine3.21 as lobe
 WORKDIR /src
 COPY lobe .
 RUN yarn
-RUN npm i
+RUN npm i  --force
 RUN yarn run build
 
 
