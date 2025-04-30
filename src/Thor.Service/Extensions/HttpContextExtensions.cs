@@ -172,6 +172,20 @@ public static class HttpContextExtensions
         await context.Response.WriteAsJsonAsync(error);
     }
 
+    public static async ValueTask WriteOpenAIErrorAsync(this HttpContext context, string message, string code = "500")
+    {
+        var error = new ThorChatCompletionsResponse
+        {
+            Error = new ThorError()
+            {
+                Type = "error",
+                Code = "openai_error " + code,
+            }
+        };
+
+        await context.Response.WriteAsJsonAsync(error);
+    }
+
 
     public static async ValueTask WriteErrorAsync(this HttpContext context, string message, string code)
     {

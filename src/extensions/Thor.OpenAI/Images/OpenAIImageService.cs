@@ -11,14 +11,16 @@ namespace Thor.OpenAI.Images;
 
 public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorImageService
 {
-    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate, ThorPlatformOptions? options = null,
+    public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate,
+        ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
             options.Address?.TrimEnd('/') + "/v1/images/generations",
             imageCreate, options.ApiKey);
 
-        var result = await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
+        var result =
+            await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
 
         return result;
     }
@@ -68,12 +70,12 @@ public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorIma
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, options.Address.TrimEnd('/') + "/v1/images/edits");
 
         requestMessage.Content = multipartContent.HttpContent;
-        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer",options.ApiKey);
-        
-        var response =await client.SendAsync(requestMessage, cancellationToken);
+
+        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", options.ApiKey);
+
+        var response = await client.SendAsync(requestMessage, cancellationToken);
 
         return await response.Content.ReadFromJsonAsync<ImageCreateResponse>();
-
     }
 
     public async Task<ImageCreateResponse> CreateImageVariation(ImageVariationCreateRequest imageEditCreateRequest,

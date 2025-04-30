@@ -53,10 +53,9 @@ public static class HttpClientFactory
                     PooledConnectionLifetime = TimeSpan.FromMinutes(30),
                     PooledConnectionIdleTimeout = TimeSpan.FromMinutes(30),
                     EnableMultipleHttp2Connections = true,
-                    ConnectTimeout = TimeSpan.FromMinutes(30),
-                    KeepAlivePingTimeout = TimeSpan.FromMinutes(30),
-                    ResponseDrainTimeout = TimeSpan.FromMinutes(30),
-                    MaxAutomaticRedirections = 2,
+                    ConnectTimeout = TimeSpan.FromSeconds(120000),
+                    MaxAutomaticRedirections = 3,
+                    AllowAutoRedirect = true,
                     Expect100ContinueTimeout = TimeSpan.FromMinutes(30),
                 })
                 {
