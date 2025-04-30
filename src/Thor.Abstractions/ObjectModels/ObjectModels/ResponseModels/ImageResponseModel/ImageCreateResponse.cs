@@ -8,6 +8,9 @@ public record ImageCreateResponse : ThorBaseResponse, IOpenAiModels.ICreatedAt
 {
     [JsonPropertyName("data")] public List<ImageDataResult> Results { get; set; }
 
+    [JsonPropertyName("usage")] public ThorUsageResponse Usage { get; set; } = new();
+    
+
 
     public record ImageDataResult
     {

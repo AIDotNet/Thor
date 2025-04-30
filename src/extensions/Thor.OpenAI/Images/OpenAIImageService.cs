@@ -9,13 +9,14 @@ using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels.ImageResponseMo
 
 namespace Thor.OpenAI.Images;
 
-public class OpenAIImageService(IHttpClientFactory httpClientFactory) : IThorImageService
+public class OpenAIImageService : IThorImageService
 {
     public async Task<ImageCreateResponse> CreateImage(ImageCreateRequest imageCreate,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
+        var client = HttpClientFactory.GetHttpClient(options.Address?.TrimEnd('/') + "/v1/images/generations");
+        var response = await client.PostJsonAsync(
             options.Address?.TrimEnd('/') + "/v1/images/generations",
             imageCreate, options.ApiKey);
 

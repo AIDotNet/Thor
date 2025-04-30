@@ -31,4 +31,16 @@ public record ImageEditCreateRequest : SharedImageRequestBaseModel
     /// </summary>
     [JsonPropertyName("prompt")]
     public string Prompt { get; set; }
+    
+    [JsonPropertyName("background")]
+    public string? Background { get; set; }
+    
+    [JsonPropertyName("moderation")]
+    public string? Moderation { get; set; }
+    
+    [JsonPropertyName("output_compression")]
+    public string? output_compression { get; set; }
+    
+    [JsonPropertyName("style")]
+    public string? style { get; set; }
 }

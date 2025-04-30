@@ -20,7 +20,6 @@
     "@lobehub/charts": "^2.0.0",
     "@lobehub/icons": "^1.22.1",
     "@lobehub/ui": "^1.141.3",
-    "ahooks": "^3.8.0",
     "antd": "^5.18.3",
     "antd-style": "^3.6.2",
     "framer-motion": "^12.4.7",
