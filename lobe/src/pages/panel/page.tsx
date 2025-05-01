@@ -1,7 +1,7 @@
 import { renderNumber, renderQuota } from '../../utils/render';
 import { useEffect, useState } from 'react';
 import { GetStatistics } from '../../services/StatisticsService';
-import { BarList, DonutChart, FunnelChart, Heatmaps, LineChart, LineChartProps, Tracker } from '@lobehub/charts';
+import { DonutChart, FunnelChart, Heatmaps, LineChart, LineChartProps, Tracker } from '@lobehub/charts';
 import { useTheme } from 'antd-style';
 import { getIconByName } from '../../utils/iconutils';
 import { GetServerLoad, GetUserRequest } from '../../services/TrackerService';
@@ -339,23 +339,7 @@ export default function PanelPage() {
                 />
               </Card>
             </Col>
-            <Col xs={24} xl={8}>
-              <Card 
-                title={<Space><BarChartOutlined /> 模型费用排名（最近七天）</Space>}
-                bordered={false}
-                style={cardStyle}
-              >
-                <BarList 
-                  style={{
-                    height: screens.xs ? 300 : 350,
-                  }}
-                  data={data?.modelRanking}
-                  showAnimation
-                  valueFormatter={modelsValueFormatter}
-                  sortOrder='descending' 
-                />
-              </Card>
-            </Col>
+          
 
             {/* 条件性显示的部分 */}
             {userNewData && (
