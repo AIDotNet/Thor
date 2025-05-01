@@ -12,7 +12,6 @@ import {
   FallOutlined, 
   DashboardOutlined, 
   LineChartOutlined, 
-  BarChartOutlined, 
   DollarOutlined,
   ApiOutlined,
   ThunderboltOutlined
