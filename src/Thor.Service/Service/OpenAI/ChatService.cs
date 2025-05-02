@@ -684,10 +684,11 @@ public sealed class ChatService(
             request.MaxCompletionTokens = null;
         }
 
-        if (request.Model is "o3-mini" or "o4-mini")
+        if (request.Model.StartsWith("o3-mini") || request.Model.StartsWith("o4-mini"))
         {
             request.MaxCompletionTokens = request.MaxTokens;
             request.MaxTokens = null;
+            request.Temperature = null;
         }
 
         var rateLimit = 0;

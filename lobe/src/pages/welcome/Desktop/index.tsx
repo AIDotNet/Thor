@@ -19,7 +19,6 @@ import { useInView } from 'react-intersection-observer'; // 引入滚动检测
 import { useState, useEffect, useRef } from 'react';
 import { modelHot } from '../../../services/LoggerService';
 import * as echarts from 'echarts';
-import { getIconByName } from '../../../utils/iconutils';
 import { useTranslation } from 'react-i18next';
 
 const { Content } = Layout;
