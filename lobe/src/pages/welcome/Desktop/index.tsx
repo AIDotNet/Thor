@@ -16,9 +16,9 @@ import { createStyles } from 'antd-style';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion'; // 引入Framer Motion动画库
 import { useInView } from 'react-intersection-observer'; // 引入滚动检测
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { modelHot } from '../../../services/LoggerService';
-import { BarList, DonutChart } from '@lobehub/charts';
+import * as echarts from 'echarts';
 import { getIconByName } from '../../../utils/iconutils';
 import { useTranslation } from 'react-i18next';
 
@@ -372,6 +372,10 @@ const ThorWebsite = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
+  // 添加图表引用
+  const donutChartRef = useRef<HTMLDivElement>(null);
+  const barChartRef = useRef<HTMLDivElement>(null);
+
   // 创建滚动检测钩子
   const [heroRef, heroInView] = useInView({
     triggerOnce: true,
@@ -416,6 +420,132 @@ const ThorWebsite = () => {
     fetchModelHotData();
   }, []);
 
+  // 添加渲染饼图的函数
+  const renderDonutChart = () => {
+    if (!donutChartRef.current || modelHotLoading || !modelHotData.length) return;
+
+    const chart = echarts.init(donutChartRef.current);
+
+    chart.setOption({
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        bottom: 10,
+        left: 'center',
+        textStyle: {
+          color: '#cccccc'
+        }
+      },
+      series: [
+        {
+          name: '模型分布',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderRadius: 10,
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 20,
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: modelHotData.map(item => ({
+            value: item.percentage,
+            name: item.model
+          })),
+          color: ['#1890ff', '#13c2c2', '#722ed1', '#eb2f96', '#faad14']
+        }
+      ],
+      animationType: 'scale',
+      animationEasing: 'elasticOut',
+      animationDelay: function () {
+        return Math.random() * 200;
+      }
+    });
+
+    return chart;
+  };
+
+  // 添加渲染条形图的函数
+  const renderBarChart = () => {
+    if (!barChartRef.current || modelHotLoading || !modelHotData.length) return;
+
+    const chart = echarts.init(barChartRef.current);
+
+    // 只取前10个模型
+    const topModels = [...modelHotData]
+      .sort((a, b) => b.percentage - a.percentage)
+      .slice(0, 10);
+
+    chart.setOption({
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        },
+        formatter: (params: any) => {
+          return `${params[0].name}: ${params[0].value.toFixed(1)}%`;
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      xAxis: {
+        type: 'value',
+        axisLabel: {
+          color: '#cccccc'
+        },
+        splitLine: {
+          lineStyle: {
+            color: 'rgba(255,255,255,0.1)'
+          }
+        }
+      },
+      yAxis: {
+        type: 'category',
+        data: topModels.map(item => item.model),
+        axisLabel: {
+          color: '#cccccc'
+        }
+      },
+      series: [
+        {
+          name: '使用率',
+          type: 'bar',
+          data: topModels.map(item => item.percentage),
+          itemStyle: {
+            color: '#1890ff'
+          },
+          label: {
+            show: true,
+            position: 'right',
+            formatter: '{c}%',
+            color: '#cccccc'
+          }
+        }
+      ]
+    });
+
+    return chart;
+  };
+
   // 定义各种动画变体
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -430,7 +560,7 @@ const ThorWebsite = () => {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
-      opacity: 1,
+      opacity: 1, 
       y: 0,
       transition: {
         duration: 0.6,
@@ -456,6 +586,27 @@ const ThorWebsite = () => {
     triggerOnce: true,
     threshold: 0.1,
   });
+  
+  // 在数据加载后渲染图表
+  useEffect(() => {
+    if (!modelHotLoading && modelHotData.length > 0 && modelHotInView) {
+      const donutChart = renderDonutChart();
+      const barChart = renderBarChart();
+      
+      const handleResize = () => {
+        donutChart?.resize();
+        barChart?.resize();
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      return () => {
+        window.removeEventListener('resize', handleResize);
+        donutChart?.dispose();
+        barChart?.dispose();
+      };
+    }
+  }, [modelHotLoading, modelHotData, modelHotInView]);
 
   return (
     <Content>
@@ -1136,16 +1287,7 @@ const ThorWebsite = () => {
                     transition={{ duration: 0.5, delay: 0.5 }}
                     style={{ height: 300 }}
                   >
-                    <DonutChart
-                      data={modelHotData.map(item => ({
-                        name: item.model,
-                        value: item.percentage
-                      }))}
-                      valueFormatter={(value) => `${value.toFixed(1)}%`}
-                      variant="pie"
-                      showAnimation
-                      colors={['#1890ff', '#13c2c2', '#722ed1', '#eb2f96', '#faad14']}
-                    />
+                    <div ref={donutChartRef} style={{ height: '100%' }} />
                   </motion.div>
                 )}
               </MotionCard>
@@ -1213,21 +1355,7 @@ const ThorWebsite = () => {
                     transition={{ duration: 0.5, delay: 0.6 }}
                     style={{ height: 300, overflowY: 'auto' }}
                   >
-                    <BarList
-                      data={modelHotData
-                        // 只要前10个
-                        .slice(0, 10)
-                        .map(item => ({
-                          name: item.model,
-                          value: item.percentage,
-                          // 可以添加图标
-                          icon: getIconByName(item.model)?.icon || null
-                        }))}
-                      showAnimation
-                      valueFormatter={(value) => `${value.toFixed(1)}%`}
-                      sortOrder='descending'
-                      color="#1890ff"
-                    />
+                    <div ref={barChartRef} style={{ height: '100%' }} />
                   </motion.div>
                 )}
               </MotionCard>

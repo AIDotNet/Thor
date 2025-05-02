@@ -22,6 +22,8 @@
     "@lobehub/ui": "^1.141.3",
     "antd": "^5.18.3",
     "antd-style": "^3.6.2",
+    "echarts": "^5.6.0",
+    "echarts-for-react": "^3.0.2",
     "framer-motion": "^12.4.7",
     "i18next": "^25.0.1",
     "i18next-browser-languagedetector": "^8.0.5",
