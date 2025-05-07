@@ -27,9 +27,14 @@ public sealed class VolCenGineChatCompletionsService(ILogger<VolCenGineChatCompl
             options.Address = "https://ark.cn-beijing.volces.com/";
         }
 
+        var headers = new Dictionary<string, string>
+        {
+            { "x-ark-moderation-scene", "skip-ark-moderation" }
+        };
+
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(
             options?.Address.TrimEnd('/') + "/api/v3/chat/completions",
-            chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
+            chatCompletionCreate, options.ApiKey, headers).ConfigureAwait(false);
 
         openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/api/v3/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
