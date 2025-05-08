@@ -198,6 +198,10 @@ public sealed class ChatService(
                 request.Model = form["model"];
                 request.ResponseFormat = form["response_format"];
                 request.Quality = form["quality"];
+                if (request.ResponseFormat == "b64_json")
+                {
+                    request.ResponseFormat = null;
+                }
 
                 // 文件stream转换byte
 
@@ -417,10 +421,12 @@ public sealed class ChatService(
                 organizationId = organizationIdHeader.ToString();
             }
 
+            if (request.ResponseFormat == "b64_json")
+            {
+                request.ResponseFormat = null;
+            }
 
             if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
-
-            var imageCostRatio = GetImageCostRatio(request);
 
             var rate = ModelManagerService.PromptRate[request.Model];
 
