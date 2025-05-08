@@ -42,8 +42,11 @@ public record ImageEditCreateRequest : SharedImageRequestBaseModel
     public string? Moderation { get; set; }
     
     [JsonPropertyName("output_compression")]
-    public string? output_compression { get; set; }
+    public string? OutputCompression { get; set; }
+    
+    [JsonPropertyName("output_format")]
+    public string? OutputFormat { get; set; }
     
     [JsonPropertyName("style")]
-    public string? style { get; set; }
+    public string? Style { get; set; }
 }
