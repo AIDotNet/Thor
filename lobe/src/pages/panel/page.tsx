@@ -9,17 +9,12 @@ import { Flexbox } from 'react-layout-kit';
 import { Typography, Card, Row, Col, Space, Statistic, Skeleton, Grid, ConfigProvider } from 'antd';
 import { 
   RiseOutlined, 
-  FallOutlined, 
   DashboardOutlined, 
   LineChartOutlined, 
   DollarOutlined,
   ApiOutlined,
   ThunderboltOutlined,
-  UserAddOutlined,
   UsergroupAddOutlined,
-  BarChartOutlined,
-  PieChartOutlined,
-  WalletOutlined,
   TransactionOutlined
 } from '@ant-design/icons';
 
