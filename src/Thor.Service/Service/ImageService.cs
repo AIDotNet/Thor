@@ -37,6 +37,15 @@ public class ImageService(IHttpClientFactory httpClientFactory)
 
         throw new Exception("Failed to get image.");
     }
+    
+    
+    public (int Width, int Height) GetImageSizeFromUrlAsync(ReadOnlyMemory<byte> url)
+    {
+        var image = SKBitmap.DecodeBounds(url.ToArray());
+        return (image.Width, image.Height);
+    }
+
+
 
     public (string MimeType, string Data) GetImageFromUrl(string url)
     {

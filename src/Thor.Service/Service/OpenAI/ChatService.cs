@@ -186,6 +186,7 @@ public sealed class ChatService(
                 organizationId = organizationIdHeader.ToString();
             }
 
+            var requestToken = 0;
             var request = new ImageEditCreateRequest();
             // 读取表单数据
             if (context.Request.HasFormContentType)
@@ -196,6 +197,7 @@ public sealed class ChatService(
                 request.Size = form["size"];
                 request.Model = form["model"];
                 request.ResponseFormat = form["response_format"];
+                request.Quality = form["quality"];
 
                 // 文件stream转换byte
 
@@ -206,6 +208,10 @@ public sealed class ChatService(
                     await imageFile.CopyToAsync(stream, context.RequestAborted);
                     request.Image = stream.ToArray();
                     request.ImageName = imageFile.FileName;
+
+                    // 计算图片token
+                    var (t, e) = CountImageTokens(request.Image, request.Quality);
+                    requestToken += t * 2;
                 }
                 else
                 {
@@ -226,8 +232,6 @@ public sealed class ChatService(
 
 
             if (string.IsNullOrEmpty(request?.Model)) request.Model = "dall-e-2";
-
-            var imageCostRatio = GetImageCostRatio(request.Model, request.Size);
 
             var rate = ModelManagerService.PromptRate[request.Model];
 
@@ -263,7 +267,7 @@ public sealed class ChatService(
             //     Low	272 tokens	408 tokens	400 tokens
             //     Medium	1056 tokens	1584 tokens	1568 tokens
             //     High	4160 tokens	6240 tokens	6208 tokens
-            var requestToken = TokenHelper.GetTotalTokens(request.Prompt ?? string.Empty);
+            requestToken += TokenHelper.GetTotalTokens(request.Prompt ?? string.Empty);
             var responseToken = 0;
             if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
                 request.Size == "1024x1024")
@@ -310,11 +314,26 @@ public sealed class ChatService(
             {
                 responseToken += 6208;
             }
+            else
+            {
+                if (request.Size == "1024x1024")
+                {
+                    responseToken += 4160;
+                }
+                else if (request.Size == "1024x1536")
+                {
+                    responseToken += 6240;
+                }
+                else if (request.Size == "1536x1024")
+                {
+                    responseToken += 6208;
+                }
+            }
 
             var quota = requestToken * rate.PromptRate;
 
             var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
-            quota += responseToken * rate.PromptRate * completionRatio;
+            quota += (responseToken) * rate.PromptRate * completionRatio;
 
             quota = (decimal)userGroup.Rate * quota;
 
@@ -336,6 +355,14 @@ public sealed class ChatService(
                 Other = channel.Other
             });
 
+            if (response.Error != null)
+            {
+                logger.LogError("图片修改失败：{error}", JsonSerializer.Serialize(response.Error));
+                context.Response.StatusCode = 200;
+                await context.WriteOpenAIErrorAsync(response.Error.Message, response.Error.Code);
+                return;
+            }
+
             // 计算createdAT
             var createdAt = DateTime.Now;
             var created = (int)createdAt.ToUnixTimeSeconds();
@@ -348,15 +375,13 @@ public sealed class ChatService(
 
             sw.Stop();
 
-            quota = (int)((decimal)userGroup.Rate * quota);
-
             await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 request.Model,
-                0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
+                0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
-            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
+            await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id, request.Model);
         }
         catch (PaymentRequiredException)
         {
@@ -476,10 +501,25 @@ public sealed class ChatService(
             {
                 responseToken += 6208;
             }
+            else
+            {
+                if (request.Size == "1024x1024")
+                {
+                    responseToken += 272;
+                }
+                else if (request.Size == "1024x1536")
+                {
+                    responseToken += 408;
+                }
+                else if (request.Size == "1536x1024")
+                {
+                    responseToken += 400;
+                }
+            }
 
             var quota = requestToken * rate.PromptRate;
 
-            var completionRatio =rate.CompletionRate?? GetCompletionRatio(request.Model);
+            var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
             quota += responseToken * rate.PromptRate * completionRatio;
 
             quota = (decimal)userGroup.Rate * quota;
@@ -525,13 +565,14 @@ public sealed class ChatService(
 
             sw.Stop();
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, rate.CompletionRate, userGroup.Rate),
+            await loggerService.CreateConsumeAsync(
+                string.Format(ConsumerTemplate, rate.PromptRate, rate.CompletionRate, userGroup.Rate),
                 request.Model,
                 0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
-            await userService.ConsumeAsync(user!.Id, (long)quota , 0, token?.Key, channel.Id, request.Model);
+            await userService.ConsumeAsync(user!.Id, (long)quota, 0, token?.Key, channel.Id, request.Model);
         }
         catch (PaymentRequiredException)
         {

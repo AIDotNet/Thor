@@ -26,6 +26,9 @@ public record ImageEditCreateRequest : SharedImageRequestBaseModel
     /// </summary>
     public string? MaskName { get; set; }
 
+    [JsonPropertyName("quality")]
+    public string Quality { get; set; }
+
     /// <summary>
     ///     A text description of the desired image(s). The maximum length is 1000 characters.
     /// </summary>

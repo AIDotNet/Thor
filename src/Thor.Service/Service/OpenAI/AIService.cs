@@ -143,6 +143,59 @@ public abstract class AIService(IServiceProvider serviceProvider, ImageService i
     /// <param name="url"></param>
     /// <param name="detail"></param>
     /// <returns></returns>
+    protected Tuple<int, Exception> CountImageTokens(ReadOnlyMemory<byte> url, string detail)
+    {
+        var fetchSize = true;
+        int width = 0, height = 0;
+        var lowDetailCost = 20; // Assuming lowDetailCost is 20
+        var highDetailCostPerTile = 100; // Assuming highDetailCostPerTile is 100
+        var additionalCost = 50; // Assuming additionalCost is 50
+
+        if (string.IsNullOrEmpty(detail) || detail == "auto") detail = "high";
+
+        switch (detail)
+        {
+            case "low":
+                return new Tuple<int, Exception>(lowDetailCost, null);
+            case "high":
+                if (fetchSize)
+                    try
+                    {
+                        (width, height) = imageService.GetImageSizeFromUrlAsync(url);
+                    }
+                    catch (Exception e)
+                    {
+                        return new Tuple<int, Exception>(0, e);
+                    }
+
+                if (width > 2048 || height > 2048)
+                {
+                    var ratio = 2048.0 / Math.Max(width, height);
+                    width = (int)(width * ratio);
+                    height = (int)(height * ratio);
+                }
+
+                if (width > 768 && height > 768)
+                {
+                    var ratio = 768.0 / Math.Min(width, height);
+                    width = (int)(width * ratio);
+                    height = (int)(height * ratio);
+                }
+
+                var numSquares = (int)Math.Ceiling((double)width / 512) * (int)Math.Ceiling((double)height / 512);
+                var result = numSquares * highDetailCostPerTile + additionalCost;
+                return new Tuple<int, Exception>(result, null);
+            default:
+                return new Tuple<int, Exception>(0, new Exception("Invalid detail option"));
+        }
+    }
+
+    /// <summary>
+    /// 计算图片token
+    /// </summary>
+    /// <param name="url"></param>
+    /// <param name="detail"></param>
+    /// <returns></returns>
     protected async ValueTask<Tuple<int, Exception>> CountImageTokens(string url, string detail)
     {
         var fetchSize = true;
