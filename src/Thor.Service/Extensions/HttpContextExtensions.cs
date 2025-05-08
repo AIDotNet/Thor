@@ -180,6 +180,7 @@ public static class HttpContextExtensions
             {
                 Type = "error",
                 Code = "openai_error " + code,
+                MessageObject = message
             }
         };
 

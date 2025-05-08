@@ -155,7 +155,7 @@ public sealed class ChatService(
         catch (PaymentRequiredException)
         {
             context.Response.StatusCode = 402;
-            await context.WriteErrorAsync("账号余额不足请充值", "402");
+            await context.WriteOpenAIErrorAsync("账号余额不足请充值", "402");
         }
         catch (RateLimitException)
         {
@@ -168,7 +168,7 @@ public sealed class ChatService(
         catch (Exception e)
         {
             logger.LogError("对话模型请求异常：{e}", e);
-            await context.WriteErrorAsync(e.Message);
+            await context.WriteOpenAIErrorAsync(e.Message);
         }
     }
 
@@ -390,7 +390,7 @@ public sealed class ChatService(
         catch (PaymentRequiredException)
         {
             context.Response.StatusCode = 402;
-            await context.WriteErrorAsync("账号余额不足请充值", "402");
+            await context.WriteOpenAIErrorAsync("账号余额不足请充值", "402");
         }
         catch (RateLimitException)
         {
@@ -403,7 +403,7 @@ public sealed class ChatService(
         catch (Exception e)
         {
             logger.LogError("对话模型请求异常：{e}", e);
-            await context.WriteErrorAsync(e.Message);
+            await context.WriteOpenAIErrorAsync(e.Message);
         }
     }
 
