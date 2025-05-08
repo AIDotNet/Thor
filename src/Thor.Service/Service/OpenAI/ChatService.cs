@@ -241,12 +241,6 @@ public sealed class ChatService(
 
             request.N ??= 1;
 
-            var quota = (int)(rate.PromptRate * imageCostRatio) * request.N;
-
-            if (request == null) throw new Exception("模型校验异常");
-
-            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
-
             // 获取渠道 通过算法计算权重
             var channel =
                 CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
@@ -261,6 +255,72 @@ public sealed class ChatService(
             {
                 throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
             }
+
+
+            request.N ??= 1;
+            // 
+            //     Quality	Square (1024×1024)	Portrait (1024×1536)	Landscape (1536×1024)
+            //     Low	272 tokens	408 tokens	400 tokens
+            //     Medium	1056 tokens	1584 tokens	1568 tokens
+            //     High	4160 tokens	6240 tokens	6208 tokens
+            var requestToken = TokenHelper.GetTotalTokens(request.Prompt ?? string.Empty);
+            var responseToken = 0;
+            if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
+                request.Size == "1024x1024")
+            {
+                responseToken += 272;
+            }
+            else if (request.Quality?.Equals("medium", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1024")
+            {
+                responseToken += 1056;
+            }
+            else if (request.Quality?.Equals("high", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1024")
+            {
+                responseToken += 4160;
+            }
+            else if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1536")
+            {
+                responseToken += 408;
+            }
+            else if (request.Quality?.Equals("medium", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1536")
+            {
+                responseToken += 1584;
+            }
+            else if (request.Quality?.Equals("high", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1536")
+            {
+                responseToken += 6240;
+            }
+            else if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1536x1024")
+            {
+                responseToken += 400;
+            }
+            else if (request.Quality?.Equals("medium", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1536x1024")
+            {
+                responseToken += 1568;
+            }
+            else if (request.Quality?.Equals("high", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1536x1024")
+            {
+                responseToken += 6208;
+            }
+
+            var quota = requestToken * rate.PromptRate;
+
+            var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
+            quota += responseToken * rate.PromptRate * completionRatio;
+
+            quota = (decimal)userGroup.Rate * quota;
+
+            // 将quota 四舍五入
+            quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
 
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorImageService>(channel.Type);
@@ -347,15 +407,6 @@ public sealed class ChatService(
 
             request.Model = await modelMapService.ModelMap(request.Model);
 
-
-            request.N ??= 1;
-
-            var quota = (int)(rate.PromptRate * imageCostRatio) * request.N;
-
-            if (request == null) throw new Exception("模型校验异常");
-
-            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
-
             // 获取渠道 通过算法计算权重
             var channel =
                 CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
@@ -371,6 +422,76 @@ public sealed class ChatService(
                 throw new BusinessException("当前渠道未设置分组，请联系管理员设置分组", "400");
             }
 
+
+            request.N ??= 1;
+            // 
+            //     Quality	Square (1024×1024)	Portrait (1024×1536)	Landscape (1536×1024)
+            //     Low	272 tokens	408 tokens	400 tokens
+            //     Medium	1056 tokens	1584 tokens	1568 tokens
+            //     High	4160 tokens	6240 tokens	6208 tokens
+            var requestToken = TokenHelper.GetTotalTokens(request.Prompt ?? string.Empty);
+            var responseToken = 0;
+            if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
+                request.Size == "1024x1024")
+            {
+                responseToken += 272;
+            }
+            else if (request.Quality?.Equals("medium", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1024")
+            {
+                responseToken += 1056;
+            }
+            else if (request.Quality?.Equals("high", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1024")
+            {
+                responseToken += 4160;
+            }
+            else if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1536")
+            {
+                responseToken += 408;
+            }
+            else if (request.Quality?.Equals("medium", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1536")
+            {
+                responseToken += 1584;
+            }
+            else if (request.Quality?.Equals("high", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1024x1536")
+            {
+                responseToken += 6240;
+            }
+            else if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1536x1024")
+            {
+                responseToken += 400;
+            }
+            else if (request.Quality?.Equals("medium", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1536x1024")
+            {
+                responseToken += 1568;
+            }
+            else if (request.Quality?.Equals("high", StringComparison.OrdinalIgnoreCase) == true &&
+                     request.Size == "1536x1024")
+            {
+                responseToken += 6208;
+            }
+
+            var quota = requestToken * rate.PromptRate;
+
+            var completionRatio =rate.CompletionRate?? GetCompletionRatio(request.Model);
+            quota += responseToken * rate.PromptRate * completionRatio;
+
+            quota = (decimal)userGroup.Rate * quota;
+
+            // 将quota 四舍五入
+            quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+
+            if (request == null) throw new Exception("模型校验异常");
+
+            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+
             // 获取渠道指定的实现类型的服务
             var openService = GetKeyedService<IThorImageService>(channel.Type);
 
@@ -385,6 +506,13 @@ public sealed class ChatService(
                 Other = channel.Other
             });
 
+            if (response.Error != null)
+            {
+                context.Response.StatusCode = 200;
+                await context.WriteOpenAIErrorAsync(response.Error.Message, response.Error.Code);
+                return;
+            }
+
             // 计算createdAT
             var createdAt = DateTime.Now;
             var created = (int)createdAt.ToUnixTimeSeconds();
@@ -397,15 +525,13 @@ public sealed class ChatService(
 
             sw.Stop();
 
-            quota = (int)((decimal)userGroup.Rate * quota);
-
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, rate.CompletionRate, userGroup.Rate),
                 request.Model,
-                0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
+                0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
-            await userService.ConsumeAsync(user!.Id, quota ?? 0, 0, token?.Key, channel.Id, request.Model);
+            await userService.ConsumeAsync(user!.Id, (long)quota , 0, token?.Key, channel.Id, request.Model);
         }
         catch (PaymentRequiredException)
         {

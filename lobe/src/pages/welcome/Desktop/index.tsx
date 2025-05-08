@@ -502,8 +502,9 @@ const ThorWebsite = () => {
       },
       grid: {
         left: '3%',
-        right: '4%',
+        right: '10%',
         bottom: '3%',
+        top: '3%',
         containLabel: true
       },
       xAxis: {
@@ -528,9 +529,14 @@ const ThorWebsite = () => {
         {
           name: '使用率',
           type: 'bar',
+          barWidth: '60%',
           data: topModels.map(item => item.percentage),
           itemStyle: {
-            color: '#1890ff'
+            color: function(params: any) {
+              // 为不同的条形图设置不同的颜色
+              const colorList = ['#1890ff', '#13c2c2', '#722ed1', '#eb2f96', '#faad14', '#52c41a', '#fa541c', '#2f54eb', '#fa8c16', '#a0d911'];
+              return colorList[params.dataIndex % colorList.length];
+            }
           },
           label: {
             show: true,
@@ -539,7 +545,12 @@ const ThorWebsite = () => {
             color: '#cccccc'
           }
         }
-      ]
+      ],
+      animationType: 'scale',
+      animationEasing: 'elasticOut',
+      animationDelay: function (idx: number) {
+        return idx * 100;
+      }
     });
 
     return chart;
@@ -592,6 +603,12 @@ const ThorWebsite = () => {
       const donutChart = renderDonutChart();
       const barChart = renderBarChart();
       
+      // 添加延时重绘以确保图表正确显示
+      const timer = setTimeout(() => {
+        donutChart?.resize();
+        barChart?.resize();
+      }, 100);
+      
       const handleResize = () => {
         donutChart?.resize();
         barChart?.resize();
@@ -600,6 +617,7 @@ const ThorWebsite = () => {
       window.addEventListener('resize', handleResize);
       
       return () => {
+        clearTimeout(timer);
         window.removeEventListener('resize', handleResize);
         donutChart?.dispose();
         barChart?.dispose();
