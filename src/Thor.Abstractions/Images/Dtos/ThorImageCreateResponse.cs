@@ -6,4 +6,6 @@ public class ThorImageCreateResponse
     public int created { get; set; }
     
     public bool successful { get; set; }
+    
+    
 }

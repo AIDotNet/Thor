@@ -554,15 +554,7 @@ public sealed class ChatService(
                 return;
             }
 
-            // 计算createdAT
-            var createdAt = DateTime.Now;
-            var created = (int)createdAt.ToUnixTimeSeconds();
-            await context.Response.WriteAsJsonAsync(new ThorImageCreateResponse
-            {
-                data = response.Results,
-                created = created,
-                successful = response.Successful
-            });
+            await context.Response.WriteAsJsonAsync(response);
 
             sw.Stop();
 

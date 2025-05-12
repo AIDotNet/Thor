@@ -1,6 +1,8 @@
 ﻿using System.ClientModel;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 using Thor.Abstractions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.Images;
@@ -16,9 +18,18 @@ public class OpenAIImageService : IThorImageService
         CancellationToken cancellationToken = default)
     {
         var client = HttpClientFactory.GetHttpClient(options.Address?.TrimEnd('/') + "/v1/images/generations");
-        var response = await client.PostJsonAsync(
-            options.Address?.TrimEnd('/') + "/v1/images/generations",
-            imageCreate, options.ApiKey);
+
+        var stringContent = new StringContent(JsonSerializer.Serialize(imageCreate, ThorJsonSerializer.DefaultOptions),
+            Encoding.UTF8, "application/json");
+        var request = new HttpRequestMessage(HttpMethod.Post,
+            options.Address?.TrimEnd('/') + "/v1/images/generations")
+        {
+            Content = stringContent
+        };
+
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", options.ApiKey);
+
+        var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         var result =
             await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
