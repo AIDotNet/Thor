@@ -78,7 +78,6 @@ export const processImage = async (params: {
         prompt: params.prompt,
         n: 1,
         size: validSize,
-        response_format: 'url',
         ...(params.negativePrompt ? { negative_prompt: params.negativePrompt } : {})
       });
       

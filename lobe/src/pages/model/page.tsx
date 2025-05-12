@@ -26,7 +26,6 @@ const useStyles = createStyles(({ token, css }) => ({
     modelContainer: css`
         display: flex;
         flex-direction: column;
-        height: 100%;
         background: linear-gradient(145deg, ${token.colorBgContainer} 0%, ${token.colorBgElevated} 100%);
         position: relative;
         overflow: hidden;

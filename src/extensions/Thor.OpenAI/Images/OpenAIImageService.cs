@@ -30,7 +30,7 @@ public class OpenAIImageService : IThorImageService
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", options.ApiKey);
 
-        var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
+        var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
         return await response.Content.ReadFromJsonAsync<ImageCreateResponse>(ThorJsonSerializer.DefaultOptions,
             cancellationToken);

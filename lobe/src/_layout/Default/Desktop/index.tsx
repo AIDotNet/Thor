@@ -1,7 +1,7 @@
 import { Layout } from "@lobehub/ui";
 import { Outlet, useNavigate } from "react-router-dom";
 import ThorFooter from "../../../components/Footer";
-import { Header } from "antd/es/layout/layout";
+import { Content, Header } from "antd/es/layout/layout";
 import { MenuOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { Button, Menu } from "antd";
 import { useState, useMemo } from "react";
@@ -24,12 +24,12 @@ export default function DesktopPage() {
         { key: 'models', label: t('nav.model') },
         { key: 'pricing', label: t('nav.product') },
         { key: 'community', label: t('common.community') },
-        { 
-            key: 'api_doc', 
+        {
+            key: 'api_doc',
             label: 'API文档',
             onClick: () => {
                 window.open('https://thor-ai.apifox.cn', '_blank');
-            } 
+            }
         },
     ], [t, i18n.language]); // 依赖i18n.language以响应语言变化
 
@@ -81,8 +81,8 @@ export default function DesktopPage() {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div 
-                        onClick={()=>{
+                    <div
+                        onClick={() => {
                             navigate('/')
                         }}
                         style={{ display: 'flex', alignItems: 'center', color: 'white', marginRight: 24 }}>
@@ -117,15 +117,16 @@ export default function DesktopPage() {
                     <Button
                         icon={<MenuOutlined />}
                         type="text"
-                        style={{ color: 'white', marginLeft: 8, display: 'block', 
+                        style={{
+                            color: 'white', marginLeft: 8, display: 'block',
                             // @ts-ignore
-                            '@media (min-width: 768px)': { display: 'none' } }}
+                            '@media (min-width: 768px)': { display: 'none' }
+                        }}
                         onClick={toggleMobileMenu}
                     />
                 </div>
             </Header>
 
-            {/* Mobile Menu */}
             {mobileMenuVisible && (
                 <div style={{ background: '#1f1f1f', padding: '16px 24px' }}>
                     <Menu
@@ -136,13 +137,13 @@ export default function DesktopPage() {
                     />
                 </div>
             )}
-            <div style={{
+            <Content style={{
                 height: 'calc(100vh - 64px)',
-                overflow: 'auto'
+                overflowY: 'auto'
             }}>
                 <Outlet />
                 <ThorFooter />
-            </div>
+            </Content>
         </Layout>
     )
 }
