@@ -537,7 +537,10 @@ public sealed class ChatService(
             var openService = GetKeyedService<IThorImageService>(channel.Type);
 
             if (openService == null) throw new Exception($"并未实现：{channel.Type} 的服务");
-
+            
+            // 记录请求信息
+            logger.LogInformation($"分配渠道：{channel.Name}, 地址：{channel.Address}, 模型：{request.Model}");
+            
             var sw = Stopwatch.StartNew();
 
             var response = await openService.CreateImage(request, new ThorPlatformOptions
@@ -549,6 +552,7 @@ public sealed class ChatService(
 
             if (response.Error != null)
             {
+                logger.LogError("图片生成失败：{error}", JsonSerializer.Serialize(response.Error));
                 context.Response.StatusCode = 200;
                 await context.WriteOpenAIErrorAsync(response.Error.Message, response.Error.Code);
                 return;

@@ -21,20 +21,19 @@ public class OpenAIImageService : IThorImageService
 
         var stringContent = new StringContent(JsonSerializer.Serialize(imageCreate, ThorJsonSerializer.DefaultOptions),
             Encoding.UTF8, "application/json");
+        
         var request = new HttpRequestMessage(HttpMethod.Post,
             options.Address?.TrimEnd('/') + "/v1/images/generations")
         {
-            Content = stringContent
+            Content = stringContent,
         };
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", options.ApiKey);
 
         var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 
-        var result =
-            await response.Content.ReadFromJsonAsync<ImageCreateResponse>(cancellationToken: cancellationToken);
-
-        return result;
+        return  await response.Content.ReadFromJsonAsync<ImageCreateResponse>(ThorJsonSerializer.DefaultOptions,
+            cancellationToken);
     }
 
     public async Task<ImageCreateResponse> CreateImageEdit(ImageEditCreateRequest imageEditCreateRequest,
