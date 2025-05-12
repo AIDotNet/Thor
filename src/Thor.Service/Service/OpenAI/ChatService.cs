@@ -586,7 +586,7 @@ public sealed class ChatService(
         }
         catch (Exception e)
         {
-            logger.LogError("对话模型请求异常：{e}", e);
+            logger.LogError("图片生成请求异常：{e}", e);
             await context.WriteOpenAIErrorAsync(e.Message);
         }
     }
