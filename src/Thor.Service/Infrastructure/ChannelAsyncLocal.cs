@@ -6,10 +6,13 @@ public class ChannelAsyncLocal
 
     public static List<string> ChannelIds
     {
-        get => _channelHolder.Value?.ChannelIds ?? new List<string>(3);
+        get => _channelHolder.Value?.ChannelIds;
         set
         {
-            _channelHolder.Value ??= new ChannelHolder();
+            if (_channelHolder.Value == null)
+            {
+                _channelHolder.Value = new ChannelHolder();
+            }
 
             _channelHolder.Value.ChannelIds = value;
         }

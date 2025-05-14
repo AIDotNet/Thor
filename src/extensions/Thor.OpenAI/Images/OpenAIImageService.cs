@@ -76,7 +76,7 @@ public class OpenAIImageService : IThorImageService
         multipartContent.Add(imageEditCreateRequest.Image, "image",
             imageEditCreateRequest.ImageName);
 
-        var client = HttpClientFactory.GetHttpClient(options.Address);
+        var client = HttpClientFactory.GetHttpClient(options.Address.TrimEnd('/') + "/v1/images/edits");
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, options.Address.TrimEnd('/') + "/v1/images/edits");
 

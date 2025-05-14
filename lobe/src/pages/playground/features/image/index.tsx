@@ -45,7 +45,6 @@ export default function ImageFeature({ modelInfo }: { modelInfo: any }) {
     const [imageSize, setImageSize] = useState<string>('1024x1024');
     const [sourceImages, setSourceImages] = useState<SourceImage[]>([]);
     const [fileList, setFileList] = useState<UploadFile[]>([]);
-    const [transformationStrength, setTransformationStrength] = useState<number>(0.7);
     
     useEffect(() => {
         // Initial loading of tokens and models
@@ -166,7 +165,6 @@ export default function ImageFeature({ modelInfo }: { modelInfo: any }) {
                         const params = {
                             ...baseParams,
                             image: sourceImage.dataUrl, // Pass complete dataURL - our service will handle extraction
-                            transformationStrength,
                         };
                         
                         const result = await processImage(params);
@@ -175,7 +173,7 @@ export default function ImageFeature({ modelInfo }: { modelInfo: any }) {
                             // Add new image to the list
                             const newImage: GeneratedImage = {
                                 id: result.data.id || Date.now().toString() + Math.random().toString(36).substring(2, 9),
-                                url: result.data.url,
+                                url: `data:image/png;base64,${result.data.b64_json}`,
                                 prompt,
                                 model: selectedModel,
                                 timestamp: Date.now(),
@@ -199,7 +197,7 @@ export default function ImageFeature({ modelInfo }: { modelInfo: any }) {
                     // Add new image to the list
                     const newImage: GeneratedImage = {
                         id: result.data.id || Date.now().toString(),
-                        url: result.data.url,
+                        url: `data:image/png;base64,${result.data.b64_json}`,
                         prompt,
                         model: selectedModel,
                         timestamp: Date.now(),
@@ -284,22 +282,6 @@ export default function ImageFeature({ modelInfo }: { modelInfo: any }) {
                                 </Button>
                             )}
                         </Form.Item>
-                        
-                        {hasSourceImages && (
-                            <Form.Item label={t('imageFeature.transformationStrength')}>
-                                <Slider 
-                                    min={0} 
-                                    max={1} 
-                                    step={0.01} 
-                                    value={transformationStrength}
-                                    onChange={setTransformationStrength}
-                                    marks={{
-                                        0: t('imageFeature.subtle'),
-                                        1: t('imageFeature.complete')
-                                    }}
-                                />
-                            </Form.Item>
-                        )}
                         
                         <Form.Item label={hasSourceImages ? t('imageFeature.transformationPrompt') : t('imageFeature.prompt')}>
                             <TextArea

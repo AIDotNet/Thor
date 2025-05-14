@@ -62,7 +62,7 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
     useEffect(() => {
         // Initial loading of tokens and models
         fetchTokens();
-    }, []);
+    }, [modelInfo]);
 
     useEffect(() => {
         // Scroll to bottom when messages change
@@ -133,11 +133,8 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                     }
                     
                     setModelOptions(filteredModels);
-                    
                     if (filteredModels.length > 0) {
                         setSelectedModel(filteredModels[0]);
-                    } else {
-                        message.info('没有可用的聊天模型');
                     }
                 } else {
                     message.error('OpenAI API返回了意外的响应结构');

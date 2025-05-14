@@ -1,4 +1,6 @@
-﻿namespace Thor.Service.Service;
+﻿using Thor.Service.Infrastructure;
+
+namespace Thor.Service.Service;
 
 public abstract class AIService(IServiceProvider serviceProvider, ImageService imageService)
     : ApplicationService(serviceProvider)
@@ -95,13 +97,17 @@ public abstract class AIService(IServiceProvider serviceProvider, ImageService i
         foreach (var chatChannel in chatChannels)
         {
             value -= chatChannel.Order;
-            if (value <= 0)
-            {
-                return chatChannel;
-            }
+            if (value > 0) continue;
+            
+            ChannelAsyncLocal.ChannelIds.Add(chatChannel.Id);
+            return chatChannel;
         }
 
-        return chatChannels.Last();
+        var v = chatChannels.Last();
+        
+        ChannelAsyncLocal.ChannelIds.Add(v.Id);
+        
+        return v;
     }
 
     /// <summary>

@@ -7,6 +7,8 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
 {
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
+        ChannelAsyncLocal.ChannelIds = new List<string>();
+        
         // 如果不是Get则自动开启事务
         if (context.Request.Method != "GET" && context.Request.Method != "OPTIONS" &&
             context.Request.Method != "HEAD" && context.Request.Method != "TRACE" &&

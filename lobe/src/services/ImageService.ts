@@ -15,7 +15,6 @@ export const processImage = async (params: {
   token: string;
   image?: string; // Base64 image data (without prefix) for image-to-image
   mask?: string;  // Optional mask image in base64 format
-  transformationStrength?: number; // Only used for image-to-image (0-1)
 }) => {
   try {
     // Initialize OpenAI client
@@ -54,7 +53,6 @@ export const processImage = async (params: {
         prompt: params.prompt,
         n: 1,
         size: editSize,
-        response_format: 'url',
       };
       
       // Add mask if provided
@@ -68,7 +66,7 @@ export const processImage = async (params: {
       return {
         data: {
           id: (response as any).created?.toString() || Date.now().toString(),
-          url: response.data?.[0]?.url || '',
+          b64_json: response.data?.[0]?.b64_json || '',
         }
       };
     } else {
@@ -84,7 +82,7 @@ export const processImage = async (params: {
       return {
         data: {
           id: (response as any).created?.toString() || Date.now().toString(),
-          url: response.data?.[0]?.url || '',
+          b64_json: response.data?.[0]?.b64_json || '',
         }
       };
     }

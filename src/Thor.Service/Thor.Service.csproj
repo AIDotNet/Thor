@@ -96,4 +96,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Service\OpenAI\ChatService.Image.cs">
+      <DependentUpon>ChatService.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
