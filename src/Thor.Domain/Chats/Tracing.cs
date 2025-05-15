@@ -67,5 +67,5 @@ public class Tracing : Entity<string>
     /// <summary>
     /// 子节点集合，不映射到数据库
     /// </summary>
-    public List<Tracing> Children { get; set; }
+    public List<Tracing> Children { get; set; } = new();
 }

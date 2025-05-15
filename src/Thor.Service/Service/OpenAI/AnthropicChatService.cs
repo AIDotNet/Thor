@@ -137,7 +137,7 @@ public class AnthropicChatService(
                         // 将quota 四舍五入
                         quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
-                        await loggerService.CreateConsumeAsync(
+                        await loggerService.CreateConsumeAsync("/v1/messages",
                             string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
                                 cachedTokens, rate.CacheRate),
                             request.Model,
@@ -148,7 +148,7 @@ public class AnthropicChatService(
                     }
                     else
                     {
-                        await loggerService.CreateConsumeAsync(
+                        await loggerService.CreateConsumeAsync("/v1/messages",
                             string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
                             request.Model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
@@ -163,7 +163,7 @@ public class AnthropicChatService(
                 else
                 {
                     // 费用
-                    await loggerService.CreateConsumeAsync(
+                    await loggerService.CreateConsumeAsync("/v1/messages",
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
                             userGroup.Rate),
                         request.Model,

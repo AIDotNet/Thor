@@ -211,7 +211,7 @@ partial class ChatService
 
             sw.Stop();
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/images/edits",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 model,
                 0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -422,7 +422,7 @@ partial class ChatService
 
             sw.Stop();
 
-            await loggerService.CreateConsumeAsync(
+            await loggerService.CreateConsumeAsync("/v1/images/generations",
                 string.Format(ConsumerTemplate, rate.PromptRate, rate.CompletionRate, userGroup.Rate),
                 model,
                 requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
@@ -582,7 +582,7 @@ partial class ChatService
 
             quota = (int)((decimal)userGroup.Rate * quota);
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/images/variations",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 model,
                 0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,

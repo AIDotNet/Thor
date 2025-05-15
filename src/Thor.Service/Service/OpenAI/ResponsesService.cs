@@ -142,7 +142,7 @@ public sealed class ResponsesService(
                         // 将quota 四舍五入
                         quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
-                        await loggerService.CreateConsumeAsync(
+                        await loggerService.CreateConsumeAsync("/v1/responses",
                             string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
                                 cachedTokens, rate.CacheRate),
                             request.Model,
@@ -153,7 +153,7 @@ public sealed class ResponsesService(
                     }
                     else
                     {
-                        await loggerService.CreateConsumeAsync(
+                        await loggerService.CreateConsumeAsync("/v1/responses",
                             string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
                             request.Model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
@@ -168,7 +168,7 @@ public sealed class ResponsesService(
                 else
                 {
                     // 费用
-                    await loggerService.CreateConsumeAsync(
+                    await loggerService.CreateConsumeAsync("/v1/responses",
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
                             userGroup.Rate),
                         request.Model,

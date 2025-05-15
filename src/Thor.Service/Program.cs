@@ -925,7 +925,7 @@ try
         .WithDescription("Image")
         .WithOpenApi();
 
-    app.MapPost("v1/images/variations",
+    app.MapPost("/v1/images/variations",
             async (ChatService imageService, HttpContext context) =>
                 await imageService.VariationsAsync(context))
         .WithDescription("OpenAI")

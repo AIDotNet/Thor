@@ -131,8 +131,7 @@ public sealed partial class ChatService(
                     Other = channel.Other
                 }, context.RequestAborted);
                 sw.Stop();
-
-
+                
                 var quota = requestToken * rate.PromptRate;
 
                 var completionRatio = GetCompletionRatio(input.Model);
@@ -143,7 +142,7 @@ public sealed partial class ChatService(
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
-                await loggerService.CreateConsumeAsync(
+                await loggerService.CreateConsumeAsync("/v1/embeddings",
                     string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
                     input.Model,
                     requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
@@ -231,7 +230,7 @@ public sealed partial class ChatService(
 
                     sw.Stop();
 
-                    await loggerService.CreateConsumeAsync(
+                    await loggerService.CreateConsumeAsync("/v1/completions",
                         string.Format(ConsumerTemplate, rate, completionRatio, userGroup.Rate),
                         input.Model,
                         requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
@@ -410,7 +409,7 @@ public sealed partial class ChatService(
                         // 将quota 四舍五入
                         quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
-                        await loggerService.CreateConsumeAsync(
+                        await loggerService.CreateConsumeAsync("/v1/chat/completions",
                             string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
                                 cachedTokens, rate.CacheRate),
                             request.Model,
@@ -421,7 +420,7 @@ public sealed partial class ChatService(
                     }
                     else
                     {
-                        await loggerService.CreateConsumeAsync(
+                        await loggerService.CreateConsumeAsync("/v1/chat/completions",
                             string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
                             request.Model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
@@ -436,7 +435,7 @@ public sealed partial class ChatService(
                 else
                 {
                     // 费用
-                    await loggerService.CreateConsumeAsync(
+                    await loggerService.CreateConsumeAsync("/v1/chat/completions",
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
                             userGroup.Rate),
                         request.Model,
@@ -699,7 +698,7 @@ public sealed partial class ChatService(
 
                     sw.Stop();
 
-                    await loggerService.CreateConsumeAsync(
+                    await loggerService.CreateConsumeAsync("/v1/realtime",
                         string.Format(RealtimeConsumerTemplate, rate, completionRatio,
                             (ModelManagerService.PromptRate[model].AudioPromptRate),
                             ModelManagerService.PromptRate[model].AudioOutputRate, userGroup.Rate),
@@ -980,7 +979,7 @@ public sealed partial class ChatService(
 
             quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/audio/transcriptions",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 audioCreateTranscriptionRequest.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -1106,7 +1105,7 @@ public sealed partial class ChatService(
 
             quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/audio/speech",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 request.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -1229,7 +1228,7 @@ public sealed partial class ChatService(
 
             quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync(string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/audio/translations",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 audioCreateTranscriptionRequest.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,

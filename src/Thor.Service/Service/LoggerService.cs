@@ -35,10 +35,16 @@ public sealed class LoggerService(
     /// <param name="stream">是否Stream请求</param>
     /// <param name="totalTime">请求总耗时</param>
     /// <param name="organizationId"></param>
-    public async ValueTask CreateConsumeAsync(string content, string model, int promptTokens, int completionTokens,
+    public async ValueTask CreateConsumeAsync(string url, string content, string model, int promptTokens,
+        int completionTokens,
         int quota, string? tokenName, string? userName, string? userId, string? channelId, string? channelName,
-        string ip, string userAgent, bool stream, int totalTime, string? organizationId = null)
+        string ip, string userAgent, bool stream, int totalTime, string? organizationId = null,
+        string? serviceId = null, string openAIProject = null,
+        bool isSuccess = true, Dictionary<string, string>? meatdata = null
+    )
     {
+        meatdata ??= new Dictionary<string, string>();
+
         using var consume =
             Activity.Current?.Source.StartActivity("创建消费日志");
 
@@ -60,6 +66,51 @@ public sealed class LoggerService(
             }
         }
 
+        var trace = new Tracing();
+        if (Activity.Current != null)
+        {
+            trace.TraceId = Activity.Current.TraceId.ToString();
+            if (Activity.Current.Tags.Any() || Activity.Current.Baggage.Any())
+            {
+                var metadata = new Dictionary<string, string>();
+                foreach (var tag in Activity.Current.Tags)
+                {
+                    metadata[tag.Key] = tag.Value;
+                }
+
+                foreach (var item in Activity.Current.Baggage)
+                {
+                    metadata[item.Key] = item.Value;
+                }
+
+                trace.Attributes = metadata;
+            }
+
+            // 获取链路层级结构并存储到trace.Children
+            var parent = Activity.Current.Parent;
+            var depth = 0;
+            while (parent != null)
+            {
+                var childTrace = new Tracing
+                {
+                    TraceId = trace.TraceId,
+                    Name = parent.OperationName,
+                    Depth = depth,
+                    ServiceName = parent.Source?.Name ?? string.Empty,
+                    Attributes = new Dictionary<string, string>
+                    {
+                        ["span_id"] = parent.SpanId.ToString()
+                    }
+                };
+                trace.Children.Add(childTrace);
+                depth++;
+                parent = parent.Parent;
+            }
+
+            meatdata["trace_id"] = trace.TraceId;
+        }
+
+
         var logger = new ChatLogger
         {
             Type = ThorChatLoggerType.Consume,
@@ -68,6 +119,11 @@ public sealed class LoggerService(
             PromptTokens = promptTokens,
             CompletionTokens = completionTokens,
             Stream = stream,
+            ServiceId = serviceId,
+            OpenAIProject = openAIProject,
+            Metadata = meatdata,
+            IsSuccess = isSuccess,
+            Url = url,
             TotalTime = totalTime,
             IP = ip,
             UserAgent = userAgent,
