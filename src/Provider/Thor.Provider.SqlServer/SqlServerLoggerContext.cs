@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Thor.Core;
+using Thor.Core.DataAccess;
 
 namespace Thor.Provider;
 

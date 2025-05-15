@@ -2,7 +2,7 @@
 
 services:
   thor:
-    image: aidotnet/thor:latest
+    image: crpi-j9ha7sxwhatgtvj4.cn-shenzhen.personal.cr.aliyuncs.com/koala-ai/thor
     ports:
       - 18080:8080
     build:
@@ -34,7 +34,7 @@ services:
       - RunMigrationsAtStartup=true
 
   postgres:
-    image: postgres:17
+    image: crpi-j9ha7sxwhatgtvj4.cn-shenzhen.personal.cr.aliyuncs.com/koala-ai/postgres:17
     container_name: ai-postgres
     ports:
       - "5432:5432"
@@ -46,14 +46,14 @@ services:
       - ./data/postgres:/var/lib/postgresql/data
 
   ai-redis:
-    image: redis
+    image: crpi-j9ha7sxwhatgtvj4.cn-shenzhen.personal.cr.aliyuncs.com/koala-ai/redis
     container_name: ai-redis
     volumes:
       - ./data/redis:/data
     command: redis-server --appendonly yes
 
   aspire-dashboard:
-    image: mcr.microsoft.com/dotnet/aspire-dashboard:8.2
+    image: mcr.microsoft.com/dotnet/aspire-dashboard
     container_name: aspire-dashboard
     ports:
       - "18888:18888"
@@ -63,7 +63,7 @@ services:
 
 
   ai-rabbitmq:
-    image: rabbitmq:3-management
+    image: crpi-j9ha7sxwhatgtvj4.cn-shenzhen.personal.cr.aliyuncs.com/koala-ai/rabbitmq:3-management
     container_name: ai-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: admin

@@ -1,5 +1,6 @@
 ﻿using Thor.BuildingBlocks.Event;
 using Thor.Core.DataAccess;
+using Thor.Domain.Chats;
 
 namespace Thor.Service.EventBus;
 

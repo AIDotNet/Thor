@@ -1,4 +1,5 @@
-﻿using Thor.Infrastructure;
+﻿using Thor.Domain.Chats;
+using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
 using Thor.Service.Infrastructure;
 

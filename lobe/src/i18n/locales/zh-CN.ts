@@ -813,7 +813,6 @@ const zhCN = {
       transformationPromptPlaceholder: '描述您想要如何转换图像...',
       negativePrompt: '反向提示词',
       negativePromptPlaceholder: '想要在生成的图像中避免的元素...',
-      transformationStrength: '转换强度',
       subtle: '微妙',
       complete: '完全',
       token: '令牌',

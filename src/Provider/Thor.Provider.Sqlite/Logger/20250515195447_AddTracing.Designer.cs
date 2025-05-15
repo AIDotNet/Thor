@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thor.Provider;
 
@@ -10,9 +11,11 @@ using Thor.Provider;
 namespace Thor.Provider.Logger
 {
     [DbContext(typeof(SqliteLoggerContext))]
-    partial class SqliteLoggerContextModelSnapshot : ModelSnapshot
+    [Migration("20250515195447_AddTracing")]
+    partial class AddTracing
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.2");

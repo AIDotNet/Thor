@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Thor.BuildingBlocks.Event;
+using Thor.Domain.Chats;
 using Thor.Service.Options;
 
 namespace Thor.Service.Service;

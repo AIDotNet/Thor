@@ -17,12 +17,12 @@ namespace Thor.Provider.MySql.Logger
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("Thor.Service.Domain.ChatLogger", b =>
+            modelBuilder.Entity("Thor.Domain.Chats.ChatLogger", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -50,6 +50,12 @@ namespace Thor.Provider.MySql.Logger
                     b.Property<string>("IP")
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("ModelName")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
@@ -57,11 +63,20 @@ namespace Thor.Provider.MySql.Logger
                     b.Property<string>("Modifier")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("OpenAIProject")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OrganizationId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<int>("PromptTokens")
                         .HasColumnType("int");
 
                     b.Property<long>("Quota")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("ServiceId")
+                        .HasColumnType("varchar(255)");
 
                     b.Property<bool>("Stream")
                         .HasColumnType("tinyint(1)");
@@ -78,11 +93,14 @@ namespace Thor.Provider.MySql.Logger
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("Url")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("UserAgent")
                         .HasColumnType("longtext");
 
                     b.Property<string>("UserId")
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("UserName")
                         .HasColumnType("varchar(255)");
@@ -93,11 +111,90 @@ namespace Thor.Provider.MySql.Logger
 
                     b.HasIndex("ModelName");
 
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("ServiceId");
+
                     b.HasIndex("TokenName");
+
+                    b.HasIndex("UserId");
 
                     b.HasIndex("UserName");
 
                     b.ToTable("Loggers");
+                });
+
+            modelBuilder.Entity("Thor.Domain.Chats.Tracing", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Attributes")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ChatLoggerId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Children")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Creator")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("Depth")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Duration")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Modifier")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ServiceName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TraceId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatLoggerId");
+
+                    b.HasIndex("Creator");
+
+                    b.HasIndex("TraceId");
+
+                    b.ToTable("Tracings");
                 });
 
             modelBuilder.Entity("Thor.Service.Domain.ModelStatisticsNumber", b =>

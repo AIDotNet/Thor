@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Thor.Domain.Chats;
 using Thor.Service.Domain;
 
 namespace Thor.Core.DataAccess;
@@ -14,6 +15,10 @@ public interface ILoggerDbContext
 
     DbSet<ModelStatisticsNumber> ModelStatisticsNumbers { get; set; }
 
+    /// <summary>
+    /// 链路追踪
+    /// </summary>
+    DbSet<Tracing> Tracings { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
 

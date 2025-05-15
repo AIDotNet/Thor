@@ -755,7 +755,6 @@ const enUS = {
       transformationPromptPlaceholder: 'Describe how you want to transform the image...',
       negativePrompt: 'Negative Prompt',
       negativePromptPlaceholder: 'Elements to avoid in the generated image...',
-      transformationStrength: 'Transformation Strength',
       subtle: 'Subtle',
       complete: 'Complete',
       token: 'Token',

@@ -1,7 +1,7 @@
 ﻿using Thor.Abstractions;
 using Thor.Service.Domain.Core;
 
-namespace Thor.Service.Domain;
+namespace Thor.Domain.Chats;
 
 public sealed class ChatLogger : Entity<string>
 {
@@ -30,7 +30,7 @@ public sealed class ChatLogger : Entity<string>
     public string ModelName { get; set; }
 
     /// <summary>
-    /// token名称
+    /// token
     /// </summary>
     public string? TokenName { get; set; }
 
@@ -66,4 +66,30 @@ public sealed class ChatLogger : Entity<string>
     /// 组织id
     /// </summary>
     public string? OrganizationId { get; set; }
+    
+    /// <summary>
+    /// 请求的url
+    /// </summary>
+    public string? Url { get; set; }
+    
+    /// <summary>
+    /// OpenAI的项目id
+    /// </summary>
+    public string? OpenAIProject { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// Service服务id
+    /// </summary>
+    public string? ServiceId { get; set; } = string.Empty;
+    
+    /// <summary>
+    /// 是否请求成功
+    /// </summary>
+    public bool IsSuccess { get; set; } = true;
+    
+    /// <summary>
+    /// 元数据
+    /// </summary>
+    /// <returns></returns>
+    public Dictionary<string, string>? Metadata { get; set; } = new();
 }

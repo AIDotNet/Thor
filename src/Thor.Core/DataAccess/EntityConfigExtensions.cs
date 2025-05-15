@@ -4,7 +4,7 @@ using Thor.Domain.Chats;
 using Thor.Domain.Users;
 using Thor.Service.Domain;
 
-namespace Thor.Service.DataAccess;
+namespace Thor.Core.DataAccess;
 
 public static class EntityConfigExtensions
 {
@@ -13,8 +13,6 @@ public static class EntityConfigExtensions
         PropertyNameCaseInsensitive = true,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
-
-    private static readonly string[] ConvertFromProviderExpression = [];
 
     public static ModelBuilder ConfigureAIDotNet(this ModelBuilder modelBuilder)
     {
@@ -237,8 +235,42 @@ public static class EntityConfigExtensions
             options.HasIndex(x => x.UserName);
 
             options.HasIndex(x => x.OrganizationId);
+
+            options.HasIndex(x => x.ServiceId);
+
+            options.HasIndex(x => x.UserId);
+
+            options.Property(x => x.Metadata)
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => string.IsNullOrEmpty(item)
+                        ? new Dictionary<string, string>()
+                        : JsonSerializer.Deserialize<Dictionary<string, string>>(item, JsonSerializerOptions));
         });
 
+        modelBuilder.Entity<Tracing>(options =>
+        {
+            
+            options.HasKey(x => x.Id);
+            options
+                .Property(e => e.Id).ValueGeneratedOnAdd();
+
+            options.HasIndex(x => x.Creator);
+            options.HasIndex(x => x.ChatLoggerId);
+
+            options.HasIndex(x => x.TraceId);
+
+            options.Property(x => x.Attributes)
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => string.IsNullOrEmpty(item)
+                        ? new Dictionary<string, string>()
+                        : JsonSerializer.Deserialize<Dictionary<string, string>>(item, JsonSerializerOptions));
+
+            options.Property(x => x.Children)
+                .HasConversion(item => JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => string.IsNullOrEmpty(item)
+                        ? new List<Tracing>()
+                        : JsonSerializer.Deserialize<List<Tracing>>(item, JsonSerializerOptions));
+        });
 
         return modelBuilder;
     }

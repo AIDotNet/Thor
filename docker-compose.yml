@@ -2,7 +2,7 @@
 
 services:
   thor:
-    image: aidotnet/thor:latest
+    image: crpi-j9ha7sxwhatgtvj4.cn-shenzhen.personal.cr.aliyuncs.com/koala-ai/thor
     ports:
       - 18080:8080
     build:

@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Thor.Core.DataAccess;
+using Thor.Domain.Chats;
 using Thor.Service.DataAccess;
 using Thor.Service.Domain;
 
-namespace Thor.Core;
+namespace Thor.Core.DataAccess;
 
 public class LoggerDbContext<TContext>(DbContextOptions<TContext> options, IServiceProvider serviceProvider)
     : BaseContext<TContext>(options, serviceProvider), ILoggerDbContext where TContext : BaseContext<TContext>
@@ -13,6 +13,8 @@ public class LoggerDbContext<TContext>(DbContextOptions<TContext> options, IServ
     public DbSet<StatisticsConsumesNumber> StatisticsConsumesNumbers { get; set; }
 
     public DbSet<ModelStatisticsNumber> ModelStatisticsNumbers { get; set; }
+
+    public DbSet<Tracing> Tracings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
