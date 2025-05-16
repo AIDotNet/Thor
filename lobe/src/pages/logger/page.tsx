@@ -17,15 +17,12 @@ import {
   theme,
   ConfigProvider,
   Timeline,
-  Tree,
   Empty,
-  Dropdown,
   Checkbox,
   Tooltip as AntTooltip,
   Badge,
   Modal
 } from "antd";
-import type { ColumnsType } from 'antd/es/table';
 import {
   SearchOutlined,
   FilterOutlined,
@@ -33,17 +30,13 @@ import {
   DownloadOutlined,
   BarChartOutlined,
   UserOutlined,
-  ClockCircleOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
-  LoadingOutlined,
   CaretRightOutlined,
   CalendarOutlined,
   SettingOutlined,
   MenuOutlined,
-  EyeOutlined
 } from "@ant-design/icons";
-import { getLoggers, viewConsumption, getLoggerDetail } from "../../services/LoggerService";
+import { getLoggers, viewConsumption } from "../../services/LoggerService";
 import { GetServerLoad } from "../../services/TrackerService";
 import { Tag, Tooltip } from "@lobehub/ui";
 import { renderQuota } from "../../utils/render";

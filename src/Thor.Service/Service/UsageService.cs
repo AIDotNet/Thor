@@ -11,7 +11,7 @@ namespace Thor.Service.Service;
 public class UsageService(ILoggerDbContext dbContext)
 {
     // 已知的API服务类型及其对应的URL前缀
-    private static readonly Dictionary<string, string> _knownApiServices = new()
+    private static readonly Dictionary<string, string> KnownApiServices = new()
     {
         { "聊天完成", "/v1/chat/completions" },
         { "图片服务", "/v1/images/generations" }, // 代表整组图片相关服务
@@ -193,7 +193,7 @@ public class UsageService(ILoggerDbContext dbContext)
         var allApis = new HashSet<string>(actualApis);
         
         // 添加所有已知的API服务类型
-        foreach (var knownApi in _knownApiServices.Values)
+        foreach (var knownApi in KnownApiServices.Values)
         {
             // 已知API可能是多个URL的代表，这里只添加主要URL
             if (!allApis.Any(api => api.Contains(knownApi)))

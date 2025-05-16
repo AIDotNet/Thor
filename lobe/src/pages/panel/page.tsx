@@ -4,12 +4,11 @@ import { GetStatistics } from '../../services/StatisticsService';
 import * as echarts from 'echarts';
 import { useTheme } from 'antd-style';
 import { getIconByName } from '../../utils/iconutils';
-import { GetServerLoad, GetUserRequest } from '../../services/TrackerService';
+import { GetUserRequest } from '../../services/TrackerService';
 import { Flexbox } from 'react-layout-kit';
 import { Typography, Card, Row, Col, Space, Statistic, Skeleton, Grid, ConfigProvider } from 'antd';
 import {
   RiseOutlined,
-  DashboardOutlined,
   LineChartOutlined,
   DollarOutlined,
   ApiOutlined,
