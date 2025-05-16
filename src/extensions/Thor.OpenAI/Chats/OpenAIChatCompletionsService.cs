@@ -26,7 +26,6 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey).ConfigureAwait(false);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -47,7 +46,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             logger.LogError("OpenAI对话异常 请求地址：{Address}, StatusCode: {StatusCode} Response: {Response}", options.Address,
                 response.StatusCode, error);
-
+            
             throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
         }
 
@@ -69,7 +68,6 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             options?.Address.TrimEnd('/') + "/v1/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   message,
   Button,
@@ -15,24 +15,86 @@ import {
   Col,
   Collapse,
   theme,
-  ConfigProvider
+  ConfigProvider,
+  Timeline,
+  Tree,
+  Empty,
+  Dropdown,
+  Checkbox,
+  Tooltip as AntTooltip,
+  Badge,
+  Modal
 } from "antd";
+import type { ColumnsType } from 'antd/es/table';
 import {
   SearchOutlined,
   FilterOutlined,
   ReloadOutlined,
   DownloadOutlined,
   BarChartOutlined,
-  UserOutlined
+  UserOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  LoadingOutlined,
+  CaretRightOutlined,
+  CalendarOutlined,
+  SettingOutlined,
+  MenuOutlined,
+  EyeOutlined
 } from "@ant-design/icons";
-import { getLoggers, viewConsumption } from "../../services/LoggerService";
+import { getLoggers, viewConsumption, getLoggerDetail } from "../../services/LoggerService";
+import { GetServerLoad } from "../../services/TrackerService";
 import { Tag, Tooltip } from "@lobehub/ui";
 import { renderQuota } from "../../utils/render";
 import dayjs from "dayjs";
+import { DndContext, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const { Title, Text } = Typography;
 const { Panel } = Collapse;
 const { useToken } = theme;
+
+interface ColumnConfigItem {
+  key: string;
+  title: string;
+  dataIndex: string;
+  width?: number;
+  fixed?: boolean | 'left' | 'right';
+  disable?: boolean;
+  render?: (...args: any[]) => JSX.Element | null;
+  sorter?: (a: any, b: any) => number;
+  filters?: { text: string; value: string }[];
+  onFilter?: (value: any, record: any) => boolean;
+  ellipsis?: boolean | { showTitle?: boolean };
+}
+
+// 拖拽表头
+const SortableItem = (props: {
+  id: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: props.id,
+  });
+  
+  const style: React.CSSProperties = {
+    ...props.style,
+    transform: CSS.Transform.toString(transform),
+    transition,
+    cursor: 'move',
+    ...(isDragging ? { position: 'relative', zIndex: 9999 } : {}),
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {props.children}
+    </div>
+  );
+};
 
 export default function LoggerPage() {
   const { token } = useToken();
@@ -42,12 +104,22 @@ export default function LoggerPage() {
   const [consume, setConsume] = useState<number>(0);
   const [consumeLoading, setConsumeLoading] = useState<boolean>(false);
   const [filterVisible, setFilterVisible] = useState<boolean>(true);
+  const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
+  const [traceDataMap, setTraceDataMap] = useState<Record<string, any>>({});
+  const [loadingTraceMap, setLoadingTraceMap] = useState<Record<string, boolean>>({});
+  const [columnSettingsVisible, setColumnSettingsVisible] = useState<boolean>(false);
+  const [columnsConfig, setColumnsConfig] = useState<ColumnConfigItem[]>([]);
+  const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
+  // 临时状态，用于编辑中的列配置
+  const [tempColumnsConfig, setTempColumnsConfig] = useState<ColumnConfigItem[]>([]);
+  const [tempSelectedColumns, setTempSelectedColumns] = useState<string[]>([]);
+  
   const [input, setInput] = useState({
     page: 1,
     pageSize: 10,
     type: -1,
     model: "",
-    startTime: null,
+    startTime: dayjs().subtract(15, 'day').format("YYYY-MM-DD HH:mm:ss"),
     endTime: null,
     keyword: "",
   } as {
@@ -61,53 +133,70 @@ export default function LoggerPage() {
     organizationId?: string;
   });
 
+  // 拖拽传感器
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
+
   // Style objects using theme tokens
   const styles = {
-    dashboardContainer: {
-      padding: 16,
-      width: '100%',
-      maxWidth: 1800,
+    pageContainer: {
+      padding: 24,
+      maxWidth: 1600,
       margin: '0 auto',
+      background: token.colorBgContainer,
+      minHeight: 'calc(100vh - 48px)',
     },
-    dashboardHeader: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+    pageHeader: {
       marginBottom: 24,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       flexWrap: 'wrap' as const,
       gap: 16,
     },
-    headerTitle: {
+    pageTitle: {
       margin: 0,
-      fontSize: '1.6rem',
+      fontSize: 20,
+      fontWeight: 500,
+      color: token.colorTextHeading,
+    },
+    statsRow: {
+      marginBottom: 24,
     },
     statsCard: {
       height: '100%',
-      borderRadius: token.borderRadius,
-      boxShadow: `0 1px 4px ${token.colorBorderSecondary}`,
+      borderRadius: 8,
+      border: `1px solid ${token.colorBorderSecondary}`,
+      boxShadow: 'none',
     },
     statsValue: {
-      fontSize: '1.8rem',
+      fontSize: 24,
       fontWeight: 600,
       display: 'block',
       color: token.colorTextHeading,
+      marginBottom: 4,
     },
     statsLabel: {
       color: token.colorTextSecondary,
-      fontSize: '0.9rem',
+      fontSize: 14,
     },
     filterSection: {
       marginBottom: 24,
     },
     filterCollapse: {
-      borderRadius: token.borderRadius,
+      borderRadius: 8,
       overflow: 'hidden',
-      background: token.colorBgContainer,
       border: `1px solid ${token.colorBorderSecondary}`,
+      background: token.colorBgElevated,
     },
-    filtersContainer: {
+    filtersGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
       gap: 16,
     },
     filterItem: {
@@ -116,36 +205,338 @@ export default function LoggerPage() {
       gap: 8,
     },
     filterLabel: {
-      fontSize: '0.85rem',
+      fontSize: 14,
       color: token.colorTextSecondary,
       marginBottom: 4,
     },
     actionBar: {
       display: 'flex',
-      gap: 8,
+      justifyContent: 'space-between',
+      alignItems: 'center',
       marginBottom: 16,
       flexWrap: 'wrap' as const,
+      gap: 8,
     },
     tableCard: {
-      borderRadius: token.borderRadius,
+      borderRadius: 8,
+      border: `1px solid ${token.colorBorderSecondary}`,
+      boxShadow: 'none',
       overflow: 'hidden',
-      boxShadow: `0 1px 4px ${token.colorBorderSecondary}`,
+      background: token.colorBgContainer,
     },
     tableCardBody: {
       padding: 0,
     },
     tableRowLight: {
       backgroundColor: token.colorBgContainer,
+      transition: 'background-color 0.3s',
+      '&:hover': {
+        backgroundColor: `${token.colorPrimaryBg} !important`,
+      },
     },
     tableRowDark: {
       backgroundColor: token.colorFillAlter,
+      transition: 'background-color 0.3s',
+      '&:hover': {
+        backgroundColor: `${token.colorPrimaryBg} !important`,
+      },
     },
     tag: {
       margin: 2,
+    },
+    // 展开区域样式
+    expandedRow: {
+      padding: '16px 24px',
+      background: token.colorBgElevated,
+      borderRadius: 8,
+    },
+    metadataCard: {
+      marginBottom: 16,
+      background: token.colorBgContainer,
+      padding: 16,
+      borderRadius: 8,
+      border: `1px solid ${token.colorBorderSecondary}`,
+    },
+    metadataLabel: {
+      fontSize: 12,
+      color: token.colorTextSecondary,
+    },
+    metadataValue: {
+      fontSize: 14,
+      color: token.colorText,
+      whiteSpace: 'nowrap' as const,
+      overflow: 'hidden' as const,
+      textOverflow: 'ellipsis' as const,
+    },
+    timelineContainer: {
+      marginTop: 16,
+    },
+    timelineTitle: {
+      fontSize: 16,
+      marginBottom: 16,
+      fontWeight: 500,
+    },
+    timelineItem: {
+      background: token.colorBgContainer,
+      padding: '12px 16px',
+      borderRadius: 8,
+      border: `1px solid ${token.colorBorderSecondary}`,
+      marginBottom: 8,
+      boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+    },
+    timelineHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    timelineDetails: {
+      fontSize: 12,
+      color: token.colorTextSecondary,
+    },
+    emptyData: {
+      padding: '40px 0',
+    },
+    columnSettingsModal: {
+      padding: 0,
+    },
+    columnSettingsHeader: {
+      padding: '12px 16px',
+      borderBottom: `1px solid ${token.colorBorderSecondary}`,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    columnSettingsList: {
+      padding: '8px 0',
+      maxHeight: '400px',
+      overflow: 'auto',
+    },
+    columnSettingsItem: {
+      padding: '8px 16px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderBottom: `1px solid ${token.colorBorderSecondary}`,
+      transition: 'background-color 0.2s',
+      '&:hover': {
+        backgroundColor: token.colorBgTextHover,
+      },
+    },
+    columnSettingsItemTitle: {
+      flex: 1,
+      marginLeft: 8,
+    },
+    columnSettingsFooter: {
+      padding: '12px 16px',
+      borderTop: `1px solid ${token.colorBorderSecondary}`,
+      display: 'flex',
+      justifyContent: 'space-between',
+    },
+    columnSettingsHandle: {
+      cursor: 'grab',
+      color: token.colorTextSecondary,
+      display: 'flex',
+      alignItems: 'center',
+    },
+    tableHeader: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '12px 16px',
+      borderBottom: `1px solid ${token.colorBorderSecondary}`,
+      backgroundColor: token.colorBgContainer,
+    },
+    tableHeaderTitle: {
+      margin: 0,
+      fontSize: 16,
+      fontWeight: 500,
+    },
+    tableSettingsButton: {
+      display: 'flex',
+      alignItems: 'center',
+    },
+  };
+
+  // 使用ref来跟踪配置是否已初始化
+  const configInitialized = useRef<boolean>(false);
+
+  // 获取链路追踪数据
+  const fetchTraceData = async (loggerId: string) => {
+    if (traceDataMap[loggerId]) return;
+    
+    setLoadingTraceMap(prev => ({ ...prev, [loggerId]: true }));
+    try {
+      const response = await GetServerLoad(loggerId);
+      if (response.success) {
+        setTraceDataMap(prev => ({ ...prev, [loggerId]: response.data }));
+      } else {
+        message.error(response.message || '获取链路追踪数据失败');
+      }
+    } catch (error) {
+      message.error('获取链路追踪数据时发生错误');
+      console.error(error);
+    } finally {
+      setLoadingTraceMap(prev => ({ ...prev, [loggerId]: false }));
     }
   };
 
-  // Media query styles
+  // 展开/折叠行
+  const handleExpandRow = (expanded: boolean, record: any) => {
+    if (expanded) {
+      setExpandedRowKeys([record.id]);
+      fetchTraceData(record.id);
+    } else {
+      setExpandedRowKeys([]);
+    }
+  };
+
+  // 渲染链路追踪时间线
+  const renderTraceTimeline = (data: any) => {
+    if (!data) return null;
+    
+    const renderTimelineItem = (item: any, index: number) => {
+      // 计算执行时间
+      const duration = item.duration ? `${item.duration}ms` : '0ms';
+      
+      // 根据操作类型或服务名称设置不同颜色
+      let itemColor = 'blue';
+      if (item.serviceName.includes('System.Net.Http')) {
+        itemColor = 'purple';
+      } else if (item.name.includes('错误') || item.status === 2) {
+        itemColor = 'red';
+      } else if (item.name.includes('消费') || item.name.includes('扣款')) {
+        itemColor = 'green';
+      } else if (item.name.includes('OpenAI') || item.name.includes('模型')) {
+        itemColor = 'cyan';
+      }
+      
+      // 状态图标
+      let dotIcon = <CheckCircleOutlined style={{ fontSize: '16px' }} />;
+      
+      return (
+        <Timeline.Item 
+          key={item.id || index} 
+          color={itemColor}
+          dot={dotIcon}
+          style={{ paddingBottom: 5 }}
+        >
+          <div style={styles.timelineItem}>
+            <div style={styles.timelineHeader}>
+              <span>
+                <Tag color={itemColor} style={{ marginRight: 8 }}>
+                  {item.name}
+                </Tag>
+              </span>
+              <span style={{ color: token.colorTextSecondary, fontSize: '12px' }}>
+                {item.startTime ? item.startTime.split(' ')[1] : ''}
+              </span>
+            </div>
+            <div style={styles.timelineDetails}>
+              <Space size={12}>
+                <span>服务: {item.serviceName}</span>
+                {item.duration > 0 && <span>耗时: {duration}</span>}
+                {Object.keys(item.attributes).length > 0 && (
+                  <Tooltip 
+                    title={
+                      <div>
+                        {Object.entries(item.attributes).map(([key, value]) => (
+                          <div key={key}>{key}: {String(value)}</div>
+                        ))}
+                      </div>
+                    }
+                  >
+                    <span style={{ cursor: 'pointer', textDecoration: 'underline' }}>查看属性</span>
+                  </Tooltip>
+                )}
+              </Space>
+            </div>
+          </div>
+          
+          {/* 如果有子节点，递归渲染 */}
+          {item.children && item.children.length > 0 && (
+            <div style={{ marginLeft: 20 }}>
+              <Timeline>
+                {item.children.map((child: any, childIndex: number) => renderTimelineItem(child, childIndex))}
+              </Timeline>
+            </div>
+          )}
+        </Timeline.Item>
+      );
+    };
+    
+    return (
+      <Timeline>
+        {renderTimelineItem(data, 0)}
+      </Timeline>
+    );
+  };
+
+  // 渲染展开行内容
+  const expandedRowRender = (record: any) => {
+    const loggerId = record.id;
+    const isLoading = loadingTraceMap[loggerId];
+    const traceData = traceDataMap[loggerId];
+    
+    if (isLoading) {
+      return (
+        <div style={{ padding: '20px 0', textAlign: 'center' }}>
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </div>
+      );
+    }
+    
+    if (!traceData) {
+      return (
+        <div style={styles.emptyData}>
+          <Empty description="暂无链路追踪数据" />
+        </div>
+      );
+    }
+    
+    return (
+      <div style={styles.expandedRow}>
+        <div style={styles.metadataCard}>
+          <Row gutter={[16, 16]}>
+            <Col span={8}>
+              <div style={styles.metadataLabel}>跟踪ID</div>
+              <div style={styles.metadataValue} title={traceData.traceId || '-'}>
+                {traceData.traceId || '-'}
+              </div>
+            </Col>
+            <Col span={8}>
+              <div style={styles.metadataLabel}>日志ID</div>
+              <div style={styles.metadataValue} title={traceData.chatLoggerId || '-'}>
+                {traceData.chatLoggerId || '-'}
+              </div>
+            </Col>
+            <Col span={8}>
+              <div style={styles.metadataLabel}>开始时间</div>
+              <div style={styles.metadataValue}>{traceData.startTime || '-'}</div>
+            </Col>
+            <Col span={8}>
+              <div style={styles.metadataLabel}>服务名称</div>
+              <div style={styles.metadataValue}>{traceData.serviceName || '-'}</div>
+            </Col>
+            <Col span={8}>
+              <div style={styles.metadataLabel}>总耗时</div>
+              <div style={styles.metadataValue}>{traceData.duration ? `${traceData.duration}ms` : '-'}</div>
+            </Col>
+            <Col span={8}>
+              <div style={styles.metadataLabel}>创建时间</div>
+              <div style={styles.metadataValue}>{traceData.createdAt || '-'}</div>
+            </Col>
+          </Row>
+        </div>
+        
+        <div style={styles.timelineContainer}>
+          <Typography.Title level={5} style={styles.timelineTitle}>调用链路</Typography.Title>
+          {renderTraceTimeline(traceData)}
+        </div>
+      </div>
+    );
+  };
+
   function timeString(totalTime: number) {
     let s = totalTime / 1000;
     let m = Math.floor(s / 60);
@@ -153,10 +544,11 @@ export default function LoggerPage() {
     return `${m}分${s}秒`;
   }
 
-  const columns = useMemo(() => [
+  // 原始列配置
+  const originalColumns = useMemo<ColumnConfigItem[]>(() => [
     {
       title: "时间",
-      fixed: "left",
+      fixed: "left" as const,
       dataIndex: "createdAt",
       key: "createdAt",
       width: 180,
@@ -165,7 +557,6 @@ export default function LoggerPage() {
     {
       title: "消费",
       dataIndex: "quota",
-      fixed: "left",
       key: "quota",
       width: 120,
       render: (value: any) => value && (
@@ -192,11 +583,6 @@ export default function LoggerPage() {
           {value}
         </Tag>
       ),
-      filters: [
-        { text: '渠道A', value: '渠道A' },
-        { text: '渠道B', value: '渠道B' },
-      ],
-      onFilter: (value: any, record: any) => record.channelName === value,
     },
     {
       title: "用户",
@@ -249,12 +635,7 @@ export default function LoggerPage() {
             {value}
           </Tag>
         );
-      },
-      filters: [
-        { text: 'GPT-3.5', value: 'gpt-3.5-turbo' },
-        { text: 'GPT-4', value: 'gpt-4' },
-      ],
-      onFilter: (value: any, record: any) => record.modelName === value,
+      }
     },
     {
       title: "用时",
@@ -331,6 +712,179 @@ export default function LoggerPage() {
     },
   ], [styles.tag]);
 
+  // 初始化列配置
+  useEffect(() => {
+    // 防止重复初始化
+    if (configInitialized.current) {
+      return;
+    }
+    
+    try {
+      // 尝试从localStorage获取已保存的配置
+      const savedConfig = localStorage.getItem('logger_columns_config');
+      const savedSelected = localStorage.getItem('logger_selected_columns');
+      
+      if (savedConfig && savedSelected) {
+        try {
+          const parsedConfig = JSON.parse(savedConfig);
+          const parsedSelected = JSON.parse(savedSelected);
+          
+          // 验证数据有效性
+          if (Array.isArray(parsedConfig) && parsedConfig.length > 0 && 
+              Array.isArray(parsedSelected) && parsedSelected.length > 0) {
+            setColumnsConfig(parsedConfig);
+            setSelectedColumns(parsedSelected);
+            setTempColumnsConfig(parsedConfig);
+            setTempSelectedColumns(parsedSelected);
+            console.log('从本地存储加载列配置', parsedConfig, parsedSelected);
+            configInitialized.current = true;
+            return;
+          }
+        } catch (error) {
+          console.error('解析列配置出错', error);
+        }
+      }
+      
+      // 默认配置
+      const defaultSelected = originalColumns
+        .filter(col => !col.disable)
+        .map(col => col.key);
+      setColumnsConfig(originalColumns);
+      setSelectedColumns(defaultSelected);
+      setTempColumnsConfig(originalColumns);
+      setTempSelectedColumns(defaultSelected);
+      console.log('使用默认列配置');
+      configInitialized.current = true;
+    } catch (error) {
+      console.error('初始化列配置出错', error);
+      // 失败时的默认配置
+      const defaultSelected = originalColumns
+        .filter(col => !col.disable)
+        .map(col => col.key);
+      setColumnsConfig(originalColumns);
+      setSelectedColumns(defaultSelected);
+      setTempColumnsConfig(originalColumns);
+      setTempSelectedColumns(defaultSelected);
+      configInitialized.current = true;
+    }
+  }, [originalColumns]);
+
+  // 打开列设置弹窗时初始化临时状态
+  const openColumnSettings = () => {
+    setTempColumnsConfig([...columnsConfig]);
+    setTempSelectedColumns([...selectedColumns]);
+    setColumnSettingsVisible(true);
+  };
+  
+  // 关闭列设置弹窗时不保存更改
+  const closeColumnSettings = () => {
+    setColumnSettingsVisible(false);
+    // 丢弃临时更改
+    setTempColumnsConfig([...columnsConfig]);
+    setTempSelectedColumns([...selectedColumns]);
+  };
+
+  // 保存列配置
+  const saveColumnSettings = () => {
+    if (tempSelectedColumns.length === 0) {
+      message.warning('请至少选择一列');
+      return;
+    }
+    
+    try {
+      // 应用临时状态到实际状态
+      setColumnsConfig([...tempColumnsConfig]);
+      setSelectedColumns([...tempSelectedColumns]);
+      
+      // 保存到本地存储
+      const configToSave = JSON.stringify(tempColumnsConfig);
+      const selectedToSave = JSON.stringify(tempSelectedColumns);
+      
+      localStorage.setItem('logger_columns_config', configToSave);
+      localStorage.setItem('logger_selected_columns', selectedToSave);
+      
+      console.log('保存列配置', {
+        columnsConfig: tempColumnsConfig,
+        selectedColumns: tempSelectedColumns
+      });
+      
+      setColumnSettingsVisible(false);
+      message.success('列配置已保存');
+    } catch (error) {
+      console.error('保存列配置出错', error);
+      message.error('保存列配置失败');
+    }
+  };
+
+  // 重置列配置
+  const resetColumnSettings = () => {
+    // 只重置临时状态
+    setTempColumnsConfig(originalColumns);
+    setTempSelectedColumns(originalColumns
+      .filter(col => !col.disable)
+      .map(col => col.key)
+    );
+  };
+
+  // 切换列显示状态
+  const toggleColumnVisibility = (key: string) => {
+    if (tempSelectedColumns.includes(key)) {
+      // 至少保留一列
+      if (tempSelectedColumns.length > 1) {
+        setTempSelectedColumns(tempSelectedColumns.filter(k => k !== key));
+      } else {
+        message.warning('至少需要保留一列');
+      }
+    } else {
+      setTempSelectedColumns([...tempSelectedColumns, key]);
+    }
+  };
+
+  // 处理列排序
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (active.id !== over?.id) {
+      setTempColumnsConfig((columns) => {
+        const oldIndex = columns.findIndex((col) => col.key === active.id);
+        const newIndex = columns.findIndex((col) => col.key === over?.id);
+        
+        return arrayMove(columns, oldIndex, newIndex);
+      });
+    }
+  };
+
+  // 获取当前使用的列配置
+  const activeColumns = useMemo<ColumnConfigItem[]>(() => {
+    // 确保选择的列不为空，如果为空使用默认显示
+    if (selectedColumns.length === 0) {
+      const defaultColumns = columnsConfig
+        .filter(col => col.disable === undefined || col.disable === false)
+        .slice(0, 3); // 至少显示前三列
+      
+      return defaultColumns.map((col, index) => ({
+        ...col,
+        ...(index === 0 ? { fixed: 'left' as const } : {}),
+      }));
+    }
+    
+    // 正常情况
+    const filtered = columnsConfig
+      .filter(col => selectedColumns.includes(col.key) && (col.disable === undefined || col.disable === false));
+    
+    // 如果筛选后没有列，则显示第一列
+    if (filtered.length === 0 && columnsConfig.length > 0) {
+      const firstCol = columnsConfig[0];
+      return [{ ...firstCol, fixed: 'left' as const }];
+    }
+    
+    return filtered.map((col, index) => ({
+      ...col,
+      // 为第一列添加固定属性
+      ...(index === 0 ? { fixed: 'left' as const } : {}),
+    }));
+  }, [columnsConfig, selectedColumns]);
+
   function loadData() {
     setLoading(true);
 
@@ -372,10 +926,10 @@ export default function LoggerPage() {
     loadViewConsumption();
   }, [input.page, input.pageSize]);
 
-  // Number display component
+  // 数值显示组件
   const ConsumptionNumber = ({ value }: { value: number }) => {
     return (
-      <span style={{ fontWeight: "bold", display: "inline-block" }}>
+      <span style={styles.statsValue}>
         {renderQuota(value, 4)}
       </span>
     );
@@ -396,7 +950,7 @@ export default function LoggerPage() {
       pageSize: 10,
       type: -1,
       model: "",
-      startTime: null,
+      startTime: dayjs().subtract(15, 'day').format("YYYY-MM-DD HH:mm:ss"),
       endTime: null,
       keyword: "",
     });
@@ -410,7 +964,7 @@ export default function LoggerPage() {
     <ConfigProvider
       theme={{
         token: {
-          borderRadius: token.borderRadius,
+          borderRadius: 8,
           colorBgContainer: token.colorBgContainer,
           colorBorderSecondary: token.colorBorderSecondary,
           colorPrimary: token.colorPrimary,
@@ -420,231 +974,319 @@ export default function LoggerPage() {
         }
       }}
     >
-      <div style={styles.dashboardContainer}>
-        <div style={styles.dashboardHeader}>
-          <Title level={3} style={styles.headerTitle}>日志查询与消费统计</Title>
+      <div style={styles.pageContainer}>
+        <div style={styles.pageHeader}>
+          <Title level={4} style={styles.pageTitle}>系统日志</Title>
           <Space wrap>
             <Button 
               icon={<ReloadOutlined />} 
               onClick={handleReset}
             >
-              <span className="button-text">重置</span>
+              重置
             </Button>
             <Button
               type="primary"
-              icon={<FilterOutlined />}
+              icon={filterVisible ? <FilterOutlined /> : <FilterOutlined />}
               onClick={() => setFilterVisible(!filterVisible)}
             >
-              <span className="button-text">
-                {filterVisible ? "隐藏筛选" : "显示筛选"}
-              </span>
+              {filterVisible ? "隐藏筛选" : "显示筛选"}
             </Button>
           </Space>
         </div>
 
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+        <Row gutter={[16, 16]} style={styles.statsRow}>
           <Col xs={24} sm={12} md={8} lg={6}>
             <Card
               style={styles.statsCard}
               bodyStyle={{ padding: 16 }}
             >
-              <Text style={styles.statsValue}>
-                {consumeLoading ? (
-                  <Skeleton.Button active size="small" style={{ width: "120px", height: "32px" }} />
-                ) : (
-                  <ConsumptionNumber value={consume} />
-                )}
-              </Text>
-              <Text style={styles.statsLabel}>区间总消费</Text>
-              <div style={{ position: 'absolute', right: '16px', top: '16px' }}>
-                <Button 
-                  type="text" 
-                  icon={<BarChartOutlined />} 
-                />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  {consumeLoading ? (
+                    <Skeleton.Button active size="small" style={{ width: "120px", height: "32px" }} />
+                  ) : (
+                    <ConsumptionNumber value={consume} />
+                  )}
+                  <Text style={styles.statsLabel}>区间总消费</Text>
+                </div>
+                <BarChartOutlined style={{ fontSize: 20, color: token.colorPrimary }} />
               </div>
             </Card>
           </Col>
         </Row>
 
         {filterVisible && (
-          <div style={{ marginBottom: '24px' }}>
-            <div style={styles.filterSection}>
-              <Collapse 
-                defaultActiveKey={['1']}
-                style={styles.filterCollapse}
+          <div style={styles.filterSection}>
+            <Collapse 
+              defaultActiveKey={['1']}
+              style={styles.filterCollapse}
+              ghost
+            >
+              <Panel 
+                header={<Text strong>搜索筛选</Text>} 
+                key="1"
               >
-                <Panel header="搜索筛选" key="1">
-                  <div style={styles.filtersContainer}>
-                    <div style={styles.filterItem}>
-                      <Text style={styles.filterLabel}>模型名称</Text>
-                      <Input
-                        prefix={<SearchOutlined />}
-                        value={input.model}
-                        onChange={(e) => {
-                          setInput({
-                            ...input,
-                            model: e.target.value,
-                          });
-                        }}
-                        placeholder="模型名称"
-                        allowClear
-                      />
-                    </div>
-                    
-                    <div style={styles.filterItem}>
-                      <Text style={styles.filterLabel}>类型</Text>
-                      <Select
-                        style={{ width: '100%' }}
-                        value={input.type}
-                        onChange={(e: any) => {
-                          setInput({
-                            ...input,
-                            type: e,
-                          });
-                        }}
-                      >
-                        <Select.Option value={-1}>全部</Select.Option>
-                        <Select.Option value={1}>消费</Select.Option>
-                        <Select.Option value={2}>充值</Select.Option>
-                        <Select.Option value={3}>系统</Select.Option>
-                        <Select.Option value={4}>新增用户</Select.Option>
-                      </Select>
-                    </div>
-                    
-                    <div style={styles.filterItem}>
-                      <Text style={styles.filterLabel}>关键字</Text>
-                      <Input
-                        prefix={<SearchOutlined />}
-                        value={input.keyword}
-                        onChange={(e) => {
-                          setInput({
-                            ...input,
-                            keyword: e.target.value,
-                          });
-                        }}
-                        placeholder="关键字"
-                        allowClear
-                      />
-                    </div>
-                    
-                    <div style={styles.filterItem}>
-                      <Text style={styles.filterLabel}>组织ID</Text>
-                      <Input
-                        prefix={<UserOutlined />}
-                        value={input.organizationId}
-                        onChange={(e) => {
-                          setInput({
-                            ...input,
-                            organizationId: e.target.value,
-                          });
-                        }}
-                        placeholder="组织ID"
-                        allowClear
-                      />
-                    </div>
-                    
-                    <div style={styles.filterItem}>
-                      <Text style={styles.filterLabel}>开始时间</Text>
-                      <DatePicker
-                        style={{ width: '100%' }}
-                        value={input.startTime ? dayjs(input.startTime) : null}
-                        onChange={(e: any) => {
-                          setInput({
-                            ...input,
-                            startTime: e ? e.format("YYYY-MM-DD HH:mm:ss") : null,
-                          });
-                        }}
-                        placeholder="开始时间"
-                        allowClear
-                        showTime
-                        format="YYYY-MM-DD HH:mm:ss"
-                      />
-                    </div>
-                    
-                    <div style={styles.filterItem}>
-                      <Text style={styles.filterLabel}>结束时间</Text>
-                      <DatePicker
-                        style={{ width: '100%' }}
-                        value={input.endTime ? dayjs(input.endTime) : null}
-                        onChange={(e: any) => {
-                          setInput({
-                            ...input,
-                            endTime: e ? e.format("YYYY-MM-DD HH:mm:ss") : null,
-                          });
-                        }}
-                        placeholder="结束时间"
-                        allowClear
-                        showTime
-                        format="YYYY-MM-DD HH:mm:ss"
-                      />
-                    </div>
+                <div style={styles.filtersGrid}>
+                  <div style={styles.filterItem}>
+                    <Text style={styles.filterLabel}>模型名称</Text>
+                    <Input
+                      placeholder="输入模型名称"
+                      value={input.model}
+                      onChange={(e) => {
+                        setInput({
+                          ...input,
+                          model: e.target.value,
+                        });
+                      }}
+                      prefix={<SearchOutlined style={{ color: token.colorTextSecondary }} />}
+                      allowClear
+                    />
                   </div>
                   
-                  <Divider style={{ margin: '16px 0' }} />
-                  
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Space>
-                      <Button onClick={handleReset}>重置</Button>
-                      <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-                        搜索
-                      </Button>
-                    </Space>
+                  <div style={styles.filterItem}>
+                    <Text style={styles.filterLabel}>类型</Text>
+                    <Select
+                      style={{ width: '100%' }}
+                      value={input.type}
+                      onChange={(e: any) => {
+                        setInput({
+                          ...input,
+                          type: e,
+                        });
+                      }}
+                      placeholder="选择类型"
+                    >
+                      <Select.Option value={-1}>全部</Select.Option>
+                      <Select.Option value={1}>消费</Select.Option>
+                      <Select.Option value={2}>充值</Select.Option>
+                      <Select.Option value={3}>系统</Select.Option>
+                      <Select.Option value={4}>新增用户</Select.Option>
+                    </Select>
                   </div>
-                </Panel>
-              </Collapse>
-            </div>
+                  
+                  <div style={styles.filterItem}>
+                    <Text style={styles.filterLabel}>关键字</Text>
+                    <Input
+                      placeholder="搜索关键字"
+                      value={input.keyword}
+                      onChange={(e) => {
+                        setInput({
+                          ...input,
+                          keyword: e.target.value,
+                        });
+                      }}
+                      prefix={<SearchOutlined style={{ color: token.colorTextSecondary }} />}
+                      allowClear
+                    />
+                  </div>
+                  
+                  <div style={styles.filterItem}>
+                    <Text style={styles.filterLabel}>组织ID</Text>
+                    <Input
+                      placeholder="输入组织ID"
+                      value={input.organizationId}
+                      onChange={(e) => {
+                        setInput({
+                          ...input,
+                          organizationId: e.target.value,
+                        });
+                      }}
+                      prefix={<UserOutlined style={{ color: token.colorTextSecondary }} />}
+                      allowClear
+                    />
+                  </div>
+                  
+                  <div style={styles.filterItem}>
+                    <Text style={styles.filterLabel}>开始时间</Text>
+                    <DatePicker
+                      style={{ width: '100%' }}
+                      value={input.startTime ? dayjs(input.startTime) : null}
+                      onChange={(e: any) => {
+                        setInput({
+                          ...input,
+                          startTime: e ? e.format("YYYY-MM-DD HH:mm:ss") : null,
+                        });
+                      }}
+                      placeholder="选择开始时间"
+                      allowClear
+                      showTime
+                      format="YYYY-MM-DD HH:mm:ss"
+                      suffixIcon={<CalendarOutlined style={{ color: token.colorTextSecondary }} />}
+                    />
+                  </div>
+                  
+                  <div style={styles.filterItem}>
+                    <Text style={styles.filterLabel}>结束时间</Text>
+                    <DatePicker
+                      style={{ width: '100%' }}
+                      value={input.endTime ? dayjs(input.endTime) : null}
+                      onChange={(e: any) => {
+                        setInput({
+                          ...input,
+                          endTime: e ? e.format("YYYY-MM-DD HH:mm:ss") : null,
+                        });
+                      }}
+                      placeholder="选择结束时间"
+                      allowClear
+                      showTime
+                      format="YYYY-MM-DD HH:mm:ss"
+                      suffixIcon={<CalendarOutlined style={{ color: token.colorTextSecondary }} />}
+                    />
+                  </div>
+                </div>
+                
+                <Divider style={{ margin: '16px 0' }} />
+                
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Space>
+                    <Button onClick={handleReset}>重置</Button>
+                    <Button type="primary" onClick={handleSearch}>
+                      搜索
+                    </Button>
+                  </Space>
+                </div>
+              </Panel>
+            </Collapse>
           </div>
         )}
 
         <div style={styles.actionBar}>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={loadData}
-            loading={loading}
-          >
-            <span className="button-text">刷新</span>
-          </Button>
+          <Space>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={loadData}
+              loading={loading}
+            >
+              刷新
+            </Button>
+            
+            <Button
+              icon={<DownloadOutlined />}
+            >
+              导出数据
+            </Button>
+          </Space>
           
-          <Button
-            icon={<DownloadOutlined />}
-          >
-            <span className="button-text">导出数据</span>
-          </Button>
+          <Text type="secondary">
+            共 {total} 条记录
+          </Text>
         </div>
 
-        <div>
-          <Card style={styles.tableCard} bodyStyle={styles.tableCardBody}>
-            <Table
-              scroll={{
-                x: "max-content",
-                y: "calc(100vh - 420px)",
-              }}
-              loading={loading}
-              columns={columns.filter(
-                (item) => item.disable == false || item.disable == undefined
-              ) as any}
-              dataSource={data}
-              rowKey={(record) => record.id || Math.random().toString()}
-              pagination={{
-                total: total,
-                pageSize: input.pageSize,
-                current: input.page,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `共 ${total} 条记录`,
-                onChange: (page, pageSize) => {
-                  setInput({
-                    ...input,
-                    page,
-                    pageSize,
-                  });
-                },
-              }}
-              rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
-              size="middle"
-            />
-          </Card>
-        </div>
+        <Card 
+          style={styles.tableCard} 
+          bodyStyle={styles.tableCardBody}
+          title={
+            <div style={styles.tableHeader}>
+              <Typography.Title level={5} style={styles.tableHeaderTitle}>
+                日志记录
+              </Typography.Title>
+              <AntTooltip title="列配置">
+                <Button
+                  icon={<SettingOutlined />}
+                  type="text"
+                  onClick={openColumnSettings}
+                  style={styles.tableSettingsButton}
+                >
+                  <Badge 
+                    count={columnsConfig.filter(c => !c.disable).length - selectedColumns.length} 
+                    size="small" 
+                    offset={[5, -5]}
+                    showZero={false}
+                  >
+                    <span>列配置</span>
+                  </Badge>
+                </Button>
+              </AntTooltip>
+            </div>
+          }
+        >
+          <Table
+            scroll={{
+              x: "max-content",
+              y: "calc(100vh - 420px)",
+            }}
+            loading={loading}
+            columns={activeColumns as any}
+            dataSource={data}
+            rowKey={(record) => record.id || Math.random().toString()}
+            pagination={{
+              total: total,
+              pageSize: input.pageSize,
+              current: input.page,
+              showSizeChanger: true,
+              showQuickJumper: true,
+              showTotal: (total) => `共 ${total} 条记录`,
+              onChange: (page, pageSize) => {
+                setInput({
+                  ...input,
+                  page,
+                  pageSize,
+                });
+              },
+              style: { padding: '16px 24px' }
+            }}
+            expandable={{
+              expandedRowRender,
+              onExpand: handleExpandRow,
+              expandedRowKeys,
+              expandIcon: ({ expanded, onExpand, record }) => (
+                <CaretRightOutlined
+                  rotate={expanded ? 90 : 0}
+                  onClick={(e) => onExpand(record, e)}
+                  style={{ transition: '0.3s', cursor: 'pointer', color: token.colorPrimary }}
+                />
+              )
+            }}
+            rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
+            size="middle"
+          />
+        </Card>
+
+        {/* 列设置弹窗 */}
+        <Modal
+          title="表格列配置"
+          open={columnSettingsVisible}
+          onCancel={closeColumnSettings}
+          footer={null}
+          width={500}
+          bodyStyle={{ padding: 0 }}
+        >
+          <div style={styles.columnSettingsHeader}>
+            <Text>共 {tempColumnsConfig.length} 列（已选择 {tempSelectedColumns.length} 列）</Text>
+            <Button type="link" onClick={resetColumnSettings}>
+              恢复默认
+            </Button>
+          </div>
+
+          <div style={styles.columnSettingsList}>
+            <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+              <SortableContext items={tempColumnsConfig.map(c => c.key)} strategy={verticalListSortingStrategy}>
+                {tempColumnsConfig.map((column) => (
+                  <SortableItem key={column.key} id={column.key} style={styles.columnSettingsItem}>
+                    <Checkbox
+                      checked={tempSelectedColumns.includes(column.key)}
+                      onChange={() => toggleColumnVisibility(column.key)}
+                      disabled={column.fixed === 'left' || column.disable}
+                    />
+                    <span style={styles.columnSettingsItemTitle}>{column.title}</span>
+                    <div style={styles.columnSettingsHandle}>
+                      <MenuOutlined />
+                    </div>
+                  </SortableItem>
+                ))}
+              </SortableContext>
+            </DndContext>
+          </div>
+
+          <div style={styles.columnSettingsFooter}>
+            <Button onClick={closeColumnSettings}>
+              取消
+            </Button>
+            <Button type="primary" onClick={saveColumnSettings}>
+              保存设置
+            </Button>
+          </div>
+        </Modal>
       </div>
     </ConfigProvider>
   );

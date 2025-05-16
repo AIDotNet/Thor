@@ -36,7 +36,6 @@ public sealed class VolCenGineChatCompletionsService(ILogger<VolCenGineChatCompl
             options?.Address.TrimEnd('/') + "/api/v3/chat/completions",
             chatCompletionCreate, options.ApiKey, headers).ConfigureAwait(false);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/api/v3/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -84,7 +83,6 @@ public sealed class VolCenGineChatCompletionsService(ILogger<VolCenGineChatCompl
             options?.Address.TrimEnd('/') + "/api/v3/chat/completions",
             chatCompletionCreate, options.ApiKey);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/api/v3/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

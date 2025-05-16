@@ -18,7 +18,8 @@ import {
   UsersRound,
   Home,
   ChevronRight,
-  Bug
+  Bug,
+  PieChart
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
@@ -140,6 +141,16 @@ const Nav = memo(() => {
         key: SidebarTabKey.Token,
         onClick: () => {
           navigate("/token");
+        },
+        role: "user,admin",
+      },
+      {
+        icon: <PieChart />,
+        enable: true,
+        label: t('sidebar.usage'),
+        key: SidebarTabKey.Usage,
+        onClick: () => {
+          navigate("/usage");
         },
         role: "user,admin",
       },

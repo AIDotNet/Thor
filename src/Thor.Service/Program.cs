@@ -47,10 +47,14 @@ using Thor.SiliconFlow.Extensions;
 using Thor.SparkDesk.Extensions;
 using Thor.VolCenGine.Extensions;
 using Product = Thor.Service.Domain.Product;
+using TracingService = Thor.Service.Service.TracingService;
 
 try
 {
     Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
+    // 初始化活动跟踪
+    Thor.Service.Infrastructure.Helper.ActivitySetup.SetupActivityListeners();
 
     var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
     {
@@ -123,10 +127,12 @@ try
         .AddHttpContextAccessor()
         .AddScoped<IEventHandler<ChatLogger>, ChatLoggerEventHandler>()
         .AddScoped<IEventHandler<CreateUserEto>, CreateUserEventHandler>()
+        .AddScoped<IEventHandler<Tracing>, TracingEventHandler>()
         .AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
         .AddTransient<JwtHelper>()
         .AddSingleton<OpenTelemetryMiddlewares>()
         .AddSingleton<UnitOfWorkMiddleware>()
+        .AddTracingService()
         .AddScoped<AuthorizeService>()
         .AddScoped<ChannelService>()
         .AddScoped<EmailService>()
@@ -146,6 +152,7 @@ try
         .AddScoped<TrackerService>()
         .AddScoped<ModelMapService>()
         .AddScoped<UserService>()
+        .AddScoped<UsageService>()
         .AddScoped<IUserContext, DefaultUserContext>()
         .AddHostedService<StatisticBackgroundTask>()
         .AddHostedService<LoggerBackgroundTask>()
@@ -234,6 +241,8 @@ try
     app.UseCors("AllowAll");
 
     app.UseWebSockets();
+
+    app.UseTracingMiddleware();
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -855,7 +864,6 @@ try
     #region System
 
     var system = app.MapGroup("/api/v1/system")
-        .WithGroupName("System")
         .WithTags("System")
         .AddEndpointFilter<ResultFilter>();
 
@@ -866,11 +874,25 @@ try
 
     #endregion
 
+    var usage = app.MapGroup("/api/v1/usage")
+            .WithTags("Usage")
+            .AddEndpointFilter<ResultFilter>()
+        // .RequireAuthorization()
+        ;
+
+    usage.MapGet(string.Empty,
+            async (UsageService usageService, string? token, DateTime? startDate, DateTime? endDate) =>
+                await usageService.GetUsageAsync(token, startDate, endDate))
+        .WithDescription("获取使用记录")
+        .WithOpenApi();
+
     var tracker = app.MapGroup("/api/v1/tracker")
         .WithTags("Tracker")
         .AddEndpointFilter<ResultFilter>();
 
-    tracker.MapGet(string.Empty, async (TrackerService service) => await service.GetAsync())
+    tracker.MapGet("{loggerId}",
+            async (ILoggerDbContext loggerDbContext, string loggerId) =>
+                await TracingService.GetTracing(loggerDbContext, loggerId))
         .WithDescription("获取Tracker")
         .WithOpenApi();
 
@@ -958,6 +980,25 @@ try
         {
             await chatService.SpeechAsync(context, request);
         });
+
+    #region Tracing
+
+    // 添加链路跟踪API端点
+    app.MapGet("/api/v1/tracing/current", (HttpContext context) =>
+        {
+            var tracing = Thor.Service.Infrastructure.Helper.TracingService.CurrentRootTracing;
+            if (tracing == null)
+            {
+                return Results.NotFound("当前请求没有跟踪信息");
+            }
+
+            return Results.Ok(tracing);
+        })
+        .WithTags("Tracing")
+        .WithDescription("获取当前请求的链路跟踪信息")
+        .WithOpenApi();
+
+    #endregion
 
     if (app.Environment.IsDevelopment())
     {

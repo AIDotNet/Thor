@@ -24,7 +24,6 @@ public class OpenAIResponsesService(ILogger<OpenAIResponsesService> logger) : IT
             options?.Address.TrimEnd('/') + "/v1/responses",
             input, options.ApiKey).ConfigureAwait(false);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/responses");
         openai?.SetTag("Model", input.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

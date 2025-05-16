@@ -58,3 +58,12 @@ export const viewConsumption = async (params: any) => {
 export const modelHot = async () => {
     return get(prefix + "/model-hot");
 }
+
+/**
+ * 获取日志详情的调用链路
+ * @param loggerId 日志ID
+ * @returns 
+ */
+export const getLoggerDetail = async (loggerId: string) => {
+    return get(prefix + "/detail/" + loggerId);
+}

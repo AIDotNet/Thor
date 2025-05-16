@@ -8,17 +8,12 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         ChannelAsyncLocal.ChannelIds = new List<string>();
-        
+
         // 如果不是Get则自动开启事务
         if (context.Request.Method != "GET" && context.Request.Method != "OPTIONS" &&
             context.Request.Method != "HEAD" && context.Request.Method != "TRACE" &&
             context.Request.Method != "CONNECT")
         {
-            using var activity =
-                Activity.Current?.Source.StartActivity("UnitOfWork", ActivityKind.Internal);
-
-            activity?.SetTag("UnitOfWork", "Begin");
-
             var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
             var loggerDbContext = context.RequestServices.GetRequiredService<ILoggerDbContext>();
             try
@@ -32,10 +27,7 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
                 logger.LogError(exception, "An error occurred during the transaction. Message: {Message}",
                     exception.Message);
 
-                activity?.SetTag("UnitOfWork", "Rollback");
             }
-
-            activity?.SetTag("UnitOfWork", "End");
 
             return;
         }
