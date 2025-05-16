@@ -37,7 +37,6 @@ public class ErnieChatV2CompletionsService(ILogger<ErnieChatV2CompletionsService
                 options?.Address.TrimEnd('/') + "/v2/chat/completions", chatCompletionCreate, options.ApiKey, header)
             .ConfigureAwait(false);
 
-        openai?.SetTag("Address", "/v2/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -92,7 +91,6 @@ public class ErnieChatV2CompletionsService(ILogger<ErnieChatV2CompletionsService
             options?.Address.TrimEnd('/') + "/v2/chat/completions",
             chatCompletionCreate, options.ApiKey, header);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v2/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

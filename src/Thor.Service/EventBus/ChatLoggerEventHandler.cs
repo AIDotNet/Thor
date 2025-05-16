@@ -11,7 +11,6 @@ public sealed class ChatLoggerEventHandler(
 {
     public async Task HandleAsync(ChatLogger @event)
     {
-        @event.Id = Guid.NewGuid().ToString("N");
         @event.CreatedAt = DateTime.Now;
         await loggerDbContext.Loggers.AddAsync(@event);
         await loggerDbContext.SaveChangesAsync();

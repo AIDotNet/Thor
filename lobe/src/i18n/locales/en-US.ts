@@ -81,14 +81,15 @@ const enUS = {
       business: 'Business Service',
       wallet: 'Wallet/Personal',
       system: 'System Service',
-      apiKeyManage: 'API Key Management'
+      apiKeyManage: 'API keys',
+      usage: 'Usage'
     },
 
     // Sidebar Menu
     sidebar: {
       panel: 'Panel',
       channel: 'Channel',
-      token: 'API Key Management',
+      token: 'API keys',
       modelManager: 'Model Manager',
       product: 'Product',
       logger: 'Logger',
@@ -102,7 +103,8 @@ const enUS = {
       ai: 'AI Service',
       chat: 'Chat',
       business: 'Business Service',
-      playground: 'Playground'
+      playground: 'Playground',
+      usage: 'Usage'
     },
 
     // Page Title
@@ -128,7 +130,52 @@ const enUS = {
         welcome: 'Loading Welcome Page',
         doc: 'Loading Documentation',
         model: 'Loading Model Page',
+        usage: 'Loading Usage Page'
       }
+    },
+
+    // Usage Page
+    usage: {
+      title: 'Usage',
+      totalSpend: 'Total Spend',
+      budget: 'Budget',
+      budgetReset: 'days. Reset in',
+      totalTokens: 'Total tokens',
+      totalRequests: 'Total requests',
+      apiCapabilities: 'API capabilities',
+      spendCategories: 'Spend categories',
+      users: 'Users',
+      services: 'Services',
+      apiKeys: 'API Keys',
+      noData: 'There is no usage data for this period',
+      requests: 'Requests',
+      inputTokens: 'Input tokens',
+      outputTokens: 'Output tokens',
+      images: 'Images',
+      chatCompletions: 'Chat Completions',
+      webSearches: 'Web Searches',
+      fileSearches: 'File Searches',
+      moderation: 'Moderation',
+      embeddings: 'Embeddings',
+      selectApiKey: 'Select API Key',
+      exportData: 'Export',
+      cost: 'Cost',
+      date: 'Date',
+      tokenCount: 'Token Count',
+      imageCount: 'Image Count',
+      audioSeconds: 'Audio Seconds',
+      spendStatistics: 'Spend Statistics',
+      requestsStatistics: 'Request Statistics',
+      tokensStatistics: 'Token Statistics',
+      audioSpeech: 'Audio Speech',
+      audioTranscription: 'Audio Transcription',
+      audioTranslation: 'Audio Translation',
+      quantity: 'Quantity',
+      apiEndpoint: 'API Endpoint',
+      apiName: 'API Name',
+      model: 'Model',
+      modelName: 'Model Name',
+      allApiKeys: 'All'
     },
 
     // Login Page

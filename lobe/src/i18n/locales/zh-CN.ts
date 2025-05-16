@@ -143,14 +143,15 @@ const zhCN = {
       business: '运营服务',
       wallet: '钱包/个人',
       system: '系统服务',
-      apiKeyManage: 'API Key 管理'
+      apiKeyManage: 'API 密钥',
+      usage: '使用情况'
     },
 
     // 侧边栏菜单
     sidebar: {
       panel: '面板',
       channel: '渠道',
-      token: 'API Key 管理',
+      token: 'API 密钥',
       modelManager: '模型管理',
       product: '产品',
       logger: '日志',
@@ -164,7 +165,8 @@ const zhCN = {
       ai: 'AI服务',
       chat: '对话',
       business: '运营服务',
-      playground: '操场'
+      playground: '操场',
+      usage: '使用情况'
     },
 
     // 页面标题
@@ -190,7 +192,52 @@ const zhCN = {
         welcome: '加载欢迎页面中',
         doc: '加载文档页面中',
         model: '加载模型页面中',
+        usage: '加载使用情况页面中'
       }
+    },
+
+    // 使用情况页面
+    usage: {
+      title: '使用情况',
+      totalSpend: '总支出',
+      budget: '预算',
+      budgetReset: '天后重置',
+      totalTokens: '总令牌数',
+      totalRequests: '总请求数',
+      apiCapabilities: 'API能力',
+      spendCategories: '消费类别',
+      users: '用户',
+      services: '服务',
+      apiKeys: 'API密钥',
+      noData: '当前周期内没有数据',
+      requests: '请求数',
+      inputTokens: '输入令牌数',
+      outputTokens: '输出令牌数',
+      images: '图像数',
+      chatCompletions: '聊天完成',
+      webSearches: '网络搜索',
+      fileSearches: '文件搜索',
+      moderation: '审核',
+      embeddings: '嵌入',
+      selectApiKey: '选择API密钥',
+      exportData: '导出',
+      cost: '费用',
+      date: '日期',
+      tokenCount: '令牌数',
+      imageCount: '图像数',
+      audioSeconds: '音频秒数',
+      spendStatistics: '消费统计',
+      requestsStatistics: '请求数统计',
+      tokensStatistics: '令牌数统计',
+      audioSpeech: '音频语音',
+      audioTranscription: '音频转录',
+      audioTranslation: '音频翻译',
+      quantity: '数量',
+      apiEndpoint: 'API端点',
+      apiName: 'API名称',
+      model: '模型',
+      modelName: '模型名称',
+      allApiKeys: '全部'
     },
 
     // 登录页面

@@ -51,7 +51,6 @@ public class AnthropicChatCompletionsService(ILogger<AnthropicChatCompletionsSer
         var response =
             await client.PostJsonAsync(options.Address.TrimEnd('/') + "/v1/messages", input, string.Empty, headers);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/messages");
         openai?.SetTag("Model", input.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -99,7 +98,6 @@ public class AnthropicChatCompletionsService(ILogger<AnthropicChatCompletionsSer
         var response = await client.HttpRequestRaw(options.Address.TrimEnd('/') + "/v1/messages", input, string.Empty,
             headers);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", input.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

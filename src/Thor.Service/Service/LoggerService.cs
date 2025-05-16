@@ -2,20 +2,27 @@
 using Thor.BuildingBlocks.Event;
 using Thor.Domain.Chats;
 using Thor.Service.Options;
-using Tracing = Thor.Domain.Chats.Tracing;
 
 namespace Thor.Service.Service;
 
 public sealed class LoggerService(
     IServiceProvider serviceProvider,
     IEventBus<ChatLogger> eventBus,
+    IEventBus<Tracing> tracingEventBus,
     IServiceCache serviceCache)
     : ApplicationService(serviceProvider)
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
+        var tracing = TracingExtensions.GetCurrentRootTracing();
         logger.CreatedAt = DateTime.Now;
+        logger.Id = Guid.NewGuid().ToString("N");
         await eventBus.PublishAsync(logger);
+        if (tracing != null)
+        {
+            tracing.ChatLoggerId = logger.Id;
+            await tracingEventBus.PublishAsync(tracing);
+        }
     }
 
     /// <summary>
@@ -69,7 +76,6 @@ public sealed class LoggerService(
             }
         }
 
-        var tracing = TracingExtensions.GetCurrentRootTracing();
         var logger = new ChatLogger
         {
             Type = ThorChatLoggerType.Consume,

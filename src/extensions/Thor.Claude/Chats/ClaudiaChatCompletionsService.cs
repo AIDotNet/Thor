@@ -119,7 +119,6 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             temperature = isThink ? null : input.Temperature
         }, string.Empty, headers);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", input.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -440,7 +439,6 @@ public sealed class ClaudiaChatCompletionsService(ILogger<ClaudiaChatCompletions
             temperature = isThinking ? null : input.Temperature
         }, string.Empty, headers);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", input.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

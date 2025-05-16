@@ -51,7 +51,6 @@ public class MiniMaxChatCompletionsService(ILogger<MiniMaxChatCompletionsService
                 chatCompletionCreate.ServiceTier
             }, options.ApiKey).ConfigureAwait(false);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/text/chatcompletion_v2");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 
@@ -121,7 +120,6 @@ public class MiniMaxChatCompletionsService(ILogger<MiniMaxChatCompletionsService
                 chatCompletionCreate.ServiceTier
             }, options.ApiKey);
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/text/chatcompletion_v2");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

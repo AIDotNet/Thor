@@ -27,7 +27,6 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
             await HttpClientFactory.GetHttpClient(options.Address)
                 .PostJsonAsync(url, chatCompletionCreate, options.ApiKey, "Api-Key");
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
         // 如果限流则抛出限流异常
@@ -62,7 +61,6 @@ public class AzureOpenAIChatCompletionsService(ILogger<AzureOpenAIChatCompletion
         var response = await HttpClientFactory.GetHttpClient(options.Address).HttpRequestRaw(url,
             chatCompletionCreate, options.ApiKey, "Api-Key");
 
-        openai?.SetTag("Address", options?.Address.TrimEnd('/') + "/v1/chat/completions");
         openai?.SetTag("Model", chatCompletionCreate.Model);
         openai?.SetTag("Response", response.StatusCode.ToString());
 

@@ -14,11 +14,6 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
             context.Request.Method != "HEAD" && context.Request.Method != "TRACE" &&
             context.Request.Method != "CONNECT")
         {
-            using var activity =
-                Activity.Current?.Source.StartActivity("UnitOfWork");
-
-            activity?.SetTag("UnitOfWork", "Begin");
-
             var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
             var loggerDbContext = context.RequestServices.GetRequiredService<ILoggerDbContext>();
             try
@@ -32,10 +27,7 @@ public class UnitOfWorkMiddleware(ILogger<UnitOfWorkMiddleware> logger) : IMiddl
                 logger.LogError(exception, "An error occurred during the transaction. Message: {Message}",
                     exception.Message);
 
-                activity?.SetTag("UnitOfWork", "Rollback");
             }
-
-            activity?.SetTag("UnitOfWork", "End");
 
             return;
         }
