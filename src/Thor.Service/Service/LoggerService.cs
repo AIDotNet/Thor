@@ -2,6 +2,7 @@
 using Thor.BuildingBlocks.Event;
 using Thor.Domain.Chats;
 using Thor.Service.Options;
+using Tracing = Thor.Domain.Chats.Tracing;
 
 namespace Thor.Service.Service;
 
@@ -45,72 +46,30 @@ public sealed class LoggerService(
     {
         meatdata ??= new Dictionary<string, string>();
 
-        using var consume =
-            Activity.Current?.Source.StartActivity("创建消费日志");
-
-        consume?.SetTag("Content", content);
-        consume?.SetTag("model", model);
-
-        if (ChatCoreOptions.FreeModel?.EnableFree == true)
         {
-            var freeModel =
-                ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(model));
-            if (freeModel != null)
+            using var consume =
+                Activity.Current?.Source.StartActivity("创建消费日志");
+
+            consume?.SetTag("Content", content);
+            consume?.SetTag("model", model);
+
+            if (ChatCoreOptions.FreeModel?.EnableFree == true)
             {
-                string key = "FreeModal:" + userId;
-                var result = await serviceCache.GetAsync<int?>(key) ?? 0;
-                if (result < freeModel.Limit)
+                var freeModel =
+                    ChatCoreOptions.FreeModel.Items?.FirstOrDefault(x => x.Model.Contains(model));
+                if (freeModel != null)
                 {
-                    quota = 0;
-                }
-            }
-        }
-
-        var trace = new Tracing();
-        if (Activity.Current != null)
-        {
-            trace.TraceId = Activity.Current.TraceId.ToString();
-            if (Activity.Current.Tags.Any() || Activity.Current.Baggage.Any())
-            {
-                var metadata = new Dictionary<string, string>();
-                foreach (var tag in Activity.Current.Tags)
-                {
-                    metadata[tag.Key] = tag.Value;
-                }
-
-                foreach (var item in Activity.Current.Baggage)
-                {
-                    metadata[item.Key] = item.Value;
-                }
-
-                trace.Attributes = metadata;
-            }
-
-            // 获取链路层级结构并存储到trace.Children
-            var parent = Activity.Current.Parent;
-            var depth = 0;
-            while (parent != null)
-            {
-                var childTrace = new Tracing
-                {
-                    TraceId = trace.TraceId,
-                    Name = parent.OperationName,
-                    Depth = depth,
-                    ServiceName = parent.Source?.Name ?? string.Empty,
-                    Attributes = new Dictionary<string, string>
+                    string key = "FreeModal:" + userId;
+                    var result = await serviceCache.GetAsync<int?>(key) ?? 0;
+                    if (result < freeModel.Limit)
                     {
-                        ["span_id"] = parent.SpanId.ToString()
+                        quota = 0;
                     }
-                };
-                trace.Children.Add(childTrace);
-                depth++;
-                parent = parent.Parent;
+                }
             }
-
-            meatdata["trace_id"] = trace.TraceId;
         }
 
-
+        var tracing = TracingExtensions.GetCurrentRootTracing();
         var logger = new ChatLogger
         {
             Type = ThorChatLoggerType.Consume,

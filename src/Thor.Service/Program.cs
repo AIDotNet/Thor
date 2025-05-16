@@ -52,6 +52,9 @@ try
 {
     Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
+    // 初始化活动跟踪
+    Thor.Service.Infrastructure.Helper.ActivitySetup.SetupActivityListeners();
+
     var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
     {
         Args = args,
@@ -127,6 +130,7 @@ try
         .AddTransient<JwtHelper>()
         .AddSingleton<OpenTelemetryMiddlewares>()
         .AddSingleton<UnitOfWorkMiddleware>()
+        .AddTracingService()
         .AddScoped<AuthorizeService>()
         .AddScoped<ChannelService>()
         .AddScoped<EmailService>()
@@ -234,6 +238,8 @@ try
     app.UseCors("AllowAll");
 
     app.UseWebSockets();
+
+    app.UseTracingMiddleware();
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -958,6 +964,24 @@ try
         {
             await chatService.SpeechAsync(context, request);
         });
+
+    #region Tracing
+
+    // 添加链路跟踪API端点
+    app.MapGet("/api/v1/tracing/current", (HttpContext context) =>
+    {
+        var tracing = Thor.Service.Infrastructure.Helper.TracingService.CurrentRootTracing;
+        if (tracing == null)
+        {
+            return Results.NotFound("当前请求没有跟踪信息");
+        }
+        return Results.Ok(tracing);
+    })
+    .WithTags("Tracing")
+    .WithDescription("获取当前请求的链路跟踪信息")
+    .WithOpenApi();
+
+    #endregion
 
     if (app.Environment.IsDevelopment())
     {
