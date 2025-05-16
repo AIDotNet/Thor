@@ -875,10 +875,9 @@ try
     #endregion
 
     var usage = app.MapGroup("/api/v1/usage")
-            .WithTags("Usage")
-            .AddEndpointFilter<ResultFilter>()
-        // .RequireAuthorization()
-        ;
+        .WithTags("Usage")
+        .AddEndpointFilter<ResultFilter>()
+        .RequireAuthorization();
 
     usage.MapGet(string.Empty,
             async (UsageService usageService, string? token, DateTime? startDate, DateTime? endDate) =>

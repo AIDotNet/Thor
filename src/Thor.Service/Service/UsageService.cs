@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 
-public class UsageService(ILoggerDbContext dbContext)
+public class UsageService(ILoggerDbContext dbContext, IUserContext userContext)
 {
     // 已知的API服务类型及其对应的URL前缀
     private static readonly Dictionary<string, string> KnownApiServices = new()
@@ -29,6 +30,7 @@ public class UsageService(ILoggerDbContext dbContext)
 
         // 查询符合条件的聊天日志
         var query = dbContext.Loggers
+            .Where(x => x.UserId == userContext.CurrentUserId)
             .Where(l => string.IsNullOrEmpty(token) || l.TokenName == token)
             .Where(l => l.CreatedAt >= startDate && l.CreatedAt <= endDate)
             .AsNoTracking();
@@ -94,7 +96,7 @@ public class UsageService(ILoggerDbContext dbContext)
         var actualApis = logs.Select(l => l.Url ?? "未知接口").Distinct().ToList();
         var models = logs.Select(l => l.ModelName ?? "未知模型").Distinct().ToList();
         if (models.Count == 0) models.Add("未知模型");
-        
+
         // 确保列表中包含所有已知的API服务
         var allApiEndpoints = GetAllApiEndpoints(actualApis);
 
@@ -121,7 +123,7 @@ public class UsageService(ILoggerDbContext dbContext)
             );
 
         var serviceRequests = new List<ServiceRequestDto>();
-        
+
         // 为每一天、每个模型和每个API，生成服务请求记录
         foreach (var date in dateRange)
         {
@@ -162,13 +164,13 @@ public class UsageService(ILoggerDbContext dbContext)
     {
         var dates = new List<DateTime>();
         var currentDate = startDate.Date;
-        
+
         while (currentDate <= endDate.Date)
         {
             dates.Add(currentDate);
             currentDate = currentDate.AddDays(1);
         }
-        
+
         return dates;
     }
 
@@ -191,7 +193,7 @@ public class UsageService(ILoggerDbContext dbContext)
     private List<string> GetAllApiEndpoints(List<string> actualApis)
     {
         var allApis = new HashSet<string>(actualApis);
-        
+
         // 添加所有已知的API服务类型
         foreach (var knownApi in KnownApiServices.Values)
         {
