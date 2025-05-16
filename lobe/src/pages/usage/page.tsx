@@ -211,12 +211,12 @@ export default function UsagePage() {
         const audioTranslationServiceData = prepareChartDataForService('/v1/audio/translations', data);
 
         // 更新图表
-        updateChart(chatCompletionChartRef, '聊天完成', dates, chatServiceData, true);
-        updateChart(imagesChartRef, '图片', dates, imageServiceData, false);
-        updateChart(embeddingsChartRef, '嵌入', dates, embeddingsServiceData, true);
-        updateChart(audioSpeechChartRef, '音频语音', dates, audioSpeechServiceData, false);
-        updateChart(audioTranscriptionChartRef, '音频转录', dates, audioTranscriptionServiceData, false);
-        updateChart(audioTranslationChartRef, '音频翻译', dates, audioTranslationServiceData, false);
+        updateChart(chatCompletionChartRef, t('usage.chatCompletion'), dates, chatServiceData, true);
+        updateChart(imagesChartRef, t('usage.images'), dates, imageServiceData, false);
+        updateChart(embeddingsChartRef, t('usage.embeddings'), dates, embeddingsServiceData, true);
+        updateChart(audioSpeechChartRef, t('usage.audioSpeech'), dates, audioSpeechServiceData, false);
+        updateChart(audioTranscriptionChartRef, t('usage.audioTranscription'), dates, audioTranscriptionServiceData, false);
+        updateChart(audioTranslationChartRef, t('usage.audioTranslation'), dates, audioTranslationServiceData, false);
     };
 
     // 更新消费图表
@@ -669,9 +669,9 @@ export default function UsagePage() {
                     let result = `<div style="font-weight:bold;margin-bottom:5px">${t('usage.date')}: ${dateStr}</div>`;
 
                     params.forEach((param: any) => {
-                        let valueText = param.seriesName === '消费'
+                        let valueText = param.seriesName === t('usage.spend')
                             ? renderQuota(param.value)
-                            : param.value;
+                            : renderNumber(param.value);
 
                         result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
               <span style="margin-right:15px">
@@ -1031,7 +1031,7 @@ export default function UsagePage() {
                                             </Flexbox>
                                             <Flexbox horizontal justify="space-between">
                                                 <Text>{t('usage.tokenCount')}</Text>
-                                                <Text>{chatCompletionsData.tokenCount}</Text>
+                                                <Text>{renderNumber(chatCompletionsData.tokenCount)}</Text>
                                             </Flexbox>
                                             <Flexbox horizontal justify="space-between">
                                                 <Text>{t('usage.cost')}</Text>
