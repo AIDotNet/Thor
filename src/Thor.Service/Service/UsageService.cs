@@ -26,7 +26,8 @@ public class UsageService(ILoggerDbContext dbContext, IUserContext userContext)
     {
         // 设置默认日期范围，如果未提供则使用过去15天
         startDate ??= DateTime.Now.Date.AddDays(-15);
-        endDate ??= DateTime.Now.Date.AddDays(1).AddSeconds(-1); // 今天结束
+        endDate = endDate == null ? DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59) : // 今天结束 (23:59:59)
+            endDate.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59); // 结束日期的结束时间
 
         // 查询符合条件的聊天日志
         var query = dbContext.Loggers
