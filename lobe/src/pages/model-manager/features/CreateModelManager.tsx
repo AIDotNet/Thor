@@ -48,7 +48,6 @@ export default function CreateModelManagerPage({
         <Modal 
             open={open} 
             onCancel={onClose} 
-            onClose={onClose} 
             footer={null} 
             title={t('modelManager.createModel')}
             style={{ maxWidth: '100%', width: mobile ? '100%' : '580px' }}

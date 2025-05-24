@@ -453,7 +453,7 @@ export default function Pay({
                         </Tag>
                     </div>
                 }
-                onClose={() => {
+                onCancel={() => {
                     setQrCode('');
                     setCountdown(300);
                 }}
