@@ -211,7 +211,25 @@ partial class ChatService
 
             sw.Stop();
 
-            await loggerService.CreateConsumeAsync("/v1/images/edits",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            if (response.Usage is { InputTokens: not null })
+            {
+                quota = response.Usage.InputTokens.Value * rate.PromptRate;
+
+                completionRatio = rate.CompletionRate ?? GetCompletionRatio(model);
+                quota += (response.Usage.OutputTokens ?? responseToken) * rate.PromptRate * completionRatio;
+
+                quota = (decimal)userGroup.Rate * quota;
+
+                // 将quota 四舍五入
+                quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                if (request == null) throw new Exception("模型校验异常");
+
+                if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+            }
+
+            await loggerService.CreateConsumeAsync("/v1/images/edits",
+                string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 model,
                 0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -422,6 +440,23 @@ partial class ChatService
 
             sw.Stop();
 
+            if (response.Usage is { InputTokens: not null })
+            {
+                quota = response.Usage.InputTokens.Value * rate.PromptRate;
+
+                completionRatio = rate.CompletionRate ?? GetCompletionRatio(model);
+                quota += (response.Usage.OutputTokens ?? responseToken) * rate.PromptRate * completionRatio;
+
+                quota = (decimal)userGroup.Rate * quota;
+
+                // 将quota 四舍五入
+                quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                if (request == null) throw new Exception("模型校验异常");
+
+                if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+            }
+
             await loggerService.CreateConsumeAsync("/v1/images/generations",
                 string.Format(ConsumerTemplate, rate.PromptRate, rate.CompletionRate, userGroup.Rate),
                 model,
@@ -582,7 +617,8 @@ partial class ChatService
 
             quota = (int)((decimal)userGroup.Rate * quota);
 
-            await loggerService.CreateConsumeAsync("/v1/images/variations",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/images/variations",
+                string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 model,
                 0, 0, quota ?? 0, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
