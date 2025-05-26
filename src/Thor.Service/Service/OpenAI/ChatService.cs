@@ -131,7 +131,7 @@ public sealed partial class ChatService(
                     Other = channel.Other
                 }, context.RequestAborted);
                 sw.Stop();
-                
+
                 var quota = requestToken * rate.PromptRate;
 
                 var completionRatio = GetCompletionRatio(input.Model);
@@ -308,6 +308,7 @@ public sealed partial class ChatService(
         }
 
         var rateLimit = 0;
+        Exception? lastException = null;
 
         // 用于限流重试，如果限流则重试并且进行重新负载均衡计算
         limitGoto:
@@ -334,9 +335,15 @@ public sealed partial class ChatService(
                 var channel =
                     CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
 
-                if (channel == null)
+                if (lastException == null && channel == null)
                     throw new NotModelException(
                         $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                
+                if (lastException != null && channel == null)
+                {
+                    // 如果上次异常没有渠道，则直接抛出异常
+                    throw lastException;
+                }
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -501,6 +508,7 @@ public sealed partial class ChatService(
         }
         catch (Exception e)
         {
+            lastException = e;
             // 读取body
             logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
                 JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
@@ -979,7 +987,8 @@ public sealed partial class ChatService(
 
             quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync("/v1/audio/transcriptions",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/audio/transcriptions",
+                string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 audioCreateTranscriptionRequest.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -1105,7 +1114,8 @@ public sealed partial class ChatService(
 
             quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync("/v1/audio/speech",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/audio/speech",
+                string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 request.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
@@ -1228,7 +1238,8 @@ public sealed partial class ChatService(
 
             quota = (decimal)userGroup.Rate * quota;
 
-            await loggerService.CreateConsumeAsync("/v1/audio/translations",string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+            await loggerService.CreateConsumeAsync("/v1/audio/translations",
+                string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
                 audioCreateTranscriptionRequest.Model,
                 requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,

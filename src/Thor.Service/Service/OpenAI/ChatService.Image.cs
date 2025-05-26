@@ -17,6 +17,7 @@ partial class ChatService
 
         int count = 0;
         var request = new ImageEditCreateRequest();
+        Exception? lastException = null;
 
         rateLimit:
 
@@ -95,9 +96,16 @@ partial class ChatService
             var channel =
                 CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user, token));
 
-            if (channel == null)
+            if (lastException == null && channel == null)
                 throw new NotModelException(
                     $"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+
+            if (lastException != null && channel == null)
+            {
+                context.Response.StatusCode = 500;
+                await context.WriteOpenAIErrorAsync(lastException.Message);
+                return;
+            }
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -244,6 +252,7 @@ partial class ChatService
         }
         catch (RateLimitException)
         {
+            lastException ??= new RateLimitException("请求过于频繁，请稍后再试");
             if (count > 3)
             {
                 context.Response.StatusCode = 429;
@@ -265,6 +274,7 @@ partial class ChatService
         }
         catch (Exception e)
         {
+            lastException = e;
             if (count > 3)
             {
                 context.Response.StatusCode = 500;
@@ -292,6 +302,7 @@ partial class ChatService
         }
 
         int count = 0;
+        Exception? lastException = null;
 
         rateLimit:
 
@@ -316,9 +327,16 @@ partial class ChatService
             var channel =
                 CalculateWeight(await channelService.GetChannelsContainsModelAsync(model, user, token));
 
-            if (channel == null)
+            if (lastException == null && channel == null)
                 throw new NotModelException(
                     $"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+
+            if (lastException != null && channel == null)
+            {
+                context.Response.StatusCode = 500;
+                await context.WriteOpenAIErrorAsync(lastException.Message);
+                return;
+            }
 
             var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -474,6 +492,7 @@ partial class ChatService
         catch (RateLimitException)
         {
             context.Response.StatusCode = 429;
+            lastException ??= new RateLimitException("请求过于频繁，请稍后再试");
 
             if (count > 3)
             {
@@ -496,6 +515,7 @@ partial class ChatService
         }
         catch (Exception e)
         {
+            lastException = e;
             if (count > 3)
             {
                 context.Response.StatusCode = 500;
