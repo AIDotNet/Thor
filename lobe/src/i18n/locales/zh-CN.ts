@@ -114,6 +114,8 @@ const zhCN = {
       disable: '禁用',
       action: '操作',
       select: '选择',
+      you: '您',
+      saveSuccess: '保存成功',
     },
 
     // 导航
@@ -799,6 +801,7 @@ const zhCN = {
       regenerate: '重新生成',
       newChatFromMessage: '以此开始新对话',
       copyContent: '复制内容',
+      enterToSend: '按 Enter 发送，Shift+Enter 换行',
       tabs: {
         chat: '对话',
         image: '图像'
@@ -842,7 +845,8 @@ const zhCN = {
         noContent: '没有对话内容可保存',
         regenerateFailed: '重新生成失败，请检查Token和模型设置',
         responseFailed: '获取响应失败，请检查Token和模型设置',
-        createChatFailed: '创建新会话失败'
+        createChatFailed: '创建新会话失败',
+        noTokensAvailable: '没有可用的Token，请先添加Token'
       }
     },
 

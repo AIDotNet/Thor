@@ -1,0 +1,354 @@
+/* Chat Feature Styles */
+.message-list {
+  scroll-behavior: smooth;
+}
+
+.message-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.message-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.message-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.message-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.message {
+  animation: messageSlideIn 0.3s ease-out;
+  transform-origin: top;
+}
+
+.message.streaming {
+  animation: messageSlideIn 0.3s ease-out, pulse 2s infinite;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(24, 144, 255, 0);
+  }
+}
+
+.message:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.message .ant-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message:hover .ant-btn {
+  opacity: 1;
+}
+
+.message-content {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.message-content pre {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+  overflow-x: auto;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.message-content code {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+}
+
+.message-content pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.message-content blockquote {
+  border-left: 4px solid #1890ff;
+  margin: 8px 0;
+  padding: 8px 16px;
+  background: rgba(24, 144, 255, 0.05);
+  border-radius: 0 6px 6px 0;
+}
+
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+  margin: 16px 0 8px 0;
+  font-weight: 600;
+}
+
+.message-content ul,
+.message-content ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.message-content li {
+  margin: 4px 0;
+}
+
+.message-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+}
+
+.message-content th,
+.message-content td {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message-content th {
+  background: rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+}
+
+/* Input area enhancements */
+.ant-input {
+  transition: all 0.3s ease;
+}
+
+.ant-input:focus {
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.ant-btn-primary {
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+/* Performance tags */
+.ant-tag {
+  border-radius: 12px;
+  font-size: 11px;
+  padding: 2px 8px;
+  margin: 2px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .message {
+    margin: 12px 0;
+    padding: 12px !important;
+  }
+  
+  .message-content {
+    font-size: 14px;
+  }
+  
+  .message-content pre {
+    font-size: 12px;
+    padding: 8px;
+  }
+  
+  .ant-tag {
+    font-size: 10px;
+    padding: 1px 6px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .message-content pre {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .message-content code {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .message-content blockquote {
+    background: rgba(24, 144, 255, 0.1);
+  }
+  
+  .message-content th,
+  .message-content td {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .message-content th {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Loading animation */
+.loading-dots {
+  display: inline-block;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+  0%, 20% {
+    content: '';
+  }
+  40% {
+    content: '.';
+  }
+  60% {
+    content: '..';
+  }
+  80%, 100% {
+    content: '...';
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar for webkit browsers */
+.ant-card-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ant-card-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ant-card-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.ant-card-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced focus styles */
+.ant-select:focus-within,
+.ant-input:focus,
+.ant-input-focused {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Button hover effects */
+.ant-btn:not(.ant-btn-primary):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Empty state styling */
+.empty-state {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive grid improvements */
+@media (max-width: 576px) {
+  .ant-row {
+    margin: 0 !important;
+  }
+  
+  .ant-col {
+    padding: 0 4px !important;
+  }
+}
+
+/* Enhanced modal styling */
+.ant-modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  border-radius: 12px 12px 0 0;
+}
+
+/* Improved tag styling */
+.performance-tags .ant-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+/* Avatar enhancements */
+.ant-avatar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.message:hover .ant-avatar {
+  transform: scale(1.05);
+}
+
+/* Typography improvements */
+.message-content h1 { font-size: 1.5em; }
+.message-content h2 { font-size: 1.3em; }
+.message-content h3 { font-size: 1.2em; }
+.message-content h4 { font-size: 1.1em; }
+.message-content h5 { font-size: 1em; }
+.message-content h6 { font-size: 0.9em; }
+
+/* Link styling */
+.message-content a {
+  color: #1890ff;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.message-content a:hover {
+  border-bottom-color: #1890ff;
+}
+
+/* Selection styling */
+.message-content ::selection {
+  background: rgba(24, 144, 255, 0.2);
+} 

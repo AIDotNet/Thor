@@ -189,7 +189,8 @@ export default function UsagePage() {
             date: new Date(item.date),
             cost: item.cost,
             requestCount: item.requestCount,
-            tokenCount: item.tokenCount
+            tokenCount: item.tokenCount,
+            modelUsage: item.modelUsage || []
         })).sort((a: any, b: any) => a.date.getTime() - b.date.getTime()); // 按日期升序排序
 
         const dailyDates = dailyUsageData.map((item: any) => `${item.date.getMonth() + 1}/${item.date.getDate()}`);
@@ -197,10 +198,10 @@ export default function UsagePage() {
         const dailyRequests = dailyUsageData.map((item: any) => item.requestCount);
         const dailyTokens = dailyUsageData.map((item: any) => item.tokenCount);
 
-        // 更新三个独立图表
-        updateCostChart(dailyDates, dailyCosts);
-        updateRequestsChart(dailyDates, dailyRequests);
-        updateTokensChart(dailyDates, dailyTokens);
+        // 更新三个独立图表，传入模型使用数据
+        updateCostChart(dailyDates, dailyCosts, dailyUsageData);
+        updateRequestsChart(dailyDates, dailyRequests, dailyUsageData);
+        updateTokensChart(dailyDates, dailyTokens, dailyUsageData);
 
         // 提取各服务的数据
         const chatServiceData = prepareChartDataForService('/v1/chat/completions', data);
@@ -220,7 +221,7 @@ export default function UsagePage() {
     };
 
     // 更新消费图表
-    const updateCostChart = (dates: string[], costs: number[]) => {
+    const updateCostChart = (dates: string[], costs: number[], dailyUsageData: any[]) => {
         if (!dailyUsageChartRef.current) return;
 
         // 销毁之前的实例（如果存在）
@@ -234,6 +235,76 @@ export default function UsagePage() {
 
         // 计算总消费
         const totalCost = costs.reduce((sum, current) => sum + current, 0);
+
+        // 检查是否有模型使用数据
+        const hasModelUsage = dailyUsageData.some(item => item.modelUsage && item.modelUsage.length > 0);
+
+        let series: any[] = [];
+        
+        if (hasModelUsage) {
+            // 收集所有模型名称
+            const allModels = new Set<string>();
+            dailyUsageData.forEach(item => {
+                if (item.modelUsage) {
+                    item.modelUsage.forEach((model: any) => {
+                        allModels.add(model.modelName);
+                    });
+                }
+            });
+
+            // 为每个模型创建系列数据
+            const modelColors = [
+                theme.colorPrimary,
+                theme.colorSuccess,
+                theme.colorWarning,
+                theme.colorError,
+                theme.colorInfo,
+                '#722ed1', // 紫色
+                '#eb2f96', // 粉色
+                '#52c41a', // 绿色
+                '#fa8c16', // 橙色
+                '#13c2c2'  // 青色
+            ];
+
+            Array.from(allModels).forEach((modelName, index) => {
+                const modelData = dailyUsageData.map(item => {
+                    const modelUsage = item.modelUsage?.find((m: any) => m.modelName === modelName);
+                    return modelUsage ? modelUsage.cost : 0;
+                });
+
+                series.push({
+                    name: modelName,
+                    type: 'bar',
+                    stack: 'cost',
+                    barWidth: '60%',
+                    itemStyle: {
+                        color: modelColors[index % modelColors.length]
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            opacity: 0.8
+                        }
+                    },
+                    data: modelData
+                });
+            });
+        } else {
+            // 没有模型数据时使用原来的逻辑
+            series = [{
+                name: t('usage.cost'),
+                type: 'bar',
+                barWidth: '60%',
+                itemStyle: {
+                    color: theme.colorPrimary
+                },
+                emphasis: {
+                    itemStyle: {
+                        color: theme.colorPrimaryActive
+                    }
+                },
+                data: costs
+            }];
+        }
 
         // 消费图表配置
         const option = {
@@ -249,15 +320,25 @@ export default function UsagePage() {
                 }
             },
             grid: {
-                top: 60,
+                top: hasModelUsage ? 80 : 60,
                 right: 20,
                 bottom: 50,
-                left: 0,  // 减少左侧边距
-                containLabel: false  // 不包含标签
+                left: 0,
+                containLabel: false
             },
+            legend: hasModelUsage ? {
+                top: 40,
+                left: 10,
+                orient: 'horizontal',
+                itemGap: 10,
+                textStyle: {
+                    fontSize: 12,
+                    color: theme.colorText
+                }
+            } : undefined,
             tooltip: {
                 trigger: 'axis',
-                confine: true, // 确保提示框在图表区域内
+                confine: true,
                 backgroundColor: theme.colorBgElevated,
                 borderColor: theme.colorBorder,
                 textStyle: {
@@ -314,28 +395,13 @@ export default function UsagePage() {
             },
             yAxis: {
                 type: 'value',
-                name: '',  // 移除名称
-                axisLine: { show: false },  // 隐藏轴线
-                axisTick: { show: false },  // 隐藏刻度
-                axisLabel: { show: false },  // 隐藏标签
-                splitLine: { show: false }   // 隐藏网格线
+                name: '',
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: { show: false },
+                splitLine: { show: false }
             },
-            series: [
-                {
-                    name: t('usage.cost'),
-                    type: 'bar',
-                    barWidth: '60%',
-                    itemStyle: {
-                        color: theme.colorPrimary
-                    },
-                    emphasis: {
-                        itemStyle: {
-                            color: theme.colorPrimaryActive
-                        }
-                    },
-                    data: costs
-                }
-            ]
+            series: series
         };
 
         // 设置配置
@@ -343,7 +409,7 @@ export default function UsagePage() {
     };
 
     // 更新请求数图表
-    const updateRequestsChart = (dates: string[], requests: number[]) => {
+    const updateRequestsChart = (dates: string[], requests: number[], dailyUsageData: any[]) => {
         if (!requestsChartRef.current) return;
 
         // 销毁之前的实例（如果存在）
@@ -357,6 +423,76 @@ export default function UsagePage() {
 
         // 计算总请求数
         const totalRequests = requests.reduce((sum, current) => sum + current, 0);
+
+        // 检查是否有模型使用数据
+        const hasModelUsage = dailyUsageData.some(item => item.modelUsage && item.modelUsage.length > 0);
+
+        let series: any[] = [];
+        
+        if (hasModelUsage) {
+            // 收集所有模型名称
+            const allModels = new Set<string>();
+            dailyUsageData.forEach(item => {
+                if (item.modelUsage) {
+                    item.modelUsage.forEach((model: any) => {
+                        allModels.add(model.modelName);
+                    });
+                }
+            });
+
+            // 为每个模型创建系列数据
+            const modelColors = [
+                theme.colorSuccess,
+                theme.colorPrimary,
+                theme.colorWarning,
+                theme.colorError,
+                theme.colorInfo,
+                '#722ed1',
+                '#eb2f96',
+                '#52c41a',
+                '#fa8c16',
+                '#13c2c2'
+            ];
+
+            Array.from(allModels).forEach((modelName, index) => {
+                const modelData = dailyUsageData.map(item => {
+                    const modelUsage = item.modelUsage?.find((m: any) => m.modelName === modelName);
+                    return modelUsage ? modelUsage.requestCount : 0;
+                });
+
+                series.push({
+                    name: modelName,
+                    type: 'bar',
+                    stack: 'requests',
+                    barWidth: '60%',
+                    itemStyle: {
+                        color: modelColors[index % modelColors.length]
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            opacity: 0.8
+                        }
+                    },
+                    data: modelData
+                });
+            });
+        } else {
+            // 没有模型数据时使用原来的逻辑
+            series = [{
+                name: t('usage.requests'),
+                type: 'bar',
+                barWidth: '60%',
+                itemStyle: {
+                    color: theme.colorSuccess
+                },
+                emphasis: {
+                    itemStyle: {
+                        color: theme.colorSuccessActive
+                    }
+                },
+                data: requests
+            }];
+        }
 
         // 请求数图表配置
         const option = {
@@ -372,15 +508,25 @@ export default function UsagePage() {
                 }
             },
             grid: {
-                top: 60,
+                top: hasModelUsage ? 80 : 60,
                 right: 20,
                 bottom: 50,
-                left: 0,  // 减少左侧边距
-                containLabel: false  // 不包含标签
+                left: 0,
+                containLabel: false
             },
+            legend: hasModelUsage ? {
+                top: 40,
+                left: 10,
+                orient: 'horizontal',
+                itemGap: 10,
+                textStyle: {
+                    fontSize: 12,
+                    color: theme.colorText
+                }
+            } : undefined,
             tooltip: {
                 trigger: 'axis',
-                confine: true, // 确保提示框在图表区域内
+                confine: true,
                 backgroundColor: theme.colorBgElevated,
                 borderColor: theme.colorBorder,
                 textStyle: {
@@ -437,28 +583,13 @@ export default function UsagePage() {
             },
             yAxis: {
                 type: 'value',
-                name: '',  // 移除名称
-                axisLine: { show: false },  // 隐藏轴线
-                axisTick: { show: false },  // 隐藏刻度
-                axisLabel: { show: false },  // 隐藏标签
-                splitLine: { show: false }   // 隐藏网格线
+                name: '',
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: { show: false },
+                splitLine: { show: false }
             },
-            series: [
-                {
-                    name: t('usage.requests'),
-                    type: 'bar',
-                    barWidth: '60%',
-                    itemStyle: {
-                        color: theme.colorSuccess
-                    },
-                    emphasis: {
-                        itemStyle: {
-                            color: theme.colorSuccessActive
-                        }
-                    },
-                    data: requests
-                }
-            ]
+            series: series
         };
 
         // 设置配置
@@ -466,7 +597,7 @@ export default function UsagePage() {
     };
 
     // 更新令牌数图表
-    const updateTokensChart = (dates: string[], tokens: number[]) => {
+    const updateTokensChart = (dates: string[], tokens: number[], dailyUsageData: any[]) => {
         if (!tokensChartRef.current) return;
 
         // 销毁之前的实例（如果存在）
@@ -480,6 +611,76 @@ export default function UsagePage() {
 
         // 计算总令牌数
         const totalTokens = tokens.reduce((sum, current) => sum + current, 0);
+
+        // 检查是否有模型使用数据
+        const hasModelUsage = dailyUsageData.some(item => item.modelUsage && item.modelUsage.length > 0);
+
+        let series: any[] = [];
+        
+        if (hasModelUsage) {
+            // 收集所有模型名称
+            const allModels = new Set<string>();
+            dailyUsageData.forEach(item => {
+                if (item.modelUsage) {
+                    item.modelUsage.forEach((model: any) => {
+                        allModels.add(model.modelName);
+                    });
+                }
+            });
+
+            // 为每个模型创建系列数据
+            const modelColors = [
+                theme.colorWarning,
+                theme.colorPrimary,
+                theme.colorSuccess,
+                theme.colorError,
+                theme.colorInfo,
+                '#722ed1',
+                '#eb2f96',
+                '#52c41a',
+                '#fa8c16',
+                '#13c2c2'
+            ];
+
+            Array.from(allModels).forEach((modelName, index) => {
+                const modelData = dailyUsageData.map(item => {
+                    const modelUsage = item.modelUsage?.find((m: any) => m.modelName === modelName);
+                    return modelUsage ? modelUsage.tokenCount : 0;
+                });
+
+                series.push({
+                    name: modelName,
+                    type: 'bar',
+                    stack: 'tokens',
+                    barWidth: '60%',
+                    itemStyle: {
+                        color: modelColors[index % modelColors.length]
+                    },
+                    emphasis: {
+                        itemStyle: {
+                            opacity: 0.8
+                        }
+                    },
+                    data: modelData
+                });
+            });
+        } else {
+            // 没有模型数据时使用原来的逻辑
+            series = [{
+                name: t('usage.tokenCount'),
+                type: 'bar',
+                barWidth: '60%',
+                itemStyle: {
+                    color: theme.colorWarning
+                },
+                emphasis: {
+                    itemStyle: {
+                        color: theme.colorWarningActive
+                    }
+                },
+                data: tokens
+            }];
+        }
 
         // 令牌数图表配置
         const option = {
@@ -495,15 +696,25 @@ export default function UsagePage() {
                 }
             },
             grid: {
-                top: 60,
+                top: hasModelUsage ? 80 : 60,
                 right: 20,
                 bottom: 50,
-                left: 0,  // 减少左侧边距
-                containLabel: false  // 不包含标签
+                left: 0,
+                containLabel: false
             },
+            legend: hasModelUsage ? {
+                top: 40,
+                left: 10,
+                orient: 'horizontal',
+                itemGap: 10,
+                textStyle: {
+                    fontSize: 12,
+                    color: theme.colorText
+                }
+            } : undefined,
             tooltip: {
                 trigger: 'axis',
-                confine: true, // 确保提示框在图表区域内
+                confine: true,
                 backgroundColor: theme.colorBgElevated,
                 borderColor: theme.colorBorder,
                 textStyle: {
@@ -560,28 +771,13 @@ export default function UsagePage() {
             },
             yAxis: {
                 type: 'value',
-                name: '',  // 移除名称
-                axisLine: { show: false },  // 隐藏轴线
-                axisTick: { show: false },  // 隐藏刻度
-                axisLabel: { show: false },  // 隐藏标签
-                splitLine: { show: false }   // 隐藏网格线
+                name: '',
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: { show: false },
+                splitLine: { show: false }
             },
-            series: [
-                {
-                    name: t('usage.tokenCount'),
-                    type: 'bar',
-                    barWidth: '60%',
-                    itemStyle: {
-                        color: theme.colorWarning
-                    },
-                    emphasis: {
-                        itemStyle: {
-                            color: theme.colorWarningActive
-                        }
-                    },
-                    data: tokens
-                }
-            ]
+            series: series
         };
 
         // 设置配置

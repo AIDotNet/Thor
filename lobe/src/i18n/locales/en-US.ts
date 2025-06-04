@@ -51,7 +51,9 @@ const enUS = {
       total: 'Total',
       createSuccess: 'Created successfully',
       updateSuccess: 'Updated successfully',
-      installApp: 'Install App'
+      installApp: 'Install App',
+      you: 'You',
+      saveSuccess: 'Saved successfully'
     },
 
     // Navigation
@@ -741,6 +743,7 @@ const enUS = {
       regenerate: 'Regenerate',
       newChatFromMessage: 'New chat from this message',
       copyContent: 'Copy content',
+      enterToSend: 'Press Enter to send, Shift+Enter for new line',
       tabs: {
         chat: 'Chat',
         image: 'Image'
@@ -784,7 +787,8 @@ const enUS = {
         noContent: 'No chat content to save',
         regenerateFailed: 'Failed to regenerate, please check Token and model settings',
         responseFailed: 'Failed to get response, please check Token and model settings',
-        createChatFailed: 'Failed to create new chat'
+        createChatFailed: 'Failed to create new chat',
+        noTokensAvailable: 'No tokens available, please add a token first'
       }
     },
 

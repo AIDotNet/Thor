@@ -245,18 +245,39 @@ export default function PanelPage() {
 
     chart.setOption({
       tooltip: {
-        trigger: 'axis',
-        formatter: (params: any) => {
-          const value = params[0].value;
-          return `${params[0].name}日: ${valueFormatter(value)}`;
-        },
-        backgroundColor: theme.colorBgElevated,
-        borderColor: theme.colorBorder,
-        textStyle: {
-          color: theme.colorText
-        },
-        padding: [8, 12],
-        extraCssText: 'box-shadow: 0 3px 6px -4px rgba(0,0,0,0.12), 0 6px 16px 0 rgba(0,0,0,0.08);'
+          trigger: 'axis',
+          confine: true,
+          backgroundColor: theme.colorBgElevated,
+          borderColor: theme.colorBorder,
+          textStyle: {
+              color: theme.colorText
+          },
+          formatter: (params: any) => {
+              const dateStr = params[0].value;
+              let result = `<div style="font-weight:bold;margin-bottom:4px">${dateStr}日</div>`;
+              let hasData = false;
+              
+              params.forEach((param: any) => {
+                if (param.value > 0) {
+                  hasData = true;
+                  result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
+                    <span>${param.marker}${param.seriesName}</span>
+                    <span style="margin-left:15px;font-weight:bold">${modelsValueFormatter(param.value)}</span>
+                  </div>`;
+                }
+              });
+
+              return result;
+          },
+          axisPointer: {
+              type: 'shadow',
+              lineStyle: {
+                  color: 'transparent'
+              },
+              crossStyle: {
+                  color: 'transparent'
+              }
+          }
       },
       xAxis: {
         type: 'category',
@@ -377,8 +398,10 @@ export default function PanelPage() {
       emphasis: {
         focus: 'series',
         itemStyle: {
-          shadowBlur: 10,
-          shadowColor: 'rgba(0,0,0,0.2)'
+          shadowBlur: 15,
+          shadowOffsetX: 0,
+          shadowOffsetY: 5,
+          shadowColor: 'rgba(0,0,0,0.3)'
         }
       },
       barMaxWidth: '50%',
@@ -390,31 +413,39 @@ export default function PanelPage() {
 
     chart.setOption({
       tooltip: {
-        trigger: 'axis',
-        formatter: function (params: any) {
-          let result = `<div style="font-weight:bold;margin-bottom:4px">${params[0].axisValue}日</div>`;
-          let hasData = false;
-          
-          params.forEach((param: any) => {
-            if (param.value > 0) {
-              hasData = true;
-              result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
-                <span>${param.marker}${param.seriesName}</span>
-                <span style="margin-left:15px;font-weight:bold">${modelsValueFormatter(param.value)}</span>
-              </div>`;
-            }
-          });
-          
-          return hasData ? result : `${params[0].axisValue}日: 无数据`;
-        },
-        backgroundColor: theme.colorBgElevated,
-        borderColor: theme.colorBorder,
-        textStyle: {
-          color: theme.colorText,
-          fontSize: 12
-        },
-        padding: [8, 12],
-        extraCssText: 'border-radius:4px;box-shadow:0 3px 6px -4px rgba(0,0,0,0.12),0 6px 16px 0 rgba(0,0,0,0.08);'
+          trigger: 'axis',
+          confine: true,
+          backgroundColor: theme.colorBgElevated,
+          borderColor: theme.colorBorder,
+          textStyle: {
+              color: theme.colorText
+          },
+          formatter: (params: any) => {
+              const dateStr = params[0].axisValue;
+              let result = `<div style="font-weight:bold;margin-bottom:4px">${dateStr}日</div>`;
+              let hasData = false;
+              
+              params.forEach((param: any) => {
+                if (param.value > 0) {
+                  hasData = true;
+                  result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
+                    <span>${param.marker}${param.seriesName}</span>
+                    <span style="margin-left:15px;font-weight:bold">${modelsValueFormatter(param.value)}</span>
+                  </div>`;
+                }
+              });
+
+              return result;
+          },
+          axisPointer: {
+              type: 'shadow',
+              lineStyle: {
+                  color: 'transparent'
+              },
+              crossStyle: {
+                  color: 'transparent'
+              }
+          }
       },
       legend: {
         data: modelsName,
