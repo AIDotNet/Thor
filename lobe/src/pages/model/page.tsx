@@ -16,6 +16,7 @@ import { getModelInfo } from "../../services/ModelService";
 import { getTags } from "../../services/ChannelService";
 import MODEL_TYPES from "../model-manager/constants/modelTypes";
 import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 
 const { Title, Paragraph } = Typography;
 const MotionTag = motion(Tag);
@@ -1432,6 +1433,7 @@ export default function DesktopLayout() {
             
             <div style={{ marginLeft: 'auto' }}>
                 <Space>
+                    <LanguageSwitcher size="small" />
                     <span className="switch-label">{t('modelLibrary.unitSwitch')}：</span>
                     <Switch
                         value={isK}
