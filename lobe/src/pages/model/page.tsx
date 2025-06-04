@@ -15,6 +15,7 @@ import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
 import { getModelInfo } from "../../services/ModelService";
 import { getTags } from "../../services/ChannelService";
 import MODEL_TYPES from "../model-manager/constants/modelTypes";
+import { useTranslation } from 'react-i18next';
 
 const { Title, Paragraph } = Typography;
 const MotionTag = motion(Tag);
@@ -29,32 +30,36 @@ const useStyles = createStyles(({ token, css }) => ({
         background: linear-gradient(145deg, ${token.colorBgContainer} 0%, ${token.colorBgElevated} 100%);
         position: relative;
         overflow: hidden;
+        min-height: 100vh;
     `,
     searchContainer: css`
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin: 16px 16px 0 16px;
-        padding: 16px;
-        border-radius: ${token.borderRadius}px;
+        gap: 16px;
+        margin: 16px;
+        padding: 20px;
+        border-radius: ${token.borderRadiusLG}px;
         background-color: ${token.colorBgContainer};
-        box-shadow: ${token.boxShadowSecondary};
+        box-shadow: ${token.boxShadowTertiary};
         position: relative;
         z-index: 2;
+        border: 1px solid ${token.colorBorderSecondary};
         
         @media (max-width: 768px) {
             flex-direction: column;
-            align-items: flex-start;
-            padding: 12px;
-            margin: 12px 12px 0 12px;
+            align-items: stretch;
+            padding: 16px;
+            margin: 12px;
+            gap: 12px;
         }
     `,
     searchInput: css`
-        width: 240px;
-        transition: all 0.3s;
+        width: 280px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
         &:focus, &:hover {
-            width: 280px;
-            box-shadow: 0 0 8px ${token.colorPrimaryBg};
+            width: 320px;
+            box-shadow: 0 0 12px ${token.colorPrimaryBg};
         }
         
         @media (max-width: 768px) {
@@ -67,47 +72,72 @@ const useStyles = createStyles(({ token, css }) => ({
     iconFilter: css`
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        margin: 16px 16px 0 16px;
-        padding: 16px;
-        border-radius: ${token.borderRadius}px;
+        gap: 16px;
+        margin: 16px;
+        padding: 20px;
+        border-radius: ${token.borderRadiusLG}px;
         background-color: ${token.colorBgContainer};
-        box-shadow: ${token.boxShadowSecondary};
+        box-shadow: ${token.boxShadowTertiary};
         position: relative;
         overflow: hidden;
         z-index: 1;
+        border: 1px solid ${token.colorBorderSecondary};
         
         @media (max-width: 768px) {
             overflow-x: auto;
             flex-wrap: nowrap;
-            padding: 12px;
-            margin: 12px 12px 0 12px;
+            padding: 16px;
+            margin: 12px;
+            gap: 12px;
+            
+            &::-webkit-scrollbar {
+                height: 4px;
+            }
+            
+            &::-webkit-scrollbar-track {
+                background: ${token.colorBgLayout};
+                border-radius: 2px;
+            }
+            
+            &::-webkit-scrollbar-thumb {
+                background: ${token.colorPrimary};
+                border-radius: 2px;
+            }
         }
     `,
     iconItem: css`
         cursor: pointer;
-        padding: 8px 16px;
-        border-radius: ${token.borderRadiusSM}px;
+        padding: 12px 20px;
+        border-radius: ${token.borderRadius}px;
         transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        border: 1px solid transparent;
+        border: 2px solid transparent;
         position: relative;
         overflow: hidden;
+        background: ${token.colorBgElevated};
+        min-width: 120px;
         
         &:hover {
-            background-color: ${token.colorBgTextHover};
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(135deg, ${token.colorBgTextHover} 0%, ${token.colorBgElevated} 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            border-color: ${token.colorPrimaryBorderHover};
         }
         
         &.selected {
-            background: linear-gradient(90deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
+            background: linear-gradient(135deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
             color: ${token.colorTextLightSolid};
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px ${token.colorPrimaryBgHover};
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px ${token.colorPrimaryBgHover};
+            border-color: ${token.colorPrimary};
         }
         
         &.selected svg {
             color: ${token.colorTextLightSolid};
+        }
+        
+        @media (max-width: 768px) {
+            min-width: 100px;
+            padding: 10px 16px;
         }
     `,
     modelTypeFilter: css`
@@ -573,6 +603,7 @@ const useStyles = createStyles(({ token, css }) => ({
 export default function DesktopLayout() {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useTranslation();
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [isK, setIsK] = useState<boolean>(false);
@@ -624,7 +655,7 @@ export default function DesktopLayout() {
                 setTotal(res.data.total);
             })
             .catch(() => {
-                message.error('加载模型数据失败');
+                message.error(t('modelLibrary.loadFailed'));
             })
             .finally(() => {
                 setLoading(false);
@@ -640,7 +671,7 @@ export default function DesktopLayout() {
             })
             .catch((error) => {
                 console.error('Failed to load tags:', error);
-                message.error('加载标签失败');
+                message.error(t('modelLibrary.loadTagsFailed'));
             });
     }
 
@@ -692,7 +723,7 @@ export default function DesktopLayout() {
         try {
             navigator.clipboard.writeText(modelName)
                 .then(() => {
-                    message.success('复制成功');
+                    message.success(t('modelLibrary.copySuccess'));
                 })
                 .catch(() => {
                     fallbackCopy(modelName);
@@ -709,7 +740,7 @@ export default function DesktopLayout() {
         input.select();
         document.execCommand('copy');
         document.body.removeChild(input);
-        message.success('复制成功');
+        message.success(t('modelLibrary.copySuccess'));
     };
 
     const handleProviderFilter = (key: string) => {
@@ -751,7 +782,7 @@ export default function DesktopLayout() {
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
-                            <span style={{ fontWeight: 'bold' }}>提示:</span>
+                            <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.promptPrice')}:</span>
                             <span>{renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}</span>
                         </MotionTag>
                         <MotionTag 
@@ -760,7 +791,7 @@ export default function DesktopLayout() {
                             whileHover={{ scale: 1.05 }}
                             transition={{ type: "spring", stiffness: 400, damping: 10 }}
                         >
-                            <span style={{ fontWeight: 'bold' }}>完成:</span>
+                            <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.completionPrice')}:</span>
                             <span>{renderQuota((item.completionRate ? 
                                 item.promptRate * multiplier * item.completionRate : 
                                 getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}</span>
@@ -775,7 +806,7 @@ export default function DesktopLayout() {
                                 whileHover={{ scale: 1.05 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                             >
-                                <span style={{ fontWeight: 'bold' }}>音频输入:</span>
+                                <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.audioInputPrice')}:</span>
                                 <span>{renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}</span>
                             </MotionTag>
                             <MotionTag 
@@ -784,7 +815,7 @@ export default function DesktopLayout() {
                                 whileHover={{ scale: 1.05 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                             >
-                                <span style={{ fontWeight: 'bold' }}>音频完成:</span>
+                                <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.audioOutputPrice')}:</span>
                                 <span>{renderQuota((item.completionRate ? 
                                     item.audioPromptRate * multiplier * item.audioOutputRate : 
                                     getCompletionRatio(item.model) * multiplier))}/{tokenUnit}</span>
@@ -801,7 +832,7 @@ export default function DesktopLayout() {
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
-                    <span style={{ fontWeight: 'bold' }}>每次:</span>
+                    <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.perUsagePrice')}:</span>
                     <span>{renderQuota(item.promptRate, 6)}</span>
                 </MotionTag>
             );
@@ -963,7 +994,7 @@ export default function DesktopLayout() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
                     >
-                        <div className={styles.modelDetailPriceTitle}>提示词价格</div>
+                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.promptPrice')}</div>
                         <div className={styles.modelDetailPriceValue}>
                             {renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}
                         </div>
@@ -975,7 +1006,7 @@ export default function DesktopLayout() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                     >
-                        <div className={styles.modelDetailPriceTitle}>完成价格</div>
+                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.completionPrice')}</div>
                         <div className={styles.modelDetailPriceValue}>
                             {renderQuota((item.completionRate ? 
                                 item.promptRate * multiplier * item.completionRate : 
@@ -991,7 +1022,7 @@ export default function DesktopLayout() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
                             >
-                                <div className={styles.modelDetailPriceTitle}>音频输入价格</div>
+                                <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.audioInputPrice')}</div>
                                 <div className={styles.modelDetailPriceValue}>
                                     {renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}
                                 </div>
@@ -1003,7 +1034,7 @@ export default function DesktopLayout() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
                             >
-                                <div className={styles.modelDetailPriceTitle}>音频完成价格</div>
+                                <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.audioOutputPrice')}</div>
                                 <div className={styles.modelDetailPriceValue}>
                                     {renderQuota((item.completionRate ? 
                                         item.audioPromptRate * multiplier * item.audioOutputRate : 
@@ -1023,7 +1054,7 @@ export default function DesktopLayout() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
                     >
-                        <div className={styles.modelDetailPriceTitle}>每次调用价格</div>
+                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.perUsagePrice')}</div>
                         <div className={styles.modelDetailPriceValue}>
                             {renderQuota(item.promptRate, 6)}
                         </div>
@@ -1038,10 +1069,10 @@ export default function DesktopLayout() {
         
         // Define stats to display
         const stats = [
-            { label: '最大上下文', value: item.quotaMax || '-' },
-            { label: '模型类型', value: item.type },
-            { label: '计费方式', value: item.quotaType === 1 ? '按量计费' : '按次计费' },
-            { label: '状态', value: item.enable ? '可用' : '不可用' },
+            { label: t('modelLibrary.maxContext'), value: item.quotaMax || '-' },
+            { label: t('modelLibrary.modelType'), value: t(`modelLibrary.${item.type}`) },
+            { label: t('modelLibrary.billingType'), value: item.quotaType === 1 ? t('modelLibrary.volumeBilling') : t('modelLibrary.perUseBilling') },
+            { label: t('modelLibrary.status'), value: item.enable ? t('modelLibrary.available') : t('modelLibrary.unavailable') },
         ];
         
         return (
@@ -1114,7 +1145,7 @@ export default function DesktopLayout() {
                 onCancel={handleModalClose}
                 footer={[
                     <Button key="back" onClick={handleModalClose}>
-                        关闭
+                        {t('modelLibrary.close')}
                     </Button>,
                     <Button 
                         key="copy" 
@@ -1122,7 +1153,7 @@ export default function DesktopLayout() {
                         onClick={() => copyModelName(selectedModel.model)}
                         className={styles.primaryButton}
                     >
-                        复制模型名称
+                        {t('modelLibrary.copyModelName')}
                     </Button>,
                 ]}
                 width={800}
@@ -1173,7 +1204,7 @@ export default function DesktopLayout() {
                 <div className={styles.modelDetailSection}>
                     <div className={styles.modelDetailSectionTitle}>
                         <Info size={16} color={token.colorTextSecondary} />
-                        模型统计
+                        {t('modelLibrary.modelStats')}
                     </div>
                     {renderModelStats(selectedModel)}
                 </div>
@@ -1181,13 +1212,13 @@ export default function DesktopLayout() {
                 <div className={styles.modelDetailSection}>
                     <div className={styles.modelDetailSectionTitle}>
                         <Info size={16} color={token.colorTextSecondary} />
-                        价格信息 ({isK ? 'K' : 'M'} 单位)
+                        {t('modelLibrary.pricingInfo')} ({isK ? 'K' : 'M'} {t('modelLibrary.unitSwitch')})
                         <Switch
                             checked={isK}
                             size="small"
                             style={{ marginLeft: 8 }}
-                            checkedChildren="K"
-                            unCheckedChildren="M"
+                            checkedChildren={t('modelLibrary.unitK')}
+                            unCheckedChildren={t('modelLibrary.unitM')}
                             onChange={setIsK}
                         />
                     </div>
@@ -1198,7 +1229,7 @@ export default function DesktopLayout() {
                     <div className={styles.modelDetailSection}>
                         <div className={styles.modelDetailSectionTitle}>
                             <Info size={16} color={token.colorTextSecondary} />
-                            模型能力
+                            {t('modelLibrary.modelCapabilities')}
                         </div>
                         <Descriptions
                             bordered
@@ -1208,9 +1239,9 @@ export default function DesktopLayout() {
                             {Object.entries(selectedModel.capabilities).map(([key, value]: any) => (
                                 <Descriptions.Item key={key} label={key}>
                                     {value ? (
-                                        <Tag color="green">支持</Tag>
+                                        <Tag color="green">{t('modelLibrary.supported')}</Tag>
                                     ) : (
-                                        <Tag color="red">不支持</Tag>
+                                        <Tag color="red">{t('modelLibrary.notSupported')}</Tag>
                                     )}
                                 </Descriptions.Item>
                             ))}
@@ -1289,7 +1320,7 @@ export default function DesktopLayout() {
                             whileHover={{ scale: 1.05 }}
                             style={{ fontSize: '11px' }}
                         >
-                            {item.enable ? '可用' : '不可用'}
+                            {item.enable ? t('modelLibrary.available') : t('modelLibrary.unavailable')}
                         </MotionTag>
                         <MotionTag 
                             color={modelTypeColor}
@@ -1297,14 +1328,14 @@ export default function DesktopLayout() {
                             style={{ fontSize: '11px' }}
                             icon={modelTypeIcon}
                         >
-                            {item.type}
+                            {t(`modelLibrary.${item.type}`)}
                         </MotionTag>
                         <MotionTag 
                             color={item.quotaType === 1 ? 'blue' : 'orange'}
                             whileHover={{ scale: 1.05 }}
                             style={{ fontSize: '11px' }}
                         >
-                            {item.quotaType === 1 ? '按量' : '按次'}
+                            {item.quotaType === 1 ? t('modelLibrary.volumeBilling') : t('modelLibrary.perUseBilling')}
                         </MotionTag>
                     </div>
 
@@ -1337,7 +1368,7 @@ export default function DesktopLayout() {
                         <div className={styles.modelStats}>
                             <div className={styles.modelStat}>
                                 <div className={styles.modelStatValue}>{item.quotaMax || '-'}</div>
-                                <div className={styles.modelStatLabel}>最大上下文</div>
+                                <div className={styles.modelStatLabel}>{t('modelLibrary.maxContext')}</div>
                             </div>
                         </div>
                     </div>
@@ -1353,7 +1384,7 @@ export default function DesktopLayout() {
         >
             <Space wrap={isMobile} style={{ width: isMobile ? '100%' : 'auto' }}>
                 <Input
-                    placeholder="请输入需要搜索的模型"
+                    placeholder={t('modelLibrary.searchPlaceholder')}
                     value={input.model}
                     className={styles.searchInput}
                     onPressEnter={() => {
@@ -1372,7 +1403,7 @@ export default function DesktopLayout() {
                 <Select
                     mode="multiple"
                     allowClear
-                    placeholder="选择标签过滤"
+                    placeholder={t('modelLibrary.selectTags')}
                     value={input.tags}
                     onChange={handleTagsChange}
                     className={styles.tagSelect}
@@ -1395,17 +1426,17 @@ export default function DesktopLayout() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                 >
-                    搜索
+                    {t('modelLibrary.searchButton')}
                 </MotionButton>
             </Space>
             
             <div style={{ marginLeft: 'auto' }}>
                 <Space>
-                    <span className="switch-label">单位：</span>
+                    <span className="switch-label">{t('modelLibrary.unitSwitch')}：</span>
                     <Switch
                         value={isK}
-                        checkedChildren={<Tag color="blue">K</Tag>}
-                        unCheckedChildren={<Tag color="green">M</Tag>}
+                        checkedChildren={<Tag color="blue">{t('modelLibrary.unitK')}</Tag>}
+                        unCheckedChildren={<Tag color="green">{t('modelLibrary.unitM')}</Tag>}
                         defaultChecked
                         onChange={setIsK}
                     />
@@ -1764,12 +1795,12 @@ export default function DesktopLayout() {
         return (
             <div className={styles.resultSummary}>
                 <div>
-                    共找到 <Typography.Text strong>{filteredData.length}</Typography.Text> 个结果
+                    {t('modelLibrary.totalResults')} <Typography.Text strong>{filteredData.length}</Typography.Text> {t('modelLibrary.resultsCount')}
                     {input.modelType && (
-                        <>, 模型类型: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{modelTypeName}</Typography.Text></>
+                        <>, {t('modelLibrary.modelTypeFilter')}: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{modelTypeName}</Typography.Text></>
                     )}
                     {input.type && (
-                        <>, 提供商: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{provider[input.type] || input.type}</Typography.Text></>
+                        <>, {t('modelLibrary.providerFilter')}: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{provider[input.type] || input.type}</Typography.Text></>
                     )}
                 </div>
                 
@@ -1782,18 +1813,18 @@ export default function DesktopLayout() {
                                 setInput({...input, type: '', tags: [], modelType: ''});
                             }}
                         >
-                            清除筛选
+                            {t('modelLibrary.clearFilters')}
                         </Button>
                     )}
                     
                     <div className={styles.viewToggle}>
-                        <span>视图:</span>
+                        <span>{t('modelLibrary.viewMode')}:</span>
                         <Switch
                             checked={isGridView}
                             size="small"
                             onChange={(checked) => setIsGridView(checked)}
-                            checkedChildren="卡片"
-                            unCheckedChildren="列表"
+                            checkedChildren={t('modelLibrary.cardView')}
+                            unCheckedChildren={t('modelLibrary.listView')}
                         />
                     </div>
                 </div>
@@ -1811,7 +1842,7 @@ export default function DesktopLayout() {
             <AnimatedBackground />
             
             <MotionDiv variants={itemVariants}>
-                <Header nav={'模型列表'} />
+                <Header nav={t('modelLibrary.title')} />
             </MotionDiv>
             
             {renderSearchSection()}
@@ -1828,10 +1859,10 @@ export default function DesktopLayout() {
                 className={styles.modelsContainer}
                 variants={itemVariants}
             >
-                {loading && <Empty description="加载中..." image={Empty.PRESENTED_IMAGE_SIMPLE} />}
+                {loading && <Empty description={t('modelLibrary.loading')} image={Empty.PRESENTED_IMAGE_SIMPLE} />}
                 
                 {!loading && filteredData.length === 0 && (
-                    <Empty description="没有符合条件的模型" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                    <Empty description={t('modelLibrary.noResults')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
                 )}
                 
                 {!loading && filteredData.length > 0 && (
@@ -1849,7 +1880,7 @@ export default function DesktopLayout() {
                                 disabled={input.page === 1}
                                 onClick={() => setInput({...input, page: input.page - 1})}
                             >
-                                上一页
+                                {t('modelLibrary.previousPage')}
                             </Button>
                             <Button type="primary">
                                 {input.page} / {Math.ceil(total / input.pageSize)}
@@ -1858,7 +1889,7 @@ export default function DesktopLayout() {
                                 disabled={input.page >= Math.ceil(total / input.pageSize)}
                                 onClick={() => setInput({...input, page: input.page + 1})}
                             >
-                                下一页
+                                {t('modelLibrary.nextPage')}
                             </Button>
                         </Button.Group>
                     </div>

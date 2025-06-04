@@ -1,35 +1,46 @@
-import { useCallback } from 'react';
+import { Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Dropdown, Button } from 'antd';
 import { GlobalOutlined } from '@ant-design/icons';
 
-/**
- * 语言切换器组件
- */
-const LanguageSwitcher = () => {
+const { Option } = Select;
+
+interface LanguageSwitcherProps {
+  size?: 'small' | 'middle' | 'large';
+  style?: React.CSSProperties;
+}
+
+const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ 
+  size = 'middle', 
+  style 
+}) => {
   const { i18n } = useTranslation();
 
-  const changeLanguage = useCallback((lng: string) => {
-    i18n.changeLanguage(lng);
-  }, [i18n]);
+  const handleLanguageChange = (language: string) => {
+    i18n.changeLanguage(language);
+    localStorage.setItem('language', language);
+  };
 
-  const items = [
-    {
-      key: 'zh-CN',
-      label: '简体中文',
-      onClick: () => changeLanguage('zh-CN'),
-    },
-    {
-      key: 'en-US',
-      label: 'English',
-      onClick: () => changeLanguage('en-US'),
-    },
+  const languages = [
+    { code: 'zh-CN', name: '中文', flag: '🇨🇳' },
+    { code: 'en-US', name: 'English', flag: '🇺🇸' }
   ];
 
   return (
-    <Dropdown menu={{ items }}>
-      <Button type="text" icon={<GlobalOutlined />} />
-    </Dropdown>
+    <Select
+      value={i18n.language}
+      onChange={handleLanguageChange}
+      size={size}
+      style={{ minWidth: 120, ...style }}
+      suffixIcon={<GlobalOutlined />}
+      dropdownStyle={{ minWidth: 140 }}
+    >
+      {languages.map(lang => (
+        <Option key={lang.code} value={lang.code}>
+          <span style={{ marginRight: 8 }}>{lang.flag}</span>
+          {lang.name}
+        </Option>
+      ))}
+    </Select>
   );
 };
 

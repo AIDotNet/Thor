@@ -477,6 +477,108 @@ const enUS = {
       advancedSettings: 'Advanced Settings'
     },
 
+    // Model Library Page
+    modelLibrary: {
+      title: 'Model Library',
+      searchPlaceholder: 'Enter model name to search',
+      searchButton: 'Search',
+      selectTags: 'Select tags to filter',
+      clearFilters: 'Clear Filters',
+      unitSwitch: 'Unit',
+      unitK: 'K',
+      unitM: 'M',
+      viewMode: 'View',
+      cardView: 'Card',
+      listView: 'List',
+      
+      // Model status
+      available: 'Available',
+      unavailable: 'Unavailable',
+      enabled: 'Enabled',
+      disabled: 'Disabled',
+      
+      // Billing types
+      volumeBilling: 'Volume',
+      perUseBilling: 'Per Use',
+      
+      // Model types
+      chat: 'Chat',
+      image: 'Image',
+      audio: 'Audio',
+      stt: 'Speech to Text',
+      tts: 'Text to Speech',
+      embedding: 'Embedding',
+      
+      // Pricing info
+      promptPrice: 'Prompt',
+      completionPrice: 'Completion',
+      audioInputPrice: 'Audio Input',
+      audioOutputPrice: 'Audio Output',
+      perUsagePrice: 'Per Usage',
+      
+      // Statistics
+      maxContext: 'Max Context',
+      modelType: 'Model Type',
+      billingType: 'Billing Type',
+      status: 'Status',
+      
+      // Actions
+      copyModelName: 'Copy Model Name',
+      copySuccess: 'Copied successfully',
+      copyFailed: 'Copy failed',
+      viewDetails: 'View Details',
+      
+      // Result statistics
+      totalResults: 'Found',
+      resultsCount: 'results',
+      modelTypeFilter: 'Model Type',
+      providerFilter: 'Provider',
+      
+      // Pagination
+      previousPage: 'Previous',
+      nextPage: 'Next',
+      
+      // Empty states
+      noResults: 'No models match the criteria',
+      loading: 'Loading...',
+      loadFailed: 'Failed to load model data',
+      
+      // Model details modal
+      modelDetails: 'Model Details',
+      basicInfo: 'Basic Information',
+      pricingInfo: 'Pricing Information',
+      modelStats: 'Model Statistics',
+      modelCapabilities: 'Model Capabilities',
+      supported: 'Supported',
+      notSupported: 'Not Supported',
+      close: 'Close',
+      
+      // Filters
+      allProviders: 'All Providers',
+      allTypes: 'All Types',
+      noTags: 'No Tags',
+      
+      // Hints
+      selectProvider: 'Select Provider',
+      selectModelType: 'Select Model Type',
+      filterByTags: 'Filter by Tags',
+      
+      // Error messages
+      loadTagsFailed: 'Failed to load tags',
+      networkError: 'Network Error',
+      serverError: 'Server Error',
+      
+      // Model type descriptions
+      typeDescriptions: {
+        chat: 'Models for conversation and text generation',
+        image: 'Models for image generation and processing',
+        audio: 'Models for audio processing',
+        stt: 'Speech to text models',
+        tts: 'Text to speech models',
+        embedding: 'Models for vector embedding'
+      }
+    },
+
     // Product Page
     product: {
       title: 'Product Management',
@@ -829,6 +931,105 @@ const enUS = {
       dragImageHint: 'Click or drag image file to this area to upload',
       supportMultipleFiles: 'Support for uploading multiple files simultaneously',
       clearAllImages: 'Clear All Images'
+    },
+
+    // Panel Page
+    panel: {
+      title: 'Data Panel',
+      loading: 'Loading data...',
+      
+      // Statistics Cards
+      statistics: {
+        currentResidualCredit: 'Current Remaining Credit',
+        recentConsumption: 'Recent Total Consumption',
+        recentRequests: 'Recent Total Requests',
+        recentTokens: 'Recent Total Tokens Consumed',
+        quotaDistribution: 'Quota Distribution',
+        consumedQuota: 'Consumed Quota',
+        remainingQuota: 'Remaining Quota',
+      },
+
+      // Chart Titles
+      charts: {
+        consumptionTrend: 'Consumption Trend',
+        requestTrend: 'Request Trend',
+        tokenTrend: 'Token Trend',
+        modelDistribution: 'Model Consumption Distribution (Last 7 Days)',
+        newUserRegistration: 'New User Registration (Last 7 Days)',
+        recentRechargeData: 'Recent Recharge Data',
+        quotaDistributionChart: 'Quota Distribution Chart',
+      },
+
+      // Chart Data Labels
+      chartLabels: {
+        consumption: 'Consumption',
+        requests: 'Requests',
+        tokens: 'Tokens',
+        day: 'Day',
+        userCount: 'User Count',
+        amount: 'Amount',
+        model: 'Model',
+        date: 'Date',
+        value: 'Value',
+        percentage: 'Percentage',
+      },
+
+      // Tooltips
+      tooltips: {
+        consumptionTooltip: 'Shows daily consumption quota trend',
+        requestTooltip: 'Shows daily API request count changes',
+        tokenTooltip: 'Shows daily token consumption changes',
+        modelTooltip: 'Shows usage distribution of each model',
+        userTooltip: 'Shows new user registration statistics',
+        rechargeTooltip: 'Shows user recharge amount distribution',
+      },
+
+      // Error Messages
+      errors: {
+        loadDataFailed: 'Failed to load data',
+        chartRenderFailed: 'Failed to render chart',
+        noDataAvailable: 'No data available',
+        networkError: 'Network connection error',
+      },
+
+      // Action Buttons
+      actions: {
+        refresh: 'Refresh Data',
+        export: 'Export Data',
+        viewDetails: 'View Details',
+        fullscreen: 'Fullscreen Display',
+      },
+
+      // Time Range
+      timeRange: {
+        today: 'Today',
+        yesterday: 'Yesterday',
+        last7Days: 'Last 7 Days',
+        last30Days: 'Last 30 Days',
+        thisMonth: 'This Month',
+        lastMonth: 'Last Month',
+        custom: 'Custom',
+      },
+
+      // Data Units
+      units: {
+        quota: 'Quota',
+        requests: 'Times',
+        tokens: 'Tokens',
+        users: 'Users',
+        yuan: 'Yuan',
+        dollar: '$',
+      },
+
+      // Status Information
+      status: {
+        normal: 'Normal',
+        warning: 'Warning',
+        error: 'Error',
+        loading: 'Loading',
+        empty: 'No Data',
+        success: 'Success',
+      },
     }
   }
 };

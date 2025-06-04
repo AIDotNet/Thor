@@ -1,14 +1,13 @@
-import { useEffect, useState, useRef } from 'react';
-import { Card, Select, Input, Button, Avatar, theme, message, Spin, Modal, Form, Row, Col, Empty, Grid, Space, Popconfirm, Tooltip, Typography, Divider, Tag } from 'antd';
+import { Card, Select, Input, Button, Avatar, theme, message, Spin, Modal, Form, Row, Col, Grid, Space, Popconfirm, Tooltip, Typography,  Tag } from 'antd';
 import { SendOutlined, UserOutlined, DeleteOutlined, SettingOutlined, SaveOutlined, SyncOutlined, ClearOutlined, RobotOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { Flexbox } from 'react-layout-kit';
-import { IconAvatar } from '@lobehub/icons';
 import ReactMarkdown from 'react-markdown';
 import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../../../../utils/responsive';
 import { getTokens } from '../../../../services/TokenService';
 import { getModels } from '../../../../services/ModelService';
 import OpenAI from 'openai';
+import { useEffect, useRef, useState } from 'react';
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -362,15 +361,15 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
         
         // If deleting a user message, also delete the following assistant message
         if (messages[index].role === 'user' && index + 1 < messages.length) {
-            setMessages(prev => [...prev.slice(0, index), ...prev.slice(index + 2)]);
+            setMessages((prev:any) => [...prev.slice(0, index), ...prev.slice(index + 2)]);
         } 
         // If deleting an assistant message, also delete the preceding user message
         else if (messages[index].role === 'assistant' && index > 0) {
-            setMessages(prev => [...prev.slice(0, index - 1), ...prev.slice(index + 1)]);
+            setMessages((prev:any) => [...prev.slice(0, index - 1), ...prev.slice(index + 1)]);
         }
         // If it's a standalone message, just delete it
         else {
-            setMessages(prev => [...prev.slice(0, index), ...prev.slice(index + 1)]);
+            setMessages((prev:any) => [...prev.slice(0, index), ...prev.slice(index + 1)]);
         }
     };
     
@@ -419,7 +418,7 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
         
         return (
             <div className="message-list" style={{ padding: isMobile ? '8px' : '16px' }}>
-                {messages.map((msg, index) => (
+                {messages.map((msg:any, index:any) => (
                     <div 
                         key={msg.id || index} 
                         className={`message ${msg.role}`}
@@ -694,7 +693,7 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                                 loading={loading}
                                 size={isMobile ? 'middle' : 'large'}
                             >
-                                {tokenOptions.map(token => (
+                                {tokenOptions.map((token:any) => (
                                     <Option key={token.key} value={token.key}>
                                         {token.name || token.key}
                                     </Option>
@@ -717,7 +716,7 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                                 showSearch
                                 size={isMobile ? 'middle' : 'large'}
                             >
-                                {modelOptions.map(model => (
+                                {modelOptions.map((model:any) => (
                                     <Option key={model} value={model}>
                                         {model}
                                     </Option>

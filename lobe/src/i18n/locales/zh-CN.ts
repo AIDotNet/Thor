@@ -514,13 +514,13 @@ const zhCN = {
       modelTypeRequired: '请输入模型计费类型',
       promptRateRequired: '请输入提示倍率',
       descriptionRequired: '请输入描述',
-      iconRequired: '请选择模型显示图标',
+      iconRequired: '请选择模型图标',
       promptRatePositive: '提示倍率必须大于0',
       createSuccess: '创建成功',
       updateSuccess: '更新成功',
       deleteSuccess: '删除成功',
       operationFailed: '操作失败',
-      confirmDelete: '确认要删除该模型吗？',
+      confirmDelete: '确定要删除此模型吗？',
       yes: '是',
       no: '否',
       perPrompt: '提示',
@@ -530,10 +530,112 @@ const zhCN = {
       perUsage: '每次',
       tokens: 'tokens',
       confirm: '确认',
-      searchModel: '请输入模型名称搜索',
+      searchModel: '请输入需要搜索的模型',
       basicInfo: '基本信息',
-      rateConfiguration: '费率配置',
+      rateConfiguration: '倍率配置',
       advancedSettings: '高级设置'
+    },
+
+    // 模型库页面
+    modelLibrary: {
+      title: '模型库',
+      searchPlaceholder: '请输入需要搜索的模型',
+      searchButton: '搜索',
+      selectTags: '选择标签过滤',
+      clearFilters: '清除筛选',
+      unitSwitch: '单位',
+      unitK: 'K',
+      unitM: 'M',
+      viewMode: '视图',
+      cardView: '卡片',
+      listView: '列表',
+      
+      // 模型状态
+      available: '可用',
+      unavailable: '不可用',
+      enabled: '已启用',
+      disabled: '已禁用',
+      
+      // 计费类型
+      volumeBilling: '按量',
+      perUseBilling: '按次',
+      
+      // 模型类型
+      chat: '对话',
+      image: '图像',
+      audio: '音频',
+      stt: '语音转文本',
+      tts: '文本转语音',
+      embedding: '向量嵌入',
+      
+      // 价格信息
+      promptPrice: '提示',
+      completionPrice: '完成',
+      audioInputPrice: '音频输入',
+      audioOutputPrice: '音频输出',
+      perUsagePrice: '每次',
+      
+      // 统计信息
+      maxContext: '最大上下文',
+      modelType: '模型类型',
+      billingType: '计费方式',
+      status: '状态',
+      
+      // 操作
+      copyModelName: '复制模型名称',
+      copySuccess: '复制成功',
+      copyFailed: '复制失败',
+      viewDetails: '查看详情',
+      
+      // 结果统计
+      totalResults: '共找到',
+      resultsCount: '个结果',
+      modelTypeFilter: '模型类型',
+      providerFilter: '提供商',
+      
+      // 分页
+      previousPage: '上一页',
+      nextPage: '下一页',
+      
+      // 空状态
+      noResults: '没有符合条件的模型',
+      loading: '加载中...',
+      loadFailed: '加载模型数据失败',
+      
+      // 模型详情弹窗
+      modelDetails: '模型详情',
+      basicInfo: '基本信息',
+      pricingInfo: '价格信息',
+      modelStats: '模型统计',
+      modelCapabilities: '模型能力',
+      supported: '支持',
+      notSupported: '不支持',
+      close: '关闭',
+      
+      // 筛选器
+      allProviders: '全部提供商',
+      allTypes: '全部类型',
+      noTags: '无标签',
+      
+      // 提示信息
+      selectProvider: '选择提供商',
+      selectModelType: '选择模型类型',
+      filterByTags: '按标签筛选',
+      
+      // 错误信息
+      loadTagsFailed: '加载标签失败',
+      networkError: '网络错误',
+      serverError: '服务器错误',
+      
+      // 模型类型说明
+      typeDescriptions: {
+        chat: '用于对话和文本生成的模型',
+        image: '用于图像生成和处理的模型',
+        audio: '用于音频处理的模型',
+        stt: '语音转文本模型',
+        tts: '文本转语音模型',
+        embedding: '用于向量嵌入的模型'
+      }
     },
 
     // 产品页面
@@ -887,7 +989,106 @@ const zhCN = {
       dragImageHint: '点击或拖拽图片到此区域上传',
       supportMultipleFiles: '支持同时上传多个文件',
       clearAllImages: '清除所有图片'
-    }
+    },
+
+    // 面板页面
+    panel: {
+      title: '数据面板',
+      loading: '数据加载中...',
+      
+      // 统计卡片
+      statistics: {
+        currentResidualCredit: '当前剩余额度',
+        recentConsumption: '最近消费总额',
+        recentRequests: '最近请求总数',
+        recentTokens: '最近消耗token总数',
+        quotaDistribution: '额度分布',
+        consumedQuota: '消费额度',
+        remainingQuota: '剩余额度',
+      },
+
+      // 图表标题
+      charts: {
+        consumptionTrend: '消费趋势',
+        requestTrend: '请求趋势',
+        tokenTrend: 'Token趋势',
+        modelDistribution: '模型消耗分布（最近七天）',
+        newUserRegistration: '新用户注册（最近七天）',
+        recentRechargeData: '最近充值数据',
+        quotaDistributionChart: '额度分布图',
+      },
+
+      // 图表数据标签
+      chartLabels: {
+        consumption: '消费',
+        requests: '请求数',
+        tokens: '令牌数',
+        day: '日',
+        userCount: '用户数量',
+        amount: '金额',
+        model: '模型',
+        date: '日期',
+        value: '数值',
+        percentage: '百分比',
+      },
+
+      // 工具提示
+      tooltips: {
+        consumptionTooltip: '显示每日消费额度变化趋势',
+        requestTooltip: '显示每日API请求数量变化',
+        tokenTooltip: '显示每日Token消耗量变化',
+        modelTooltip: '显示各模型的使用情况分布',
+        userTooltip: '显示新用户注册数量统计',
+        rechargeTooltip: '显示用户充值金额分布',
+      },
+
+      // 错误信息
+      errors: {
+        loadDataFailed: '数据加载失败',
+        chartRenderFailed: '图表渲染失败',
+        noDataAvailable: '暂无数据',
+        networkError: '网络连接错误',
+      },
+
+      // 操作按钮
+      actions: {
+        refresh: '刷新数据',
+        export: '导出数据',
+        viewDetails: '查看详情',
+        fullscreen: '全屏显示',
+      },
+
+      // 时间范围
+      timeRange: {
+        today: '今天',
+        yesterday: '昨天',
+        last7Days: '最近7天',
+        last30Days: '最近30天',
+        thisMonth: '本月',
+        lastMonth: '上月',
+        custom: '自定义',
+      },
+
+      // 数据单位
+      units: {
+        quota: '额度',
+        requests: '次',
+        tokens: '个',
+        users: '人',
+        yuan: '元',
+        dollar: '$',
+      },
+
+      // 状态信息
+      status: {
+        normal: '正常',
+        warning: '警告',
+        error: '错误',
+        loading: '加载中',
+        empty: '暂无数据',
+        success: '成功',
+      },
+    },
   }
 };
 

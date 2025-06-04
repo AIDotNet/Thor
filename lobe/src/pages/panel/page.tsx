@@ -16,6 +16,7 @@ import {
   UsergroupAddOutlined,
   TransactionOutlined
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 const { useBreakpoint } = Grid;
@@ -26,6 +27,7 @@ interface LineChartProps {
 }
 
 export default function PanelPage() {
+  const { t } = useTranslation();
   const [data, setData] = useState<any>(undefined);
   const [consumeChart, setConsumeChart] = useState<any[]>([]);
   const [requestChart, setRequestChart] = useState<any[]>([]);
@@ -87,15 +89,15 @@ export default function PanelPage() {
           const token = tokens.find((x: any) => x.dateTime === item);
           consumeChart.push({
             date: item,
-            消费: consume?.value,
+            consumption: consume?.value,
           });
           requestChart.push({
             date: item,
-            请求数: request?.value,
+            requests: request?.value,
           });
           tokenChart.push({
             date: item,
-            令牌数: token?.value
+            tokens: token?.value
           });
 
           const model = {} as any;
@@ -145,7 +147,7 @@ export default function PanelPage() {
   };
 
   const labelFormatter = (value: any) => {
-    return `${value}` + '日';
+    return `${value}` + t('panel.chartLabels.day');
   };
 
   const modelsValueFormatter: LineChartProps['valueFormatter'] = (value: any) => {
@@ -179,7 +181,7 @@ export default function PanelPage() {
         },
         series: [
           {
-            name: '额度分布',
+            name: t('panel.statistics.quotaDistribution'),
             type: 'pie',
             radius: ['40%', '70%'],
             avoidLabelOverlap: false,
@@ -203,8 +205,8 @@ export default function PanelPage() {
               show: false
             },
             data: [
-              { value: data.currentConsumedCredit, name: '消费额度', itemStyle: { color: colors[1] } },
-              { value: data.currentResidualCredit, name: '剩余额度', itemStyle: { color: colors[0] } },
+              { value: data.currentConsumedCredit, name: t('panel.statistics.consumedQuota'), itemStyle: { color: colors[1] } },
+              { value: data.currentResidualCredit, name: t('panel.statistics.remainingQuota'), itemStyle: { color: colors[0] } },
             ],
             animationType: 'scale',
             animationEasing: 'elasticOut',
@@ -234,7 +236,8 @@ export default function PanelPage() {
     ref: React.RefObject<HTMLDivElement>,
     data: any[],
     category: string,
-    valueFormatter: (value: any) => string
+    valueFormatter: (value: any) => string,
+    translatedLabel?: string
   ) => {
     if (!ref.current || data.length === 0) return;
 
@@ -242,6 +245,7 @@ export default function PanelPage() {
 
     const xAxisData = data.map(item => item.date);
     const seriesData = data.map(item => item[category]);
+    const displayLabel = translatedLabel || category;
 
     chart.setOption({
       tooltip: {
@@ -254,12 +258,10 @@ export default function PanelPage() {
           },
           formatter: (params: any) => {
               const dateStr = params[0].value;
-              let result = `<div style="font-weight:bold;margin-bottom:4px">${dateStr}日</div>`;
-              let hasData = false;
+              let result = `<div style="font-weight:bold;margin-bottom:4px">${dateStr}${t('panel.chartLabels.day')}</div>`;
               
               params.forEach((param: any) => {
                 if (param.value > 0) {
-                  hasData = true;
                   result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
                     <span>${param.marker}${param.seriesName}</span>
                     <span style="margin-left:15px;font-weight:bold">${modelsValueFormatter(param.value)}</span>
@@ -326,7 +328,7 @@ export default function PanelPage() {
       },
       series: [
         {
-          name: category,
+          name: displayLabel,
           type: 'line',
           data: seriesData,
           smooth: true,
@@ -422,12 +424,9 @@ export default function PanelPage() {
           },
           formatter: (params: any) => {
               const dateStr = params[0].axisValue;
-              let result = `<div style="font-weight:bold;margin-bottom:4px">${dateStr}日</div>`;
-              let hasData = false;
-              
+              let result = `<div style="font-weight:bold;margin-bottom:4px">${dateStr}${t('panel.chartLabels.day')}</div>`;
               params.forEach((param: any) => {
                 if (param.value > 0) {
-                  hasData = true;
                   result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
                     <span>${param.marker}${param.seriesName}</span>
                     <span style="margin-left:15px;font-weight:bold">${modelsValueFormatter(param.value)}</span>
@@ -544,7 +543,7 @@ export default function PanelPage() {
             // 如果是对象字符串，尝试提取更有意义的值
             if (value.startsWith('{') && value.endsWith('}')) {
               try {
-                return '用户';
+                return t('panel.chartLabels.userCount');
               } catch (e) {
                 return value;
               }
@@ -563,7 +562,7 @@ export default function PanelPage() {
       },
       yAxis: {
         type: 'value',
-        name: '数量',
+        name: t('panel.chartLabels.userCount'),
         nameTextStyle: {
           color: theme.colorTextSecondary,
           fontSize: 12
@@ -582,7 +581,7 @@ export default function PanelPage() {
       },
       series: [
         {
-          name: '用户数量',
+          name: t('panel.chartLabels.userCount'),
           type: 'bar',
           data: values,
           itemStyle: {
@@ -671,7 +670,7 @@ export default function PanelPage() {
       },
       series: [
         {
-          name: '数据',
+          name: t('panel.chartLabels.value'),
           type: 'pie',
           radius: ['40%', '70%'],
           center: ['50%', '45%'],
@@ -712,13 +711,13 @@ export default function PanelPage() {
     if (loading || !data) return;
 
     // 消费折线图
-    const consumeLineChart = renderLineChart(consumeChartRef, consumeChart, '消费', cunsumeValueFormatter);
+    const consumeLineChart = renderLineChart(consumeChartRef, consumeChart, 'consumption', cunsumeValueFormatter, t('panel.chartLabels.consumption'));
 
     // 请求折线图
-    const requestLineChart = renderLineChart(requestChartRef, requestChart, '请求数', requestValueFormatter);
+    const requestLineChart = renderLineChart(requestChartRef, requestChart, 'requests', requestValueFormatter, t('panel.chartLabels.requests'));
 
     // Token折线图
-    const tokenLineChart = renderLineChart(tokenChartRef, tokenChart, '令牌数', tokenValueFormatter);
+    const tokenLineChart = renderLineChart(tokenChartRef, tokenChart, 'tokens', tokenValueFormatter, t('panel.chartLabels.tokens'));
     // 模型使用情况折线图
     const modelsChart = renderModelsLineChart();
 
@@ -780,7 +779,7 @@ export default function PanelPage() {
                 style={cardStyle}
               >
                 <Flexbox gap={8}>
-                  <Text type="secondary">当前剩余额度</Text>
+                  <Text type="secondary">{t('panel.statistics.currentResidualCredit')}</Text>
                   <Flexbox horizontal align="center" justify="space-between">
                     <Title level={2} style={{ margin: 0 }}>
                       {renderQuota(data?.currentResidualCredit, 2)}
@@ -801,7 +800,7 @@ export default function PanelPage() {
                 <Col xs={24} md={8}>
                   <Card bordered={false} style={cardStyle}>
                     <Statistic
-                      title="最近消费总额"
+                      title={t('panel.statistics.recentConsumption')}
                       value={renderQuota(data?.consumes?.reduce((a: number, b: any) => a + b.value, 0), 2)}
                       prefix={<RiseOutlined />}
                     />
@@ -811,7 +810,7 @@ export default function PanelPage() {
                 <Col xs={24} md={8}>
                   <Card bordered={false} style={cardStyle}>
                     <Statistic
-                      title="最近请求总数"
+                      title={t('panel.statistics.recentRequests')}
                       value={renderNumber(data?.requests?.reduce((a: number, b: any) => a + b.value, 0))}
                       prefix={<ApiOutlined />}
                     />
@@ -821,7 +820,7 @@ export default function PanelPage() {
                 <Col xs={24} md={8}>
                   <Card bordered={false} style={cardStyle}>
                     <Statistic
-                      title="最近消耗token总数"
+                      title={t('panel.statistics.recentTokens')}
                       value={renderNumber(data?.tokens?.reduce((a: number, b: any) => a + b.value, 0))}
                       prefix={<ThunderboltOutlined />}
                     />
@@ -839,7 +838,7 @@ export default function PanelPage() {
             {/* 模型数据分析部分 */}
             <Col xs={24} xl={24}>
               <Card
-                title={<Space><LineChartOutlined /> 模型消耗分布（最近七天）</Space>}
+                title={<Space><LineChartOutlined /> {t('panel.charts.modelDistribution')}</Space>}
                 bordered={false}
                 style={cardStyle}
               >
@@ -852,7 +851,7 @@ export default function PanelPage() {
             {userNewData && (
               <Col xs={24} lg={12}>
                 <Card
-                  title={<Space><UsergroupAddOutlined /> 新用户注册（最近七天）</Space>}
+                  title={<Space><UsergroupAddOutlined /> {t('panel.charts.newUserRegistration')}</Space>}
                   bordered={false}
                   style={cardStyle}
                 >
@@ -864,7 +863,7 @@ export default function PanelPage() {
             {rechargeData && (
               <Col xs={24} lg={userNewData ? 12 : 24}>
                 <Card
-                  title={<Space><TransactionOutlined /> 最近充值数据</Space>}
+                  title={<Space><TransactionOutlined /> {t('panel.charts.recentRechargeData')}</Space>}
                   bordered={false}
                   style={cardStyle}
                 >
