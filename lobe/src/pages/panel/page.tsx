@@ -570,7 +570,8 @@ export default function PanelPage() {
         minInterval: 1, // 强制Y轴以整数显示
         axisLabel: {
           formatter: (value: any) => value, // 显示整数
-          color: theme.colorTextSecondary
+          color: theme.colorTextSecondary,
+          fontSize: 12
         },
         splitLine: {
           lineStyle: {

@@ -240,7 +240,7 @@ export default function UsagePage() {
         const hasModelUsage = dailyUsageData.some(item => item.modelUsage && item.modelUsage.length > 0);
 
         let series: any[] = [];
-        
+
         if (hasModelUsage) {
             // 收集所有模型名称
             const allModels = new Set<string>();
@@ -349,15 +349,17 @@ export default function UsagePage() {
                     let result = `<div style="font-weight:bold;margin-bottom:5px">${t('usage.date')}: ${dateStr}</div>`;
 
                     params.forEach((param: any) => {
-                        let valueText = renderQuota(param.value);
+                        if (param.value > 0) {
+                            let valueText = renderQuota(param.value);
 
-                        result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
-              <span style="margin-right:15px">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background-color:${param.color};margin-right:5px"></span>
-                ${param.seriesName}:
-              </span>
-              <span style="font-weight:bold">${valueText}</span>
-            </div>`;
+                            result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
+                  <span style="margin-right:15px">
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background-color:${param.color};margin-right:5px"></span>
+                    ${param.seriesName}:
+                  </span>
+                  <span style="font-weight:bold">${valueText}</span>
+                </div>`;
+                        }
                     });
 
                     return result;
@@ -428,7 +430,7 @@ export default function UsagePage() {
         const hasModelUsage = dailyUsageData.some(item => item.modelUsage && item.modelUsage.length > 0);
 
         let series: any[] = [];
-        
+
         if (hasModelUsage) {
             // 收集所有模型名称
             const allModels = new Set<string>();
@@ -538,14 +540,15 @@ export default function UsagePage() {
 
                     params.forEach((param: any) => {
                         let valueText = param.value;
-
-                        result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
+                        if (param.value > 0) {
+                            result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
               <span style="margin-right:15px">
                 <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background-color:${param.color};margin-right:5px"></span>
                 ${param.seriesName}:
               </span>
               <span style="font-weight:bold">${valueText}</span>
             </div>`;
+                        }
                     });
 
                     return result;
@@ -616,7 +619,7 @@ export default function UsagePage() {
         const hasModelUsage = dailyUsageData.some(item => item.modelUsage && item.modelUsage.length > 0);
 
         let series: any[] = [];
-        
+
         if (hasModelUsage) {
             // 收集所有模型名称
             const allModels = new Set<string>();
@@ -725,7 +728,8 @@ export default function UsagePage() {
                     let result = `<div style="font-weight:bold;margin-bottom:5px">${t('usage.date')}: ${dateStr}</div>`;
 
                     params.forEach((param: any) => {
-                        let valueText = renderNumber(param.value);
+                        if (param.value > 0) {
+                            let valueText = renderNumber(param.value);
 
                         result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
               <span style="margin-right:15px">
@@ -734,6 +738,7 @@ export default function UsagePage() {
               </span>
               <span style="font-weight:bold">${valueText}</span>
             </div>`;
+                        }
                     });
 
                     return result;
