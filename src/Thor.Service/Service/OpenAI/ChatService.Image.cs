@@ -209,10 +209,10 @@ partial class ChatService
                 Other = channel.Other
             });
 
-            if (response.Error != null)
+            if (response.Error != null || response.Results.Count == 0)
             {
                 logger.LogError("图片修改失败：{error}", JsonSerializer.Serialize(response.Error));
-                throw new BusinessException(response.Error.Message, response.Error.Code);
+                throw new BusinessException(response.Error?.Message ?? "图片修改失败", response.Error?.Code ?? "500");
             }
 
             await context.Response.WriteAsJsonAsync(response);
@@ -346,11 +346,7 @@ partial class ChatService
             }
 
             request.N ??= 1;
-            // 
-            //     Quality	Square (1024×1024)	Portrait (1024×1536)	Landscape (1536×1024)
-            //     Low	272 tokens	408 tokens	400 tokens
-            //     Medium	1056 tokens	1584 tokens	1568 tokens
-            //     High	4160 tokens	6240 tokens	6208 tokens
+
             var requestToken = TokenHelper.GetTotalTokens(request.Prompt ?? string.Empty);
             var responseToken = 0;
             if (request.Quality?.Equals("low", StringComparison.OrdinalIgnoreCase) == true &&
@@ -445,13 +441,10 @@ partial class ChatService
                 Other = channel.Other
             });
 
-            if (response.Error != null)
+            if (response.Error != null || response.Results.Count == 0)
             {
                 logger.LogError("图片生成失败：{error}", JsonSerializer.Serialize(response.Error));
-                // context.Response.StatusCode = 200;
-                // await context.WriteOpenAIErrorAsync(response.Error.Message, response.Error.Code);
-                //
-                throw new BusinessException(response.Error.Message, response.Error.Code);
+                throw new BusinessException(response.Error?.Message ?? "图片生成失败", response.Error?.Code ?? "500");
             }
 
             await context.Response.WriteAsJsonAsync(response);
@@ -469,6 +462,9 @@ partial class ChatService
 
                 // 将quota 四舍五入
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
+
+                requestToken = response.Usage.InputTokens.Value;
+                responseToken = response.Usage.OutputTokens ?? responseToken;
 
                 if (request == null) throw new Exception("模型校验异常");
 
