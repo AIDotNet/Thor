@@ -259,12 +259,15 @@ export default function PanelPage() {
           formatter: (params: any) => {
               const dateStr = params[0].value;
               let result = `<div style="font-weight:bold;margin-bottom:4px">${dateStr}${t('panel.chartLabels.day')}</div>`;
-              
+
+              // 将params按value排序
+              params.sort((a: any, b: any) => b.value - a.value);
+
               params.forEach((param: any) => {
                 if (param.value > 0) {
                   result += `<div style="display:flex;justify-content:space-between;margin:3px 0">
                     <span>${param.marker}${param.seriesName}</span>
-                    <span style="margin-left:15px;font-weight:bold">${modelsValueFormatter(param.value)}</span>
+                    <span style="margin-left:15px;font-weight:bold">${valueFormatter(param.value)}</span>
                   </div>`;
                 }
               });
