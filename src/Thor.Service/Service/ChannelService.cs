@@ -1,10 +1,13 @@
 ﻿using MapsterMapper;
+using MiniExcelLibs;
 using OpenAI.Chat;
 using System.Diagnostics;
 using System.Threading.Channels;
+using MiniExcelLibs.Attributes;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Consts;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.AzureOpenAI;
@@ -332,5 +335,131 @@ public sealed class ChannelService(
         }
 
         return (response.Choices?.Count > 0, (int)sw.ElapsedMilliseconds);
+    }
+
+    /// <summary>
+    /// 从Excel文件批量导入渠道
+    /// </summary>
+    /// <param name="stream">Excel文件流</param>
+    /// <returns>导入成功的渠道数量</returns>
+    public async ValueTask<int> ImportChannelsFromExcelAsync(Stream stream)
+    {
+        // 使用MiniExcel读取Excel文件
+        var channels = await stream.QueryAsync<ExcelChatChannelInput>();
+
+        int successCount = 0;
+
+        foreach (var channel in channels)
+        {
+            try
+            {
+                // 验证必填字段
+                if (string.IsNullOrWhiteSpace(channel.Name) ||
+                    string.IsNullOrWhiteSpace(channel.Type) ||
+                    channel.Models == null ||
+                    !channel.Models.Any())
+                {
+                    continue; // 跳过无效数据
+                }
+
+                var chatChannel = new Thor.Service.Dto.ChatChannelInput
+                {
+                    Name = channel.Name,
+                    Type = channel.Type,
+                    Address = channel.Address,
+                    Key = channel.Key,
+                    Models = channel.Models.Split(',').Select(x => x.Trim()).ToList(),
+                    Other = channel.Other,
+                    Groups = channel.Groups.Split(',').Select(x => x.Trim()).ToArray()
+                };
+                // 创建渠道
+                await CreateAsync(chatChannel);
+                successCount++;
+            }
+            catch (Exception)
+            {
+                // 记录异常但继续处理下一条记录
+                continue;
+            }
+        }
+
+        // 清除缓存
+        await cache.RemoveAsync(CacheKey);
+
+        return successCount;
+    }
+
+    /// <summary>
+    /// 生成渠道导入模板
+    /// </summary>
+    /// <returns>包含模板数据的内存流</returns>
+    public MemoryStream GenerateImportTemplate()
+    {
+        var memoryStream = new MemoryStream();
+
+        // 创建示例数据
+        var templateData = new List<ExcelChatChannelInput>
+        {
+            new()
+            {
+                Name = "示例渠道1",
+                Type = "OpenAI",
+                Address = "https://api.openai.com/v1",
+                Key = "sk-xxxxxxxxxxxx",
+                Models = "gpt-3.5-turbo,gpt-4",
+                Other = "",
+                Groups = "default"
+            },
+        };
+
+        // 使用MiniExcel生成Excel文件
+        memoryStream.SaveAsAsync(templateData);
+
+        // 将流位置重置到开始
+        memoryStream.Position = 0;
+
+        return memoryStream;
+    }
+
+    public sealed class ExcelChatChannelInput
+    {
+        [ExcelColumnName("渠道名称")] public string Name { get; set; }
+
+        /// <summary>
+        /// 根地址
+        /// </summary>
+        [ExcelColumnName("请求地址")]
+        public string Address { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 密钥
+        /// </summary>
+        [ExcelColumnName("密钥")]
+        public string Key { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 模型
+        /// </summary>
+        [ExcelColumnName("支持的模型列表使用,分割")]
+        public string Models { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [ExcelColumnName("权重")]
+        public string Other { get; set; } = string.Empty;
+
+        /// <summary>
+        /// AI类型
+        /// </summary>
+        [ExcelColumnName("AI类型（OpenAI|AzureOpenAI）")]
+        public string Type { get; set; }
+
+        /// <summary>
+        /// 分组
+        /// </summary>
+        /// <returns></returns>
+        [ExcelColumnName("分组使用,分割")]
+        public string Groups { get; set; }
     }
 }

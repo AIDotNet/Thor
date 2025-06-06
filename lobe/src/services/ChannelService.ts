@@ -1,4 +1,4 @@
-import { del, fetch, get, postJson, put, putJson } from "../utils/fetch";
+import { del, fetch, get, post, postJson, put, putJson } from "../utils/fetch";
 
 const prefix = "/api/v1/channel";
 
@@ -56,3 +56,30 @@ export const UpdateOrder = (id: string, order: number) => {
 export const getTags = () => {
   return get(prefix + "/tag");
 }
+
+/**
+ * 导入渠道/api/v1/channel/import 文件
+ */
+export const importChannel = (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return post(prefix + "/import", {
+    body: formData,
+  });
+}
+
+
+/**
+ * 下载导入模板
+ * /api/v1/channel/import/template
+ */
+export const downloadImportTemplate = () => {
+  return get(prefix + "/import/template", {
+    responseType: "blob",
+  });
+}
+
+
+
+
+

@@ -645,7 +645,13 @@ const enUS = {
       selectGroups: 'Select groups',
       groupsRequired: 'Please select groups',
       rate: 'Rate',
-      models: 'Models'
+      models: 'Models',
+      downloadTemplate: 'Download Template',
+      importTemplate: 'Import Template',
+      downloadSuccess: 'Template downloaded successfully',
+      downloadFailed: 'Template download failed',
+      importSuccess: 'Import successful',
+      importFailed: 'Import failed'
     },
 
     // Payment Page

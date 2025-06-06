@@ -704,7 +704,13 @@ const zhCN = {
       selectGroups: '请选择组',
       groupsRequired: '请选择组',
       rate: '倍率',
-      models: '模型'
+      models: '模型',
+      downloadTemplate: '下载模板',
+      importTemplate: '导入模板',
+      downloadSuccess: '模板下载成功',
+      downloadFailed: '模板下载失败',
+      importSuccess: '导入成功',
+      importFailed: '导入失败'
     },
 
     // 支付页面

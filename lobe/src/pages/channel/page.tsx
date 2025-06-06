@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button, Switch, message, Tag, Dropdown, InputNumber, Table, Space, Card, Typography, Select, Row, Col } from 'antd';
-import { LoadingOutlined, ReloadOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test } from "../../services/ChannelService";
+import { Button, Switch, message, Tag, Dropdown, InputNumber, Table, Space, Card, Typography, Select, Row, Col, Upload } from 'antd';
+import { LoadingOutlined, ReloadOutlined, PlusOutlined, SearchOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons';
+import { Remove, UpdateOrder, controlAutomatically, disable, getChannels, test, downloadImportTemplate, importChannel } from "../../services/ChannelService";
 import { renderQuota } from "../../utils/render";
 import { Input } from "@lobehub/ui";
 import { getTypes } from "../../services/ModelService";
@@ -34,6 +34,7 @@ export default function ChannelPage() {
   });
   const [testingChannels, setTestingChannels] = useState<string[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     getList().then((res) => {
@@ -338,6 +339,57 @@ export default function ChannelPage() {
     loadingData();
   }, [input]);
 
+  // 下载导入模板
+  function handleDownloadTemplate() {
+    downloadImportTemplate()
+      .then((response) => {
+        console.log(response);
+        if (response.success || response instanceof Blob) {
+          // 如果响应直接是 Blob 或者包含数据
+          const blob = response instanceof Blob ? response : new Blob([response.data || response], { 
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+          });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'channel_import_template.xlsx';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          message.success(t('channel.downloadSuccess'));
+        } else {
+          message.error(response.message || t('channel.downloadFailed'));
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+        message.error(t('channel.downloadFailed'));
+      });
+  }
+
+  // 处理文件导入
+  function handleImport(file: File) {
+    setImporting(true);
+    importChannel(file)
+      .then((response) => {
+        if (response.success) {
+          message.success(t('channel.importSuccess'));
+          loadingData(); // 重新加载数据
+        } else {
+          message.error(response.message || t('channel.importFailed'));
+        }
+      })
+      .catch(() => {
+        message.error(t('channel.importFailed'));
+      })
+      .finally(() => {
+        setImporting(false);
+      });
+    
+    return false; // 阻止默认上传行为
+  }
+
   return (
     <ConfigProvider theme={{
       components: {
@@ -400,6 +452,26 @@ export default function ChannelPage() {
                     </Option>
                   ))}
                 </Select>
+                
+                <Button 
+                  icon={<DownloadOutlined />}
+                  onClick={handleDownloadTemplate}
+                >
+                  {t('channel.downloadTemplate')}
+                </Button>
+                
+                <Upload
+                  accept=".xlsx,.xls"
+                  showUploadList={false}
+                  beforeUpload={handleImport}
+                >
+                  <Button 
+                    icon={<UploadOutlined />}
+                    loading={importing}
+                  >
+                    {t('channel.importTemplate')}
+                  </Button>
+                </Upload>
                 
                 <Button 
                   icon={<ReloadOutlined />}

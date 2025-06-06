@@ -128,9 +128,6 @@ public class TracingMiddleware : IMiddleware
             // 手动结束根跟踪
             rootTracing.EndTime = DateTime.UtcNow;
             rootTracing.Duration = (long)(rootTracing.EndTime.Value - rootTracing.StartTime).TotalMilliseconds;
-            
-            // 打印根跟踪信息，帮助调试
-            Console.WriteLine($"Request completed: {rootTracing.Name}, Duration: {rootTracing.Duration}ms, Children: {rootTracing.Children.Count}");
         }
     }
 } 

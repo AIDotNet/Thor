@@ -22,6 +22,7 @@ using Thor.Domain.Chats;
 using Thor.Domain.Users;
 using Thor.ErnieBot.Extensions;
 using Thor.GCPClaude.Extensions;
+using Thor.Gemini.Extensions;
 using Thor.Hunyuan.Extensions;
 using Thor.LocalEvent;
 using Thor.LocalMemory.Cache;
@@ -174,7 +175,8 @@ try
         .AddMiniMaxService()
         .AddVolCenGineService()
         .AddSiliconFlowService()
-        .AddDeepSeekService();
+        .AddDeepSeekService()
+        .AddGeminiService();
 
     builder.Services
         .AddCors(options =>
@@ -458,11 +460,40 @@ try
     channel.MapPut("/control-automatically/{id}", async (ChannelService services, string id) =>
         await services.ControlAutomaticallyAsync(id));
 
-    channel.MapPut("/order/{id}", async (ChannelService services, string id, int order) =>
-        await services.UpdateOrderAsync(id, order));
+    channel.MapPost("/import", async (ChannelService service, HttpContext context) =>
+    {
+        var file = context.Request.Form.Files.FirstOrDefault();
+        if (file == null || file.Length == 0)
+            return Results.BadRequest("请上传有效的Excel文件");
 
-    channel.MapGet("/tag", async (ChannelService services) =>
-        await services.GetTagsAsync());
+        // 验证文件扩展名是否为.xlsx或.xls
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (extension != ".xlsx" && extension != ".xls")
+            return Results.BadRequest("只支持.xlsx或.xls格式的Excel文件");
+
+        using var stream = file.OpenReadStream();
+        var importCount = await service.ImportChannelsFromExcelAsync(stream);
+
+        return Results.Ok(new { Success = true, Message = $"成功导入{importCount}个渠道" });
+    });
+
+    app.MapGet("/api/v1/channel/import/template", async (ChannelService service, HttpContext context) =>
+        {
+            using var memoryStream = service.GenerateImportTemplate();
+
+            context.Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            context.Response.Headers.Add("Content-Disposition", "attachment; filename=ChannelImportTemplate.xlsx");
+
+
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            await memoryStream.CopyToAsync(context.Response.Body);
+        }).RequireAuthorization(new AuthorizeAttribute()
+        {
+            Roles = RoleConstant.Admin
+        })
+        .WithDescription("下载渠道导入模板")
+        .WithTags("Channel")
+        .WithOpenApi();
 
     #endregion
 

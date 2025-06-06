@@ -6,6 +6,13 @@ export async function fetch(url: string, options: any) {
   };
   try {
     const response = await window.fetch(url, { ...options, headers });
+
+    // 根据返回的content-type，判断返回的是blob还是json
+    const contentType = response.headers.get("content-type");
+    if (contentType?.includes("application/octet-stream") || contentType?.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+      return response.blob();
+    }
+
     if (response.status >= 200 && response.status < 300) {
       const data = await response.text();
       if (data === "" || data === null) {
