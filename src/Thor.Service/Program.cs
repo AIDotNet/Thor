@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Serilog;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.ResponseCompression;
 using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
@@ -224,6 +225,13 @@ try
         }
     }));
 
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.MimeTypes =
+            ResponseCompressionDefaults.MimeTypes.Concat(["application/javascript", "text/css", "text/html"]);
+    });
+
     builder.AddServiceDefaults();
 
     builder.Services.AddWebSockets(options =>
@@ -248,6 +256,8 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    app.UseResponseCompression();
 
     app.UseStaticFiles();
 
@@ -1018,7 +1028,7 @@ try
     #region Tracing
 
     // 添加链路跟踪API端点
-    app.MapGet("/api/v1/tracing/current", (HttpContext context) =>
+    app.MapGet("/api/v1/tracing/current", () =>
         {
             var tracing = Thor.Service.Infrastructure.Helper.TracingService.CurrentRootTracing;
             if (tracing == null)
