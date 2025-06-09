@@ -4,6 +4,8 @@ using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Infrastructure;
+using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
 
 namespace Thor.Service.Service.OpenAI;
@@ -236,14 +238,37 @@ partial class ChatService
                 if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
             }
 
-            await loggerService.CreateConsumeAsync("/v1/images/edits",
-                string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
-                model,
-                0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
-                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
-                organizationId);
+            // 判断是否按次
+            if (rate.QuotaType == ModelQuotaType.ByCount)
+            {
+                quota = (decimal)(rate.PromptRate) * (decimal)userGroup.Rate;
 
-            await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id, model);
+                await loggerService.CreateConsumeAsync("/v1/images/edits",
+                    string.Format(ConsumerImageTemplate, RenderHelper.RenderQuota(rate.PromptRate),
+                        userGroup.Rate),
+                    request.Model,
+                    requestToken, responseToken, (int)((int)quota), token?.Key,
+                    user?.UserName, user?.Id,
+                    channel.Id,
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                    false,
+                    (int)sw.ElapsedMilliseconds, organizationId);
+
+                await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
+                    channel.Id,
+                    request.Model);
+            }
+            else
+            {
+                await loggerService.CreateConsumeAsync("/v1/images/edits",
+                    string.Format(ConsumerTemplateOnDemand, rate.PromptRate, userGroup.Rate),
+                    model,
+                    0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                    organizationId);
+
+                await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id, model);
+            }
         }
         catch (PaymentRequiredException)
         {
@@ -471,14 +496,31 @@ partial class ChatService
                 if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
             }
 
-            await loggerService.CreateConsumeAsync("/v1/images/generations",
-                string.Format(ConsumerTemplate, rate.PromptRate, rate.CompletionRate, userGroup.Rate),
-                model,
-                requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
-                channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
-                organizationId);
+            // 判断是否按次
+            if (rate.QuotaType == ModelQuotaType.ByCount)
+            {
+                quota = (decimal)(rate.PromptRate) * (decimal)userGroup.Rate;
 
-            await userService.ConsumeAsync(user!.Id, (long)quota, 0, token?.Key, channel.Id, model);
+                await loggerService.CreateConsumeAsync("/v1/images/generations",
+                    string.Format(ConsumerImageTemplate, rate.PromptRate, userGroup.Rate),
+                    model,
+                    requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                    organizationId);
+
+                await userService.ConsumeAsync(user!.Id, (long)quota, 0, token?.Key, channel.Id, model);
+            }
+            else
+            {
+                await loggerService.CreateConsumeAsync("/v1/images/generations",
+                    string.Format(ConsumerTemplateOnDemand, rate.PromptRate, userGroup.Rate),
+                    model,
+                    0, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                    channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
+                    organizationId);
+
+                await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id, model);
+            }
         }
         catch (PaymentRequiredException)
         {

@@ -66,7 +66,7 @@ export const processImage = async (params: {
       return {
         data: {
           id: (response as any).created?.toString() || Date.now().toString(),
-          b64_json: response.data?.[0]?.b64_json || '',
+          b64_json: response.data?.[0]?.b64_json || response.data?.[0]?.url,
         }
       };
     } else {
@@ -82,7 +82,7 @@ export const processImage = async (params: {
       return {
         data: {
           id: (response as any).created?.toString() || Date.now().toString(),
-          b64_json: response.data?.[0]?.b64_json || '',
+          b64_json: response.data?.[0]?.b64_json || response.data?.[0]?.url,
         }
       };
     }

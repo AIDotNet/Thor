@@ -3,6 +3,8 @@ export function renderQuota(quota: number, digits = 2) {
     let quotaPerUnit = localStorage.getItem('quota_per_unit') ?? '500000';
     let displayInCurrency = localStorage.getItem('display_in_currency') ?? "true";
     if (displayInCurrency === 'true') {
+        console.log((quota / parseFloat(quotaPerUnit as string)));
+        
         return '$' + (quota / parseFloat(quotaPerUnit as string)).toFixed(digits);
     }
     return renderNumber(quota);

@@ -9,6 +9,12 @@ public abstract class AIService(IServiceProvider serviceProvider, ImageService i
     ///  按量计费模型倍率模板
     /// </summary>
     protected const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1} 分组倍率：{2}";
+    
+    
+    /// <summary>
+    ///  按量计费模型倍率模板
+    /// </summary>
+    protected const string ConsumerImageTemplate = "模型倍率：{0}  分组倍率：{1}";
 
     /// <summary>
     /// 按量计费命中缓存模型
