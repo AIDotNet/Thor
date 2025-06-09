@@ -454,6 +454,10 @@ try
     channel.MapPut("/disable/{id}", async (ChannelService services, string id) =>
         await services.DisableAsync(id));
 
+    channel.MapPut("/order/{id}", async (ChannelService services, string id, int order) =>
+        await services.UpdateOrderAsync(id, order));
+
+
     channel.MapPut("/test/{id}", async (ChannelService services, string id) =>
         await services.TestChannelAsync(id));
 
