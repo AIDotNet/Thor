@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Thor.Service.Infrastructure;
+using MiniExcelLibs;
+using MiniExcelLibs.Attributes;
+using System.IO;
 
 namespace Thor.Service.Service;
 
@@ -26,17 +29,19 @@ public class UsageService(ILoggerDbContext dbContext, IUserContext userContext)
     {
         // 设置默认日期范围，如果未提供则使用过去15天
         startDate ??= DateTime.Now.Date.AddDays(-15);
-        endDate = endDate == null ? DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59) : // 今天结束 (23:59:59)
+        endDate = endDate == null
+            ? DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59)
+            : // 今天结束 (23:59:59)
             endDate.Value.Date.AddHours(23).AddMinutes(59).AddSeconds(59); // 结束日期的结束时间
 
         // 查询符合条件的聊天日志
         var query = dbContext.Loggers
-            .Where(x => x.UserId == userContext.CurrentUserId)
+            .Where(x => x.UserId == userContext.CurrentUserId && x.Type == ThorChatLoggerType.Consume)
             .Where(l => string.IsNullOrEmpty(token) || l.TokenName == token)
             .Where(l => l.CreatedAt >= startDate && l.CreatedAt <= endDate)
             .AsNoTracking();
 
-        // 获取所有符合条件的日志记录
+        // 获取所有符合���件的日志记录
         var logs = await query.ToListAsync();
 
         // 创建响应对象
@@ -159,6 +164,69 @@ public class UsageService(ILoggerDbContext dbContext, IUserContext userContext)
     }
 
     /// <summary>
+    /// 导出使用数据到Excel
+    /// </summary>
+    /// <param name="token">令牌名称，如果为空则查询所有令牌</param>
+    /// <param name="startDate">开始日期，默认为过去15天</param>
+    /// <param name="endDate">结束日期，默认为今天</param>
+    /// <returns>Excel文件的字节数组</returns>
+    public async Task<byte[]> ExportUsageDataToExcelAsync(string? token, DateTime? startDate, DateTime? endDate)
+    {
+        // 获取使用数据
+        var usageData = await GetUsageAsync(token, startDate, endDate);
+
+        // 创建用于导出的视图模型
+        var exportData = new List<UsageExportViewModel>();
+
+        // 将每日数据转换为导出格式
+        foreach (var daily in usageData.DailyUsage)
+        {
+            // 如果该日没有模型使用数据，添加一个总行
+            if (daily.ModelUsage.Count == 0)
+            {
+                exportData.Add(new UsageExportViewModel
+                {
+                    日期 = daily.Date.ToString("yyyy-MM-dd"),
+                    模型 = "所有模型",
+                    请求次数 = daily.RequestCount,
+                    消耗Token = daily.TokenCount,
+                    消费额度 = daily.Cost
+                });
+            }
+            else
+            {
+                // 为每个模型添加一行数据
+                foreach (var model in daily.ModelUsage)
+                {
+                    exportData.Add(new UsageExportViewModel
+                    {
+                        日期 = daily.Date.ToString("yyyy-MM-dd"),
+                        模型 = model.ModelName,
+                        请求次数 = model.RequestCount,
+                        消耗Token = model.TokenCount,
+                        消费额度 = model.Cost
+                    });
+                }
+            }
+        }
+
+        // 添加总计行
+        exportData.Add(new UsageExportViewModel
+        {
+            日期 = "总计",
+            模型 = "所有模型",
+            请求次数 = usageData.TotalRequestCount,
+            消耗Token = usageData.TotalTokenCount,
+            消费额度 = usageData.TotalCost
+        });
+
+        // 使用内存流生成Excel数据
+        using var ms = new MemoryStream();
+        await ms.SaveAsAsync(exportData);
+        return ms.ToArray();
+    }
+
+    /// <summary>
     /// 获取从开始日期到结束日期的每一天
     /// </summary>
     private List<DateTime> GetDateRange(DateTime startDate, DateTime endDate)
@@ -213,4 +281,20 @@ public class UsageService(ILoggerDbContext dbContext, IUserContext userContext)
 
         return allApis.ToList();
     }
+}
+
+/// <summary>
+/// Excel导出视图模型
+/// </summary>
+public class UsageExportViewModel
+{
+    [ExcelColumn(Name = "日期")] public string 日期 { get; set; } = string.Empty;
+
+    [ExcelColumn(Name = "模型")] public string 模型 { get; set; } = string.Empty;
+
+    [ExcelColumn(Name = "请求次数")] public long 请求次数 { get; set; }
+
+    [ExcelColumn(Name = "Token消耗")] public long 消耗Token { get; set; }
+
+    [ExcelColumn(Name = "消费额度")] public long 消费额度 { get; set; }
 }
