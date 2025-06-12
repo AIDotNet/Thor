@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Exceptions;
@@ -98,7 +99,7 @@ public sealed class ResponsesService(
                     using var activity =
                         Activity.Current?.Source.StartActivity("流式对话", ActivityKind.Internal);
 
-                    (requestToken, responseToken) =
+                    (requestToken, responseToken, cachedTokens) =
                         await StreamHandlerAsync(context, request, channel, chatCompletionsService, user,
                             rate);
                 }
@@ -334,12 +335,12 @@ public sealed class ResponsesService(
             result = await responsesService.GetResponseAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result, ThorJsonSerializer.DefaultOptions);
-            
+
             if (result?.Usage?.InputTokens is not null && result.Usage.InputTokens > 0)
             {
                 requestToken = result.Usage.InputTokens;
             }
-            
+
             if (result?.Usage?.OutputTokens is not null && result.Usage.OutputTokens > 0)
             {
                 responseToken = result.Usage.OutputTokens;
@@ -356,12 +357,12 @@ public sealed class ResponsesService(
             result = await responsesService.GetResponseAsync(request, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
-            
+
             if (result?.Usage?.InputTokens is not null && result.Usage.InputTokens > 0)
             {
                 requestToken = result.Usage.InputTokens;
             }
-            
+
             if (result?.Usage?.OutputTokens is not null && result.Usage.OutputTokens > 0)
             {
                 responseToken = result.Usage.OutputTokens;
@@ -398,10 +399,129 @@ public sealed class ResponsesService(
         return (requestToken, responseToken, cachedTokens);
     }
 
-    private async Task<(int requestToken, int responseToken)> StreamHandlerAsync(HttpContext context,
+    private async Task<(int requestToken, int responseToken, int cachedTokens)> StreamHandlerAsync(HttpContext context,
         ResponsesInput request, ChatChannel channel, IThorResponsesService responsesService, User? user,
-        ModelManager value)
+        ModelManager rate)
     {
-        throw new NotImplementedException();
+        int requestToken = TokenHelper.GetTokens(request.Instructions ?? string.Empty);
+        int responseToken = 0;
+
+        // 命中缓存tokens数量
+        int cachedTokens = 0;
+
+        var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
+
+        // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
+        if (rate.QuotaType == ModelQuotaType.OnDemand && request.IsMessageArray)
+        {
+            requestToken += TokenHelper.GetTotalTokens(request?.Inputs.Where(x => x.IsMessageArray)
+                .SelectMany(x => x.Contents)
+                .Where(x => x.Type == "input_text").Select(x => x.Text).ToArray());
+
+            requestToken += TokenHelper.GetTotalTokens(request.Inputs.Where(x => x.Contents == null)
+                .Select(x => x.Content).ToArray());
+
+            // 解析图片
+            foreach (var message in request.Inputs.Where(x => x.Contents != null).SelectMany(x => x.Contents)
+                         .Where(x => x.Type is "input_image"))
+            {
+                var imageUrl = message.ImageUrl;
+                if (imageUrl != null)
+                {
+                    try
+                    {
+                        var imageTokens = await CountImageTokens(message.ImageUrl, "low");
+                        requestToken += imageTokens.Item1;
+                    }
+                    catch (Exception ex)
+                    {
+                        GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
+                    }
+                }
+            }
+
+            var quota = requestToken * rate.PromptRate;
+
+            // 判断请求token数量是否超过额度
+            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+        }
+        else if (rate.QuotaType == ModelQuotaType.OnDemand)
+        {
+            if (request?.Inputs != null)
+            {
+                requestToken += TokenHelper.GetTotalTokens(request?.Inputs?.Where(x => x.IsMessageArray)
+                    .Where(x => x.Content != null)
+                    .SelectMany(x => x.Contents)
+                    .Where(x => x.Type == "input_text").Select(x => x.Text).ToArray());
+            }
+            else
+            {
+                requestToken += TokenHelper.GetTotalTokens(request?.Input);
+            }
+
+            var quota = requestToken * rate.PromptRate;
+
+            // 判断请求token数量是否超过额度
+            if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
+        }
+
+        // 是否第一次输出
+        bool isFirst = true;
+        await foreach (var (@event, item) in responsesService.GetResponsesAsync(request, platformOptions))
+        {
+            if (isFirst)
+            {
+                context.SetEventStreamHeaders();
+                isFirst = false;
+            }
+
+            if (item?.Response?.Output != null)
+            {
+                foreach (var output in item.Response.Output)
+                {
+                    if (output.Content is { Length: > 0 })
+                    {
+                        // 计算输出的token数量
+                        responseToken += TokenHelper.GetTotalTokens(output.Content.Select(x => x.Text).ToArray());
+                    }
+                }
+            }
+
+
+            responseToken = TokenHelper.GetTotalTokens(item?.Delta ?? string.Empty);
+
+            if (@event.Equals("response.completed"))
+            {
+                if (item?.Response?.Usage?.InputTokens > 0)
+                {
+                    requestToken = item.Response.Usage.InputTokens;
+                }
+
+                if (item?.Response?.Usage?.OutputTokens > 0)
+                {
+                    responseToken = item.Response.Usage.OutputTokens;
+                }
+
+                if (item?.Response?.Usage?.InputTokensDetails?.CachedTokens > 0)
+                {
+                    cachedTokens = item.Response.Usage.InputTokensDetails.CachedTokens;
+                }
+            }
+
+            await context.WriteAsEventStreamDataAsync(@event, item).ConfigureAwait(false);
+        }
+
+        if (rate.QuotaType == ModelQuotaType.OnDemand && request.Tools != null && request.Tools.Count != 0)
+        {
+            requestToken += TokenHelper.GetTotalTokens(request.Tools.Where(x => !string.IsNullOrEmpty(x?.Name))
+                .Select(x => x!.Name).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(request.Tools
+                .Where(x => !string.IsNullOrEmpty(x?.Description))
+                .Select(x => x!.Description!).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(request.Tools.Where(x => !string.IsNullOrEmpty(x?.Type))
+                .Select(x => x!.Type!).ToArray());
+        }
+
+        return (requestToken, responseToken, cachedTokens);
     }
 }

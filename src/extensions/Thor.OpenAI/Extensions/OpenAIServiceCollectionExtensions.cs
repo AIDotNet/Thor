@@ -8,12 +8,12 @@ using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Responses;
-using Thor.DeepSeek.Responses;
 using Thor.OpenAI.Audios;
 using Thor.OpenAI.Chats;
 using Thor.OpenAI.Embeddings;
 using Thor.OpenAI.Images;
 using Thor.OpenAI.Realtime;
+using Thor.OpenAI.Responses;
 
 namespace Thor.DeepSeek.Extensions;
 

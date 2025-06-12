@@ -92,24 +92,40 @@ public class ResponsesInput : IOpenAiModels.IModel, IOpenAiModels.IUser
 
     [JsonPropertyName("max_output_tokens")]
     public int? MaxOutputTokens { get; set; }
+
+    [JsonPropertyName("temperature")] public double? Temperature { get; set; }
+
+    [JsonPropertyName("tool_choice")] public object? ToolChoice { get; set; }
+
+    [JsonPropertyName("top_p")] public double? TopP { get; set; }
+
+    /// <summary>
+    /// The truncation strategy to use for the model response.
+    /// auto: If the context of this response and previous ones exceeds the model's context window size, the model will truncate the response to fit the context window by dropping input items in the middle of the conversation.
+    ///     disabled (default): If a model response will exceed the context window size for a model, the request will fail with a 400 error.
+    /// </summary>
+    [JsonPropertyName("truncation")] public string? Truncation { get; set; }
+
+    [JsonPropertyName("store")] public bool? Store { get; set; }
+
+    /// <summary>
+    /// Whether to allow the model to run tool calls in parallel.
+    /// </summary>
+    [JsonPropertyName("parallel_tool_calls")]
+    public bool? ParallelToolCalls { get; set; }
+
+    [JsonPropertyName("previous_response_id")]
+    public string? PreviousResponseId { get; set; }
     
-    [JsonPropertyName("temperature")]
-    public double? Temperature { get; set; }
-    
-    [JsonPropertyName("tool_choice")]
-    public object? ToolChoice { get; set; }
-    
-    [JsonPropertyName("top_p")]
-    public double? TopP { get; set; }
-    
-    [JsonPropertyName("truncation")]
-    public string? Truncation { get; set; }
-    
-    [JsonPropertyName("store")]
-    public bool? Store { get; set; }
+    [JsonPropertyName("service_tier")]
+    public string? ServiceTier { get; set; }
 }
 
-public sealed class ReasoningResponsesInput : ResponsesInput
+public sealed class ReasoningResponsesInput
 {
     [JsonPropertyName("effort")] public string? Effort { get; set; }
+
+    [JsonPropertyName("summary")] public string? Summary { get; set; }
+
+    [JsonPropertyName("generate_summary")] public string? GenerateSummary { get; set; }
 }
