@@ -928,7 +928,7 @@ export default function DesktopLayout() {
                 transition={{
                     duration: 20,
                     repeat: Infinity,
-                    ease: "easeInOut",
+                    ease: [0.42, 0, 0.58, 1],
                     repeatType: "reverse"
                 }}
             />
@@ -952,7 +952,7 @@ export default function DesktopLayout() {
                 transition={{
                     duration: 25,
                     repeat: Infinity,
-                    ease: "easeInOut",
+                    ease: [0.42, 0, 0.58, 1],
                     repeatType: "reverse"
                 }}
             />
