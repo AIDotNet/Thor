@@ -1,107 +1,184 @@
-/**
- * ResponsesService - 处理以"o"开头模型的responses接口调用
- * 这个服务专门用于处理需要使用responses接口而非传统completions接口的模型
- */
-
-export interface ResponsesRequest {
-  model: string;
-  messages: Array<{
-    role: 'system' | 'user' | 'assistant';
-    content: string;
-  }>;
-  temperature?: number;
-  max_tokens?: number;
-  top_p?: number;
-}
-
-export interface ResponsesResponse {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  choices: Array<{
-    index: number;
-    message: {
-      role: 'assistant';
-      content: string;
-    };
-    finish_reason: string;
-  }>;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-}
+import OpenAI from 'openai';
 
 /**
- * 判断模型是否需要使用responses接口
+ * 判断是否为需要使用responses接口的模型
  * @param modelName 模型名称
  * @returns 是否使用responses接口
  */
-export const shouldUseResponsesInterface = (modelName: string): boolean => {
-  return modelName.toLowerCase().startsWith('o');
+export const isResponsesModel = (modelName: string): boolean => {
+  return modelName.startsWith('o1') || modelName.startsWith('o-');
 };
 
 /**
- * 调用responses接口进行聊天
- * @param token API Token
- * @param request 请求参数
- * @returns 响应数据
+ * 使用responses接口进行对话
+ * @param params 请求参数
+ * @returns Promise with response data
  */
-export const chatWithResponses = async (
-  token: string,
-  request: ResponsesRequest
-): Promise<ResponsesResponse> => {
-  const response = await fetch(window.location.origin + '/v1/responses', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(request)
+export const createResponsesCompletion = async (params: {
+  model: string;
+  messages: any[];
+  token: string;
+  baseURL?: string;
+  stream?: boolean;
+}) => {
+  const { model, messages, token, baseURL, stream = false } = params;
+  
+  // 使用responses接口的请求体格式
+  const requestBody = {
+    model,
+    messages,
+    stream
+  };
+
+  try {
+    // 根据是否流式返回选择不同的调用方式
+    if (stream) {
+      // 流式响应
+      const response = await fetch(`${baseURL || (window.location.origin + '/v1')}/responses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return response;
+    } else {
+      // 非流式响应
+      const response = await fetch(`${baseURL || (window.location.origin + '/v1')}/responses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    }
+  } catch (error) {
+    console.error('Responses API error:', error);
+    throw error;
+  }
+};
+
+/**
+ * 使用传统的chat completions接口进行对话
+ * @param params 请求参数
+ * @returns Promise with response data
+ */
+export const createChatCompletion = async (params: {
+  model: string;
+  messages: any[];
+  token: string;
+  baseURL?: string;
+  stream?: boolean;
+}) => {
+  const { model, messages, token, baseURL, stream = false } = params;
+  
+  const openai = new OpenAI({
+    apiKey: token,
+    dangerouslyAllowBrowser: true,
+    baseURL: baseURL || (window.location.origin + '/v1')
   });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return await response.json();
+  return await openai.chat.completions.create({
+    model,
+    messages,
+    stream
+  });
 };
 
 /**
- * 调用responses接口进行图像生成
- * @param token API Token
- * @param params 图像生成参数
- * @returns 图像响应数据
+ * 智能选择接口进行对话
+ * 根据模型名称自动选择使用responses接口或chat completions接口
+ * @param params 请求参数
+ * @returns Promise with response data
  */
-export const generateImageWithResponses = async (
-  token: string,
-  params: {
-    model: string;
-    prompt: string;
-    size: string;
-    n?: number;
-    negative_prompt?: string;
-    image?: string;
-    mask?: string;
+export const createCompletion = async (params: {
+  model: string;
+  messages: any[];
+  token: string;
+  baseURL?: string;
+  stream?: boolean;
+}) => {
+  const { model } = params;
+  
+  if (isResponsesModel(model)) {
+    console.log(`使用responses接口处理模型: ${model}`);
+    return await createResponsesCompletion(params);
+  } else {
+    console.log(`使用chat completions接口处理模型: ${model}`);
+    return await createChatCompletion(params);
   }
+};
+
+/**
+ * 处理流式响应的通用方法
+ * @param response 响应对象
+ * @param onChunk 处理每个chunk的回调函数
+ * @param isResponsesAPI 是否为responses接口
+ */
+export const processStreamResponse = async (
+  response: any,
+  onChunk: (content: string) => void,
+  isResponsesAPI: boolean = false
 ) => {
-  const response = await fetch(window.location.origin + '/v1/images/responses', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      n: 1,
-      ...params
-    })
-  });
+  if (isResponsesAPI) {
+    // 处理responses接口的流式响应
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    
+    if (!reader) {
+      throw new Error('无法获取响应流');
+    }
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+        
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') return;
+            
+            try {
+              const parsed = JSON.parse(data);
+              // responses接口的响应格式可能不同，需要根据实际情况调整
+              const content = parsed.choices?.[0]?.delta?.content || parsed.content || '';
+              if (content) {
+                onChunk(content);
+              }
+            } catch (e) {
+              console.warn('解析响应数据失败:', e);
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+  } else {
+    // 处理chat completions接口的流式响应
+    for await (const chunk of response) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        onChunk(content);
+      }
+    }
   }
-
-  return await response.json();
 }; 

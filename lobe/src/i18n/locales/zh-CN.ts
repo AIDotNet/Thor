@@ -955,6 +955,12 @@ const zhCN = {
         responseFailed: '获取响应失败，请检查Token和模型设置',
         createChatFailed: '创建新会话失败',
         noTokensAvailable: '没有可用的Token，请先添加Token'
+      },
+      apiInterface: {
+        responsesApi: 'Responses API',
+        chatCompletionsApi: 'Chat Completions API',
+        usingInterface: '正在使用',
+        oModelNotice: 'o系列模型将使用最新的Responses接口'
       }
     },
 

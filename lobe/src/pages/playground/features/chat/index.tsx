@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../../../../utils/responsive';
 import { getTokens } from '../../../../services/TokenService';
 import { getModels } from '../../../../services/ModelService';
-import { shouldUseResponsesInterface, chatWithResponses } from '../../../../services/ResponsesService';
+import { createCompletion, isResponsesModel, processStreamResponse } from '../../../../services/ResponsesService';
 import OpenAI from 'openai';
 import { useEffect, useRef, useState } from 'react';
 
@@ -235,15 +235,8 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                 throw new Error(t('playground.errorMessages.selectToken'));
             }
             
-            // Initialize OpenAI client
-            const openai = new OpenAI({
-                apiKey: selectedToken,
-                dangerouslyAllowBrowser: true,
-                baseURL: window.location.origin + '/v1'
-            });
-            
             // Prepare messages array including system prompt
-            let messageArray: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
+            let messageArray = [];
             
             if (regenerateIndex !== undefined) {
                 // If regenerating, only include messages up to the regenerated index
@@ -263,102 +256,65 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
             // Start performance timer
             const startTime = Date.now();
             
-            // 判断是否为以"o"开头的模型，使用不同的API接口
-            const isOModel = shouldUseResponsesInterface(selectedModel);
+            // 判断是否为需要使用responses接口的模型
+            const useResponsesAPI = isResponsesModel(selectedModel);
+            console.log(`模型 ${selectedModel} 使用${useResponsesAPI ? 'responses' : 'chat completions'}接口`);
             
-            if (isOModel) {
-                // 对于以"o"开头的模型，使用responses接口
-                const responseData = await chatWithResponses(selectedToken, {
-                    model: selectedModel,
-                    messages: messageArray,
-                    temperature: 0.7
-                });
-                
-                // Completion time
-                const completionTime = Date.now();
-                
-                // Extract response content
-                const responseContent = responseData.choices?.[0]?.message?.content || '';
-                
-                // Calculate performance metrics
-                const performance = {
-                    firstTokenTime: completionTime - startTime, // 对于responses接口，首token时间等于完成时间
-                    completionTime: completionTime - startTime,
-                    totalTokens: responseData.usage?.total_tokens || responseContent.length / 4,
-                    tokensPerSecond: (responseData.usage?.total_tokens || responseContent.length / 4) / ((completionTime - startTime) / 1000)
-                };
-                
-                // Add assistant message with full response
-                const assistantMessage: Message = {
-                    role: 'assistant',
-                    content: responseContent,
-                    timestamp: Date.now(),
-                    performance
-                };
-                
-                // Update messages based on whether we're regenerating or not
-                if (regenerateIndex !== undefined) {
-                    // Replace messages starting from the regenerate index
-                    setMessages(prev => [...prev.slice(0, regenerateIndex), assistantMessage]);
-                    setRegeneratingMessageIndex(null);
-                } else {
-                    // Normal flow - append the new message
-                    setMessages(prev => [...prev, assistantMessage]);
-                }
-                
-            } else {
-                // 对于其他模型，使用传统的completions接口（流式响应）
-                const stream = await openai.chat.completions.create({
-                    model: selectedModel,
-                    messages: messageArray as any,
-                    stream: true
-                });
-                
-                let firstTokenTime = 0;
-                let responseContent = '';
-                
-                // Process the stream
-                for await (const chunk of stream) {
+            // 使用统一的API调用方法
+            const stream = await createCompletion({
+                model: selectedModel,
+                messages: messageArray as any,
+                token: selectedToken,
+                baseURL: window.location.origin + '/v1',
+                stream: true
+            });
+            
+            let firstTokenTime = 0;
+            let responseContent = '';
+            
+            // 处理流式响应
+            await processStreamResponse(
+                stream,
+                (content: string) => {
                     // Record time of first token
-                    if (responseContent === '' && chunk.choices[0]?.delta?.content) {
+                    if (responseContent === '' && content) {
                         firstTokenTime = Date.now();
                     }
                     
-                    // Append the chunk content if available
-                    if (chunk.choices[0]?.delta?.content) {
-                        responseContent += chunk.choices[0].delta.content;
-                        setCurrentAssistantMessage(responseContent);
-                    }
-                }
-                
-                // Completion time
-                const completionTime = Date.now();
-                
-                // Calculate performance metrics
-                const performance = {
-                    firstTokenTime: firstTokenTime - startTime,
-                    completionTime: completionTime - startTime,
-                    totalTokens: responseContent.length / 4, // Rough estimate
-                    tokensPerSecond: (responseContent.length / 4) / ((completionTime - startTime) / 1000)
-                };
-                
-                // Add assistant message with full response
-                const assistantMessage: Message = {
-                    role: 'assistant',
-                    content: responseContent,
-                    timestamp: Date.now(),
-                    performance
-                };
-                
-                // Update messages based on whether we're regenerating or not
-                if (regenerateIndex !== undefined) {
-                    // Replace messages starting from the regenerate index
-                    setMessages(prev => [...prev.slice(0, regenerateIndex), assistantMessage]);
-                    setRegeneratingMessageIndex(null);
-                } else {
-                    // Normal flow - append the new message
-                    setMessages(prev => [...prev, assistantMessage]);
-                }
+                    // Append the chunk content
+                    responseContent += content;
+                    setCurrentAssistantMessage(responseContent);
+                },
+                useResponsesAPI
+            );
+            
+            // Completion time
+            const completionTime = Date.now();
+            
+            // Calculate performance metrics
+            const performance = {
+                firstTokenTime: firstTokenTime - startTime,
+                completionTime: completionTime - startTime,
+                totalTokens: responseContent.length / 4, // Rough estimate
+                tokensPerSecond: (responseContent.length / 4) / ((completionTime - startTime) / 1000)
+            };
+            
+            // Add assistant message with full response
+            const assistantMessage: Message = {
+                role: 'assistant',
+                content: responseContent,
+                timestamp: Date.now(),
+                performance
+            };
+            
+            // Update messages based on whether we're regenerating or not
+            if (regenerateIndex !== undefined) {
+                // Replace messages starting from the regenerate index
+                setMessages(prev => [...prev.slice(0, regenerateIndex), assistantMessage]);
+                setRegeneratingMessageIndex(null);
+            } else {
+                // Normal flow - append the new message
+                setMessages(prev => [...prev, assistantMessage]);
             }
             
         } catch (error: any) {
@@ -746,28 +702,31 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                                 ))}
                             </Select>
                         </Col>
-                        <Col xs={24} sm={12} md={8}>
-                            <div style={{ marginBottom: isMobile ? 4 : 0 }}>
-                                <Text strong style={{ fontSize: 12, color: token.colorTextSecondary }}>
-                                    {t('playground.selectModel')}
-                                </Text>
-                            </div>
-                            <Select
-                                style={{ width: '100%' }}
-                                placeholder={t('playground.selectModel')}
-                                value={selectedModel}
-                                onChange={setSelectedModel}
-                                loading={loading}
-                                disabled={!selectedToken}
-                                showSearch
-                                size={isMobile ? 'middle' : 'large'}
-                            >
-                                {modelOptions.map((model:any) => (
-                                    <Option key={model} value={model}>
-                                        {model}
-                                    </Option>
-                                ))}
-                            </Select>
+                        <Col xs={24} md={12}>
+                            <Space direction="vertical" style={{ width: '100%' }} size="small">
+                                <Text type="secondary">{t('playground.selectModel')}</Text>
+                                <Space wrap>
+                                    <Select
+                                        style={{ minWidth: 200, flex: 1 }}
+                                        placeholder={t('playground.selectModel')}
+                                        value={selectedModel}
+                                        onChange={setSelectedModel}
+                                        loading={loading}
+                                        disabled={!selectedToken}
+                                    >
+                                        {modelOptions.map(model => (
+                                            <Option key={model} value={model}>
+                                                {model}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                    {selectedModel && (
+                                        <Tag color={isResponsesModel(selectedModel) ? 'blue' : 'green'}>
+                                            {isResponsesModel(selectedModel) ? 'Responses API' : 'Chat Completions API'}
+                                        </Tag>
+                                    )}
+                                </Space>
+                            </Space>
                         </Col>
                         <Col xs={24} md={8} style={{ textAlign: isMobile ? 'center' : 'right' }}>
                             <Space size="middle">

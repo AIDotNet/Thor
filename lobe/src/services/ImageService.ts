@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { shouldUseResponsesInterface, generateImageWithResponses } from './ResponsesService';
 
 /**
  * Process an image using the OpenAI API
@@ -18,100 +17,77 @@ export const processImage = async (params: {
   mask?: string;  // Optional mask image in base64 format
 }) => {
   try {
-    // 判断是否为以"o"开头的模型
-    const isOModel = shouldUseResponsesInterface(params.model);
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey: params.token,
+      dangerouslyAllowBrowser: true,
+      baseURL: window.location.origin + '/v1'
+    });
+
+    // Map requested size to valid OpenAI size
+    let validSize: "256x256" | "512x512" | "1024x1024" | "1792x1024" | "1024x1792" = "1024x1024"; // Default
     
-    if (isOModel) {
-      // 对于以"o"开头的模型，使用responses接口
-      const responseData = await generateImageWithResponses(params.token, {
+    if (params.size === "1024x1024" || 
+        params.size === "512x512" || 
+        params.size === "256x256" ||
+        params.size === "1792x1024" ||
+        params.size === "1024x1792") {
+      validSize = params.size as any;
+    }
+
+    // For image-to-image transformation
+    if (params.image) {
+      // Convert base64 string to File object for the API
+      const imageFile = base64ToFile(params.image, 'image.png', 'image/png');
+      
+      // For image edit, valid sizes are more limited
+      const editSize: "256x256" | "512x512" | "1024x1024" = 
+        (validSize === "1024x1024" || validSize === "512x512" || validSize === "256x256") 
+          ? validSize 
+          : "1024x1024";
+      
+      // Prepare request parameters
+      const editParams: any = {
+        model: params.model,
+        image: imageFile,
+        prompt: params.prompt,
+        n: 1,
+        size: editSize,
+      };
+      
+      // Add mask if provided
+      if (params.mask) {
+        editParams.mask = base64ToFile(params.mask, 'mask.png', 'image/png');
+      }
+      
+      // Call image edit endpoint with correct parameters
+      const response = await openai.images.edit(editParams);
+      
+      return {
+        data: {
+          id: (response as any).created?.toString() || Date.now().toString(),
+          b64_json: response.data?.[0]?.b64_json || response.data?.[0]?.url,
+        }
+      };
+    } else {
+      // Text-to-image generation
+      const response = await openai.images.generate({
         model: params.model,
         prompt: params.prompt,
-        size: params.size,
-        negative_prompt: params.negativePrompt,
-        image: params.image,
-        mask: params.mask
+        n: 1,
+        size: validSize,
+        ...(params.negativePrompt ? { negative_prompt: params.negativePrompt } : {})
       });
       
       return {
         data: {
-          id: responseData.created?.toString() || Date.now().toString(),
-          b64_json: responseData.data?.[0]?.b64_json || responseData.data?.[0]?.url,
+          id: (response as any).created?.toString() || Date.now().toString(),
+          b64_json: response.data?.[0]?.b64_json || response.data?.[0]?.url,
         }
       };
-    } else {
-      // 对于其他模型，使用传统的OpenAI接口
-      // Initialize OpenAI client
-      const openai = new OpenAI({
-        apiKey: params.token,
-        dangerouslyAllowBrowser: true,
-        baseURL: window.location.origin + '/v1'
-      });
-
-      // Map requested size to valid OpenAI size
-      let validSize: "256x256" | "512x512" | "1024x1024" | "1792x1024" | "1024x1792" = "1024x1024"; // Default
-      
-      if (params.size === "1024x1024" || 
-          params.size === "512x512" || 
-          params.size === "256x256" ||
-          params.size === "1792x1024" ||
-          params.size === "1024x1792") {
-        validSize = params.size as any;
-      }
-
-      // For image-to-image transformation
-      if (params.image) {
-        // Convert base64 string to File object for the API
-        const imageFile = base64ToFile(params.image, 'image.png', 'image/png');
-        
-        // For image edit, valid sizes are more limited
-        const editSize: "256x256" | "512x512" | "1024x1024" = 
-          (validSize === "1024x1024" || validSize === "512x512" || validSize === "256x256") 
-            ? validSize 
-            : "1024x1024";
-        
-        // Prepare request parameters
-        const editParams: any = {
-          model: params.model,
-          image: imageFile,
-          prompt: params.prompt,
-          n: 1,
-          size: editSize,
-        };
-        
-        // Add mask if provided
-        if (params.mask) {
-          editParams.mask = base64ToFile(params.mask, 'mask.png', 'image/png');
-        }
-        
-        // Call image edit endpoint with correct parameters
-        const response = await openai.images.edit(editParams);
-        
-        return {
-          data: {
-            id: (response as any).created?.toString() || Date.now().toString(),
-            b64_json: response.data?.[0]?.b64_json || response.data?.[0]?.url,
-          }
-        };
-      } else {
-        // Text-to-image generation
-        const response = await openai.images.generate({
-          model: params.model,
-          prompt: params.prompt,
-          n: 1,
-          size: validSize,
-          ...(params.negativePrompt ? { negative_prompt: params.negativePrompt } : {})
-        });
-        
-        return {
-          data: {
-            id: (response as any).created?.toString() || Date.now().toString(),
-            b64_json: response.data?.[0]?.b64_json || response.data?.[0]?.url,
-          }
-        };
-      }
     }
   } catch (error: any) {
-    console.error('Image generation error:', error);
+    console.error('OpenAI image generation error:', error);
     throw new Error(`Image generation failed: ${error.message || 'Unknown error'}`);
   }
 };
