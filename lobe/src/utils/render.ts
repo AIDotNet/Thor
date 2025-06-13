@@ -1,4 +1,3 @@
-
 export function renderQuota(quota: number, digits = 2) {
     let quotaPerUnit = localStorage.getItem('quota_per_unit') ?? '500000';
     let displayInCurrency = localStorage.getItem('display_in_currency') ?? "true";
@@ -58,6 +57,9 @@ export function getCompletionRatio(name: string) {
     }
 
     if (name.startsWith("gpt-4")) return name.startsWith("gpt-4-turbo") ? 3 : 2;
+    
+    // 为以"o"开头的模型添加支持（如o1系列）
+    if (name.toLowerCase().startsWith("o1") || name.toLowerCase().startsWith("o-")) return 4;
 
     if (name.startsWith("claude-")) return name.startsWith("claude-3") ? 5 : 3;
 

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../../../../utils/responsive';
 import { getTokens } from '../../../../services/TokenService';
 import { getModels } from '../../../../services/ModelService';
+import { shouldUseResponsesInterface, chatWithResponses } from '../../../../services/ResponsesService';
 import OpenAI from 'openai';
 import { useEffect, useRef, useState } from 'react';
 
@@ -242,7 +243,7 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
             });
             
             // Prepare messages array including system prompt
-            let messageArray = [];
+            let messageArray: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [];
             
             if (regenerateIndex !== undefined) {
                 // If regenerating, only include messages up to the regenerated index
@@ -262,57 +263,102 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
             // Start performance timer
             const startTime = Date.now();
             
-            // Create streaming completion
-            const stream = await openai.chat.completions.create({
-                model: selectedModel,
-                messages: messageArray as any,
-                stream: true
-            });
+            // 判断是否为以"o"开头的模型，使用不同的API接口
+            const isOModel = shouldUseResponsesInterface(selectedModel);
             
-            let firstTokenTime = 0;
-            let responseContent = '';
-            
-            // Process the stream
-            for await (const chunk of stream) {
-                // Record time of first token
-                if (responseContent === '' && chunk.choices[0]?.delta?.content) {
-                    firstTokenTime = Date.now();
+            if (isOModel) {
+                // 对于以"o"开头的模型，使用responses接口
+                const responseData = await chatWithResponses(selectedToken, {
+                    model: selectedModel,
+                    messages: messageArray,
+                    temperature: 0.7
+                });
+                
+                // Completion time
+                const completionTime = Date.now();
+                
+                // Extract response content
+                const responseContent = responseData.choices?.[0]?.message?.content || '';
+                
+                // Calculate performance metrics
+                const performance = {
+                    firstTokenTime: completionTime - startTime, // 对于responses接口，首token时间等于完成时间
+                    completionTime: completionTime - startTime,
+                    totalTokens: responseData.usage?.total_tokens || responseContent.length / 4,
+                    tokensPerSecond: (responseData.usage?.total_tokens || responseContent.length / 4) / ((completionTime - startTime) / 1000)
+                };
+                
+                // Add assistant message with full response
+                const assistantMessage: Message = {
+                    role: 'assistant',
+                    content: responseContent,
+                    timestamp: Date.now(),
+                    performance
+                };
+                
+                // Update messages based on whether we're regenerating or not
+                if (regenerateIndex !== undefined) {
+                    // Replace messages starting from the regenerate index
+                    setMessages(prev => [...prev.slice(0, regenerateIndex), assistantMessage]);
+                    setRegeneratingMessageIndex(null);
+                } else {
+                    // Normal flow - append the new message
+                    setMessages(prev => [...prev, assistantMessage]);
                 }
                 
-                // Append the chunk content if available
-                if (chunk.choices[0]?.delta?.content) {
-                    responseContent += chunk.choices[0].delta.content;
-                    setCurrentAssistantMessage(responseContent);
-                }
-            }
-            
-            // Completion time
-            const completionTime = Date.now();
-            
-            // Calculate performance metrics
-            const performance = {
-                firstTokenTime: firstTokenTime - startTime,
-                completionTime: completionTime - startTime,
-                totalTokens: responseContent.length / 4, // Rough estimate
-                tokensPerSecond: (responseContent.length / 4) / ((completionTime - startTime) / 1000)
-            };
-            
-            // Add assistant message with full response
-            const assistantMessage: Message = {
-                role: 'assistant',
-                content: responseContent,
-                timestamp: Date.now(),
-                performance
-            };
-            
-            // Update messages based on whether we're regenerating or not
-            if (regenerateIndex !== undefined) {
-                // Replace messages starting from the regenerate index
-                setMessages(prev => [...prev.slice(0, regenerateIndex), assistantMessage]);
-                setRegeneratingMessageIndex(null);
             } else {
-                // Normal flow - append the new message
-                setMessages(prev => [...prev, assistantMessage]);
+                // 对于其他模型，使用传统的completions接口（流式响应）
+                const stream = await openai.chat.completions.create({
+                    model: selectedModel,
+                    messages: messageArray as any,
+                    stream: true
+                });
+                
+                let firstTokenTime = 0;
+                let responseContent = '';
+                
+                // Process the stream
+                for await (const chunk of stream) {
+                    // Record time of first token
+                    if (responseContent === '' && chunk.choices[0]?.delta?.content) {
+                        firstTokenTime = Date.now();
+                    }
+                    
+                    // Append the chunk content if available
+                    if (chunk.choices[0]?.delta?.content) {
+                        responseContent += chunk.choices[0].delta.content;
+                        setCurrentAssistantMessage(responseContent);
+                    }
+                }
+                
+                // Completion time
+                const completionTime = Date.now();
+                
+                // Calculate performance metrics
+                const performance = {
+                    firstTokenTime: firstTokenTime - startTime,
+                    completionTime: completionTime - startTime,
+                    totalTokens: responseContent.length / 4, // Rough estimate
+                    tokensPerSecond: (responseContent.length / 4) / ((completionTime - startTime) / 1000)
+                };
+                
+                // Add assistant message with full response
+                const assistantMessage: Message = {
+                    role: 'assistant',
+                    content: responseContent,
+                    timestamp: Date.now(),
+                    performance
+                };
+                
+                // Update messages based on whether we're regenerating or not
+                if (regenerateIndex !== undefined) {
+                    // Replace messages starting from the regenerate index
+                    setMessages(prev => [...prev.slice(0, regenerateIndex), assistantMessage]);
+                    setRegeneratingMessageIndex(null);
+                } else {
+                    // Normal flow - append the new message
+                    setMessages(prev => [...prev, assistantMessage]);
+                }
             }
             
         } catch (error: any) {
