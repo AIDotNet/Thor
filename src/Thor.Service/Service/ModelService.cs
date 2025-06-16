@@ -212,4 +212,219 @@ public static class ModelService
         result.Add("其他", null);
         return result;
     }
+
+    /// <summary>
+    /// 获取模型库列表（用于模型库页面）
+    /// </summary>
+    /// <param name="context">HTTP上下文</param>
+    /// <param name="model">模型名称搜索</param>
+    /// <param name="page">页码</param>
+    /// <param name="pageSize">页面大小</param>
+    /// <param name="type">供应商类型</param>
+    /// <param name="modelType">模型类型</param>
+    /// <param name="tags">标签</param>
+    /// <returns></returns>
+    public static async Task<PagingDto<ModelManager>> GetModelLibraryAsync(HttpContext context, 
+        string? model = null, int page = 1, int pageSize = 20, 
+        string? type = null, string? modelType = null, string[]? tags = null)
+    {
+        var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
+        
+        var query = dbContext.ModelManagers.Where(x => x.Enable).AsQueryable();
+
+        if (!string.IsNullOrEmpty(model))
+        {
+            query = query.Where(x => x.Model.StartsWith(model) || x.Description.Contains(model));
+        }
+
+        if (!string.IsNullOrEmpty(type))
+        {
+            query = query.Where(x => x.Icon == type);
+        }
+
+        if (!string.IsNullOrEmpty(modelType))
+        {
+            query = query.Where(x => x.Type.ToLower() == modelType.ToLower());
+        }
+
+        if (tags != null && tags.Length > 0)
+        {
+            // 如果需要过滤tag则先查询到内存
+            var tagsList = await dbContext.ModelManagers
+                .AsNoTracking()
+                .Where(x => x.Enable)
+                .ToListAsync();
+
+            tagsList = tagsList
+                .Where(x => x.Tags.Any(tags.Contains))
+                .ToList();
+
+            var total = tagsList.Count;
+
+            tagsList = tagsList
+                .OrderByDescending(x => x.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagingDto<ModelManager>(total, tagsList);
+        }
+        else
+        {
+            var total = await query.CountAsync();
+
+            var data = await query
+                .OrderByDescending(x => x.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagingDto<ModelManager>(total, data);
+        }
+    }
+
+    /// <summary>
+    /// 获取模型库元数据信息（包含tags、types、providers、icons等）
+    /// </summary>
+    /// <param name="context">HTTP上下文</param>
+    /// <returns></returns>
+    public static async Task<object> GetModelLibraryMetadataAsync(HttpContext context)
+    {
+        var dbContext = context.RequestServices.GetRequiredService<IThorContext>();
+        
+        var models = await dbContext.ModelManagers
+            .AsNoTracking()
+            .Where(x => x.Enable) // 只获取启用的模型
+            .ToListAsync();
+
+        // 获取所有标签
+        var allTags = models
+            .SelectMany(x => x.Tags)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToList();
+
+        // 获取所有模型类型及其数量
+        var modelTypes = models
+            .Where(x => !string.IsNullOrEmpty(x.Type))
+            .Select(x => x.Type)
+            .Distinct()
+            .OrderBy(x => x)
+            .ToList();
+
+        // 计算每个模型类型的数量
+        var modelTypeCounts = models
+            .Where(x => !string.IsNullOrEmpty(x.Type))
+            .GroupBy(x => x.Type)
+            .Select(g => new
+            {
+                type = g.Key,
+                count = g.Count()
+            })
+            .OrderBy(x => x.type)
+            .ToList();
+
+        // 获取所有供应商信息（基于Icon字段）
+        var providers = new Dictionary<string, string>();
+        var icons = models
+            .Where(x => !string.IsNullOrEmpty(x.Icon))
+            .Select(x => x.Icon)
+            .Distinct()
+            .ToList();
+
+        foreach (var icon in icons)
+        {
+            switch (icon)
+            {
+                case "OpenAI":
+                    providers.Add("OpenAI", "OpenAI");
+                    break;
+                case "DeepSeek":
+                    providers.Add("DeepSeek", "深度求索");
+                    break;
+                case "Claude":
+                    providers.Add("Claude", "Claude");
+                    break;
+                case "ChatGLM":
+                    providers.Add("ChatGLM", "ChatGLM");
+                    break;
+                case "SiliconCloud":
+                    providers.Add("SiliconCloud", "硅基流动");
+                    break;
+                case "Moonshot":
+                    providers.Add("Moonshot", "Moonshot");
+                    break;
+                case "Mistral":
+                    providers.Add("Mistral", "Mistral");
+                    break;
+                case "Gemini":
+                    providers.Add("Gemini", "Gemini");
+                    break;
+                case "ErnieBot":
+                    providers.Add("ErnieBot", "文心一言");
+                    break;
+                case "SparkDesk":
+                    providers.Add("SparkDesk", "讯飞星火");
+                    break;
+                case "Hunyuan":
+                    providers.Add("Hunyuan", "腾讯混元");
+                    break;
+                case "MiniMax":
+                    providers.Add("MiniMax", "MiniMax");
+                    break;
+                case "MetaGLM":
+                    providers.Add("MetaGLM", "智谱清言");
+                    break;
+                case "GiteeAI":
+                    providers.Add("GiteeAI", "Gitee AI");
+                    break;
+                case "VolCenGine":
+                    providers.Add("VolCenGine", "火山引擎");
+                    break;
+                case "Qiansail":
+                    providers.Add("Qiansail", "千帆大模型");
+                    break;
+                case "Ollama":
+                    providers.Add("Ollama", "Ollama");
+                    break;
+                case "AWSClaude":
+                    providers.Add("AWSClaude", "AWS Claude");
+                    break;
+                case "GCPClaude":
+                    providers.Add("GCPClaude", "GCP Claude");
+                    break;
+                case "AzureOpenAI":
+                    providers.Add("AzureOpenAI", "Azure OpenAI");
+                    break;
+                default:
+                    providers.Add(icon, icon);
+                    break;
+            }
+        }
+
+        // 计算每个供应商的模型数量
+        var providerCounts = models
+            .Where(x => !string.IsNullOrEmpty(x.Icon))
+            .GroupBy(x => x.Icon)
+            .Select(g => new
+            {
+                provider = g.Key,
+                count = g.Count()
+            })
+            .OrderBy(x => x.provider)
+            .ToList();
+
+        // 构建图标映射（使用Icon字段作为key和value）
+        var iconMapping = icons.ToDictionary(x => x, x => x);
+
+        return new
+        {
+            tags = allTags,
+            providers = providers,
+            icons = iconMapping,
+            modelTypes = modelTypes,
+            modelTypeCounts = modelTypeCounts,
+            providerCounts = providerCounts
+        };
+    }
 }

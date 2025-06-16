@@ -19,7 +19,8 @@ import {
   Home,
   ChevronRight,
   Bug,
-  PieChart
+  PieChart,
+  Megaphone
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
@@ -205,6 +206,16 @@ const Nav = memo(() => {
         enable: true,
         key: SidebarTabKey.Setting,
         children: [
+          {
+            icon: <Megaphone />,
+            label: t('sidebar.announcement'),
+            enable: true,
+            key: SidebarTabKey.Announcement,
+            onClick: () => {
+              navigate("/announcement");
+            },
+            role: "admin",
+          },
           {
             icon: <FileText />,
             label: t('sidebar.logger'),

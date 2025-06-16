@@ -266,10 +266,10 @@ const Login = memo(() => {
                 <AnimatedShape />
 
                 <BrandContent>
-                    <Title level={1} style={{ color: 'white', marginTop: 24 }}>
+                    <Title level={1} style={{ marginTop: 24 }}>
                         TokenAI 
                     </Title>
-                    <Paragraph style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, marginBottom: 40 }}>
+                    <Paragraph style={{ fontSize: 16, marginBottom: 40 }}>
                         {t('login.brandSlogan')}
                     </Paragraph>
 
@@ -278,10 +278,10 @@ const Login = memo(() => {
                     <FeatureItem>
                         <FeatureIcon>🚀</FeatureIcon>
                         <div>
-                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                            <Text style={{  fontWeight: 'bold', fontSize: 16 }}>
                                 {t('login.feature1Title')}
                             </Text>
-                            <Paragraph style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>
+                            <Paragraph style={{ margin: 0 }}>
                                 {t('login.feature1Desc')}
                             </Paragraph>
                         </div>
@@ -290,10 +290,10 @@ const Login = memo(() => {
                     <FeatureItem>
                         <FeatureIcon>🔒</FeatureIcon>
                         <div>
-                            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                            <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
                                 {t('login.feature2Title')}
                             </Text>
-                            <Paragraph style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>
+                            <Paragraph style={{ margin: 0 }}>
                                 {t('login.feature2Desc')}
                             </Paragraph>
                         </div>
@@ -301,7 +301,6 @@ const Login = memo(() => {
                 </BrandContent>
             </BrandSide>
 
-            {/* 右侧表单区 */}
             <FormSide theme={themeColors}>
                 <FormContainer>
                     <div style={{ textAlign: 'center', marginBottom: 40 }}>

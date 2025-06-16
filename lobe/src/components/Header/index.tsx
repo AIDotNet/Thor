@@ -66,17 +66,6 @@ export default function ThorHeader() {
         >
             <header>
                 <Space size={8}>
-                    <PwaInstall 
-                        buttonMode={true}
-                        buttonText={t('common.installApp')}
-                        buttonType='text'
-                        buttonSize='middle'
-                        buttonStyle={{ 
-                            display: 'flex',
-                            alignItems: 'center'
-                        }}
-                        logoUrl='/logo.png'
-                    />
                     <ThemeSwitch 
                         onThemeSwitch={(model) => toggleTheme(model)}
                         themeMode={themeMode} 

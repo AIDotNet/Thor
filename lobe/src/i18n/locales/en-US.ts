@@ -106,7 +106,8 @@ const enUS = {
       chat: 'Chat',
       business: 'Business Service',
       playground: 'Playground',
-      usage: 'Usage'
+      usage: 'Usage',
+      announcement: 'Announcements'
     },
 
     // Page Title
@@ -132,7 +133,8 @@ const enUS = {
         welcome: 'Loading Welcome Page',
         doc: 'Loading Documentation',
         model: 'Loading Model Page',
-        usage: 'Loading Usage Page'
+        usage: 'Loading Usage Page',
+        announcement: 'Loading Announcements Page'
       }
     },
 
@@ -451,30 +453,25 @@ const enUS = {
       enterMaxContext: 'Enter max context',
       selectIcon: 'Select an icon',
       enterTags: 'Enter tags',
-      modelNameRequired: 'Please enter model name',
-      modelTypeRequired: 'Please enter model billing type',
-      promptRateRequired: 'Please enter prompt rate',
-      descriptionRequired: 'Please enter description',
-      iconRequired: 'Please select a model icon',
-      promptRatePositive: 'Prompt rate must be greater than 0',
-      createSuccess: 'Created successfully',
-      updateSuccess: 'Updated successfully',
-      deleteSuccess: 'Deleted successfully',
-      operationFailed: 'Operation failed',
-      confirmDelete: 'Are you sure you want to delete this model?',
-      yes: 'Yes',
-      no: 'No',
-      perPrompt: 'Prompt',
-      perCompletion: 'Completion',
+      priceUnit: 'Price Unit',
+      searchModel: 'Search model name',
+      perPrompt: 'Input Price',
+      perCompletion: 'Output Price',
       audioInput: 'Audio Input',
       audioOutput: 'Audio Output',
       perUsage: 'Per Usage',
-      tokens: 'tokens',
-      confirm: 'Confirm',
-      searchModel: 'Enter model name to search',
       basicInfo: 'Basic Information',
       rateConfiguration: 'Rate Configuration',
-      advancedSettings: 'Advanced Settings'
+      createSuccess: 'Created successfully',
+      updateSuccess: 'Updated successfully',
+      operationFailed: 'Operation failed',
+      modelNameRequired: 'Please enter model name',
+      modelTypeRequired: 'Please select billing type',
+      descriptionRequired: 'Please enter description',
+      iconRequired: 'Please select an icon',
+      confirm: 'Confirm',
+      no: 'No',
+      yes: 'Yes'
     },
 
     // Model Library Page

@@ -36,6 +36,8 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
     public DbSet<ModelMap> ModelMaps { get; set; }
     
     public DbSet<UserGroup> UserGroups { get; set; }
+    
+    public DbSet<Announcement> Announcements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Exceptions;
+using Thor.Domain.Chats;
 using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;

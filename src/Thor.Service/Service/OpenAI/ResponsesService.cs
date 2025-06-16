@@ -5,6 +5,7 @@ using Thor.Abstractions.Chats;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Responses;
 using Thor.Abstractions.Responses.Dto;
+using Thor.Domain.Chats;
 using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
@@ -38,6 +39,7 @@ public sealed class ResponsesService(
         var model = request.Model;
 
         var rateLimit = 0;
+        Exception? exception = null;
 
         // 用于限流重试，如果限流则重试并且进行重新负载均衡计算
         limitGoto:
@@ -62,11 +64,18 @@ public sealed class ResponsesService(
 
                 // 获取渠道通过算法计算权重
                 var channel =
-                    CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
+                    CalculateWeight(
+                        await channelService.GetChannelsContainsModelAsync(request.Model, user, token, true));
 
-                if (channel == null)
+                if (channel == null && exception == null)
                     throw new NotModelException(
                         $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+
+                if (channel == null && exception != null)
+                {
+                    await context.WriteErrorAsync(exception.Message, "400");
+                    return;
+                }
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -193,10 +202,11 @@ public sealed class ResponsesService(
         }
         catch (ThorRateLimitException)
         {
+            exception = new ThorRateLimitException("对话模型请求限流，请稍后再试");
             logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 3)
+            if (rateLimit > 5)
             {
                 context.Response.StatusCode = 429;
             }
@@ -235,11 +245,12 @@ public sealed class ResponsesService(
         }
         catch (Exception e)
         {
+            exception = e;
             logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
                 JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 3)
+            if (rateLimit > 5)
             {
                 context.Response.StatusCode = 400;
                 await context.WriteErrorAsync(e.Message, "500");

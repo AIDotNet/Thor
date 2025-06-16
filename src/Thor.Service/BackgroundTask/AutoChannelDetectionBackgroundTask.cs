@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Thor.Core.DataAccess;
+using Thor.Domain.Chats;
 using Thor.Service.DataAccess;
 using Thor.Service.Domain;
 using Thor.Service.Exceptions;

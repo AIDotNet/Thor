@@ -52,11 +52,12 @@ public sealed class ChannelService(
     /// <param name="token"></param>
     /// <returns></returns>
     public async ValueTask<IEnumerable<ChatChannel>> GetChannelsContainsModelAsync(string model, User user,
-        Token? token)
+        Token? token, bool isResponses = false)
     {
         var group = token?.Groups ?? (user).Groups;
         return (await GetChannelsAsync()).Where(x =>
             x.Models.Contains(model)
+            && x.SupportsResponses == isResponses // 是否支持Responses
             // 防止重试重复分配
             && !ChannelAsyncLocal.ChannelIds.Contains(x.Id) &&
             (group.Length == 0 || x.Groups.Select(x => x.ToLower()).Intersect(group).Any()));
@@ -368,6 +369,7 @@ public sealed class ChannelService(
                     Type = channel.Type,
                     Address = channel.Address,
                     Key = channel.Key,
+                    SupportsResponses = channel.SupportsResponses,
                     Models = channel.Models.Split(',').Select(x => x.Trim()).ToList(),
                     Other = channel.Other,
                     Groups = channel.Groups.Split(',').Select(x => x.Trim()).ToArray()
@@ -461,5 +463,13 @@ public sealed class ChannelService(
         /// <returns></returns>
         [ExcelColumnName("分组使用,分割")]
         public string Groups { get; set; }
+
+
+        /// <summary>
+        /// 是否支持Responses
+        /// </summary>
+        /// <returns></returns>
+        [ExcelColumnName("是否支持Responses")]
+        public bool SupportsResponses { get; set; } = false;
     }
 }

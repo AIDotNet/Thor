@@ -1,372 +1,477 @@
 import { useEffect, useMemo, useState } from "react";
 import { Header, Input, Tag, Tooltip } from "@lobehub/ui";
 import { IconAvatar, OpenAI } from "@lobehub/icons";
-import { Button, Card, Col, Descriptions, Divider, Empty, Modal, Row, Select, Space, Switch, Typography, message, theme, Badge } from "antd";
+import { Button, Card, Col, Descriptions, Divider, Empty, Modal, Row, Select, Space, Switch, Typography, message, theme, Badge, Layout, Drawer, Pagination } from "antd";
 import { getCompletionRatio, renderQuota } from "../../utils/render";
 import { getIconByName } from "../../utils/iconutils";
-import { GetModelManagerList } from "../../services/ModelManagerService";
-import { Copy, Info, Search, Tag as TagIcon, MessageSquare, Image, Mic, Headphones, FileText, Layers } from "lucide-react";
+import { getModelLibrary, getModelLibraryMetadata, getModelInfo, getProvider } from "../../services/ModelService";
+import { Copy, Info, Search, Tag as TagIcon, MessageSquare, Image, Mic, Headphones, FileText, Layers, Filter, Menu } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Flexbox } from "react-layout-kit";
-import { getProvider } from "../../services/ModelService";
-import { motion } from "framer-motion";
 import { createStyles } from "antd-style";
 import useBreakpoint from "antd/es/grid/hooks/useBreakpoint";
-import { getModelInfo } from "../../services/ModelService";
-import { getTags } from "../../services/ChannelService";
 import MODEL_TYPES from "../model-manager/constants/modelTypes";
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 
 const { Title, Paragraph } = Typography;
-const MotionTag = motion(Tag);
-const MotionButton = motion(Button);
-const MotionDiv = motion.div;
-const MotionCard = motion(Card);
+const { Sider, Content } = Layout;
 
 const useStyles = createStyles(({ token, css }) => ({
-    modelContainer: css`
+    // 主容器样式
+    mainLayout: css`
+        height: 100vh;
+        background: linear-gradient(135deg, ${token.colorBgContainer} 0%, ${token.colorBgElevated} 100%);
+        position: relative;
+        overflow: hidden;
+    `,
+
+    // 左侧边栏样式
+    leftSider: css`
+        background: ${token.colorBgContainer};
+        border-right: 1px solid ${token.colorBorderSecondary};
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        overflow-y: auto;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 100;
+        
+        &::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background: ${token.colorBorderSecondary};
+            border-radius: 2px;
+        }
+        
+        &::-webkit-scrollbar-thumb:hover {
+            background: ${token.colorBorder};
+        }
+    `,
+
+    // 右侧内容区样式
+    rightContent: css`
+        margin-left: 280px;
+        padding: 0;
+        background: ${token.colorBgLayout};
+        height: 100vh;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
-        background: linear-gradient(145deg, ${token.colorBgContainer} 0%, ${token.colorBgElevated} 100%);
-        position: relative;
-        overflow: hidden;
-        min-height: 100vh;
+        
+        @media (max-width: 768px) {
+            margin-left: 0;
+        }
     `,
-    searchContainer: css`
+
+    // 移动端抽屉按钮
+    mobileFilterButton: css`
+        position: fixed;
+        top: 90px;
+        left: 20px;
+        z-index: 1000;
+        background: ${token.colorPrimary};
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         display: flex;
         align-items: center;
-        gap: 16px;
-        margin: 16px;
-        padding: 20px;
-        border-radius: ${token.borderRadiusLG}px;
-        background-color: ${token.colorBgContainer};
-        box-shadow: ${token.boxShadowTertiary};
-        position: relative;
-        z-index: 2;
-        border: 1px solid ${token.colorBorderSecondary};
-        
-        @media (max-width: 768px) {
-            flex-direction: column;
-            align-items: stretch;
-            padding: 16px;
-            margin: 12px;
-            gap: 12px;
-        }
-    `,
-    searchInput: css`
-        width: 280px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        
-        &:focus, &:hover {
-            width: 320px;
-            box-shadow: 0 0 12px ${token.colorPrimaryBg};
-        }
-        
-        @media (max-width: 768px) {
-            width: 100%;
-            &:focus, &:hover {
-                width: 100%;
-            }
-        }
-    `,
-    iconFilter: css`
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        margin: 16px;
-        padding: 20px;
-        border-radius: ${token.borderRadiusLG}px;
-        background-color: ${token.colorBgContainer};
-        box-shadow: ${token.boxShadowTertiary};
-        position: relative;
-        overflow: hidden;
-        z-index: 1;
-        border: 1px solid ${token.colorBorderSecondary};
-        
-        @media (max-width: 768px) {
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding: 16px;
-            margin: 12px;
-            gap: 12px;
-            
-            &::-webkit-scrollbar {
-                height: 4px;
-            }
-            
-            &::-webkit-scrollbar-track {
-                background: ${token.colorBgLayout};
-                border-radius: 2px;
-            }
-            
-            &::-webkit-scrollbar-thumb {
-                background: ${token.colorPrimary};
-                border-radius: 2px;
-            }
-        }
-    `,
-    iconItem: css`
-        cursor: pointer;
-        padding: 12px 20px;
-        border-radius: ${token.borderRadius}px;
-        transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        border: 2px solid transparent;
-        position: relative;
-        overflow: hidden;
-        background: ${token.colorBgElevated};
-        min-width: 120px;
+        justify-content: center;
+        transition: all 0.3s ease;
         
         &:hover {
-            background: linear-gradient(135deg, ${token.colorBgTextHover} 0%, ${token.colorBgElevated} 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            transform: scale(1.05);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        @media (min-width: 769px) {
+            display: none;
+        }
+    `,
+
+    // 过滤器容器
+    filterContainer: css`
+        padding: 24px 20px;
+        
+        @media (max-width: 768px) {
+            padding: 20px 16px;
+        }
+    `,
+
+    // 过滤器组标题
+    filterGroupTitle: css`
+        font-size: 14px;
+        font-weight: 600;
+        color: ${token.colorTextHeading};
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid ${token.colorBorderSecondary};
+        position: relative;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 24px;
+            height: 2px;
+            background: ${token.colorPrimary};
+            border-radius: 1px;
+        }
+    `,
+
+    // 搜索区域
+    searchSection: css`
+        margin-bottom: 24px;
+        
+        .ant-input-affix-wrapper {
+            border-radius: ${token.borderRadiusLG}px;
+            border: 1px solid ${token.colorBorderSecondary};
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+            
+            &:focus-within {
+                border-color: ${token.colorPrimary};
+                box-shadow: 0 0 0 2px ${token.colorPrimaryBg};
+            }
+        }
+    `,
+
+    // 过滤器组
+    filterGroup: css`
+        margin-bottom: 32px;
+        
+        &:last-child {
+            margin-bottom: 0;
+        }
+    `,
+
+    // 供应商过滤器
+    providerFilter: css`
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    `,
+
+    providerItem: css`
+        cursor: pointer;
+        padding: 16px;
+        border-radius: ${token.borderRadiusLG}px;
+        transition: all 0.3s ease;
+        border: 1px solid ${token.colorBorderSecondary};
+        background: ${token.colorBgElevated};
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(135deg, ${token.colorPrimary}, ${token.colorPrimaryActive});
+            transition: width 0.3s ease;
+        }
+        
+        &:hover {
+            background: ${token.colorBgTextHover};
             border-color: ${token.colorPrimaryBorderHover};
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            
+            &::before {
+                width: 4px;
+            }
         }
         
         &.selected {
-            background: linear-gradient(135deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
-            color: ${token.colorTextLightSolid};
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px ${token.colorPrimaryBgHover};
+            background: ${token.colorPrimaryBg};
             border-color: ${token.colorPrimary};
-        }
-        
-        &.selected svg {
-            color: ${token.colorTextLightSolid};
-        }
-        
-        @media (max-width: 768px) {
-            min-width: 100px;
-            padding: 10px 16px;
+            box-shadow: 0 4px 12px ${token.colorPrimaryBgHover};
+            
+            &::before {
+                width: 4px;
+            }
         }
     `,
+
+    // 模型类型过滤器
     modelTypeFilter: css`
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: 8px;
-        margin: 16px 16px 0 16px;
-        padding: 16px;
-        border-radius: ${token.borderRadius}px;
-        background-color: ${token.colorBgContainer};
-        box-shadow: ${token.boxShadowSecondary};
-        position: relative;
-        z-index: 1;
-        
-        @media (max-width: 768px) {
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding: 12px;
-            margin: 12px 12px 0 12px;
-        }
     `,
-    modelTypeFilterItem: css`
+
+    modelTypeItem: css`
         cursor: pointer;
-        padding: 8px 12px;
-        border-radius: ${token.borderRadiusSM}px;
-        transition: all 0.3s;
+        padding: 12px 16px;
+        border-radius: ${token.borderRadiusLG}px;
+        transition: all 0.3s ease;
         border: 1px solid ${token.colorBorderSecondary};
+        background: ${token.colorBgElevated};
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(135deg, ${token.colorPrimary}, ${token.colorPrimaryActive});
+            transition: width 0.3s ease;
+        }
         
         &:hover {
+            background: ${token.colorBgTextHover};
             border-color: ${token.colorPrimaryBorderHover};
-            transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            
+            &::before {
+                width: 4px;
+            }
         }
         
         &.selected {
+            background: ${token.colorPrimaryBg};
             border-color: ${token.colorPrimary};
-            background-color: ${token.colorPrimaryBg};
-            transform: translateY(-2px);
             box-shadow: 0 4px 12px ${token.colorPrimaryBgHover};
+            
+            &::before {
+                width: 4px;
+            }
         }
     `,
-    resultSummary: css`
-        margin: 16px 16px 0;
-        font-size: 14px;
-        color: ${token.colorTextSecondary};
+
+    // 标签选择器
+    tagSelector: css`
+        .ant-select {
+            width: 100%;
+        }
+        
+        .ant-select-selector {
+            border-radius: ${token.borderRadiusLG}px;
+            min-height: 40px;
+            border: 1px solid ${token.colorBorderSecondary};
+            transition: all 0.3s ease;
+            
+            &:focus, &:focus-within {
+                border-color: ${token.colorPrimary};
+                box-shadow: 0 0 0 2px ${token.colorPrimaryBg};
+            }
+        }
+    `,
+
+    // 内容头部
+    contentHeader: css`
+        padding: 24px 32px;
+        background: ${token.colorBgContainer};
+        border-bottom: 1px solid ${token.colorBorderSecondary};
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         
         @media (max-width: 768px) {
-            margin: 12px 12px 0;
+            padding: 20px 16px;
             flex-direction: column;
             align-items: flex-start;
-            gap: 8px;
+            gap: 16px;
         }
     `,
+
+    // 模型容器
     modelsContainer: css`
-        margin: 16px;
         flex: 1;
-        overflow: auto;
-        overflow-x: hidden !important;
-        position: relative;
-        z-index: 1;
+        padding: 32px;
+        overflow-y: auto;
+        background: ${token.colorBgLayout};
         
         @media (max-width: 768px) {
-            margin: 12px;
+            padding: 20px 16px;
+        }
+        
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background: ${token.colorBorderSecondary};
+            border-radius: 3px;
+        }
+        
+        &::-webkit-scrollbar-thumb:hover {
+            background: ${token.colorBorder};
         }
     `,
+
+    // 模型网格
+    modelGrid: css`
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 24px;
+        
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+    `,
+
+    // 模型卡片
     modelCard: css`
-        border-radius: ${token.borderRadius}px;
+        background: ${token.colorBgContainer};
+        border-radius: ${token.borderRadiusLG}px;
+        padding: 24px;
+        border: 1px solid ${token.colorBorderSecondary};
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
         overflow: hidden;
-        height: 100%;
-        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        backdrop-filter: blur(10px);
-        background-color: ${token.colorBgContainer};
-        box-shadow: ${token.boxShadowSecondary};
-        display: flex;
-        flex-direction: column;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 0;
+            background: linear-gradient(90deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
+            transition: height 0.3s ease;
+        }
         
         &:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            border-color: ${token.colorPrimaryBorderHover};
+            
+            &::before {
+                height: 4px;
+            }
         }
     `,
-    modelCardMeta: css`
-        display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-    `,
-    modelCardContent: css`
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    `,
-    modelCardFooter: css`
-        margin-top: auto;
-        padding-top: 12px;
-        border-top: 1px solid ${token.colorBorderSecondary};
-    `,
+
+    // 其他样式保持不变...
     modelCardHeader: css`
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     `,
-    modelCardSection: css`
-        margin-bottom: 8px;
-    `,
-    modelGridView: css`
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 16px;
-        
-        @media (max-width: 768px) {
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 12px;
-        }
-    `,
-    viewToggle: css`
+
+    modelCardMeta: css`
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-left: auto;
+        gap: 12px;
+        flex: 1;
     `,
+
     modelName: css`
+        font-size: 16px;
+        font-weight: 600;
+        color: ${token.colorText};
+        margin: 0;
         cursor: pointer;
-        color: ${token.colorPrimary};
-        transition: color 0.3s;
-        font-weight: 500;
-        font-size: 14px;
-        max-width: 180px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        position: relative;
-        padding-bottom: 2px;
+        transition: color 0.3s ease;
+        line-height: 1.4;
         
         &:hover {
-            color: ${token.colorPrimaryHover};
-            &:after {
-                width: 100%;
-            }
-        }
-        
-        &:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: ${token.colorPrimary};
-            transition: width 0.3s ease;
+            color: ${token.colorPrimary};
         }
     `,
+
     modelDescription: css`
-        font-size: 12px;
+        font-size: 14px;
         color: ${token.colorTextSecondary};
-        margin-bottom: 12px;
+        margin-bottom: 16px;
+        line-height: 1.6;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        height: 36px;
     `,
+
     modelTags: css`
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
-        margin-bottom: 8px;
+        gap: 8px;
+        margin-bottom: 16px;
+        
+        .ant-tag {
+            margin: 0;
+            border-radius: ${token.borderRadius}px;
+            font-size: 11px;
+            line-height: 1.3;
+        }
     `,
-    modelPriceSection: css`
-        margin-top: 12px;
-    `,
+
     modelStats: css`
-        display: flex;
-        justify-content: space-between;
-        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid ${token.colorBorderSecondary};
     `,
+
     modelStat: css`
         text-align: center;
+        padding: 8px;
+        background: ${token.colorBgLayout};
+        border-radius: ${token.borderRadius}px;
     `,
+
     modelStatValue: css`
-        font-weight: 500;
+        font-size: 14px;
+        font-weight: 600;
         color: ${token.colorText};
-        font-size: 13px;
+        display: block;
+        margin-bottom: 4px;
     `,
+
     modelStatLabel: css`
-        font-size: 11px;
+        font-size: 12px;
         color: ${token.colorTextSecondary};
+        line-height: 1.3;
     `,
-    pagination: css`
-        margin-top: 24px;
-        text-align: center;
-    `,
-    primaryButton: css`
-        background: linear-gradient(90deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
-        border: none;
-        box-shadow: 0 4px 10px ${token.colorPrimaryBg};
-        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-        
-        &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px ${token.colorPrimaryBgHover};
-        }
-    `,
-    tagSelect: css`
-        min-width: 200px;
-        
-        @media (max-width: 768px) {
-            width: 100%;
-        }
-    `,
+
+    // 模态框样式
     modelDetailModal: css`
         .ant-modal-content {
-            background: linear-gradient(145deg, ${token.colorBgContainer} 0%, ${token.colorBgElevated} 100%);
+            background: ${token.colorBgContainer};
             border-radius: ${token.borderRadiusLG}px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
         }
         
         .ant-modal-header {
             background: transparent;
             border-bottom: 1px solid ${token.colorBorderSecondary};
-            padding: 16px 24px;
+            padding: 20px 24px;
         }
         
         .ant-modal-body {
@@ -378,6 +483,7 @@ const useStyles = createStyles(({ token, css }) => ({
         .ant-modal-footer {
             border-top: 1px solid ${token.colorBorderSecondary};
             padding: 16px 24px;
+            background: ${token.colorBgLayout};
         }
         
         @media (max-width: 768px) {
@@ -385,13 +491,24 @@ const useStyles = createStyles(({ token, css }) => ({
                 padding: 16px;
                 max-height: 80vh;
             }
+            
+            .ant-modal-footer {
+                padding: 12px 16px;
+            }
         }
     `,
-    modelDetailHeader: css`
+
+    // 工具提示样式
+    resultInfo: css`
         display: flex;
         align-items: center;
-        margin-bottom: 24px;
-        gap: 16px;
+        gap: 8px;
+        font-size: 14px;
+        color: ${token.colorTextSecondary};
+        
+        .ant-space {
+            flex-wrap: wrap;
+        }
         
         @media (max-width: 768px) {
             flex-direction: column;
@@ -399,6 +516,69 @@ const useStyles = createStyles(({ token, css }) => ({
             gap: 12px;
         }
     `,
+
+    // 清除过滤器按钮
+    clearFiltersButton: css`
+        color: ${token.colorTextSecondary};
+        border-color: ${token.colorBorderSecondary};
+        background: ${token.colorBgContainer};
+        border-radius: ${token.borderRadiusLG}px;
+        height: 40px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        
+        &:hover {
+            color: ${token.colorPrimary};
+            border-color: ${token.colorPrimary};
+            background: ${token.colorPrimaryBg};
+        }
+    `,
+
+    // 模型详情样式
+    modelDetailTags: css`
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+    `,
+
+    modelDetailPricing: css`
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 16px;
+    `,
+
+    modelDetailPriceCard: css`
+        background-color: ${token.colorBgContainer};
+        border-radius: ${token.borderRadius}px;
+        padding: 16px;
+        flex: 1;
+        min-width: 200px;
+        box-shadow: ${token.boxShadowSecondary};
+    `,
+
+    modelDetailPriceTitle: css`
+        font-size: 14px;
+        font-weight: 500;
+        color: ${token.colorTextSecondary};
+        margin-bottom: 8px;
+    `,
+
+    modelDetailPriceValue: css`
+        font-size: 18px;
+        font-weight: 600;
+        color: ${token.colorPrimary};
+    `,
+
+    // 其他模型详情样式
+    modelDetailHeader: css`
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 16px;
+    `,
+
     modelDetailIcon: css`
         display: flex;
         align-items: center;
@@ -409,53 +589,35 @@ const useStyles = createStyles(({ token, css }) => ({
         border-radius: ${token.borderRadiusLG}px;
         box-shadow: ${token.boxShadowSecondary};
         padding: 12px;
-        
-        @media (max-width: 768px) {
-            width: 48px;
-            height: 48px;
-            padding: 8px;
-        }
     `,
+
     modelDetailInfo: css`
         flex: 1;
     `,
+
     modelDetailName: css`
         display: flex;
         align-items: center;
         gap: 8px;
         margin-bottom: 4px;
     `,
+
     modelDetailTitle: css`
         margin: 0;
         font-size: 20px;
         font-weight: 600;
         color: ${token.colorText};
-        
-        @media (max-width: 768px) {
-            font-size: 18px;
-        }
     `,
+
     modelDetailDescription: css`
         color: ${token.colorTextSecondary};
         font-size: 14px;
     `,
-    modelDetailTags: css`
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 16px;
-        
-        @media (max-width: 768px) {
-            margin-top: 12px;
-        }
-    `,
+
     modelDetailSection: css`
         margin-bottom: 24px;
-        
-        @media (max-width: 768px) {
-            margin-bottom: 16px;
-        }
     `,
+
     modelDetailSectionTitle: css`
         font-size: 16px;
         font-weight: 500;
@@ -464,84 +626,35 @@ const useStyles = createStyles(({ token, css }) => ({
         display: flex;
         align-items: center;
         gap: 8px;
-        
-        @media (max-width: 768px) {
-            font-size: 15px;
-            margin-bottom: 12px;
-        }
     `,
-    modelDetailPricing: css`
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        
-        @media (max-width: 768px) {
-            gap: 12px;
-        }
-    `,
-    modelDetailPriceCard: css`
-        background-color: ${token.colorBgContainer};
-        border-radius: ${token.borderRadius}px;
-        padding: 16px;
-        flex: 1;
-        min-width: 200px;
-        box-shadow: ${token.boxShadowSecondary};
-        
-        @media (max-width: 768px) {
-            min-width: 100%;
-            padding: 12px;
-        }
-    `,
-    modelDetailPriceTitle: css`
-        font-size: 14px;
-        font-weight: 500;
-        color: ${token.colorTextSecondary};
-        margin-bottom: 8px;
-    `,
-    modelDetailPriceValue: css`
-        font-size: 18px;
-        font-weight: 600;
-        color: ${token.colorPrimary};
-        
-        @media (max-width: 768px) {
-            font-size: 16px;
-        }
-    `,
+
     modelDetailStats: css`
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
         gap: 16px;
-        
-        @media (max-width: 768px) {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
+        margin-top: 16px;
     `,
+
     modelDetailStat: css`
         background-color: ${token.colorBgContainer};
         border-radius: ${token.borderRadius}px;
         padding: 16px;
         text-align: center;
         box-shadow: ${token.boxShadowSecondary};
-        
-        @media (max-width: 768px) {
-            padding: 12px;
-        }
     `,
+
     modelDetailStatValue: css`
         font-size: 18px;
         font-weight: 600;
         color: ${token.colorText};
-        
-        @media (max-width: 768px) {
-            font-size: 16px;
-        }
     `,
+
     modelDetailStatLabel: css`
         font-size: 13px;
         color: ${token.colorTextSecondary};
         margin-top: 4px;
     `,
+
     copyButton: css`
         display: inline-flex;
         align-items: center;
@@ -558,45 +671,65 @@ const useStyles = createStyles(({ token, css }) => ({
             background-color: ${token.colorBgTextHover};
             border-color: ${token.colorPrimaryBorder};
         }
+    `,
+
+    // 主要按钮样式
+    primaryButton: css`
+        background: linear-gradient(90deg, ${token.colorPrimary} 0%, ${token.colorPrimaryActive} 100%);
+        border: none;
+        box-shadow: 0 4px 10px ${token.colorPrimaryBg};
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         
-        @media (max-width: 768px) {
-            width: 24px;
-            height: 24px;
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px ${token.colorPrimaryBgHover};
         }
     `,
-    modelTypeIcon: css`
+
+    // 分页容器样式
+    paginationContainer: css`
+        padding: 24px 32px;
+        background: ${token.colorBgContainer};
+        border-top: 1px solid ${token.colorBorderSecondary};
         display: flex;
-        align-items: center;
         justify-content: center;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background-color: ${token.colorPrimaryBg};
-        margin-right: 4px;
-    `,
-    modelTypeBadge: css`
-        position: absolute;
-        top: 12px;
-        right: 12px;
-    `,
-    modelTypeSummary: css`
-        display: flex;
-        gap: 12px;
-        margin: 16px 16px 0 16px;
-        padding: 16px;
-        border-radius: ${token.borderRadius}px;
-        background-color: ${token.colorBgContainer};
-        box-shadow: ${token.boxShadowSecondary};
-        position: relative;
-        z-index: 1;
-        overflow-x: auto;
+        align-items: center;
+        flex-shrink: 0;
         
         @media (max-width: 768px) {
-            flex-wrap: nowrap;
+            padding: 16px 20px;
         }
         
-        @media (min-width: 769px) {
-            flex-wrap: wrap;
+        .ant-pagination {
+            .ant-pagination-item {
+                border-radius: ${token.borderRadius}px;
+                transition: all 0.3s ease;
+                
+                &:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+            }
+            
+            .ant-pagination-item-active {
+                background: ${token.colorPrimary};
+                border-color: ${token.colorPrimary};
+                
+                a {
+                    color: ${token.colorWhite};
+                }
+            }
+            
+            .ant-pagination-prev,
+            .ant-pagination-next {
+                border-radius: ${token.borderRadius}px;
+                transition: all 0.3s ease;
+                
+                &:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                }
+            }
         }
     `,
 }));
@@ -608,14 +741,21 @@ export default function DesktopLayout() {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [isK, setIsK] = useState<boolean>(false);
-    const [provider, setProvider] = useState<any>({});    
+    const [provider, setProvider] = useState<any>({});
     const [total, setTotal] = useState<number>(0);
     const [allTags, setAllTags] = useState<string[]>([]);
+    const [modelMetadata, setModelMetadata] = useState<any>({
+        tags: [],
+        providers: {},
+        icons: {},
+        modelTypes: []
+    });
     const [selectedModel, setSelectedModel] = useState<any>(null);
     const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [drawerVisible, setDrawerVisible] = useState<boolean>(false);
     const [input, setInput] = useState({
         page: 1,
-        pageSize: 16,
+        pageSize: 40,
         model: '',
         isFirst: true,
         type: '',
@@ -623,9 +763,7 @@ export default function DesktopLayout() {
         modelType: ''
     });
     const [selectedModelType, setSelectedModelType] = useState<string>('');
-    const [isGridView, setIsGridView] = useState<boolean>(true);
-    const modelTypes = useMemo(() => Object.values(MODEL_TYPES), []);
-    
+
     const { styles } = useStyles();
     const { token } = theme.useToken();
     const screens = useBreakpoint();
@@ -634,6 +772,25 @@ export default function DesktopLayout() {
 
     useEffect(() => {
         loadModelInfo();
+        loadMetadata();
+    }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [input.page, input.pageSize, input.type, input.modelType, input.tags, input.model]);
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        searchParams.set('model', input.model);
+        navigate({ search: searchParams.toString() }, { replace: true });
+    }, [input.model, navigate]);
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const model = searchParams.get('model');
+        if (model) {
+            setInput({ ...input, model, isFirst: false });
+        }
     }, []);
 
     function loadModelInfo() {
@@ -642,15 +799,55 @@ export default function DesktopLayout() {
                 setModelInfo(res.data);
             });
     }
-    const loadProvider = () => {
+
+    const loadMetadata = () => {
+        getModelLibraryMetadata()
+            .then((res) => {
+                if (res.data) {
+                    setModelMetadata(res.data);
+                    // 为了向后兼容，同时设置原有的状态
+                    if (res.data.tags && Array.isArray(res.data.tags)) {
+                        setAllTags(res.data.tags);
+                    }
+                    if (res.data.providers) {
+                        setProvider(res.data.providers);
+                    }
+                }
+            })
+            .catch((error) => {
+                console.error('Failed to load metadata:', error);
+                message.error(t('modelLibrary.loadFailed'));
+                // 如果统一接口失败，回退到分别调用
+                loadProviderFallback();
+                loadTagsFallback();
+            });
+    }
+
+    // 回退方法 - 如果统一接口不可用
+    const loadProviderFallback = () => {
         getProvider().then((res) => {
             setProvider(res.data);
-        })
+        }).catch(() => {
+            console.warn('Provider fallback also failed');
+        });
+    }
+
+    const loadTagsFallback = () => {
+        // 这里应该有一个专门获取tags的方法，暂时使用元数据方法的fallback
+        getModelLibraryMetadata()
+            .then((res) => {
+                if (res.data && res.data.tags && Array.isArray(res.data.tags)) {
+                    setAllTags(res.data.tags);
+                }
+            })
+            .catch(() => {
+                console.warn('Tags fallback also failed');
+            });
     }
 
     const loadData = () => {
         setLoading(true);
-        GetModelManagerList(input.model, input.page, input.pageSize, true, input.type, input.modelType)
+        getModelLibrary(input.model, input.page, input.pageSize, input.type, input.modelType, input.tags)
             .then((res) => {
                 setData(res.data.items);
                 setTotal(res.data.total);
@@ -663,60 +860,68 @@ export default function DesktopLayout() {
             });
     }
 
-    const loadTags = () => {
-        getTags()
-            .then((res) => {
-                if (res.data && Array.isArray(res.data)) {
-                    setAllTags(res.data);
-                }
-            })
-            .catch((error) => {
-                console.error('Failed to load tags:', error);
-                message.error(t('modelLibrary.loadTagsFailed'));
-            });
-    }
-
-    const filterDataByTags = () => {
-        if (!input.tags || input.tags.length === 0) return data;
-        
-        return data.filter(item => {
-            if (!item.tags || !Array.isArray(item.tags)) return false;
-            return input.tags.some(tag => item.tags.includes(tag));
-        });
-    }
-
-    // Count models by type
-    const modelCountByType = useMemo(() => {
-        const counts: Record<string, number> = {};
-        data.forEach(item => {
-            if (item.type) {
-                counts[item.type] = (counts[item.type] || 0) + 1;
+    // 计算供应商和模型类型的实际数量
+    const getProviderCount = (providerKey: string) => {
+        // 优先使用从metadata接口获取的数量统计
+        if (modelMetadata.providerCounts && Array.isArray(modelMetadata.providerCounts)) {
+            const providerData = modelMetadata.providerCounts.find((item: any) => 
+                item.provider === providerKey
+            );
+            if (providerData) {
+                return providerData.count;
             }
-        });
-        return counts;
-    }, [data]);
-    
-    // Filter data by model type
-    const filterDataByModelType = (data: any[]) => {
-        if (!input.modelType) return data;
-        return data.filter(item => item.type?.toLowerCase() === input.modelType.toLowerCase());
+        }
+        // 回退到从本地数据计算
+        return data.filter(item => item.provider === providerKey).length;
     };
-    
-    // Combined filters
+
+    const getModelTypeCount = (type: string) => {
+        // 优先使用从metadata接口获取的数量统计
+        if (modelMetadata.modelTypeCounts && Array.isArray(modelMetadata.modelTypeCounts)) {
+            const typeData = modelMetadata.modelTypeCounts.find((item: any) =>
+                item.type?.toLowerCase() === type?.toLowerCase()
+            );
+            if (typeData) {
+                return typeData.count;
+            }
+        }
+        // 回退到从本地数据计算
+        return data.filter(item => item.type?.toLowerCase() === type.toLowerCase()).length;
+    };
+
+    // 获取模型类型的翻译文本
+    const getModelTypeText = (type: string) => {
+        const typeKey = type?.toLowerCase();
+        switch (typeKey) {
+            case 'chat':
+                return t('modelLibrary.chat');
+            case 'image':
+                return t('modelLibrary.image');
+            case 'audio':
+                return t('modelLibrary.audio');
+            case 'stt':
+                return t('modelLibrary.stt');
+            case 'tts':
+                return t('modelLibrary.tts');
+            case 'embedding':
+                return t('modelLibrary.embedding');
+            default:
+                return type;
+        }
+    };
+
     const filteredData = useMemo(() => {
-        let filtered = filterDataByTags();
-        filtered = filterDataByModelType(filtered);
-        return filtered;
-    }, [data, input.tags, input.modelType]);
-    
+        // 服务器端已经处理了所有过滤逻辑，直接使用返回的数据
+        return data;
+    }, [data]);
+
     const handleModelTypeSelect = (type: string) => {
-        const newType = selectedModelType === type ? '' : type;
+        const newType = selectedModelType?.toLowerCase() === type?.toLowerCase() ? '' : type;
         setSelectedModelType(newType);
-        // When a model type is selected, update the input.modelType to filter the data
         setInput({
             ...input,
-            modelType: newType, // Toggle the model type filter
-            page: 1 // Reset to first page
+            modelType: newType,
+            page: 1
         });
     };
 
@@ -769,344 +974,34 @@ export default function DesktopLayout() {
         setModalVisible(false);
     };
 
-    const renderPriceInfo = (item: any) => {
-        if (item.quotaType === 1) {
-            const tokenUnit = isK ? '1K' : '1M';
-            const multiplier = isK ? 1000 : 1000000;
-            
-            return (
-                <div className="model-price" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                        <MotionTag 
-                            color='cyan'
-                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
-                            whileHover={{ scale: 1.05 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                        >
-                            <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.promptPrice')}:</span>
-                            <span>{renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}</span>
-                        </MotionTag>
-                        <MotionTag 
-                            color='geekblue' 
-                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
-                            whileHover={{ scale: 1.05 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                        >
-                            <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.completionPrice')}:</span>
-                            <span>{renderQuota((item.completionRate ? 
-                                item.promptRate * multiplier * item.completionRate : 
-                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}</span>
-                        </MotionTag>
-                    </div>
-                    
-                    {item.isVersion2 && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
-                            <MotionTag 
-                                color='cyan'
-                                style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            >
-                                <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.audioInputPrice')}:</span>
-                                <span>{renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}</span>
-                            </MotionTag>
-                            <MotionTag 
-                                color='geekblue' 
-                                style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
-                                whileHover={{ scale: 1.05 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            >
-                                <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.audioOutputPrice')}:</span>
-                                <span>{renderQuota((item.completionRate ? 
-                                    item.audioPromptRate * multiplier * item.audioOutputRate : 
-                                    getCompletionRatio(item.model) * multiplier))}/{tokenUnit}</span>
-                            </MotionTag>
-                        </div>
-                    )}
-                </div>
-            );
-        } else {
-            return (
-                <MotionTag 
-                    color='geekblue'
-                    style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '2px' }}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                    <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.perUsagePrice')}:</span>
-                    <span>{renderQuota(item.promptRate, 6)}</span>
-                </MotionTag>
-            );
-        }
+    const handlePageChange = (page: number, pageSize?: number) => {
+        setInput({
+            ...input,
+            page,
+            pageSize: pageSize || input.pageSize
+        });
     };
 
-    useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        searchParams.set('model', input.model);
-        navigate({ search: searchParams.toString() }, { replace: true });
-    }, [input.model, navigate]);
-
-    useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        const model = searchParams.get('model');
-        if (model) {
-            setInput({ ...input, model, isFirst: false });
-        }
-    }, []);
-
-    useEffect(() => {
-        loadProvider();
-    }, []);
-
-    useEffect(() => {
-        loadData();
-    }, [input.page, input.pageSize, input.type, input.modelType]);
-    
-    useEffect(() => {
-        loadTags();
-    }, []);
-
-    const hasProviders = useMemo(() => Object.keys(provider).length > 0, [provider]);
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { 
-            opacity: 1,
-            transition: { 
-                staggerChildren: 0.1,
-                delayChildren: 0.2
-            }
-        }
-    };
-    
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: { 
-            y: 0, 
-            opacity: 1,
-            transition: {
-                type: "spring",
-                stiffness: 300,
-                damping: 24
-            }
-        }
-    };
-
-    const cardVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: (i: number) => ({ 
-            y: 0, 
-            opacity: 1,
-            transition: {
-                delay: i * 0.05,
-                type: "spring",
-                stiffness: 300,
-                damping: 24
-            }
-        })
-    };
-
-    const AnimatedBackground = () => (
-        <>
-            <MotionDiv
-                style={{
-                    position: 'absolute',
-                    width: '50%',
-                    height: '50%',
-                    borderRadius: '50%',
-                    background: `radial-gradient(circle, ${token.colorPrimaryBg} 0%, rgba(0,0,0,0) 70%)`,
-                    top: '-20%',
-                    right: '-10%',
-                    filter: 'blur(80px)',
-                    zIndex: 0,
-                    opacity: 0.4
-                }}
-                animate={{
-                    x: [0, 30, 0],
-                    y: [0, 20, 0],
-                }}
-                transition={{
-                    duration: 20,
-                    repeat: Infinity,
-                    ease: [0.42, 0, 0.58, 1],
-                    repeatType: "reverse"
-                }}
-            />
-            <MotionDiv
-                style={{
-                    position: 'absolute',
-                    width: '40%',
-                    height: '40%',
-                    borderRadius: '50%',
-                    background: `radial-gradient(circle, ${token.colorInfoBg} 0%, rgba(0,0,0,0) 70%)`,
-                    bottom: '10%',
-                    left: '-10%',
-                    filter: 'blur(80px)',
-                    zIndex: 0,
-                    opacity: 0.4
-                }}
-                animate={{
-                    x: [0, -30, 0],
-                    y: [0, 30, 0],
-                }}
-                transition={{
-                    duration: 25,
-                    repeat: Infinity,
-                    ease: [0.42, 0, 0.58, 1],
-                    repeatType: "reverse"
-                }}
-            />
-        </>
-    );
-
-    const renderAllTags = (tags: string[]) => {
-        if (!tags || !Array.isArray(tags) || tags.length === 0) return null;
-        
-        return (
-            <div className={styles.modelDetailTags}>
-                {tags.map((tag, index) => (
-                    <MotionTag
-                        key={tag}
-                        color="blue"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        whileHover={{ scale: 1.05 }}
-                    >
-                        {tag}
-                    </MotionTag>
-                ))}
-            </div>
-        );
-    };
-
-    const renderDetailedPriceInfo = (item: any) => {
-        if (!item) return null;
-        
-        const tokenUnit = isK ? '1K' : '1M';
-        const multiplier = isK ? 1000 : 1000000;
-        
-        if (item.quotaType === 1) {
-            return (
-                <div className={styles.modelDetailPricing}>
-                    <MotionDiv 
-                        className={styles.modelDetailPriceCard}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.promptPrice')}</div>
-                        <div className={styles.modelDetailPriceValue}>
-                            {renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}
-                        </div>
-                    </MotionDiv>
-                    
-                    <MotionDiv 
-                        className={styles.modelDetailPriceCard}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                    >
-                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.completionPrice')}</div>
-                        <div className={styles.modelDetailPriceValue}>
-                            {renderQuota((item.completionRate ? 
-                                item.promptRate * multiplier * item.completionRate : 
-                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}
-                        </div>
-                    </MotionDiv>
-                    
-                    {item.isVersion2 && (
-                        <>
-                            <MotionDiv 
-                                className={styles.modelDetailPriceCard}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                            >
-                                <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.audioInputPrice')}</div>
-                                <div className={styles.modelDetailPriceValue}>
-                                    {renderQuota(item.audioPromptRate * multiplier)}/{tokenUnit}
-                                </div>
-                            </MotionDiv>
-                            
-                            <MotionDiv 
-                                className={styles.modelDetailPriceCard}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4 }}
-                            >
-                                <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.audioOutputPrice')}</div>
-                                <div className={styles.modelDetailPriceValue}>
-                                    {renderQuota((item.completionRate ? 
-                                        item.audioPromptRate * multiplier * item.audioOutputRate : 
-                                        getCompletionRatio(item.model) * multiplier))}/{tokenUnit}
-                                </div>
-                            </MotionDiv>
-                        </>
-                    )}
-                </div>
-            );
-        } else {
-            return (
-                <div className={styles.modelDetailPricing}>
-                    <MotionDiv 
-                        className={styles.modelDetailPriceCard}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                    >
-                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.perUsagePrice')}</div>
-                        <div className={styles.modelDetailPriceValue}>
-                            {renderQuota(item.promptRate, 6)}
-                        </div>
-                    </MotionDiv>
-                </div>
-            );
-        }
-    };
-
-    const renderModelStats = (item: any) => {
-        if (!item) return null;
-        
-        // Define stats to display
-        const stats = [
-            { label: t('modelLibrary.maxContext'), value: item.quotaMax || '-' },
-            { label: t('modelLibrary.modelType'), value: t(`modelLibrary.${item.type}`) },
-            { label: t('modelLibrary.billingType'), value: item.quotaType === 1 ? t('modelLibrary.volumeBilling') : t('modelLibrary.perUseBilling') },
-            { label: t('modelLibrary.status'), value: item.enable ? t('modelLibrary.available') : t('modelLibrary.unavailable') },
-        ];
-        
-        return (
-            <div className={styles.modelDetailStats}>
-                {stats.map((stat, index) => (
-                    <MotionDiv 
-                        key={stat.label}
-                        className={styles.modelDetailStat}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 + index * 0.1 }}
-                    >
-                        <div className={styles.modelDetailStatValue}>{stat.value}</div>
-                        <div className={styles.modelDetailStatLabel}>{stat.label}</div>
-                    </MotionDiv>
-                ))}
-            </div>
-        );
+    const handleSearch = () => {
+        setInput({
+            ...input,
+            page: 1 // 搜索时重置到第一页
+        });
     };
 
     const getModelTypeIcon = (type: string) => {
-        switch(type?.toLowerCase()) {
-            case MODEL_TYPES.CHAT:
+        switch (type?.toLowerCase()) {
+            case MODEL_TYPES.CHAT.toLowerCase():
                 return <MessageSquare size={14} color={token.colorPrimary} />;
-            case MODEL_TYPES.IMAGE:
+            case MODEL_TYPES.IMAGE.toLowerCase():
                 return <Image size={14} color={token.colorSuccess} />;
-            case MODEL_TYPES.AUDIO:
+            case MODEL_TYPES.AUDIO.toLowerCase():
                 return <Headphones size={14} color={token.colorWarning} />;
-            case MODEL_TYPES.STT:
+            case MODEL_TYPES.STT.toLowerCase():
                 return <Mic size={14} color={token.colorInfo} />;
-            case MODEL_TYPES.TTS:
+            case MODEL_TYPES.TTS.toLowerCase():
                 return <Headphones size={14} color={token.colorWarning} />;
-            case MODEL_TYPES.EMBEDDING:
+            case MODEL_TYPES.EMBEDDING.toLowerCase():
                 return <Layers size={14} color={token.colorError} />;
             default:
                 return <FileText size={14} color={token.colorTextSecondary} />;
@@ -1114,31 +1009,153 @@ export default function DesktopLayout() {
     };
 
     const getModelTypeColor = (type: string) => {
-        switch(type?.toLowerCase()) {
-            case MODEL_TYPES.CHAT:
+        switch (type?.toLowerCase()) {
+            case MODEL_TYPES.CHAT.toLowerCase():
                 return 'blue';
-            case MODEL_TYPES.IMAGE:
+            case MODEL_TYPES.IMAGE.toLowerCase():
                 return 'green';
-            case MODEL_TYPES.AUDIO:
+            case MODEL_TYPES.AUDIO.toLowerCase():
                 return 'gold';
-            case MODEL_TYPES.STT:
+            case MODEL_TYPES.STT.toLowerCase():
                 return 'cyan';
-            case MODEL_TYPES.TTS:
+            case MODEL_TYPES.TTS.toLowerCase():
                 return 'orange';
-            case MODEL_TYPES.EMBEDDING:
+            case MODEL_TYPES.EMBEDDING.toLowerCase():
                 return 'magenta';
             default:
                 return 'default';
         }
     };
 
+    const renderPriceInfo = (item: any) => {
+        if (item.quotaType === 1) {
+            const tokenUnit = isK ? '1K' : '1M';
+            const multiplier = isK ? 1000 : 1000000;
+
+            return (
+                <div className="model-price" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        <Tag
+                            color='cyan'
+                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                            <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.promptPrice')}:</span>
+                            <span>{renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}</span>
+                        </Tag>
+                        <Tag
+                            color='geekblue'
+                            style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        >
+                            <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.completionPrice')}:</span>
+                            <span>{renderQuota((item.completionRate ?
+                                item.promptRate * multiplier * item.completionRate :
+                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}</span>
+                        </Tag>
+                    </div>
+                </div>
+            );
+        } else {
+            return (
+                <Tag
+                    color='geekblue'
+                    style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                    <span style={{ fontWeight: 'bold' }}>{t('modelLibrary.perUsagePrice')}:</span>
+                    <span>{renderQuota(item.promptRate, 6)}</span>
+                </Tag>
+            );
+        }
+    };
+
+    const renderAllTags = (tags: string[]) => {
+        if (!tags || !Array.isArray(tags) || tags.length === 0) return null;
+
+        return (
+            <div className={styles.modelDetailTags}>
+                {tags.map((tag, index) => (
+                    <Tag
+                        key={tag}
+                        color="blue"
+                    >
+                        {tag}
+                    </Tag>
+                ))}
+            </div>
+        );
+    };
+
+    const renderDetailedPriceInfo = (item: any) => {
+        if (!item) return null;
+
+        const tokenUnit = isK ? '1K' : '1M';
+        const multiplier = isK ? 1000 : 1000000;
+
+        if (item.quotaType === 1) {
+            return (
+                <div className={styles.modelDetailPricing}>
+                    <div className={styles.modelDetailPriceCard}>
+                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.promptPrice')}</div>
+                        <div className={styles.modelDetailPriceValue}>
+                            {renderQuota(item.promptRate * multiplier, 6)}/{tokenUnit}
+                        </div>
+                    </div>
+
+                    <div className={styles.modelDetailPriceCard}>
+                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.completionPrice')}</div>
+                        <div className={styles.modelDetailPriceValue}>
+                            {renderQuota((item.completionRate ?
+                                item.promptRate * multiplier * item.completionRate :
+                                getCompletionRatio(item.model) * multiplier), 6)}/{tokenUnit}
+                        </div>
+                    </div>
+                </div>
+            );
+        } else {
+            return (
+                <div className={styles.modelDetailPricing}>
+                    <div className={styles.modelDetailPriceCard}>
+                        <div className={styles.modelDetailPriceTitle}>{t('modelLibrary.perUsagePrice')}</div>
+                        <div className={styles.modelDetailPriceValue}>
+                            {renderQuota(item.promptRate, 6)}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    };
+
+    const renderModelStats = (item: any) => {
+        if (!item) return null;
+
+        const stats = [
+            { label: t('modelLibrary.maxContext'), value: item.quotaMax || '-' },
+            { label: t('modelLibrary.modelType'), value: getModelTypeText(item.type) },
+            { label: t('modelLibrary.billingType'), value: item.quotaType === 1 ? t('modelLibrary.volumeBilling') : t('modelLibrary.perUseBilling') },
+            { label: t('modelLibrary.status'), value: item.enable ? t('modelLibrary.available') : t('modelLibrary.unavailable') },
+        ];
+
+        return (
+            <div className={styles.modelDetailStats}>
+                {stats.map((stat, index) => (
+                    <div
+                        key={stat.label}
+                        className={styles.modelDetailStat}
+                    >
+                        <div className={styles.modelDetailStatValue}>{stat.value}</div>
+                        <div className={styles.modelDetailStatLabel}>{stat.label}</div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     const renderModelDetailModal = () => {
         if (!selectedModel) return null;
-        
+
         const icon = getIconByName(selectedModel.icon);
         const modelTypeIcon = getModelTypeIcon(selectedModel.type);
         const modelTypeColor = getModelTypeColor(selectedModel.type);
-        
+
         return (
             <Modal
                 title={null}
@@ -1148,8 +1165,8 @@ export default function DesktopLayout() {
                     <Button key="back" onClick={handleModalClose}>
                         {t('modelLibrary.close')}
                     </Button>,
-                    <Button 
-                        key="copy" 
+                    <Button
+                        key="copy"
                         type="primary"
                         onClick={() => copyModelName(selectedModel.model)}
                         className={styles.primaryButton}
@@ -1163,35 +1180,28 @@ export default function DesktopLayout() {
                 centered
             >
                 <div className={styles.modelDetailHeader}>
-                    <MotionDiv 
-                        className={styles.modelDetailIcon}
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    >
+                    <div className={styles.modelDetailIcon}>
                         {icon?.icon ?? <IconAvatar size={isMobile ? 32 : 40} Icon={OpenAI} />}
-                    </MotionDiv>
-                    
+                    </div>
+
                     <div className={styles.modelDetailInfo}>
                         <div className={styles.modelDetailName}>
                             <Title level={4} className={styles.modelDetailTitle}>
                                 {selectedModel.model}
                             </Title>
-                            <MotionDiv 
+                            <div
                                 className={styles.copyButton}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
                                 onClick={() => copyModelName(selectedModel.model)}
                             >
                                 <Copy size={16} color={token.colorTextSecondary} />
-                            </MotionDiv>
-                            <MotionTag 
+                            </div>
+                            <Tag
                                 color={modelTypeColor}
                                 style={{ marginLeft: 8 }}
                                 icon={modelTypeIcon}
                             >
-                                {selectedModel.type}
-                            </MotionTag>
+                                {getModelTypeText(selectedModel.type)}
+                            </Tag>
                         </div>
                         <Paragraph className={styles.modelDetailDescription}>
                             {selectedModel.description}
@@ -1199,9 +1209,9 @@ export default function DesktopLayout() {
                         {renderAllTags(selectedModel.tags)}
                     </div>
                 </div>
-                
+
                 <Divider />
-                
+
                 <div className={styles.modelDetailSection}>
                     <div className={styles.modelDetailSectionTitle}>
                         <Info size={16} color={token.colorTextSecondary} />
@@ -1209,7 +1219,7 @@ export default function DesktopLayout() {
                     </div>
                     {renderModelStats(selectedModel)}
                 </div>
-                
+
                 <div className={styles.modelDetailSection}>
                     <div className={styles.modelDetailSectionTitle}>
                         <Info size={16} color={token.colorTextSecondary} />
@@ -1225,479 +1235,178 @@ export default function DesktopLayout() {
                     </div>
                     {renderDetailedPriceInfo(selectedModel)}
                 </div>
-                
-                {selectedModel.capabilities && (
-                    <div className={styles.modelDetailSection}>
-                        <div className={styles.modelDetailSectionTitle}>
-                            <Info size={16} color={token.colorTextSecondary} />
-                            {t('modelLibrary.modelCapabilities')}
-                        </div>
-                        <Descriptions
-                            bordered
-                            column={{ xs: 1, sm: 2 }}
-                            size="small"
-                        >
-                            {Object.entries(selectedModel.capabilities).map(([key, value]: any) => (
-                                <Descriptions.Item key={key} label={key}>
-                                    {value ? (
-                                        <Tag color="green">{t('modelLibrary.supported')}</Tag>
-                                    ) : (
-                                        <Tag color="red">{t('modelLibrary.notSupported')}</Tag>
-                                    )}
-                                </Descriptions.Item>
-                            ))}
-                        </Descriptions>
-                    </div>
-                )}
             </Modal>
         );
     };
 
+    // 渲染左侧过滤器
+    const renderLeftFilters = () => (
+        <div className={styles.filterContainer}>
+            {/* 搜索区域 */}
+            <div className={styles.filterGroup}>
+                <div className={styles.filterGroupTitle}>
+                    <Search size={16} />
+                    {t('modelLibrary.search')}
+                </div>
+                <div className={styles.searchSection}>
+                    <Input
+                        placeholder={t('modelLibrary.searchPlaceholder')}
+                        value={input.model}
+                        onPressEnter={handleSearch}
+                        prefix={<Search size={16} color={token.colorTextSecondary} />}
+                        onChange={(e) => setInput({ ...input, model: e.target.value })}
+                        allowClear
+                    />
+                </div>
+            </div>
+
+            {/* 供应商过滤器 */}
+            {Object.keys(provider).length > 0 && (
+                <div className={styles.filterGroup}>
+                    <div className={styles.filterGroupTitle}>
+                        <Image size={16} />
+                        {t('modelLibrary.providers')}
+                    </div>
+                    <div className={styles.providerFilter}>
+                        {Object.entries(provider).map(([key, value]: any) => {
+                            const providerCount = getProviderCount(key);
+                            return (
+                                <div
+                                    key={key}
+                                    className={`${styles.providerItem} ${input.type === key ? 'selected' : ''}`}
+                                    onClick={() => handleProviderFilter(key)}
+                                >
+                                    {getIconByName(key, 24)?.icon ?? <IconAvatar size={24} Icon={OpenAI} />}
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 500 }}>{value || '其他'}</div>
+                                        <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                                            {providerCount} 个模型
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* 模型类型过滤器 */}
+            <div className={styles.filterGroup}>
+                <div className={styles.filterGroupTitle}>
+                    <Layers size={16} />
+                    {t('modelLibrary.modelTypes')}
+                </div>
+                <div className={styles.modelTypeFilter}>
+                    {Object.values(MODEL_TYPES).map((type) => {
+                        const typeIcon = getModelTypeIcon(type);
+                        const count = getModelTypeCount(type);
+
+                        return (
+                            <div
+                                key={type}
+                                className={`${styles.modelTypeItem} ${selectedModelType?.toLowerCase() === type?.toLowerCase() ? 'selected' : ''}`}
+                                onClick={() => handleModelTypeSelect(type)}
+                            >
+                                <div style={{
+                                    width: 28,
+                                    height: 28,
+                                    borderRadius: '50%',
+                                    backgroundColor: token.colorBgLayout,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}>
+                                    {typeIcon}
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontWeight: 500 }}>{getModelTypeText(type)}</div>
+                                    <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                                        {count} 个模型
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* 标签过滤器 */}
+            <div className={styles.filterGroup}>
+                <div className={styles.filterGroupTitle}>
+                    <TagIcon size={16} />
+                    {t('modelLibrary.tags')}
+                </div>
+                <div className={styles.tagSelector}>
+                    <Select
+                        mode="multiple"
+                        placeholder={t('modelLibrary.selectTags')}
+                        value={input.tags}
+                        onChange={handleTagsChange}
+                        options={allTags.map(tag => ({ label: tag, value: tag }))}
+                        maxTagCount={2}
+                        allowClear
+                    />
+                </div>
+            </div>
+
+            {/* 单位切换 */}
+            <div className={styles.filterGroup}>
+                <div className={styles.filterGroupTitle}>
+                    <Info size={16} />
+                    {t('modelLibrary.settings')}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 14 }}>{t('modelLibrary.unitSwitch')}:</span>
+                        <Switch
+                            checked={isK}
+                            size="small"
+                            checkedChildren="K"
+                            unCheckedChildren="M"
+                            onChange={setIsK}
+                        />
+                    </div>
+                    <LanguageSwitcher size="small" />
+                </div>
+            </div>
+
+            {/* 清除过滤器 */}
+            {(input.type || selectedModelType || input.tags.length > 0) && (
+                <div className={styles.filterGroup}>
+                    <Button
+                        block
+                        onClick={() => {
+                            setInput({ ...input, type: '', tags: [], modelType: '' });
+                            setSelectedModelType('');
+                        }}
+                        className={styles.clearFiltersButton}
+                    >
+                        {t('modelLibrary.clearFilters')}
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+
+    // 渲染模型卡片 - 简化动画
     const renderModelCard = (item: any, index: number) => {
         const icon = getIconByName(item.icon);
         const modelTypeIcon = getModelTypeIcon(item.type);
         const modelTypeColor = getModelTypeColor(item.type);
-        
+
         return (
-            <Col xs={12} sm={8} md={6} lg={6} xl={4} xxl={3} key={item.id}>
-                <MotionCard
-                    className={styles.modelCard}
-                    loading={loading}
-                    custom={index}
-                    variants={cardVariants}
-                    whileHover={{ y: -8, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
-                    size="small"
-                    onClick={() => handleModelClick(item)}
-                    style={{ cursor: 'pointer', position: 'relative' }}
-                >
-                    <Badge 
-                        className={styles.modelTypeBadge}
-                        count={
-                            <Tooltip title={`模型类型: ${item.type}`}>
-                                <div style={{ 
-                                    backgroundColor: token.colorBgContainer,
-                                    borderRadius: '50%',
-                                    width: 28, 
-                                    height: 28,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    boxShadow: token.boxShadowSecondary
-                                }}>
-                                    {modelTypeIcon}
-                                </div>
-                            </Tooltip>
-                        }
-                    />
-                    
-                    <div className={styles.modelCardMeta}>
-                        <motion.div 
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                            style={{ marginRight: 8 }}
-                        >
-                            {icon?.icon ?? <IconAvatar size={28} Icon={OpenAI} />}
-                        </motion.div>
-                        <div 
-                            className={styles.modelName}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                copyModelName(item.model);
-                            }}
-                        >
-                            {item.model}
-                        </div>
-                    </div>
-
-                    <Tooltip title={item.description}>
-                        <div className={styles.modelDescription}>
-                            {item.description}
-                        </div>
-                    </Tooltip>
-
-                    <div className={styles.modelTags}>
-                        <MotionTag 
-                            color={item.enable ? 'green' : 'red'}
-                            whileHover={{ scale: 1.05 }}
-                            style={{ fontSize: '11px' }}
-                        >
-                            {item.enable ? t('modelLibrary.available') : t('modelLibrary.unavailable')}
-                        </MotionTag>
-                        <MotionTag 
-                            color={modelTypeColor}
-                            whileHover={{ scale: 1.05 }}
-                            style={{ fontSize: '11px' }}
-                            icon={modelTypeIcon}
-                        >
-                            {t(`modelLibrary.${item.type}`)}
-                        </MotionTag>
-                        <MotionTag 
-                            color={item.quotaType === 1 ? 'blue' : 'orange'}
-                            whileHover={{ scale: 1.05 }}
-                            style={{ fontSize: '11px' }}
-                        >
-                            {item.quotaType === 1 ? t('modelLibrary.volumeBilling') : t('modelLibrary.perUseBilling')}
-                        </MotionTag>
-                    </div>
-
-                    {item.tags && item.tags.length > 0 && (
-                        <div className={styles.modelTags}>
-                            {item.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                <MotionTag 
-                                    key={tag} 
-                                    color='blue'
-                                    style={{ fontSize: '11px' }}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.05 }}
-                                    whileHover={{ scale: 1.05 }}
-                                >
-                                    {tag}
-                                </MotionTag>
-                            ))}
-                            {item.tags.length > 2 && (
-                                <MotionTag color="default" style={{ fontSize: '11px' }}>+{item.tags.length - 2}</MotionTag>
-                            )}
-                        </div>
-                    )}
-
-                    <div style={{ marginTop: 'auto' }}>
-                        <div className={styles.modelPriceSection}>
-                            {renderPriceInfo(item)}
-                        </div>
-
-                        <div className={styles.modelStats}>
-                            <div className={styles.modelStat}>
-                                <div className={styles.modelStatValue}>{item.quotaMax || '-'}</div>
-                                <div className={styles.modelStatLabel}>{t('modelLibrary.maxContext')}</div>
-                            </div>
-                        </div>
-                    </div>
-                </MotionCard>
-            </Col>
-        );
-    };
-
-    const renderSearchSection = () => (
-        <MotionDiv 
-            className={styles.searchContainer}
-            variants={itemVariants}
-        >
-            <Space wrap={isMobile} style={{ width: isMobile ? '100%' : 'auto' }}>
-                <Input
-                    placeholder={t('modelLibrary.searchPlaceholder')}
-                    value={input.model}
-                    className={styles.searchInput}
-                    onPressEnter={() => {
-                        loadData();
-                        loadTags();
-                    }}
-                    prefix={<Search size={16} color={token.colorTextSecondary} />}
-                    onChange={(e) => {
-                        setInput({
-                            ...input,
-                            model: e.target.value
-                        });
-                    }}
-                />
-                    
-                <Select
-                    mode="multiple"
-                    allowClear
-                    placeholder={t('modelLibrary.selectTags')}
-                    value={input.tags}
-                    onChange={handleTagsChange}
-                    className={styles.tagSelect}
-                    maxTagCount={3}
-                    options={allTags.map(tag => ({
-                        label: tag,
-                        value: tag,
-                    }))}
-                    suffixIcon={<TagIcon size={16} color={token.colorTextSecondary} />}
-                />
-                
-                <MotionButton
-                    type='primary'
-                    icon={<Search size={16} />}
-                    className={styles.primaryButton}
-                    onClick={() => {
-                        loadData();
-                        loadTags();
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                >
-                    {t('modelLibrary.searchButton')}
-                </MotionButton>
-            </Space>
-            
-            <div style={{ marginLeft: 'auto' }}>
-                <Space>
-                    <LanguageSwitcher size="small" />
-                    <span className="switch-label">{t('modelLibrary.unitSwitch')}：</span>
-                    <Switch
-                        value={isK}
-                        checkedChildren={<Tag color="blue">{t('modelLibrary.unitK')}</Tag>}
-                        unCheckedChildren={<Tag color="green">{t('modelLibrary.unitM')}</Tag>}
-                        defaultChecked
-                        onChange={setIsK}
-                    />
-                </Space>
-            </div>
-        </MotionDiv>
-    );
-
-    // Render model type summary
-    const renderModelTypeSummary = () => {
-        if (!modelInfo.modelTypeCounts || modelInfo.modelTypeCounts.length === 0) return null;
-        
-        return (
-            <MotionDiv 
-                className={styles.modelTypeSummary}
-                variants={itemVariants}
+            <div
+                key={item.id}
+                className={styles.modelCard}
+                onClick={() => handleModelClick(item)}
             >
-                {modelInfo.modelTypeCounts.map((item: any, index: number) => {
-                    const type = item.type;
-                    const count = item.count;
-                    const typeIcon = getModelTypeIcon(type);
-                    const typeColor = getModelTypeColor(type);
-                    
-                    // Safely determine background color
-                    let bgColor = token.colorBgContainer;
-                    if (typeColor !== 'default') {
-                        switch(typeColor) {
-                            case 'blue':
-                                bgColor = token.colorPrimaryBg;
-                                break;
-                            case 'green':
-                                bgColor = token.colorSuccessBg;
-                                break;
-                            case 'gold':
-                            case 'orange':
-                                bgColor = token.colorWarningBg;
-                                break;
-                            case 'cyan':
-                                bgColor = token.colorInfoBg;
-                                break;
-                            case 'magenta':
-                                bgColor = token.colorErrorBg;
-                                break;
-                            default:
-                                bgColor = token.colorBgContainer;
-                        }
-                    }
-                    
-                    return (
-                        <MotionDiv
-                            key={type}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            onClick={() => handleModelTypeSelect(type)}
-                            style={{
-                                cursor: 'pointer',
-                                padding: '12px 16px',
-                                borderRadius: token.borderRadiusSM + 'px',
-                                backgroundColor: selectedModelType === type ? token.colorPrimaryBg : token.colorBgElevated,
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '8px',
-                                minWidth: '100px',
-                                boxShadow: selectedModelType === type ? `0 6px 16px ${token.colorPrimaryBgHover}` : token.boxShadowSecondary,
-                                transition: 'all 0.3s',
-                                border: `1px solid ${selectedModelType === type ? token.colorPrimaryBorder : 'transparent'}`
-                            }}
-                        >
-                            <div style={{ 
-                                width: 40, 
-                                height: 40, 
-                                borderRadius: '50%', 
-                                backgroundColor: bgColor,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                boxShadow: token.boxShadowSecondary
-                            }}>
-                                {typeIcon}
-                            </div>
-                            <div style={{ 
-                                fontWeight: 500, 
-                                textTransform: 'capitalize',
-                                color: selectedModelType === type ? token.colorPrimaryText : token.colorText
-                            }}>
-                                {type}
-                            </div>
-                            <Badge 
-                                count={count} 
-                                overflowCount={999} 
-                                style={{ 
-                                    backgroundColor: selectedModelType === type ? token.colorPrimary : token.colorTextSecondary
-                                }} 
-                            />
-                        </MotionDiv>
-                    );
-                })}
-            </MotionDiv>
-        );
-    };
-
-    // Rendering the provider filter section
-    const renderProviderFilter = () => (
-        <MotionDiv 
-            className={styles.iconFilter}
-            variants={itemVariants}
-        >
-            {Object.entries(provider).map(([key, value]: any, index: number) => {
-                const providerCount = data.filter(item => item.provider === key).length;
-                
-                return (
-                    <MotionDiv
-                        key={key}
-                        className={`${styles.iconItem} ${input.type === key ? 'selected' : ''}`}
-                        onClick={() => handleProviderFilter(key)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ 
-                            delay: index * 0.05,
-                            type: "spring", 
-                            stiffness: 300, 
-                            damping: 24 
-                        }}
-                    >
-                        <Flexbox horizontal gap={8}>
-                            {getIconByName(key, 24)?.icon ?? <IconAvatar size={24} Icon={OpenAI} />}
-                            <Flexbox gap={4}>
-                                <span className="provider-name" style={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 1,
-                                    WebkitBoxOrient: 'vertical',
-                                    maxWidth: 120,
-                                    color: input.type === key ? token.colorTextLightSolid : token.colorText
-                                }}>
-                                    {value || '其他'}
-                                </span>
-                                <Badge count={providerCount} size="small" style={{ backgroundColor: input.type === key ? token.colorTextLightSolid : token.colorPrimary }} />
-                            </Flexbox>
-                        </Flexbox>
-                    </MotionDiv>
-                );
-            })}
-        </MotionDiv>
-    );
-    
-    // Rendering the model type filter
-    const renderModelTypeFilter = () => (
-        <MotionDiv 
-            className={styles.modelTypeFilter}
-            variants={itemVariants}
-        >
-            {modelTypes.map((type, index) => {
-                const typeIcon = getModelTypeIcon(type);
-                const typeColor = getModelTypeColor(type);
-                // Use modelInfo.modelTypeCounts to get the count
-                const typeData = modelInfo.modelTypeCounts?.find((item: any) => item.type === type.toLowerCase());
-                const count = typeData ? typeData.count : modelCountByType[type] || 0;
-                
-                // Map color names to corresponding background colors
-                const getBgColorByType = (colorName: string): string => {
-                    switch(colorName) {
-                        case 'blue': return token.colorPrimaryBg;
-                        case 'green': return token.colorSuccessBg;
-                        case 'gold': return token.colorWarningBg;
-                        case 'cyan': return token.colorInfoBg;
-                        case 'orange': return token.colorWarningBg;
-                        case 'magenta': return token.colorErrorBg;
-                        default: return token.colorBgContainer;
-                    }
-                };
-                
-                return (
-                    <MotionDiv
-                        key={type}
-                        className={`${styles.modelTypeFilterItem} ${selectedModelType === type ? 'selected' : ''}`}
-                        onClick={() => handleModelTypeSelect(type)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ 
-                            delay: index * 0.05,
-                            type: "spring", 
-                            stiffness: 300, 
-                            damping: 24 
-                        }}
-                    >
-                        <div style={{ 
-                            width: 24, 
-                            height: 24, 
-                            borderRadius: '50%', 
-                            backgroundColor: getBgColorByType(typeColor),
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            {typeIcon}
+                <div className={styles.modelCardHeader}>
+                    <div className={styles.modelCardMeta}>
+                        <div style={{ marginRight: 12 }}>
+                            {icon?.icon ?? <IconAvatar size={32} Icon={OpenAI} />}
                         </div>
-                        <span>{type}</span>
-                        <Badge count={count} size="small" style={{ backgroundColor: selectedModelType === type ? token.colorPrimary : token.colorTextSecondary }} />
-                    </MotionDiv>
-                );
-            })}
-        </MotionDiv>
-    );
-    
-    // Render a grid view of model cards
-    const renderModelGrid = () => (
-        <div className={styles.modelGridView}>
-            {filteredData.map((item, index) => (
-                <MotionCard
-                    key={item.id}
-                    className={styles.modelCard}
-                    loading={loading}
-                    custom={index}
-                    variants={cardVariants}
-                    whileHover={{ y: -8, boxShadow: "0 12px 24px rgba(0, 0, 0, 0.15)" }}
-                    size="small"
-                    onClick={() => handleModelClick(item)}
-                    style={{ cursor: 'pointer', position: 'relative' }}
-                >
-                    <Badge 
-                        className={styles.modelTypeBadge}
-                        count={
-                            <Tooltip title={`模型类型: ${item.type}`}>
-                                <div style={{ 
-                                    backgroundColor: token.colorBgContainer,
-                                    borderRadius: '50%',
-                                    width: 28, 
-                                    height: 28,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    boxShadow: token.boxShadowSecondary
-                                }}>
-                                    {getModelTypeIcon(item.type)}
-                                </div>
-                            </Tooltip>
-                        }
-                    />
-                    
-                    <div className={styles.modelCardHeader}>
-                        <div className={styles.modelCardMeta}>
-                            <motion.div 
-                                whileHover={{ scale: 1.1, rotate: 5 }}
-                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                                style={{ marginRight: 8 }}
-                            >
-                                {getIconByName(item.icon)?.icon ?? <IconAvatar size={28} Icon={OpenAI} />}
-                            </motion.div>
-                            <div 
+                        <div>
+                            <div
                                 className={styles.modelName}
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -1706,128 +1415,61 @@ export default function DesktopLayout() {
                             >
                                 {item.model}
                             </div>
+                            <div style={{ fontSize: 12, color: token.colorTextSecondary }}>
+                                {provider[item.provider] || item.provider}
+                            </div>
                         </div>
-                        
-                        <MotionTag 
-                            color={item.enable ? 'green' : 'red'}
-                            whileHover={{ scale: 1.05 }}
-                            style={{ fontSize: '11px' }}
+                    </div>
+                    <Tag
+                        color={item.enable ? 'green' : 'red'}
+                    >
+                        {item.enable ? t('modelLibrary.available') : t('modelLibrary.unavailable')}
+                    </Tag>
+                </div>
+
+                <div className={styles.modelDescription}>
+                    {item.description}
+                </div>
+
+                <div className={styles.modelTags}>
+                    <Tag
+                        color={modelTypeColor}
+                        icon={modelTypeIcon}
+                    >
+                        {getModelTypeText(item.type)}
+                    </Tag>
+                    <Tag
+                        color={item.quotaType === 1 ? 'blue' : 'orange'}
+                    >
+                        {item.quotaType === 1 ? t('modelLibrary.volumeBilling') : t('modelLibrary.perUseBilling')}
+                    </Tag>
+
+                    {item.tags && item.tags.slice(0, 2).map((tag: string) => (
+                        <Tag
+                            key={tag}
+                            color='blue'
+                            style={{ fontSize: 11 }}
                         >
-                            {item.enable ? '可用' : '不可用'}
-                        </MotionTag>
-                    </div>
-
-                    <div className={styles.modelCardContent}>
-                        <div className={styles.modelCardSection}>
-                            <Tooltip title={item.description}>
-                                <div className={styles.modelDescription}>
-                                    {item.description}
-                                </div>
-                            </Tooltip>
-                        </div>
-
-                        <div className={styles.modelCardSection}>
-                            <div className={styles.modelTags}>
-                                <MotionTag 
-                                    color={getModelTypeColor(item.type)}
-                                    whileHover={{ scale: 1.05 }}
-                                    style={{ fontSize: '11px' }}
-                                    icon={getModelTypeIcon(item.type)}
-                                >
-                                    {item.type}
-                                </MotionTag>
-                                <MotionTag 
-                                    color={item.quotaType === 1 ? 'blue' : 'orange'}
-                                    whileHover={{ scale: 1.05 }}
-                                    style={{ fontSize: '11px' }}
-                                >
-                                    {item.quotaType === 1 ? '按量' : '按次'}
-                                </MotionTag>
-                            </div>
-                        </div>
-
-                        {item.tags && item.tags.length > 0 && (
-                            <div className={styles.modelCardSection}>
-                                <div className={styles.modelTags}>
-                                    {item.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                        <MotionTag 
-                                            key={tag} 
-                                            color='blue'
-                                            style={{ fontSize: '11px' }}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: idx * 0.05 }}
-                                            whileHover={{ scale: 1.05 }}
-                                        >
-                                            {tag}
-                                        </MotionTag>
-                                    ))}
-                                    {item.tags.length > 2 && (
-                                        <MotionTag color="default" style={{ fontSize: '11px' }}>+{item.tags.length - 2}</MotionTag>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className={styles.modelCardFooter}>
-                        <div className={styles.modelPriceSection}>
-                            {renderPriceInfo(item)}
-                        </div>
-
-                        <div className={styles.modelStats}>
-                            <div className={styles.modelStat}>
-                                <div className={styles.modelStatValue}>{item.quotaMax || '-'}</div>
-                                <div className={styles.modelStatLabel}>最大上下文</div>
-                            </div>
-                        </div>
-                    </div>
-                </MotionCard>
-            ))}
-        </div>
-    );
-
-    // Render results summary with view toggle
-    const renderResultSummary = () => {
-        const modelTypeName = input.modelType ? 
-            modelInfo.modelTypeCounts?.find((item: any) => 
-                item.type.toLowerCase() === input.modelType.toLowerCase()
-            )?.name || input.modelType : '';
-            
-        return (
-            <div className={styles.resultSummary}>
-                <div>
-                    {t('modelLibrary.totalResults')} <Typography.Text strong>{filteredData.length}</Typography.Text> {t('modelLibrary.resultsCount')}
-                    {input.modelType && (
-                        <>, {t('modelLibrary.modelTypeFilter')}: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{modelTypeName}</Typography.Text></>
-                    )}
-                    {input.type && (
-                        <>, {t('modelLibrary.providerFilter')}: <Typography.Text type="secondary" style={{ fontStyle: 'italic' }}>{provider[input.type] || input.type}</Typography.Text></>
+                            {tag}
+                        </Tag>
+                    ))}
+                    {item.tags && item.tags.length > 2 && (
+                        <Tag color="default" style={{ fontSize: 11 }}>
+                            +{item.tags.length - 2}
+                        </Tag>
                     )}
                 </div>
-                
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    {(input.modelType || input.type || input.tags.length > 0) && (
-                        <Button 
-                            size="small" 
-                            onClick={() => {
-                                setSelectedModelType('');
-                                setInput({...input, type: '', tags: [], modelType: ''});
-                            }}
-                        >
-                            {t('modelLibrary.clearFilters')}
-                        </Button>
-                    )}
-                    
-                    <div className={styles.viewToggle}>
-                        <span>{t('modelLibrary.viewMode')}:</span>
-                        <Switch
-                            checked={isGridView}
-                            size="small"
-                            onChange={(checked) => setIsGridView(checked)}
-                            checkedChildren={t('modelLibrary.cardView')}
-                            unCheckedChildren={t('modelLibrary.listView')}
-                        />
+
+                {/* 价格信息 */}
+                <div style={{ marginTop: 16 }}>
+                    {renderPriceInfo(item)}
+                </div>
+
+                {/* 统计信息 */}
+                <div className={styles.modelStats}>
+                    <div className={styles.modelStat}>
+                        <span className={styles.modelStatValue}>{item.quotaMax || '-'}</span>
+                        <div className={styles.modelStatLabel}>{t('modelLibrary.maxContext')}</div>
                     </div>
                 </div>
             </div>
@@ -1835,131 +1477,124 @@ export default function DesktopLayout() {
     };
 
     return (
-        <MotionDiv 
-            className={styles.modelContainer}
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-        >
-            <AnimatedBackground />
-            
-            <MotionDiv variants={itemVariants}>
-                <Header nav={t('modelLibrary.title')} />
-            </MotionDiv>
-            
-            {renderSearchSection()}
-            
-            {modelInfo.modelTypeCounts && modelInfo.modelTypeCounts.length > 0 && renderModelTypeSummary()}
-            
-            {hasProviders && renderProviderFilter()}
-            
-            {renderModelTypeFilter()}
-            
-            {renderResultSummary()}
-            
-            <MotionDiv 
-                className={styles.modelsContainer}
-                variants={itemVariants}
+        <Layout className={styles.mainLayout}>
+            {isMobile && (
+                <Button
+                    className={styles.mobileFilterButton}
+                    type="primary"
+                    icon={<Filter size={16} />}
+                    onClick={() => setDrawerVisible(true)}
+                    shape="circle"
+                >
+                </Button>
+            )}
+
+            {!isMobile && (
+                <Sider
+                    width={280}
+                    style={{
+                        marginTop: 8,
+                    }}
+                    className={styles.leftSider}
+                    theme="light"
+                >
+                    {renderLeftFilters()}
+                </Sider>
+            )}
+
+            <Drawer
+                title={
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Filter size={16} />
+                        {t('modelLibrary.filters')}
+                    </div>
+                }
+                placement="left"
+                onClose={() => setDrawerVisible(false)}
+                open={drawerVisible}
+                width={280}
+                bodyStyle={{ padding: 0 }}
             >
-                {loading && <Empty description={t('modelLibrary.loading')} image={Empty.PRESENTED_IMAGE_SIMPLE} />}
-                
-                {!loading && filteredData.length === 0 && (
-                    <Empty description={t('modelLibrary.noResults')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                )}
-                
-                {!loading && filteredData.length > 0 && (
-                    isGridView ? renderModelGrid() : (
-                        <Row gutter={[12, 12]}>
+                {renderLeftFilters()}
+            </Drawer>
+
+            {/* 右侧内容区域 */}
+            <Content className={styles.rightContent}>
+                {/* 模型展示区域 */}
+                <div className={styles.modelsContainer}>
+                    {loading && (
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 300,
+                            flexDirection: 'column',
+                            gap: 16
+                        }}>
+                            <Empty
+                                description={t('modelLibrary.loading')}
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            />
+                        </div>
+                    )}
+
+                    {!loading && filteredData.length === 0 && (
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            height: 300,
+                            flexDirection: 'column',
+                            gap: 16
+                        }}>
+                            <Empty
+                                description={t('modelLibrary.noResults')}
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                            />
+                            {(input.type || selectedModelType || input.tags.length > 0) && (
+                                <Button
+                                    type="primary"
+                                    onClick={() => {
+                                        setInput({ ...input, type: '', tags: [], modelType: '' });
+                                        setSelectedModelType('');
+                                    }}
+                                >
+                                    {t('modelLibrary.clearFilters')}
+                                </Button>
+                            )}
+                        </div>
+                    )}
+
+                    {!loading && filteredData.length > 0 && (
+                        <div className={styles.modelGrid}>
                             {filteredData.map((item, index) => renderModelCard(item, index))}
-                        </Row>
-                    )
-                )}
+                        </div>
+                    )}
+                </div>
                 
-                {total > 0 && (
-                    <div className={styles.pagination}>
-                        <Button.Group>
-                            <Button 
-                                disabled={input.page === 1}
-                                onClick={() => setInput({...input, page: input.page - 1})}
-                            >
-                                {t('modelLibrary.previousPage')}
-                            </Button>
-                            <Button type="primary">
-                                {input.page} / {Math.ceil(total / input.pageSize)}
-                            </Button>
-                            <Button 
-                                disabled={input.page >= Math.ceil(total / input.pageSize)}
-                                onClick={() => setInput({...input, page: input.page + 1})}
-                            >
-                                {t('modelLibrary.nextPage')}
-                            </Button>
-                        </Button.Group>
+                {/* 分页组件 */}
+                {!loading && filteredData.length > 0 && (
+                    <div className={styles.paginationContainer}>
+                        <Pagination
+                            current={input.page}
+                            pageSize={input.pageSize}
+                            total={total}
+                            onChange={handlePageChange}
+                            onShowSizeChange={handlePageChange}
+                            showSizeChanger
+                            showQuickJumper
+                            showTotal={(total, range) => 
+                                `${t('modelLibrary.showing')} ${range[0]}-${range[1]} ${t('modelLibrary.of')} ${total} ${t('modelLibrary.items')}`
+                            }
+                            pageSizeOptions={['10', '20', '50', '100']}
+                            size={isMobile ? 'small' : 'default'}
+                        />
                     </div>
                 )}
-            </MotionDiv>
-            
+            </Content>
+
+            {/* 模型详情模态框 */}
             {renderModelDetailModal()}
-            
-            <style>{`
-                .mobile-header {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100%;
-                }
-                
-                .mobile-search {
-                    padding: 0 16px;
-                    margin-top: 12px;
-                }
-                
-                .header-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 16px;
-                }
-                
-                .unit-switch {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                
-                .switch-label {
-                    font-size: 14px;
-                    color: ${token.colorTextSecondary};
-                }
-                
-                .search-wrapper {
-                    position: relative;
-                }
-                
-                /* 滚动条美化 */
-                ::-webkit-scrollbar {
-                    width: 8px;
-                    height: 8px;
-                }
-                
-                ::-webkit-scrollbar-track {
-                    background: rgba(0, 0, 0, 0.05);
-                    border-radius: 4px;
-                }
-                
-                ::-webkit-scrollbar-thumb {
-                    background: rgba(0, 0, 0, 0.2);
-                    border-radius: 4px;
-                }
-                
-                ::-webkit-scrollbar-thumb:hover {
-                    background: rgba(0, 0, 0, 0.3);
-                }
-                
-                @media (max-width: 768px) {
-                    .header-actions {
-                        flex-direction: column;
-                        align-items: flex-start;
-                    }
-                }
-            `}</style>
-        </MotionDiv>
+        </Layout>
     );
 }

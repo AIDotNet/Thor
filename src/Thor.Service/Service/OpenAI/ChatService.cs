@@ -14,6 +14,7 @@ using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
+using Thor.Domain.Chats;
 using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
@@ -338,11 +339,11 @@ public sealed partial class ChatService(
                 if (lastException == null && channel == null)
                     throw new NotModelException(
                         $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
-                
+
                 if (lastException != null && channel == null)
                 {
-                    // 如果上次异常没有渠道，则直接抛出异常
-                    throw lastException;
+                    await context.WriteErrorAsync(lastException.Message);
+                    return;
                 }
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
@@ -466,10 +467,11 @@ public sealed partial class ChatService(
         }
         catch (ThorRateLimitException)
         {
+            lastException = new ThorRateLimitException("对话模型请求限流");
             logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 3)
+            if (rateLimit > 5)
             {
                 context.Response.StatusCode = 429;
             }
@@ -509,14 +511,9 @@ public sealed partial class ChatService(
         catch (Exception e)
         {
             lastException = e;
-            // 读取body
-            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
-                JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
-            logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
-                JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 3)
+            if (rateLimit > 5)
             {
                 context.Response.StatusCode = 400;
                 await context.WriteErrorAsync(e.Message, "500");
@@ -1432,25 +1429,6 @@ public sealed partial class ChatService(
 
 
         return (requestToken, responseToken);
-    }
-
-    /// <summary>
-    /// 计算图片倍率
-    /// </summary>
-    /// <param name="module"></param>
-    /// <returns></returns>
-    private static decimal GetImageCostRatio(ImageCreateRequest module)
-    {
-        var imageCostRatio = GetImageSizeRatio(module.Model, module.Size);
-        if (module is { Quality: "hd", Model: "dall-e-3" })
-        {
-            if (module.Size == "1024x1024")
-                imageCostRatio *= 2;
-            else
-                imageCostRatio *= (decimal)1.5;
-        }
-
-        return imageCostRatio;
     }
 
 
