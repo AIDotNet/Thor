@@ -55,6 +55,8 @@ if not exist "node_modules" (
         cd ..
         exit /b 1
     )
+) else (
+    echo 前端依赖已存在，跳过安装
 )
 
 echo 构建前端...

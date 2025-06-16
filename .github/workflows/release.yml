@@ -27,14 +27,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: 'lobe/package-lock.json'
 
       - name: 安装依赖
         working-directory: lobe
-        run: |
-          npm ci
-          npm install --force
+        run: npm install --force
 
       - name: 构建前端
         working-directory: lobe

@@ -61,6 +61,8 @@ if [ ! -d "node_modules" ]; then
         cd ..
         exit 1
     fi
+else
+    echo -e "${GREEN}前端依赖已存在，跳过安装${NC}"
 fi
 
 echo -e "${YELLOW}构建前端...${NC}"

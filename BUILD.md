@@ -40,6 +40,12 @@
 - **Release包**: 支持12种不同的平台/架构/部署模式组合
 - **Docker镜像**: 支持linux/amd64和linux/arm64架构
 
+### 常见问题解决
+如果遇到Node.js缓存错误（`Some specified paths were not resolved`），我们已经优化了配置：
+- 移除了对不存在的`package-lock.json`的依赖
+- 简化了前端依赖安装流程
+- 确保构建过程的稳定性
+
 ## 🔧 本地构建
 
 ### Windows用户

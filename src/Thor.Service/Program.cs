@@ -1119,13 +1119,6 @@ try
         app.UseSwaggerUI();
     }
 
-    // 初始化种子数据
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<Thor.Core.DataAccess.IThorContext>();
-        await Thor.Service.Data.SeedData.SeedAnnouncementsAsync(context);
-    }
-
     await app.RunAsync();
 }
 catch (Exception ex)
