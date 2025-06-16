@@ -39,4 +39,10 @@ public sealed class ChatChannelInput
     /// </summary>
     /// <returns></returns>
     public string[] Groups { get; set; } = [];
+    
+    /// <summary>
+    /// 是否支持Responses
+    /// </summary>
+    /// <returns></returns>
+    public bool SupportsResponses { get; set; } = false;
 }

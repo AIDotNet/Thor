@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { LayoutProps } from "./type";
 import { HomeOutlined } from "@ant-design/icons";
 import PwaInstall from "../components/PwaInstall";
+import AnnouncementBanner from "../components/AnnouncementBanner";
 
 const { Content, Footer, Sider } = Layout;
 const { Text, Title } = Typography;
@@ -185,17 +186,6 @@ const HeaderActions = memo(() => {
       >
         {t('nav.model')}
       </Button>
-      <PwaInstall 
-        buttonMode={true}
-        buttonText={t('common.installApp')}
-        buttonType="default"
-        buttonSize="middle"
-        buttonStyle={{ 
-          display: 'flex',
-          alignItems: 'center'
-        }}
-        logoUrl='/logo.png'
-      />
       <LanguageSwitcher />
       <ThemeSwitch 
         onThemeSwitch={handleThemeSwitch}
@@ -216,21 +206,6 @@ const HeaderActions = memo(() => {
 });
 
 HeaderActions.displayName = "HeaderActions";
-
-// 页脚组件
-const FooterContent = memo(() => {
-  const { token } = theme.useToken();
-  
-  return (
-    <StyledFooter theme={{ token }}>
-      <Text type="secondary">
-        Thor ©{new Date().getFullYear()} Created by Thor
-      </Text>
-    </StyledFooter>
-  );
-});
-
-FooterContent.displayName = "FooterContent";
 
 // 主内容区域
 const MainContent = memo(() => {
@@ -275,20 +250,22 @@ const LayoutPage = memo<LayoutProps>(({ nav }) => {
         }
       }}
     >
-      <Layout style={{ minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
-        <Sidebar nav={nav} />
-        <Layout style={{ background: token.colorBgLayout, height: "100%", overflow: "auto" }}>
-          <Header 
-            actions={<HeaderActions />} 
-            style={{
-              boxShadow: `0 2px 8px rgba(0, 0, 0, 0.06)`,
-              zIndex: 9,
-            }}
-          />
-          <MainContent />
-          <FooterContent />
+      <div style={{ position: 'relative' }}>
+        <AnnouncementBanner />
+        <Layout style={{ minHeight: "100vh", height: "100vh", overflow: "hidden" }}>
+          <Sidebar nav={nav} />
+          <Layout style={{ background: token.colorBgLayout, height: "100%", overflow: "auto" }}>
+            <Header 
+              actions={<HeaderActions />} 
+              style={{
+                boxShadow: `0 2px 8px rgba(0, 0, 0, 0.06)`,
+                zIndex: 9,
+              }}
+            />
+            <MainContent />
+          </Layout>
         </Layout>
-      </Layout>
+      </div>
     </ConfigProvider>
   );
 });

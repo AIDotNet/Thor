@@ -29,11 +29,11 @@ public static class ActivitySetup
             Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
             ActivityStarted = activity => 
             {
-                Console.WriteLine($"Global activity started: {activity.DisplayName}, ID: {activity.Id}");
+                // Console.WriteLine($"Global activity started: {activity.DisplayName}, ID: {activity.Id}");
             },
             ActivityStopped = activity => 
             {
-                Console.WriteLine($"Global activity stopped: {activity.DisplayName}, ID: {activity.Id}, Duration: {activity.Duration.TotalMilliseconds}ms");
+                // Console.WriteLine($"Global activity stopped: {activity.DisplayName}, ID: {activity.Id}, Duration: {activity.Duration.TotalMilliseconds}ms");
             }
         });
     }
@@ -48,7 +48,7 @@ public static class ActivitySetup
         
         public void OnNext(DiagnosticListener listener)
         {
-            Console.WriteLine($"Diagnostic listener found: {listener.Name}");
+            // Console.WriteLine($"Diagnostic listener found: {listener.Name}");
             listener.Subscribe(new DiagnosticObserver(listener.Name));
         }
     }
@@ -75,7 +75,7 @@ public static class ActivitySetup
                 value.Key.Contains("Request") || 
                 value.Key.Contains("Http"))
             {
-                Console.WriteLine($"[{_listenerName}] Event: {value.Key}");
+                // Console.WriteLine($"[{_listenerName}] Event: {value.Key}");
             }
         }
     }

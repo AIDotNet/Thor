@@ -277,8 +277,8 @@ partial class ChatService
         }
         catch (RateLimitException)
         {
-            lastException ??= new RateLimitException("请求过于频繁，请稍后再试");
-            if (count > 3)
+            lastException = new RateLimitException("请求过于频繁，请稍后再试");
+            if (count > 5)
             {
                 context.Response.StatusCode = 429;
                 await context.WriteOpenAIErrorAsync("请求过于频繁，请稍后再试", "429");
@@ -300,7 +300,7 @@ partial class ChatService
         catch (Exception e)
         {
             lastException = e;
-            if (count > 3)
+            if (count > 5)
             {
                 context.Response.StatusCode = 500;
                 logger.LogError("图片修改请求异常：{e}", e);

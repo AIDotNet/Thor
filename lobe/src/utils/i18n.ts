@@ -7,7 +7,7 @@ import i18n from '../i18n';
  * @returns 翻译后的文本
  */
 export const t = (key: string, options?: Record<string, any>): string => {
-  return i18n.t(key, options);
+  return i18n.t(key, options) as string;
 };
 
 /**

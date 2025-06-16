@@ -37,4 +37,6 @@ export enum SidebarTabKey {
   Playground = 'playground',
   
   Usage = 'usage',
+
+  Announcement = 'announcement',
 }

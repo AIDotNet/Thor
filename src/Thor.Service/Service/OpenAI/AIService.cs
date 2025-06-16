@@ -1,4 +1,5 @@
-﻿using Thor.Service.Infrastructure;
+﻿using Thor.Domain.Chats;
+using Thor.Service.Infrastructure;
 
 namespace Thor.Service.Service;
 

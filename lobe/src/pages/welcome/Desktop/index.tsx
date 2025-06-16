@@ -14,8 +14,8 @@ import './styles.css';
 import styled from 'styled-components';
 import { createStyles } from 'antd-style';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion'; // 引入Framer Motion动画�?
-import { useInView } from 'react-intersection-observer'; // 引入滚动检�?
+import { motion } from 'framer-motion'; // 引入Framer Motion动画?
+import { useInView } from 'react-intersection-observer'; // 引入滚动检?
 import { useState, useEffect, useRef } from 'react';
 import { modelHot } from '../../../services/LoggerService';
 import * as echarts from 'echarts';
@@ -322,7 +322,7 @@ const CountUpStatistic = ({ title, value, suffix, valueStyle }: { title: string,
     if (inView) {
       const numericValue = parseInt(value.replace(/[^0-9]/g, ''));
       let startTime: number | undefined;
-      const duration = 1500; // 缩短动画时间提高响应�?
+      const duration = 1500; // 缩短动画时间提高响应?
 
       const step = (timestamp: number) => {
         if (!startTime) startTime = timestamp;
@@ -340,12 +340,12 @@ const CountUpStatistic = ({ title, value, suffix, valueStyle }: { title: string,
     }
   }, [inView, value]);
 
-  // 缓动函数，使数字增长更自�?
+  // 缓动函数，使数字增长更自?
   const easeOutQuart = (x: number): number => {
     return 1 - Math.pow(1 - x, 4);
   };
 
-  // 提取数字后面的文本（�?+"�?
+  // 提取数字后面的文本（?+"?
   const suffixText = value.replace(/[0-9]/g, '');
 
   return (
@@ -375,7 +375,7 @@ const ThorWebsite = () => {
   const donutChartRef = useRef<HTMLDivElement>(null);
   const barChartRef = useRef<HTMLDivElement>(null);
 
-  // 创建滚动检测钩�?
+  // 创建滚动检测钩?
   const [heroRef, heroInView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -396,11 +396,11 @@ const ThorWebsite = () => {
     threshold: 0.1,
   });
 
-  // 添加模型热度数据状�?
+  // 添加模型热度数据状?
   const [modelHotData, setModelHotData] = useState<{ model: string, percentage: number }[]>([]);
   const [modelHotLoading, setModelHotLoading] = useState(true);
 
-  // 添加获取模型热度数据的函�?
+  // 添加获取模型热度数据的函?
   useEffect(() => {
     const fetchModelHotData = async () => {
       try {
@@ -419,7 +419,7 @@ const ThorWebsite = () => {
     fetchModelHotData();
   }, []);
 
-  // 添加渲染饼图的函�?
+  // 添加渲染饼图的函?
   const renderDonutChart = () => {
     if (!donutChartRef.current || modelHotLoading || !modelHotData.length) return;
 
@@ -485,7 +485,7 @@ const ThorWebsite = () => {
 
     const chart = echarts.init(barChartRef.current);
 
-    // 只取�?0个模�?
+    // 只取?0个模?
     const topModels = [...modelHotData]
       .sort((a, b) => b.percentage - a.percentage)
       .slice(0, 10);
@@ -603,7 +603,7 @@ const ThorWebsite = () => {
       const donutChart = renderDonutChart();
       const barChart = renderBarChart();
       
-      // 添加延时重绘以确保图表正确显�?
+      // 添加延时重绘以确保图表正确显?
       const timer = setTimeout(() => {
         donutChart?.resize();
         barChart?.resize();
@@ -691,7 +691,7 @@ const ThorWebsite = () => {
               animate={heroInView ? { opacity: 1 } : { opacity: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
             >
-              —�?{t('welcome.tagline')}
+              —{t('welcome.tagline')}
             </MotionParagraph>
             <Space size="large" className={styles.heroButtons}>
               <MotionButton
