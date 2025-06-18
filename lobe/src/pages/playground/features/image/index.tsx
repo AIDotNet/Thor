@@ -173,7 +173,7 @@ export default function ImageFeature({ modelInfo }: { modelInfo: any }) {
                             // Add new image to the list
                             const newImage: GeneratedImage = {
                                 id: result.data.id || Date.now().toString() + Math.random().toString(36).substring(2, 9),
-                                url: `data:image/png;base64,${result.data.b64_json}`,
+                                url: result.data.b64_json?.startsWith("http") ? result.data.b64_json : `data:image/png;base64,${result.data.b64_json}`,
                                 prompt,
                                 model: selectedModel,
                                 timestamp: Date.now(),
@@ -197,7 +197,7 @@ export default function ImageFeature({ modelInfo }: { modelInfo: any }) {
                     // Add new image to the list
                     const newImage: GeneratedImage = {
                         id: result.data.id || Date.now().toString(),
-                        url: `data:image/png;base64,${result.data.b64_json}`,
+                        url: result.data.b64_json?.startsWith("http") ? result.data.b64_json : `data:image/png;base64,${result.data.b64_json}`,
                         prompt,
                         model: selectedModel,
                         timestamp: Date.now(),

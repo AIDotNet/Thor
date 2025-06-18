@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using Serilog;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.ResponseCompression;
 using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
@@ -154,6 +155,7 @@ try
         .AddScoped<ModelMapService>()
         .AddScoped<UserService>()
         .AddScoped<UsageService>()
+        .AddScoped<AnnouncementService>()
         .AddScoped<IUserContext, DefaultUserContext>()
         .AddHostedService<StatisticBackgroundTask>()
         .AddHostedService<LoggerBackgroundTask>()
@@ -224,6 +226,13 @@ try
         }
     }));
 
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.MimeTypes =
+            ResponseCompressionDefaults.MimeTypes.Concat(["application/javascript", "text/css", "text/html"]);
+    });
+
     builder.AddServiceDefaults();
 
     builder.Services.AddWebSockets(options =>
@@ -248,6 +257,8 @@ try
 
     app.UseAuthentication();
     app.UseAuthorization();
+
+    app.UseResponseCompression();
 
     app.UseStaticFiles();
 
@@ -454,6 +465,10 @@ try
     channel.MapPut("/disable/{id}", async (ChannelService services, string id) =>
         await services.DisableAsync(id));
 
+    channel.MapPut("/order/{id}", async (ChannelService services, string id, int order) =>
+        await services.UpdateOrderAsync(id, order));
+
+
     channel.MapPut("/test/{id}", async (ChannelService services, string id) =>
         await services.TestChannelAsync(id));
 
@@ -524,6 +539,20 @@ try
     model.MapGet("/info", async (HttpContext context) => { return await ModelService.GetModelInfoAsync(context); })
         .WithDescription("获取模型信息")
         .WithOpenApi();
+
+    // 新增模型库相关端点
+    model.MapGet("/library", async (HttpContext context, string? model, int page = 1, int pageSize = 20,
+                string? type = null, string? modelType = null, string[]? tags = null) =>
+            await ModelService.GetModelLibraryAsync(context, model, page, pageSize, type, modelType, tags))
+        .WithDescription("获取模型库列表")
+        .AllowAnonymous()
+        .WithName("获取模型库列表");
+
+    model.MapGet("/library/metadata",
+            async (HttpContext context) => { return await ModelService.GetModelLibraryMetadataAsync(context); })
+        .WithDescription("获取模型库元数据")
+        .AllowAnonymous()
+        .WithName("获取模型库元数据");
 
     #endregion
 
@@ -905,6 +934,60 @@ try
 
     #endregion
 
+    #region Announcement
+
+    var announcement = app.MapGroup("/api/v1/announcement")
+        .WithTags("Announcement")
+        .AddEndpointFilter<ResultFilter>();
+
+    // 获取有效公告（用户端）
+    announcement.MapGet("active", async (AnnouncementService service) =>
+            await service.GetActiveAnnouncementsAsync())
+        .WithDescription("获取有效公告")
+        .WithOpenApi();
+
+    // 管理员相关API
+    var announcementAdmin = app.MapGroup("/api/v1/announcement/admin")
+        .WithTags("Announcement")
+        .AddEndpointFilter<ResultFilter>()
+        .RequireAuthorization(new AuthorizeAttribute()
+        {
+            Roles = RoleConstant.Admin
+        });
+
+    announcementAdmin.MapPost(string.Empty, async (AnnouncementService service, CreateAnnouncementInput input) =>
+            await service.CreateAsync(input))
+        .WithDescription("创建公告")
+        .WithOpenApi();
+
+    announcementAdmin.MapGet("list",
+            async (AnnouncementService service, int page = 1, int pageSize = 10, string? keyword = null) =>
+                await service.GetListAsync(page, pageSize, keyword))
+        .WithDescription("获取公告列表")
+        .WithOpenApi();
+
+    announcementAdmin.MapGet("{id}", async (AnnouncementService service, string id) =>
+            await service.GetAsync(id))
+        .WithDescription("获取公告详情")
+        .WithOpenApi();
+
+    announcementAdmin.MapPut("{id}", async (AnnouncementService service, string id, UpdateAnnouncementInput input) =>
+            await service.UpdateAsync(id, input))
+        .WithDescription("更新公告")
+        .WithOpenApi();
+
+    announcementAdmin.MapDelete("{id}", async (AnnouncementService service, string id) =>
+            await service.DeleteAsync(id))
+        .WithDescription("删除公告")
+        .WithOpenApi();
+
+    announcementAdmin.MapPut("toggle/{id}", async (AnnouncementService service, string id, bool enabled) =>
+            await service.ToggleEnabledAsync(id, enabled))
+        .WithDescription("启用/禁用公告")
+        .WithOpenApi();
+
+    #endregion
+
     var usage = app.MapGroup("/api/v1/usage")
         .WithTags("Usage")
         .AddEndpointFilter<ResultFilter>()
@@ -1014,7 +1097,7 @@ try
     #region Tracing
 
     // 添加链路跟踪API端点
-    app.MapGet("/api/v1/tracing/current", (HttpContext context) =>
+    app.MapGet("/api/v1/tracing/current", () =>
         {
             var tracing = Thor.Service.Infrastructure.Helper.TracingService.CurrentRootTracing;
             if (tracing == null)

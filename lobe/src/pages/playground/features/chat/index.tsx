@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../../../../utils/responsive';
 import { getTokens } from '../../../../services/TokenService';
 import { getModels } from '../../../../services/ModelService';
+import { createCompletion, isResponsesModel, processStreamResponse } from '../../../../services/ResponsesService';
 import OpenAI from 'openai';
 import { useEffect, useRef, useState } from 'react';
 
@@ -234,13 +235,6 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                 throw new Error(t('playground.errorMessages.selectToken'));
             }
             
-            // Initialize OpenAI client
-            const openai = new OpenAI({
-                apiKey: selectedToken,
-                dangerouslyAllowBrowser: true,
-                baseURL: window.location.origin + '/v1'
-            });
-            
             // Prepare messages array including system prompt
             let messageArray = [];
             
@@ -262,29 +256,37 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
             // Start performance timer
             const startTime = Date.now();
             
-            // Create streaming completion
-            const stream = await openai.chat.completions.create({
+            // 判断是否为需要使用responses接口的模型
+            const useResponsesAPI = isResponsesModel(selectedModel);
+            console.log(`模型 ${selectedModel} 使用${useResponsesAPI ? 'responses' : 'chat completions'}接口`);
+            
+            // 使用统一的API调用方法
+            const stream = await createCompletion({
                 model: selectedModel,
                 messages: messageArray as any,
+                token: selectedToken,
+                baseURL: window.location.origin + '/v1',
                 stream: true
             });
             
             let firstTokenTime = 0;
             let responseContent = '';
             
-            // Process the stream
-            for await (const chunk of stream) {
-                // Record time of first token
-                if (responseContent === '' && chunk.choices[0]?.delta?.content) {
-                    firstTokenTime = Date.now();
-                }
-                
-                // Append the chunk content if available
-                if (chunk.choices[0]?.delta?.content) {
-                    responseContent += chunk.choices[0].delta.content;
+            // 处理流式响应
+            await processStreamResponse(
+                stream,
+                (content: string) => {
+                    // Record time of first token
+                    if (responseContent === '' && content) {
+                        firstTokenTime = Date.now();
+                    }
+                    
+                    // Append the chunk content
+                    responseContent += content;
                     setCurrentAssistantMessage(responseContent);
-                }
-            }
+                },
+                useResponsesAPI
+            );
             
             // Completion time
             const completionTime = Date.now();
@@ -700,28 +702,31 @@ export default function ChatFeature({ modelInfo }: { modelInfo: any }) {
                                 ))}
                             </Select>
                         </Col>
-                        <Col xs={24} sm={12} md={8}>
-                            <div style={{ marginBottom: isMobile ? 4 : 0 }}>
-                                <Text strong style={{ fontSize: 12, color: token.colorTextSecondary }}>
-                                    {t('playground.selectModel')}
-                                </Text>
-                            </div>
-                            <Select
-                                style={{ width: '100%' }}
-                                placeholder={t('playground.selectModel')}
-                                value={selectedModel}
-                                onChange={setSelectedModel}
-                                loading={loading}
-                                disabled={!selectedToken}
-                                showSearch
-                                size={isMobile ? 'middle' : 'large'}
-                            >
-                                {modelOptions.map((model:any) => (
-                                    <Option key={model} value={model}>
-                                        {model}
-                                    </Option>
-                                ))}
-                            </Select>
+                        <Col xs={24} md={12}>
+                            <Space direction="vertical" style={{ width: '100%' }} size="small">
+                                <Text type="secondary">{t('playground.selectModel')}</Text>
+                                <Space wrap>
+                                    <Select
+                                        style={{ minWidth: 200, flex: 1 }}
+                                        placeholder={t('playground.selectModel')}
+                                        value={selectedModel}
+                                        onChange={setSelectedModel}
+                                        loading={loading}
+                                        disabled={!selectedToken}
+                                    >
+                                        {modelOptions.map(model => (
+                                            <Option key={model} value={model}>
+                                                {model}
+                                            </Option>
+                                        ))}
+                                    </Select>
+                                    {selectedModel && (
+                                        <Tag color={isResponsesModel(selectedModel) ? 'blue' : 'green'}>
+                                            {isResponsesModel(selectedModel) ? 'Responses API' : 'Chat Completions API'}
+                                        </Tag>
+                                    )}
+                                </Space>
+                            </Space>
                         </Col>
                         <Col xs={24} md={8} style={{ textAlign: isMobile ? 'center' : 'right' }}>
                             <Space size="middle">

@@ -89,7 +89,6 @@ const zhCN = {
       error404: '404 - 页面不存在',
       error500: '500 - 服务器错误',
       welcome: '欢迎',
-      installApp: '安装应用',
       offline: '离线',
       online: '在线',
       failed: '加载失败',
@@ -168,7 +167,8 @@ const zhCN = {
       chat: '对话',
       business: '运营服务',
       playground: '操场',
-      usage: '使用情况'
+      usage: '使用情况',
+      announcement: '公告管理'
     },
 
     // 页面标题
@@ -194,7 +194,8 @@ const zhCN = {
         welcome: '加载欢迎页面中',
         doc: '加载文档页面中',
         model: '加载模型页面中',
-        usage: '加载使用情况页面中'
+        usage: '加载使用情况页面中',
+        announcement: '加载公告管理页面中'
       }
     },
 
@@ -508,32 +509,27 @@ const zhCN = {
       enterCacheHitRate: '请输入缓存命中倍率',
       enterAudioCacheRate: '请输入Audio缓存倍率',
       enterMaxContext: '请输入最大上文',
-      selectIcon: '请选择图标',
-      enterTags: '请输入标签',
-      modelNameRequired: '请输入模型名称',
-      modelTypeRequired: '请输入模型计费类型',
-      promptRateRequired: '请输入提示倍率',
-      descriptionRequired: '请输入描述',
-      iconRequired: '请选择模型图标',
-      promptRatePositive: '提示倍率必须大于0',
-      createSuccess: '创建成功',
-      updateSuccess: '更新成功',
-      deleteSuccess: '删除成功',
-      operationFailed: '操作失败',
-      confirmDelete: '确定要删除此模型吗？',
-      yes: '是',
-      no: '否',
-      perPrompt: '提示',
-      perCompletion: '完成',
+      selectIcon: '选择图标',
+      enterTags: '输入标签',
+      priceUnit: '价格单位',
+      searchModel: '搜索模型名称',
+      perPrompt: '输入价格',
+      perCompletion: '输出价格',
       audioInput: '音频输入',
       audioOutput: '音频输出',
-      perUsage: '每次',
-      tokens: 'tokens',
-      confirm: '确认',
-      searchModel: '请输入需要搜索的模型',
+      perUsage: '每次使用',
       basicInfo: '基本信息',
       rateConfiguration: '倍率配置',
-      advancedSettings: '高级设置'
+      createSuccess: '创建成功',
+      updateSuccess: '更新成功',
+      operationFailed: '操作失败',
+      modelNameRequired: '请输入模型名称',
+      modelTypeRequired: '请选择计费类型',
+      descriptionRequired: '请输入描述',
+      iconRequired: '请选择图标',
+      confirm: '确认',
+      no: '否',
+      yes: '是'
     },
 
     // 模型库页面
@@ -541,6 +537,7 @@ const zhCN = {
       title: '模型库',
       searchPlaceholder: '请输入需要搜索的模型',
       searchButton: '搜索',
+      search: '搜索',
       selectTags: '选择标签过滤',
       clearFilters: '清除筛选',
       unitSwitch: '单位',
@@ -549,6 +546,13 @@ const zhCN = {
       viewMode: '视图',
       cardView: '卡片',
       listView: '列表',
+      filters: '筛选器',
+      providers: '供应商',
+      modelTypes: '模型类型',
+      tags: '标签',
+      settings: '设置',
+      provider: '供应商',
+      type: '类型',
       
       // 模型状态
       available: '可用',
@@ -596,6 +600,9 @@ const zhCN = {
       // 分页
       previousPage: '上一页',
       nextPage: '下一页',
+      showing: '显示',
+      of: '共',
+      items: '条',
       
       // 空状态
       noResults: '没有符合条件的模型',
@@ -955,6 +962,12 @@ const zhCN = {
         responseFailed: '获取响应失败，请检查Token和模型设置',
         createChatFailed: '创建新会话失败',
         noTokensAvailable: '没有可用的Token，请先添加Token'
+      },
+      apiInterface: {
+        responsesApi: 'Responses API',
+        chatCompletionsApi: 'Chat Completions API',
+        usingInterface: '正在使用',
+        oModelNotice: 'o系列模型将使用最新的Responses接口'
       }
     },
 

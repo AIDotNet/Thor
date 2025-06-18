@@ -142,7 +142,7 @@ export default function DesktopPage() {
                 overflowY: 'auto'
             }}>
                 <Outlet />
-                <ThorFooter />
+                {location.pathname !== '/model' && <ThorFooter />}
             </Content>
         </Layout>
     )

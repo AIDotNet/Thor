@@ -76,6 +76,21 @@ public static class HttpContextExtensions
         await context.Response.Body.FlushAsync();
     }
 
+    /// <summary>
+    /// 往响应内容写入事件流数据,调用前需要先调用 <see cref="SetEventStreamHeaders"/>
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="event"></param>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static async ValueTask WriteAsEventStreamDataAsync(this HttpContext context,string @event, object value)
+    {
+        var jsonData = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
+        Console.WriteLine($"event: {@event}\ndata: {jsonData}\n\n");
+        await context.WriteAsEventAsync($"event: {@event}\ndata: {jsonData}\n\n");
+        await context.Response.Body.FlushAsync();
+    }
+
     public static async ValueTask WriteAsEventAsync(this HttpContext context, string value)
     {
         await context.Response.WriteAsync(value, Encoding.UTF8);

@@ -22,7 +22,7 @@ public interface IThorResponsesService
     /// <param name="options"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    IAsyncEnumerable<ResponsesDto> GetResponsesAsync(ResponsesInput input,
+    IAsyncEnumerable<(string @event, ResponsesSSEDto<ResponsesDto> responses)> GetResponsesAsync(ResponsesInput input,
         ThorPlatformOptions? options = null,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = new CancellationToken());
 }

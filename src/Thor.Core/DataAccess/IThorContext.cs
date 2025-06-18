@@ -32,5 +32,7 @@ public interface IThorContext
 
     DbSet<UserGroup> UserGroups { get; set; }
 
+    DbSet<Announcement> Announcements { get; set; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken());
 }

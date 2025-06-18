@@ -123,16 +123,6 @@ const MobileLayout = memo(({ nav }: LayoutProps) => {
           </LogoContainer>
           
           <Space>
-            <Tooltip title={t('common.installApp')}>
-              <PwaInstall 
-                buttonMode={true}
-                buttonText=""
-                buttonType="text"
-                buttonSize="small"
-                buttonStyle={{ padding: '4px 8px' }}
-                logoUrl='/logo.png'
-              />
-            </Tooltip>
             <LanguageSwitcher />
             <ThemeSwitch
               onThemeSwitch={handleThemeSwitch}
@@ -163,12 +153,6 @@ const MobileLayout = memo(({ nav }: LayoutProps) => {
             <Outlet />
           </ContentWrapper>
         </StyledContent>
-
-        <StyledFooter theme={{ token }}>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            Thor ©{new Date().getFullYear()} Created by Thor
-          </Text>
-        </StyledFooter>
 
         {/* 导航抽屉 */}
         <Drawer

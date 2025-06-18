@@ -490,3 +490,23 @@ $RECYCLE.BIN/
 /src/Thor.Service/logger.db-shm
 /src/Thor.Service/logger.db-wal
 /data
+
+# Thor 构建产物
+publish/
+*.zip
+*.tar.gz
+**/wwwroot/
+# 保留 Thor.Service 的 wwwroot 目录结构但忽略内容
+!src/Thor.Service/wwwroot/
+src/Thor.Service/wwwroot/*
+!src/Thor.Service/wwwroot/.gitkeep
+
+# 前端构建产物  
+lobe/dist/
+lobe/node_modules/
+lobe/.next/
+lobe/out/
+
+# 构建缓存
+.build-cache/
+build-cache/

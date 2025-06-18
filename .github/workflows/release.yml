@@ -1,0 +1,255 @@
+name: Release构建流水线
+
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  NODE_VERSION: '20'
+  PROJECT_NAME: 'Thor'
+  PROJECT_PATH: 'src/Thor.Service/Thor.Service.csproj'
+
+jobs:
+  # 构建前端
+  build-frontend:
+    name: 构建前端
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 安装依赖
+        working-directory: lobe
+        run: npm install --force
+
+      - name: 构建前端
+        working-directory: lobe
+        run: npm run build
+
+      - name: 上传前端构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: lobe/dist/
+          retention-days: 1
+
+  # 构建后端Release包
+  build-backend:
+    name: 构建后端 (${{ matrix.runtime }}-${{ matrix.deployment }})
+    runs-on: ${{ matrix.os }}
+    needs: build-frontend
+    strategy:
+      matrix:
+        include:
+          # Windows
+          - os: windows-latest
+            runtime: win-x64
+            deployment: framework-dependent
+          - os: windows-latest
+            runtime: win-x64
+            deployment: self-contained
+          - os: windows-latest
+            runtime: win-arm64
+            deployment: framework-dependent
+          - os: windows-latest
+            runtime: win-arm64
+            deployment: self-contained
+          # Linux
+          - os: ubuntu-latest
+            runtime: linux-x64
+            deployment: framework-dependent
+          - os: ubuntu-latest
+            runtime: linux-x64
+            deployment: self-contained
+          - os: ubuntu-latest
+            runtime: linux-arm64
+            deployment: framework-dependent
+          - os: ubuntu-latest
+            runtime: linux-arm64
+            deployment: self-contained
+          # macOS
+          - os: macos-latest
+            runtime: osx-x64
+            deployment: framework-dependent
+          - os: macos-latest
+            runtime: osx-x64
+            deployment: self-contained
+          - os: macos-latest
+            runtime: osx-arm64
+            deployment: framework-dependent
+          - os: macos-latest
+            runtime: osx-arm64
+            deployment: self-contained
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置.NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: 下载前端构建产物
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: src/Thor.Service/wwwroot/
+
+      - name: 还原NuGet包
+        run: dotnet restore ${{ env.PROJECT_PATH }}
+
+      - name: 构建项目
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+
+      - name: 发布应用 (依赖框架)
+        if: matrix.deployment == 'framework-dependent'
+        run: |
+          dotnet publish ${{ env.PROJECT_PATH }} \
+            --configuration Release \
+            --runtime ${{ matrix.runtime }} \
+            --no-build \
+            --output ./publish/${{ matrix.runtime }}-fd/ \
+            /p:PublishSingleFile=true \
+            /p:PublishReadyToRun=true
+
+      - name: 发布应用 (自包含)
+        if: matrix.deployment == 'self-contained'
+        run: |
+          dotnet publish ${{ env.PROJECT_PATH }} \
+            --configuration Release \
+            --runtime ${{ matrix.runtime }} \
+            --self-contained true \
+            --no-build \
+            --output ./publish/${{ matrix.runtime }}-sc/ \
+            /p:PublishSingleFile=true \
+            /p:PublishReadyToRun=true \
+            /p:IncludeNativeLibrariesForSelfExtract=true
+
+      - name: 创建发布包
+        shell: bash
+        run: |
+          if [ "${{ matrix.deployment }}" == "framework-dependent" ]; then
+            SUFFIX="fd"
+            SOURCE_DIR="./publish/${{ matrix.runtime }}-fd/"
+          else
+            SUFFIX="sc"
+            SOURCE_DIR="./publish/${{ matrix.runtime }}-sc/"
+          fi
+          
+          PACKAGE_NAME="${{ env.PROJECT_NAME }}-${{ matrix.runtime }}-${SUFFIX}"
+          
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            7z a "${PACKAGE_NAME}.zip" "${SOURCE_DIR}*"
+          else
+            tar -czf "${PACKAGE_NAME}.tar.gz" -C "${SOURCE_DIR}" .
+          fi
+
+      - name: 上传发布包
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.runtime }}-${{ matrix.deployment }}
+          path: |
+            *.zip
+            *.tar.gz
+          retention-days: 30
+
+  # 构建Docker镜像
+  build-docker:
+    name: 构建Docker镜像
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录Docker Hub
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
+        uses: docker/login-action@v3
+        with:
+          username: aidotnet
+          password: ${{ secrets.DOCKER }}
+
+      - name: 提取元数据
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: aidotnet/thor
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 构建并推送Docker镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: src/Thor.Service/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # 创建GitHub Release
+  create-release:
+    name: 创建GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-frontend, build-backend, build-docker]
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 下载所有构建产物
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: 准备发布文件
+        run: |
+          mkdir -p ./release-files
+          find ./artifacts -name "*.zip" -o -name "*.tar.gz" | xargs -I {} cp {} ./release-files/
+
+      - name: 创建Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: ${{ contains(github.ref, '-') }}
+          files: ./release-files/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # 清理临时构建产物
+  cleanup:
+    name: 清理构建产物
+    runs-on: ubuntu-latest
+    needs: [build-frontend, build-backend, build-docker]
+    if: always()
+    
+    steps:
+      - name: 删除前端构建产物
+        uses: geekyeggo/delete-artifact@v4
+        with:
+          name: frontend-dist
+          failOnError: false 

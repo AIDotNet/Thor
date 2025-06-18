@@ -23,7 +23,7 @@ public class ResponsesMessageInput
                 return Content;
             }
 
-            return Content!;
+            return Contents;
         }
         set
         {
@@ -52,7 +52,7 @@ public class ResponsesMessageInput
     {
         get
         {
-            if (string.IsNullOrEmpty(Content))
+            if (Contents is null || Contents.Count == 0)
             {
                 return false;
             }
@@ -67,8 +67,8 @@ public class ResponsesMessageInput
 public class ResponsesMessageContentInput
 {
     [JsonPropertyName("type")] public string Type { get; set; }
-    
+
     [JsonPropertyName("image_url")] public string? ImageUrl { get; set; }
-    
+
     [JsonPropertyName("text")] public string? Text { get; set; }
 }
