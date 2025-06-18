@@ -172,6 +172,21 @@ public partial class UserService(
     }
 
     /// <summary>
+    /// 获取用户简单列表，只返回ID和用户名，用于下拉选择
+    /// </summary>
+    /// <returns></returns>
+    public async ValueTask<List<object>> GetSimpleListAsync()
+    {
+        var users = await DbContext.Users
+            .AsNoTracking()
+            .Select(x => new { x.Id, x.UserName })
+            .OrderBy(x => x.UserName)
+            .ToListAsync();
+        
+        return users.Cast<object>().ToList();
+    }
+
+    /// <summary>
     ///     对于用户进行消费
     /// </summary>
     /// <param name="id"></param>

@@ -75,3 +75,11 @@ export const updatePassword = (data:any) => {
 export const GetEmailCode = (email: string) => {
     return get(prefix + `/email-code?email=${email}`);
 }
+
+/**
+ * 获取用户简单列表，仅返回ID和用户名
+ * @returns 用户简单列表
+ */
+export const getSimpleList = () => {
+    return get(prefix + '/simple-list');
+}

@@ -2,6 +2,9 @@
 using Thor.BuildingBlocks.Event;
 using Thor.Domain.Chats;
 using Thor.Service.Options;
+using MiniExcelLibs;
+using System.IO;
+using Thor.Infrastructure;
 
 namespace Thor.Service.Service;
 
@@ -136,7 +139,7 @@ public sealed class LoggerService(
 
     public async Task<long> ViewConsumptionAsync(ThorChatLoggerType? type,
         string? model,
-        DateTime? startTime, DateTime? endTime, string? keyword)
+        DateTime? startTime, DateTime? endTime, string? keyword, string? userId = null)
     {
         var query = LoggerDbContext.Loggers
             .AsNoTracking();
@@ -151,8 +154,17 @@ public sealed class LoggerService(
 
         if (endTime.HasValue) query = query.Where(x => x.CreatedAt <= endTime);
 
-        // 非管理员只能查看自己的日志
-        if (!UserContext.IsAdmin) query = query.Where(x => x.UserId == UserContext.CurrentUserId);
+        // 用户权限校验
+        if (!UserContext.IsAdmin)
+        {
+            // 非管理员只能查看自己的日志
+            query = query.Where(x => x.UserId == UserContext.CurrentUserId);
+        }
+        else if (!string.IsNullOrWhiteSpace(userId))
+        {
+            // 管理员可以查看指定用户的日志
+            query = query.Where(x => x.UserId == userId);
+        }
 
         if (!string.IsNullOrWhiteSpace(keyword))
             query = query.Where(x =>
@@ -170,7 +182,7 @@ public sealed class LoggerService(
 
     public async ValueTask<PagingDto<ChatLogger>> GetAsync(int page, int pageSize, ThorChatLoggerType? type,
         string? model,
-        DateTime? startTime, DateTime? endTime, string? keyword, string? organizationId = null)
+        DateTime? startTime, DateTime? endTime, string? keyword, string? organizationId = null, string? userId = null)
     {
         var query = LoggerDbContext.Loggers
             .AsNoTracking();
@@ -185,7 +197,17 @@ public sealed class LoggerService(
 
         if (endTime.HasValue) query = query.Where(x => x.CreatedAt <= endTime);
 
-        if (!UserContext.IsAdmin) query = query.Where(x => x.UserId == UserContext.CurrentUserId);
+        // 用户权限校验
+        if (!UserContext.IsAdmin)
+        {
+            // 非管理员只能查看自己的日志
+            query = query.Where(x => x.UserId == UserContext.CurrentUserId);
+        }
+        else if (!string.IsNullOrWhiteSpace(userId))
+        {
+            // 管理员可以查看指定用户的日志
+            query = query.Where(x => x.UserId == userId);
+        }
 
         if (!string.IsNullOrEmpty(organizationId))
         {
@@ -222,6 +244,59 @@ public sealed class LoggerService(
         });
 
         return new PagingDto<ChatLogger>(total, result);
+    }
+
+    /// <summary>
+    /// 导出日志
+    /// </summary>
+    public async Task ExportAsync(
+        HttpContext context,
+        ThorChatLoggerType? type,
+        string? model,
+        DateTime? startTime, DateTime? endTime, string? keyword, string? organizationId = null, string? userId = null)
+    {
+        var result = await GetAsync(1, int.MaxValue, type, model, startTime, endTime, keyword, organizationId, userId);
+
+        // 使用MiniExcel导出
+        if (result.Items.Any())
+        {
+            // 创建导出数据
+            var exportData = result.Items.Select(log => new
+            {
+                日志类型 = log.Type.ToString(),
+                模型名称 = log.ModelName,
+                用户名 = log.UserName,
+                用户ID = log.UserId,
+                IP地址 = log.IP,
+                内容 = log.Content,
+                提示词Token = log.PromptTokens,
+                完成Token = log.CompletionTokens,
+                总消耗 = log.Quota,
+                额度 = RenderHelper.RenderQuota(log.Quota, 2),
+                响应时间 = log.TotalTime,
+                是否成功 = log.IsSuccess ? "是" : "否",
+                创建时间 = log.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")
+            }).ToList();
+
+            // 设置文件名称
+            string fileName = $"{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+
+            // 设置响应头
+            context.Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            context.Response.Headers.Append("Content-Disposition", $"attachment; filename=\"{fileName}\"");
+
+            var exportStream = new MemoryStream();
+            await exportStream.SaveAsAsync(exportData);
+
+            exportStream.Seek(0, SeekOrigin.Begin);
+
+            await exportStream.CopyToAsync(context.Response.Body);
+        }
+        else
+        {
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync("没有找到符合条件的数据");
+        }
     }
 
     /// <summary>

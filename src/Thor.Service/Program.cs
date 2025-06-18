@@ -568,16 +568,28 @@ try
     log.MapGet(string.Empty,
             async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model,
                     DateTime? startTime,
-                    DateTime? endTime, string? keyword, string? organizationId) =>
-                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword, organizationId))
+                    DateTime? endTime, string? keyword, string? organizationId, string? userId) =>
+                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword, organizationId, userId))
         .WithDescription("获取日志")
         .WithDisplayName("获取日志")
         .WithOpenApi();
 
+    app.MapGet("/api/v1/logger/export",
+            async (
+                    HttpContext context,
+                    LoggerService service, ThorChatLoggerType? type, string? model,
+                    DateTime? startTime,
+                    DateTime? endTime, string? keyword, string? organizationId, string? userId) =>
+                await service.ExportAsync(context, type, model, startTime, endTime, keyword, organizationId, userId))
+        .WithDescription("获取日志")
+        .WithDisplayName("获取日志")
+        .RequireAuthorization()
+        .WithOpenApi();
+
     log.MapGet("view-consumption",
             async (LoggerService service, ThorChatLoggerType? type, string? model, DateTime? startTime,
-                    DateTime? endTime, string? keyword) =>
-                await service.ViewConsumptionAsync(type, model, startTime, endTime, keyword))
+                    DateTime? endTime, string? keyword, string? userId) =>
+                await service.ViewConsumptionAsync(type, model, startTime, endTime, keyword, userId))
         .WithDescription("查看消耗")
         .WithDisplayName("查看消耗")
         .WithOpenApi();
@@ -611,6 +623,16 @@ try
         {
             Roles = RoleConstant.Admin
         });
+
+    user.MapGet("simple-list", async (UserService service) =>
+            await service.GetSimpleListAsync())
+        .RequireAuthorization(new AuthorizeAttribute()
+        {
+            Roles = RoleConstant.Admin
+        })
+        .WithDescription("获取用户简化列表")
+        .WithDisplayName("获取用户简化列表")
+        .WithOpenApi();
 
     user.MapGet("info", async (UserService service) =>
             await service.GetAsync())

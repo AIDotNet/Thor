@@ -36,8 +36,9 @@ import {
   SettingOutlined,
   MenuOutlined,
 } from "@ant-design/icons";
-import { getLoggers, viewConsumption } from "../../services/LoggerService";
+import { getLoggers, viewConsumption, Export } from "../../services/LoggerService";
 import { GetServerLoad } from "../../services/TrackerService";
+import { getSimpleList } from "../../services/UserService";
 import { Tag, Tooltip } from "@lobehub/ui";
 import { renderQuota } from "../../utils/render";
 import dayjs from "dayjs";
@@ -96,6 +97,7 @@ export default function LoggerPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [consume, setConsume] = useState<number>(0);
   const [consumeLoading, setConsumeLoading] = useState<boolean>(false);
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
   const [filterVisible, setFilterVisible] = useState<boolean>(true);
   const [expandedRowKeys, setExpandedRowKeys] = useState<string[]>([]);
   const [traceDataMap, setTraceDataMap] = useState<Record<string, any>>({});
@@ -106,6 +108,10 @@ export default function LoggerPage() {
   // 临时状态，用于编辑中的列配置
   const [tempColumnsConfig, setTempColumnsConfig] = useState<ColumnConfigItem[]>([]);
   const [tempSelectedColumns, setTempSelectedColumns] = useState<string[]>([]);
+  // 用户列表相关状态
+  const [userList, setUserList] = useState<any[]>([]);
+  const [userListLoading, setUserListLoading] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(localStorage.getItem("role") === "admin");
   
   const [input, setInput] = useState({
     page: 1,
@@ -115,6 +121,7 @@ export default function LoggerPage() {
     startTime: dayjs().subtract(15, 'day').format("YYYY-MM-DD HH:mm:ss"),
     endTime: null,
     keyword: "",
+    userId: "",
   } as {
     page: number;
     pageSize: number;
@@ -124,6 +131,7 @@ export default function LoggerPage() {
     endTime: string | null;
     keyword: string;
     organizationId?: string;
+    userId?: string;
   });
 
   // 拖拽传感器
@@ -914,10 +922,37 @@ export default function LoggerPage() {
       });
   }
 
+  // 加载用户列表
+  const loadUserList = async () => {
+    if (!isAdmin) return;
+    
+    setUserListLoading(true);
+    try {
+      const response = await getSimpleList();
+      if (response.success) {
+        setUserList(response.data);
+      } else {
+        message.error(response.message || '获取用户列表失败');
+      }
+    } catch (error) {
+      message.error('获取用户列表时发生错误');
+      console.error(error);
+    } finally {
+      setUserListLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
     loadViewConsumption();
   }, [input.page, input.pageSize]);
+
+  // 初始化加载用户列表
+  useEffect(() => {
+    if (isAdmin) {
+      loadUserList();
+    }
+  }, [isAdmin]);
 
   // 数值显示组件
   const ConsumptionNumber = ({ value }: { value: number }) => {
@@ -946,11 +981,57 @@ export default function LoggerPage() {
       startTime: dayjs().subtract(15, 'day').format("YYYY-MM-DD HH:mm:ss"),
       endTime: null,
       keyword: "",
+      userId: "",
     });
     setTimeout(() => {
       loadData();
       loadViewConsumption();
     }, 0);
+  };
+
+  const handleExport = async () => {
+    try {
+      setExportLoading(true);
+      message.loading({ content: '正在导出数据...', key: 'export' });
+      
+      // 准备导出参数，不包括分页参数
+      const exportParams = {
+        type: input.type,
+        model: input.model,
+        startTime: input.startTime,
+        endTime: input.endTime,
+        keyword: input.keyword,
+        organizationId: input.organizationId,
+        userId: input.userId,
+      };
+
+      const response = await Export(exportParams);
+      
+      // 创建下载链接
+      const blob = new Blob([response], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // 生成文件名
+      const timestamp = dayjs().format('YYYY-MM-DD_HH-mm-ss');
+      link.download = `日志数据_${timestamp}.xlsx`;
+      
+      // 触发下载
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      message.success({ content: '数据导出成功！', key: 'export' });
+    } catch (error) {
+      console.error('导出失败:', error);
+      message.error({ content: '导出失败，请重试', key: 'export' });
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   return (
@@ -1088,6 +1169,35 @@ export default function LoggerPage() {
                       allowClear
                     />
                   </div>
+
+                  {isAdmin && (
+                    <div style={styles.filterItem}>
+                      <Text style={styles.filterLabel}>指定用户</Text>
+                      <Select
+                        style={{ width: '100%' }}
+                        placeholder="选择用户（管理员专用）"
+                        value={input.userId}
+                        onChange={(value: string) => {
+                          setInput({
+                            ...input,
+                            userId: value,
+                          });
+                        }}
+                        allowClear
+                        loading={userListLoading}
+                        showSearch
+                        filterOption={(inputValue, option) =>
+                          option?.children?.toString().toLowerCase().includes(inputValue.toLowerCase()) || false
+                        }
+                      >
+                        {userList.map((user: any) => (
+                          <Select.Option key={user.id} value={user.id}>
+                            {user.userName}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </div>
+                  )}
                   
                   <div style={styles.filterItem}>
                     <Text style={styles.filterLabel}>开始时间</Text>
@@ -1155,6 +1265,8 @@ export default function LoggerPage() {
             
             <Button
               icon={<DownloadOutlined />}
+              onClick={handleExport}
+              loading={exportLoading}
             >
               导出数据
             </Button>
