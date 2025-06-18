@@ -121,13 +121,22 @@ const CreateAnnouncement: React.FC<CreateAnnouncementProps> = ({ visible, onCanc
   const [loading, setLoading] = useState(false);
   const [content, setContent] = useState('');
 
+  // 当模态框关闭时重置内容
+  React.useEffect(() => {
+    if (!visible) {
+      setContent('');
+    }
+  }, [visible]);
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       setLoading(true);
       
+      // 确保内容值被正确获取
       const submitData = {
         ...values,
+        content: content || values.content, // 优先使用 state 中的 content
         expireTime: values.expireTime ? values.expireTime.toISOString() : null
       };
 
@@ -233,7 +242,9 @@ const CreateAnnouncement: React.FC<CreateAnnouncementProps> = ({ visible, onCanc
           }
           rules={[{ required: true, message: '请输入公告内容' }]}
         >
-          <Tabs items={tabItems} />
+          <div>
+            <Tabs items={tabItems} />
+          </div>
         </Form.Item>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>

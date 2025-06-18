@@ -31,6 +31,7 @@ interface InputProps {
   extension: {
     [key: string]: any;
   };
+  supportsResponses: boolean;
 }
 
 export default function UpdateChannel({
@@ -65,6 +66,7 @@ export default function UpdateChannel({
     models: [],
     groups: [],
     extension: {},
+    supportsResponses: false,
   });
 
   type FieldType = {
@@ -76,6 +78,7 @@ export default function UpdateChannel({
     models: string[];
     groups: string[];
     cache?: boolean;
+    supportsResponses?: boolean;
   };
 
   function loading() {
@@ -109,6 +112,7 @@ export default function UpdateChannel({
         groups: value.groups,
         cache: value.cache,
         extension: value.extension,
+        supportsResponses: value.supportsResponses || false,
       });
     }
   }, [visible, value]);
@@ -222,6 +226,34 @@ export default function UpdateChannel({
           >
             <Input placeholder={t('channel.enterProxyAddress')} />
           </Form.Item>
+          
+          {input.type === "CustomeOpenAI" && (
+            <>
+              <div style={{ 
+                marginBottom: 16, 
+                padding: 12, 
+                backgroundColor: token.colorInfoBg, 
+                borderRadius: token.borderRadius,
+                border: `1px solid ${token.colorInfoBorder}`
+              }}>
+                <Text type="secondary">
+                  {t('channel.routeDefaultFormat')}：https://api.openai.com/v1
+                </Text>
+              </div>
+              <Form.Item<FieldType>
+                name="supportsResponses"
+                label={t('channel.supportsResponses')}
+                valuePropName="checked"
+              >
+                <Checkbox
+                  checked={input.supportsResponses}
+                  onChange={(v) => {
+                    setInput({ ...input, supportsResponses: v.target.checked });
+                  }}
+                />
+              </Form.Item>
+            </>
+          )}
           
           {input.type === "AzureOpenAI" && (
             <Form.Item<FieldType>

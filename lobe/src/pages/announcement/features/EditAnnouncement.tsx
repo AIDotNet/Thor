@@ -141,7 +141,10 @@ const EditAnnouncement: React.FC<EditAnnouncementProps> = ({ visible, onCancel, 
         expireTime: announcement.expireTime ? dayjs(announcement.expireTime) : null
       };
       form.setFieldsValue(formData);
-      setContent(announcement.content);
+      setContent(announcement.content || '');
+    } else if (!visible) {
+      // 当模态框关闭时重置状态
+      setContent('');
     }
   }, [announcement, visible, form]);
 
@@ -150,8 +153,10 @@ const EditAnnouncement: React.FC<EditAnnouncementProps> = ({ visible, onCancel, 
       const values = await form.validateFields();
       setLoading(true);
       
+      // 确保内容值被正确获取
       const submitData = {
         ...values,
+        content: content || values.content, // 优先使用 state 中的 content
         expireTime: values.expireTime ? values.expireTime.toISOString() : null
       };
 
@@ -246,7 +251,9 @@ const EditAnnouncement: React.FC<EditAnnouncementProps> = ({ visible, onCancel, 
           }
           rules={[{ required: true, message: '请输入公告内容' }]}
         >
-          <Tabs items={tabItems} />
+          <div>
+            <Tabs items={tabItems} />
+          </div>
         </Form.Item>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>

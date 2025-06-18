@@ -18,6 +18,7 @@ using Thor.BuildingBlocks.Event;
 using Thor.Claude.Extensions;
 using Thor.Core.DataAccess;
 using Thor.Core.Extensions;
+using Thor.CustomOpenAI.Extensions;
 using Thor.DeepSeek.Extensions;
 using Thor.Domain.Chats;
 using Thor.Domain.Users;
@@ -164,6 +165,7 @@ try
         .AddOpenAIService()
         .AddMoonshotService()
         .AddSparkDeskService()
+        .AddCustomeOpenAIService()
         .AddQiansailService()
         .AddGCPClaudeService()
         .AddMetaGLMService()

@@ -47,7 +47,8 @@ export default function CreateChannel({
     key: "",
     models: [],
     groups: [],
-    cache: false
+    cache: false,
+    supportsResponses: false
   });
 
   type FieldType = {
@@ -59,6 +60,7 @@ export default function CreateChannel({
     models: string[];
     groups: string[];
     cache?: boolean;
+    supportsResponses?: boolean;
   };
 
   function loading() {
@@ -141,7 +143,8 @@ export default function CreateChannel({
         onFinish={handleSubmit}
         layout="vertical"
         initialValues={{
-          cache: false
+          cache: false,
+          supportsResponses: false
         }}
       >
         <Form.Item<FieldType>
@@ -200,10 +203,36 @@ export default function CreateChannel({
           label={t('channel.proxyAddress')} 
           name="address"
         >
-          <Input 
-            placeholder={t('channel.enterProxyAddress')} 
-          />
+          <Input placeholder={t('channel.enterProxyAddress')} />
         </Form.Item>
+        
+        {input.type === "CustomeOpenAI" && (
+          <>
+            <div style={{ 
+              marginBottom: 16, 
+              padding: 12, 
+              backgroundColor: token.colorInfoBg, 
+              borderRadius: token.borderRadius,
+              border: `1px solid ${token.colorInfoBorder}`
+            }}>
+              <Text type="secondary">
+                {t('channel.routeDefaultFormat')}：https://api.openai.com/v1
+              </Text>
+            </div>
+            <Form.Item<FieldType>
+              name="supportsResponses"
+              label={t('channel.supportsResponses')}
+              valuePropName="checked"
+            >
+              <Checkbox
+                checked={input.supportsResponses}
+                onChange={(v) => {
+                  setInput({ ...input, supportsResponses: v.target.checked });
+                }}
+              />
+            </Form.Item>
+          </>
+        )}
         
         {input.type === "AzureOpenAI" && (
           <Form.Item<FieldType>

@@ -717,7 +717,9 @@ const zhCN = {
       downloadSuccess: '模板下载成功',
       downloadFailed: '模板下载失败',
       importSuccess: '导入成功',
-      importFailed: '导入失败'
+      importFailed: '导入失败',
+      routeDefaultFormat: '路由默认格式',
+      supportsResponses: '支持Responses'
     },
 
     // 支付页面

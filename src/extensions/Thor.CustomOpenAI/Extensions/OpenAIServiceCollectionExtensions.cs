@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 using Thor.Abstractions;
@@ -6,25 +7,22 @@ using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
-using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Responses;
-using Thor.OpenAI;
-using Thor.OpenAI.Audios;
-using Thor.OpenAI.Chats;
+using Thor.CustomOpenAI.Audios;
+using Thor.CustomOpenAI.Chats;
+using Thor.CustomOpenAI.Images;
+using Thor.CustomOpenAI.Responses;
 using Thor.OpenAI.Embeddings;
-using Thor.OpenAI.Images;
-using Thor.OpenAI.Realtime;
-using Thor.OpenAI.Responses;
 
-namespace Thor.DeepSeek.Extensions;
+namespace Thor.CustomOpenAI.Extensions;
 
 public static class OpenAIServiceCollectionExtensions
 {
-    public static IServiceCollection AddOpenAIService(this IServiceCollection services)
+    public static IServiceCollection AddCustomeOpenAIService(this IServiceCollection services)
     {
-        ThorGlobal.PlatformNames.Add(OpenAIPlatformOptions.PlatformName, OpenAIPlatformOptions.PlatformCode);
+        ThorGlobal.PlatformNames.Add(CustomeOpenAIPlatformOptions.PlatformName, CustomeOpenAIPlatformOptions.PlatformCode);
 
-        ThorGlobal.ModelNames.Add(OpenAIPlatformOptions.PlatformCode, [
+        ThorGlobal.ModelNames.Add(CustomeOpenAIPlatformOptions.PlatformCode, [
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-0125",
             "gpt-3.5-turbo-0301",
@@ -54,26 +52,23 @@ public static class OpenAIServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IThorChatCompletionsService, OpenAIChatCompletionsService>(OpenAIPlatformOptions
+        services.AddKeyedSingleton<IThorChatCompletionsService, OpenAIChatCompletionsService>(CustomeOpenAIPlatformOptions
             .PlatformCode);
 
         services.AddKeyedSingleton<IThorTextEmbeddingService, OpenAITextEmbeddingService>(
-            OpenAIPlatformOptions.PlatformCode);
+            CustomeOpenAIPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IThorImageService, OpenAIImageService>(OpenAIPlatformOptions.PlatformCode);
+        services.AddKeyedSingleton<IThorImageService, OpenAIImageService>(CustomeOpenAIPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IThorCompletionsService, OpenAICompletionService>(OpenAIPlatformOptions
+        services.AddKeyedSingleton<IThorCompletionsService, OpenAICompletionService>(CustomeOpenAIPlatformOptions
             .PlatformCode);
 
-        services.AddKeyedTransient<IThorRealtimeService, OpenAIRealtimeService>(OpenAIPlatformOptions
+        services.AddKeyedSingleton<IThorAudioService, OpenAIAudioService>(CustomeOpenAIPlatformOptions
             .PlatformCode);
 
-        services.AddKeyedSingleton<IThorAudioService, OpenAIAudioService>(OpenAIPlatformOptions
-            .PlatformCode);
+        services.AddKeyedSingleton<IThorResponsesService, OpenAIResponsesService>(CustomeOpenAIPlatformOptions.PlatformCode);
 
-        services.AddKeyedSingleton<IThorResponsesService, OpenAIResponsesService>(OpenAIPlatformOptions.PlatformCode);
-
-        services.AddHttpClient(OpenAIPlatformOptions.PlatformCode,
+        services.AddHttpClient(CustomeOpenAIPlatformOptions.PlatformCode,
                 options =>
                 {
                     options.Timeout = TimeSpan.FromMinutes(10);

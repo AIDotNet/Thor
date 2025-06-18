@@ -648,7 +648,9 @@ const enUS = {
       downloadSuccess: 'Template downloaded successfully',
       downloadFailed: 'Template download failed',
       importSuccess: 'Import successful',
-      importFailed: 'Import failed'
+      importFailed: 'Import failed',
+      routeDefaultFormat: 'Route Default Format',
+      supportsResponses: 'Supports Responses'
     },
 
     // Payment Page

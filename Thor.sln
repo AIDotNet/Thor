@@ -98,6 +98,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.GCPClaude", "src\exten
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.Gemini", "src\extensions\Thor.Gemini\Thor.Gemini.csproj", "{99796C52-045C-4091-9134-51E56DC29CAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Thor.CustomOpenAI", "src\extensions\Thor.CustomOpenAI\Thor.CustomOpenAI.csproj", "{4CECDE2D-9B0D-47C2-9F04-291EEBE38448}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -256,6 +258,10 @@ Global
 		{99796C52-045C-4091-9134-51E56DC29CAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99796C52-045C-4091-9134-51E56DC29CAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99796C52-045C-4091-9134-51E56DC29CAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CECDE2D-9B0D-47C2-9F04-291EEBE38448}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CECDE2D-9B0D-47C2-9F04-291EEBE38448}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CECDE2D-9B0D-47C2-9F04-291EEBE38448}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CECDE2D-9B0D-47C2-9F04-291EEBE38448}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -300,6 +306,7 @@ Global
 		{65B6C566-F252-499B-BF17-77C53537F766} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{640AFAA2-E60E-478B-82ED-4C47BF6A5F12} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 		{99796C52-045C-4091-9134-51E56DC29CAE} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
+		{4CECDE2D-9B0D-47C2-9F04-291EEBE38448} = {294B7A34-48F5-43AB-A1D3-033480559E3A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A80931C-B951-4EF2-AC79-457E73118E5F}

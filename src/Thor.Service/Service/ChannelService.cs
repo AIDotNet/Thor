@@ -16,6 +16,7 @@ using Thor.Core;
 using Thor.Hunyuan;
 using Thor.DeepSeek;
 using Thor.Domain.Chats;
+using Thor.OpenAI;
 using Thor.Service.Infrastructure;
 using Thor.SparkDesk;
 
