@@ -102,7 +102,7 @@ public record EmbeddingCreateResponse : ThorBaseResponse
         }
     }
 
-    [JsonPropertyName("usage")] public ThorUsageResponse Usage { get; set; }
+    [JsonPropertyName("usage")] public ThorUsageResponse? Usage { get; set; }
 }
 
 public record EmbeddingResponse

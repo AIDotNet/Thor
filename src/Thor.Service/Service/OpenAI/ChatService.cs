@@ -6,12 +6,14 @@ using System.Text.Json;
 using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Embeddings.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Images.Dtos;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
+using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
 using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
 using Thor.Domain.Chats;
@@ -133,7 +135,8 @@ public sealed partial class ChatService(
                 }, context.RequestAborted);
                 sw.Stop();
 
-                var quota = requestToken * rate.PromptRate;
+
+                var quota = (stream.Usage?.InputTokens ?? requestToken) * rate.PromptRate;
 
                 var completionRatio = GetCompletionRatio(input.Model);
                 quota += rate.PromptRate * completionRatio;
@@ -146,15 +149,30 @@ public sealed partial class ChatService(
                 await loggerService.CreateConsumeAsync("/v1/embeddings",
                     string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
                     input.Model,
-                    requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                    (stream.Usage?.InputTokens ?? requestToken), 0, (int)quota, token?.Key, user?.UserName, user?.Id,
+                    channel.Id,
                     channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                     organizationId);
 
-                await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                await userService.ConsumeAsync(user!.Id, (long)quota, (stream.Usage?.InputTokens ?? requestToken),
+                    token?.Key, channel.Id,
                     input.Model);
+
                 stream.ConvertEmbeddingData(input.EncodingFormat);
 
-                await context.Response.WriteAsJsonAsync(stream);
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    input.Model,
+                    stream.Data,
+                    stream.Error,
+                    stream.ObjectTypeName,
+                    Usage = new ThorUsageResponse()
+                    {
+                        InputTokens = (stream.Usage?.InputTokens ?? requestToken),
+                        CompletionTokens = 0,
+                        TotalTokens = (stream.Usage?.InputTokens ?? requestToken)
+                    }
+                });
             }
         }
         catch (RateLimitException)
