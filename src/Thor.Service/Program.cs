@@ -13,6 +13,7 @@ using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.Responses;
 using Thor.Abstractions.Tracker;
 using Thor.AWSClaude.Extensions;
+using Thor.AzureDatabricks.Extensions;
 using Thor.AzureOpenAI.Extensions;
 using Thor.BuildingBlocks.Event;
 using Thor.Claude.Extensions;
@@ -179,6 +180,7 @@ try
         .AddMiniMaxService()
         .AddVolCenGineService()
         .AddSiliconFlowService()
+        .AddAzureDatabricksPlatform()
         .AddDeepSeekService()
         .AddGeminiService();
 

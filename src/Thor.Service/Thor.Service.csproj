@@ -46,6 +46,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\extensions\Thor.AWSClaude\Thor.AWSClaude.csproj" />
+    <ProjectReference Include="..\extensions\Thor.AzureDatabricks\Thor.AzureDatabricks.csproj" />
     <ProjectReference Include="..\extensions\Thor.AzureOpenAI\Thor.AzureOpenAI.csproj" />
     <ProjectReference Include="..\extensions\Thor.Claude\Thor.Claude.csproj" />
     <ProjectReference Include="..\extensions\Thor.CustomOpenAI\Thor.CustomOpenAI.csproj" />

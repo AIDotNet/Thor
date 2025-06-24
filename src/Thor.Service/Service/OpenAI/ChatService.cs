@@ -420,7 +420,7 @@ public sealed partial class ChatService(
                         await loggerService.CreateConsumeAsync("/v1/chat/completions",
                             string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
                                 cachedTokens, rate.CacheRate),
-                            request.Model,
+                            model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                             request.Stream is true,
@@ -430,14 +430,14 @@ public sealed partial class ChatService(
                     {
                         await loggerService.CreateConsumeAsync("/v1/chat/completions",
                             string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
-                            request.Model,
+                            model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                             request.Stream is true,
                             (int)sw.ElapsedMilliseconds, organizationId);
 
                         await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                            request.Model);
+                            model);
                     }
                 }
                 else
@@ -446,7 +446,7 @@ public sealed partial class ChatService(
                     await loggerService.CreateConsumeAsync("/v1/chat/completions",
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
                             userGroup.Rate),
-                        request.Model,
+                        model,
                         requestToken, responseToken, (int)((int)rate.PromptRate * (decimal)userGroup.Rate), token?.Key,
                         user?.UserName, user?.Id,
                         channel.Id,
@@ -456,7 +456,7 @@ public sealed partial class ChatService(
 
                     await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
                         channel.Id,
-                        request.Model);
+                        model);
                 }
             }
             else

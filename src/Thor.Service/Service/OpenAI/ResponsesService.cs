@@ -94,7 +94,7 @@ public sealed class ResponsesService(
 
 
                 // 记录请求模型 / 请求用户
-                logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", request.Model, user?.UserName,
+                logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", model, user?.UserName,
                     channel.Name);
 
                 int requestToken;
@@ -124,7 +124,7 @@ public sealed class ResponsesService(
 
                 var quota = requestToken * rate.PromptRate;
 
-                var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
+                var completionRatio = rate.CompletionRate ?? GetCompletionRatio(model);
                 quota += responseToken * rate.PromptRate * completionRatio;
 
                 // 计算分组倍率
@@ -155,7 +155,7 @@ public sealed class ResponsesService(
                         await loggerService.CreateConsumeAsync("/v1/responses",
                             string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
                                 cachedTokens, rate.CacheRate),
-                            request.Model,
+                            model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                             request.Stream is true,
@@ -165,14 +165,14 @@ public sealed class ResponsesService(
                     {
                         await loggerService.CreateConsumeAsync("/v1/responses",
                             string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
-                            request.Model,
+                            model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                             request.Stream is true,
                             (int)sw.ElapsedMilliseconds, organizationId);
 
                         await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                            request.Model);
+                            model);
                     }
                 }
                 else
@@ -181,7 +181,7 @@ public sealed class ResponsesService(
                     await loggerService.CreateConsumeAsync("/v1/responses",
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
                             userGroup.Rate),
-                        request.Model,
+                        model,
                         requestToken, responseToken, (int)((int)rate.PromptRate * (decimal)userGroup.Rate), token?.Key,
                         user?.UserName, user?.Id,
                         channel.Id,
@@ -191,7 +191,7 @@ public sealed class ResponsesService(
 
                     await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
                         channel.Id,
-                        request.Model);
+                        model);
                 }
             }
             else
