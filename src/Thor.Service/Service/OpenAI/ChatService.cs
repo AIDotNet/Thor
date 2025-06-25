@@ -836,7 +836,7 @@ public sealed partial class ChatService(
             // 如果存在返回的Usage则使用返回的Usage中的CompletionTokens
             if (result?.Usage?.CompletionTokens is not null && result.Usage.CompletionTokens > 0)
             {
-                responseToken = result.Usage.CompletionTokens.Value;
+                responseToken = (int)result.Usage.CompletionTokens.Value;
             }
             else
             {
@@ -891,7 +891,7 @@ public sealed partial class ChatService(
 
         if (result?.Usage?.CompletionTokens is not null && result.Usage.CompletionTokens > 0)
         {
-            responseToken = result.Usage.CompletionTokens.Value;
+            responseToken = (int)result.Usage.CompletionTokens.Value;
         }
         else
         {
@@ -1397,7 +1397,7 @@ public sealed partial class ChatService(
 
                 if (item.Usage is { CompletionTokens: > 0 })
                 {
-                    responseToken = item.Usage.CompletionTokens.Value;
+                    responseToken = (int)item.Usage.CompletionTokens.Value;
                 }
 
                 if (item.Choices != null)
