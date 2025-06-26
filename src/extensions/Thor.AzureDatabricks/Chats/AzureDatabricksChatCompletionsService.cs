@@ -76,6 +76,8 @@ public class AzureDatabricksChatCompletionsService(ILogger<AzureDatabricksChatCo
         using var openai =
             Activity.Current?.Source.StartActivity("OpenAI 对话流式补全");
 
+        chatCompletionCreate.StreamOptions = null;
+
         var response = await HttpClientFactory.GetHttpClient(address).HttpRequestRaw(
             address,
             chatCompletionCreate, options.ApiKey);
