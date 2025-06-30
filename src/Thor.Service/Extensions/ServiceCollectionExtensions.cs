@@ -66,8 +66,8 @@ public static class ServiceCollectionExtensions
         }
         
         // var ConnectionStrings:DefaultConnection
-        var defaultConnection = Environment.GetEnvironmentVariable("DefaultConnection");
-        var loggerConnection = Environment.GetEnvironmentVariable("LoggerConnection");
+        var defaultConnection = Environment.GetEnvironmentVariable("ConnectionStrings:DefaultConnection");
+        var loggerConnection = Environment.GetEnvironmentVariable("ConnectionStrings:LoggerConnection");
         
         if (!string.IsNullOrEmpty(defaultConnection))
         {
