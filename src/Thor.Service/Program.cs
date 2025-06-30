@@ -135,7 +135,7 @@ try
         .AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
         .AddTransient<JwtHelper>()
         .AddSingleton<OpenTelemetryMiddlewares>()
-        .AddSingleton<DetailedRequestResponseLogMiddleware>()
+        .AddScoped<DetailedRequestResponseLogMiddleware>()
         .AddSingleton<UnitOfWorkMiddleware>()
         .AddTracingService()
         .AddScoped<AuthorizeService>()
