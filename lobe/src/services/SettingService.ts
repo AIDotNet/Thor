@@ -236,6 +236,12 @@ class SystemSetting {
      */
     static readonly CasdoorClientSecret: string = SystemSetting.Default + ":CasdoorClientSecret";
 
+    /**
+     * 启用详细请求响应日志
+     * @type {string}
+     */
+    static readonly EnableDetailedRequestResponseLog: string = SystemSetting.Default + ":EnableDetailedRequestResponseLog";
+
     
 }
 

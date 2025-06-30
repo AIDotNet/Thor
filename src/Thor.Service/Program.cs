@@ -135,6 +135,7 @@ try
         .AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
         .AddTransient<JwtHelper>()
         .AddSingleton<OpenTelemetryMiddlewares>()
+        .AddSingleton<DetailedRequestResponseLogMiddleware>()
         .AddSingleton<UnitOfWorkMiddleware>()
         .AddTracingService()
         .AddScoped<AuthorizeService>()
@@ -368,6 +369,7 @@ try
     app.UseOpenTelemetry();
 
     app.UseMiddleware<OpenTelemetryMiddlewares>();
+    app.UseMiddleware<DetailedRequestResponseLogMiddleware>();
     app.UseMiddleware<UnitOfWorkMiddleware>();
 
     if (!Directory.Exists("/data"))

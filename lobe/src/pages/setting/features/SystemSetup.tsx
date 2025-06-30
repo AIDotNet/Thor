@@ -212,6 +212,15 @@ export default function SystemSetup({
                                 placeholder={t('settingPage.system.casdoorClientSecret')}
                             />
                         </Form.Item>
+                        <Form.Item
+                            label="启用详细请求响应日志"
+                            valuePropName="checked"
+                        >
+                            <Switch
+                                checked={input[SystemSetting.EnableDetailedRequestResponseLog] === 'true'}
+                                onChange={(checked) => handleInputChange(SystemSetting.EnableDetailedRequestResponseLog, checked ? 'true' : 'false')}
+                            />
+                        </Form.Item>
                     </Collapse.Panel>
                 </Collapse>
                 <Form.Item>
