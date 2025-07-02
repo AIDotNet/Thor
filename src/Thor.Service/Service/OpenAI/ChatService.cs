@@ -1095,7 +1095,7 @@ public sealed partial class ChatService(
             {
                 // (模型倍率 * (文字输入 + 文字输出 * 补全倍率)
                 quota = (decimal)((requestToken + usage.CompletionTokens * (rate.CompletionRate ?? 1)) *
-                                  rate.PromptRate) * (decimal)userGroup.Rate;
+                                  rate.PromptRate) ;
             }
 
             switch (request.ResponseFormat)
