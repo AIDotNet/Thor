@@ -1,10 +1,12 @@
 ﻿using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 using Thor.Abstractions;
+using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.Abstractions.Realtime;
+using Thor.AzureOpenAI.Audios;
 using Thor.AzureOpenAI.Chats;
 using Thor.AzureOpenAI.Embeddings;
 using Thor.AzureOpenAI.Realtime;
@@ -54,6 +56,8 @@ public static class AzureOpenAIServiceCollectionExtensions
 
         services.AddKeyedSingleton<IThorRealtimeService, AzureOpenAIRealtimeService>(AzureOpenAIPlatformOptions
             .PlatformCode);
+
+        services.AddKeyedSingleton<IThorAudioService, AzureAudioService>(AzureOpenAIPlatformOptions.PlatformCode);
 
         services.AddHttpClient(AzureOpenAIPlatformOptions.PlatformCode,
                 options =>

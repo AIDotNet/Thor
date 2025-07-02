@@ -1159,7 +1159,7 @@ public sealed partial class ChatService(
         catch (Exception e)
         {
             logger.LogError("对话模型请求异常：{e}", e);
-            await context.WriteErrorAsync(e.Message);
+            await context.WriteOpenAIErrorAsync(e.Message);
         }
     }
 
