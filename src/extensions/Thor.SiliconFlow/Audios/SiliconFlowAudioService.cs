@@ -4,10 +4,12 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
 using Thor.Abstractions.Audios;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using Thor.Abstractions.Realtime.Dto;
 
 namespace Thor.SiliconFlow.Audios
 {
@@ -152,7 +154,8 @@ namespace Thor.SiliconFlow.Audios
             return result;
         }
 
-        public async Task<Stream> SpeechAsync(AudioCreateSpeechRequest request, ThorPlatformOptions? options = null,
+        public async Task<(Stream, ThorUsageResponse? usage)> SpeechAsync(AudioCreateSpeechRequest request,
+            ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using var openai =
@@ -187,7 +190,7 @@ namespace Thor.SiliconFlow.Audios
 
             var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
 
-            return stream;
+            return (stream, null);
         }
     }
 }

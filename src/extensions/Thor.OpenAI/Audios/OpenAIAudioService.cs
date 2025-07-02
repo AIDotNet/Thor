@@ -5,10 +5,12 @@ using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
 using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats.Dtos;
+using Thor.Abstractions.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 using Thor.Abstractions.ObjectModels.ObjectModels.RequestModels;
 using Thor.Abstractions.ObjectModels.ObjectModels.ResponseModels;
+using Thor.Abstractions.Realtime.Dto;
 
 namespace Thor.OpenAI.Audios
 {
@@ -153,7 +155,8 @@ namespace Thor.OpenAI.Audios
             return result;
         }
 
-        public async Task<Stream> SpeechAsync(AudioCreateSpeechRequest request, ThorPlatformOptions? options = null,
+        public async Task<(Stream, ThorUsageResponse? usage)> SpeechAsync(AudioCreateSpeechRequest request,
+            ThorPlatformOptions? options = null,
             CancellationToken cancellationToken = default)
         {
             using var openai =
@@ -185,10 +188,21 @@ namespace Thor.OpenAI.Audios
 
                 throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
             }
+            
+            // 如果响应头有X-Usage
+            if (response.Headers.TryGetValues("X-Usage", out var usageValues))
+            {
+                var usageJson = usageValues.FirstOrDefault();
+                if (!string.IsNullOrEmpty(usageJson))
+                {
+                    var usage = System.Text.Json.JsonSerializer.Deserialize<ThorUsageResponse>(usageJson);
+                    return (await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false), usage);
+                }
+            }
 
             var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
 
-            return stream;
+            return (stream, null);
         }
     }
 }

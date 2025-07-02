@@ -1,13 +1,9 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 using Thor.Abstractions;
-using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
-using Thor.Abstractions.Realtime;
-using Thor.Abstractions.Responses;
-using Thor.Gemini.Audios;
 using Thor.Gemini.Chats;
 using Thor.Gemini.Embeddings;
 using Thor.OpenAI.Images;
@@ -32,10 +28,6 @@ public static class GeminiServiceCollectionExtensions
         services.AddKeyedSingleton<IThorImageService, GeminiImageService>(GeminiPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IThorCompletionsService, GeminiCompletionService>(GeminiPlatformOptions
-            .PlatformCode);
-
-
-        services.AddKeyedSingleton<IThorAudioService, GeminiAudioService>(GeminiPlatformOptions
             .PlatformCode);
 
         services.AddHttpClient(GeminiPlatformOptions.PlatformCode,

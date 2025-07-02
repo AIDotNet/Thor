@@ -1078,7 +1078,7 @@ public sealed partial class ChatService(
 
             var sw = Stopwatch.StartNew();
 
-            var response =
+            var (response, usage) =
                 await openService.SpeechAsync(request, new ThorPlatformOptions
                 {
                     ApiKey = channel.Key,
@@ -1087,9 +1087,16 @@ public sealed partial class ChatService(
                 }, context.RequestAborted);
 
             // 计算音频的时长
-            var requestToken = TokenHelper.GetTotalTokens(request.Input);
+            var requestToken = usage?.PromptTokens ?? TokenHelper.GetTotalTokens(request.Input);
 
             quota = requestToken * rate.PromptRate * (rate.CompletionRate ?? 1);
+
+            if (usage?.CompletionTokens > 0)
+            {
+                // (模型倍率 * (文字输入 + 文字输出 * 补全倍率)
+                quota = (decimal)((requestToken + usage.CompletionTokens * (rate.CompletionRate ?? 1)) *
+                                  rate.PromptRate) * (decimal)userGroup.Rate;
+            }
 
             switch (request.ResponseFormat)
             {
@@ -1130,13 +1137,15 @@ public sealed partial class ChatService(
             quota = (decimal)userGroup.Rate * quota;
 
             await loggerService.CreateConsumeAsync("/v1/audio/speech",
-                string.Format(ConsumerTemplate, rate.PromptRate, 0, userGroup.Rate),
+                string.Format(ConsumerTemplate, rate.PromptRate, ((int?)usage?.CompletionTokens ?? 0), userGroup.Rate),
                 request.Model,
-                requestToken, 0, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                requestToken, ((int?)usage?.CompletionTokens ?? 0), (int)quota, token?.Key, user?.UserName, user?.Id,
+                channel.Id,
                 channel.Name, context.GetIpAddress(), context.GetUserAgent(), false, (int)sw.ElapsedMilliseconds,
                 organizationId);
 
-            await userService.ConsumeAsync(user!.Id, (int)quota, 0, token?.Key, channel.Id,
+            await userService.ConsumeAsync(user!.Id, (int)quota, ((int?)usage?.CompletionTokens ?? 0), token?.Key,
+                channel.Id,
                 request.Model);
         }
         catch (RateLimitException)
