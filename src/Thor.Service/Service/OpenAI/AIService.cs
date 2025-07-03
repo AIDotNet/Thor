@@ -1,5 +1,6 @@
 ﻿using Thor.Domain.Chats;
 using Thor.Service.Infrastructure;
+using Thor.Service.Extensions;
 
 namespace Thor.Service.Service;
 
@@ -32,6 +33,34 @@ public abstract class AIService(IServiceProvider serviceProvider, ImageService i
     /// </summary>
     protected const string RealtimeConsumerTemplate =
         "模型倍率：文本提示词倍率:{0} 文本完成倍率:{1} 音频请求倍率:{2} 音频完成倍率:{3}  实时对话 分组倍率：{4}";
+
+    /// <summary>
+    /// 分层定价计费模型倍率模板
+    /// </summary>
+    protected const string TieredConsumerTemplate = "分层定价 提示词费用:{0} 完成词费用:{1} 分组倍率：{2}";
+
+    /// <summary>
+    /// 生成定价描述
+    /// </summary>
+    /// <param name="rate">模型管理器</param>
+    /// <param name="requestTokens">请求token数</param>
+    /// <param name="responseTokens">响应token数</param>
+    /// <param name="userGroupRate">用户组倍率</param>
+    /// <returns>定价描述</returns>
+    protected static string GetPricingDescription(ModelManager rate, int requestTokens, int responseTokens, double userGroupRate)
+    {
+        if (rate.TieredPricing?.Enabled == true)
+        {
+            var promptCost = rate.CalculatePromptCost(requestTokens);
+            var completionCost = rate.CalculateCompletionCost(responseTokens);
+            return string.Format(TieredConsumerTemplate, promptCost, completionCost, userGroupRate);
+        }
+        else
+        {
+            var completionRatio = rate.CompletionRate ?? 1.0m;
+            return string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroupRate);
+        }
+    }
 
 
     protected static readonly Dictionary<string, Dictionary<string, double>> ImageSizeRatios = new()

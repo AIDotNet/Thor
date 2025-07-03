@@ -18,6 +18,7 @@ using Thor.Abstractions.Realtime;
 using Thor.Abstractions.Realtime.Dto;
 using Thor.Domain.Chats;
 using Thor.Infrastructure;
+using Thor.Service.Extensions;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
 using Thor.Service.Infrastructure;
@@ -136,10 +137,19 @@ public sealed partial class ChatService(
                 sw.Stop();
 
 
-                var quota = (stream.Usage?.InputTokens ?? requestToken) * rate.PromptRate;
+                var quota = rate.CalculatePromptCost(stream.Usage?.InputTokens ?? requestToken);
 
                 var completionRatio = GetCompletionRatio(input.Model);
-                quota += rate.PromptRate * completionRatio;
+                // For embeddings, completion is usually minimal, but we still apply tiered pricing if enabled
+                if (rate.TieredPricing?.Enabled == true)
+                {
+                    // For embeddings, we typically don't have significant completion tokens
+                    quota += rate.CalculateCompletionCost(0) * completionRatio;
+                }
+                else
+                {
+                    quota += rate.PromptRate * completionRatio;
+                }
 
                 quota = (decimal)userGroup.Rate * quota;
 
@@ -147,7 +157,7 @@ public sealed partial class ChatService(
                 quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
                 await loggerService.CreateConsumeAsync("/v1/embeddings",
-                    string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
+                    GetPricingDescription(rate, stream.Usage?.InputTokens ?? requestToken, 0, userGroup.Rate),
                     input.Model,
                     (stream.Usage?.InputTokens ?? requestToken), 0, (int)quota, token?.Key, user?.UserName, user?.Id,
                     channel.Id,
@@ -237,10 +247,18 @@ public sealed partial class ChatService(
                     var (requestToken, responseToken) =
                         await CompletionsHandlerAsync(context, input, channel, openService, user, rate.PromptRate);
 
-                    var quota = requestToken * rate.PromptRate;
+                    var quota = rate.CalculatePromptCost(requestToken);
 
                     var completionRatio = GetCompletionRatio(input.Model);
-                    quota += responseToken * rate.PromptRate * completionRatio;
+                    // Use tiered pricing for completion tokens if enabled
+                    if (rate.TieredPricing?.Enabled == true)
+                    {
+                        quota += rate.CalculateCompletionCost(responseToken);
+                    }
+                    else
+                    {
+                        quota += responseToken * rate.PromptRate * completionRatio;
+                    }
 
                     quota = (decimal)userGroup.Rate * quota;
 
@@ -405,10 +423,18 @@ public sealed partial class ChatService(
                             rate);
                 }
 
-                var quota = requestToken * rate.PromptRate;
+                var quota = rate.CalculatePromptCost(requestToken);
 
                 var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
-                quota += responseToken * rate.PromptRate * completionRatio;
+                // Use tiered pricing for completion tokens if enabled, otherwise use the old method
+                if (rate.TieredPricing?.Enabled == true)
+                {
+                    quota += rate.CalculateCompletionCost(responseToken);
+                }
+                else
+                {
+                    quota += responseToken * rate.PromptRate * completionRatio;
+                }
 
                 // 计算分组倍率
                 quota = (decimal)userGroup!.Rate * quota;
