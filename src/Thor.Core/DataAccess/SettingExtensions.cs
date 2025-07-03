@@ -196,6 +196,11 @@ public static class SettingExtensions
         /// Casdoor Client Secret
         /// </summary>
         public const string CasdoorClientSecret = Default + ":CasdoorClientSecret";
+
+        /// <summary>
+        /// 启用详细请求响应日志
+        /// </summary>
+        public const string EnableDetailedRequestResponseLog = Default + ":EnableDetailedRequestResponseLog";
     }
 
     /// <summary>
@@ -502,6 +507,14 @@ public static class SettingExtensions
             Value = "",
             Description = "Casdoor Client Secret",
             Private = false
+        });
+
+        settings.Add(new Setting()
+        {
+            Key = SystemSetting.EnableDetailedRequestResponseLog,
+            Value = "false",
+            Description = "启用详细请求响应日志",
+            Private = true
         });
 
         #endregion

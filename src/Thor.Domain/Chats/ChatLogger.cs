@@ -92,4 +92,24 @@ public sealed class ChatLogger : Entity<string>
     /// </summary>
     /// <returns></returns>
     public Dictionary<string, string>? Metadata { get; set; } = new();
+    
+    /// <summary>
+    /// 原始请求体（详细日志模式）
+    /// </summary>
+    public string? RequestBody { get; set; }
+    
+    /// <summary>
+    /// 原始响应体（详细日志模式）
+    /// </summary>
+    public string? ResponseBody { get; set; }
+    
+    /// <summary>
+    /// 请求头信息（详细日志模式）
+    /// </summary>
+    public string? RequestHeaders { get; set; }
+    
+    /// <summary>
+    /// 响应头信息（详细日志模式）
+    /// </summary>
+    public string? ResponseHeaders { get; set; }
 }
