@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Thor.Service.Filters;
 using Thor.Service.Service;
+using Thor.Service.Infrastructure.Helper;
 
 namespace Thor.Service.Extensions;
 
@@ -92,6 +93,16 @@ public static class EndpointRouteExtensions
             .WithDescription("获取模型管理器元数据信息")
             .AllowAnonymous()
             .WithName("获取模型管理器元数据");
+
+        // 新增获取Gemini分层定价模板端点
+        modelManager.MapGet("tiered-pricing/gemini-template", () =>
+                TieredPricingHelper.CreateGeminiTieredPricing())
+            .WithDescription("获取Gemini风格的分层定价模板")
+            .RequireAuthorization(new AuthorizeAttribute()
+            {
+                Roles = RoleConstant.Admin
+            })
+            .WithName("获取Gemini分层定价模板");
 
         return endpoints;
     }

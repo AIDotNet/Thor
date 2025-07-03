@@ -87,4 +87,9 @@ public class CreateModelManagerInput
     /// chat|image|audio
     /// </summary>
     public string Type { get; set; } = ModelManagerType.Chat;
+    
+    /// <summary>
+    /// 分层定价配置
+    /// </summary>
+    public ModelTieredPricing? TieredPricing { get; set; }
 }

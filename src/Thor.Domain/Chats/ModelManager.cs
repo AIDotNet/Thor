@@ -99,4 +99,9 @@ public sealed class ModelManager : Entity<Guid>
     /// 扩展字段
     /// </summary>
     public Dictionary<string, string> Extension { get; set; } = new();
+    
+    /// <summary>
+    /// 分层定价配置
+    /// </summary>
+    public ModelTieredPricing? TieredPricing { get; set; }
 }

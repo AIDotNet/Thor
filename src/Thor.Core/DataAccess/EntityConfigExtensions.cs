@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Thor.Domain.Chats;
 using Thor.Domain.Users;
 using Thor.Service.Domain;
+using Thor.Service.Domain.Core;
 
 namespace Thor.Core.DataAccess;
 
@@ -167,6 +168,13 @@ public static class EntityConfigExtensions
                     item => string.IsNullOrEmpty(item)
                         ? new Dictionary<string, string>()
                         : JsonSerializer.Deserialize<Dictionary<string, string>>(item, JsonSerializerOptions));
+
+            options.Property(x => x.TieredPricing)
+                .HasConversion(
+                    item => item == null ? null : JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => string.IsNullOrEmpty(item) 
+                        ? null 
+                        : JsonSerializer.Deserialize<Thor.Service.Domain.Core.ModelTieredPricing>(item, JsonSerializerOptions));
         });
 
         modelBuilder.Entity<UserGroup>(options =>
