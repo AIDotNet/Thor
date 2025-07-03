@@ -104,6 +104,15 @@ public static class EndpointRouteExtensions
             })
             .WithName("获取Gemini分层定价模板");
 
+        modelManager.MapGet("context-pricing/template", () =>
+                TieredPricingHelper.CreateContextPricingTemplate())
+            .WithDescription("获取上下文定价模板")
+            .RequireAuthorization(new AuthorizeAttribute()
+            {
+                Roles = RoleConstant.Admin
+            })
+            .WithName("获取上下文定价模板");
+
         return endpoints;
     }
 }

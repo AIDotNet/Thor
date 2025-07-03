@@ -56,3 +56,40 @@ public class ModelTieredPricing
     /// </summary>
     public List<ModelPricingTier> AudioOutputTiers { get; set; } = new();
 }
+
+/// <summary>
+/// 上下文定价配置
+/// </summary>
+public class ModelContextPricing
+{
+    /// <summary>
+    /// 是否启用上下文定价
+    /// </summary>
+    public bool Enabled { get; set; }
+    
+    /// <summary>
+    /// 上下文长度定价层级
+    /// </summary>
+    public List<ModelPricingTier> ContextTiers { get; set; } = new();
+    
+    /// <summary>
+    /// 定价倍率类型
+    /// </summary>
+    public ContextPricingType PricingType { get; set; } = ContextPricingType.Multiplier;
+}
+
+/// <summary>
+/// 上下文定价类型
+/// </summary>
+public enum ContextPricingType
+{
+    /// <summary>
+    /// 倍率模式 - 在基础费率上应用倍率
+    /// </summary>
+    Multiplier = 0,
+    
+    /// <summary>
+    /// 替换模式 - 完全替换基础费率
+    /// </summary>
+    Replacement = 1
+}

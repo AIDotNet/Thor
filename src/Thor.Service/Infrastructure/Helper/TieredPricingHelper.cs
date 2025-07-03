@@ -108,4 +108,24 @@ public static class TieredPricingHelper
             }
         };
     }
+    
+    /// <summary>
+    /// 创建上下文定价配置模板
+    /// </summary>
+    /// <returns>上下文定价配置</returns>
+    public static ModelContextPricing CreateContextPricingTemplate()
+    {
+        return new ModelContextPricing
+        {
+            Enabled = true,
+            PricingType = ContextPricingType.Multiplier,
+            ContextTiers = new List<ModelPricingTier>
+            {
+                new ModelPricingTier { Threshold = 4000, Rate = 1.0m, Description = "短上下文 ≤4K tokens" },
+                new ModelPricingTier { Threshold = 16000, Rate = 1.2m, Description = "中等上下文 4K-16K tokens" },
+                new ModelPricingTier { Threshold = 32000, Rate = 1.5m, Description = "长上下文 16K-32K tokens" },
+                new ModelPricingTier { Threshold = -1, Rate = 2.0m, Description = "超长上下文 >32K tokens" }
+            }
+        };
+    }
 }

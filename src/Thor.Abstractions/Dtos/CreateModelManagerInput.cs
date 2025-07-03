@@ -92,4 +92,9 @@ public class CreateModelManagerInput
     /// 分层定价配置
     /// </summary>
     public ModelTieredPricing? TieredPricing { get; set; }
+    
+    /// <summary>
+    /// 上下文定价配置
+    /// </summary>
+    public ModelContextPricing? ContextPricing { get; set; }
 }

@@ -175,6 +175,13 @@ public static class EntityConfigExtensions
                     item => string.IsNullOrEmpty(item) 
                         ? null 
                         : JsonSerializer.Deserialize<Thor.Service.Domain.Core.ModelTieredPricing>(item, JsonSerializerOptions));
+
+            options.Property(x => x.ContextPricing)
+                .HasConversion(
+                    item => item == null ? null : JsonSerializer.Serialize(item, JsonSerializerOptions),
+                    item => string.IsNullOrEmpty(item) 
+                        ? null 
+                        : JsonSerializer.Deserialize<Thor.Service.Domain.Core.ModelContextPricing>(item, JsonSerializerOptions));
         });
 
         modelBuilder.Entity<UserGroup>(options =>
