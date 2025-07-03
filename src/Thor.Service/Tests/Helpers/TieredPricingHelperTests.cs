@@ -80,33 +80,33 @@ public class TieredPricingHelperTests
     }
     
     [Test]
-    public void CreateGeminiTieredPricing_ShouldCreateCorrectConfiguration()
+    public void CreateTieredPricingTemplate_ShouldCreateCorrectConfiguration()
     {
         // Act
-        var geminiPricing = TieredPricingHelper.CreateGeminiTieredPricing();
+        var tieredPricing = TieredPricingHelper.CreateTieredPricingTemplate();
         
         // Assert
-        Assert.IsTrue(geminiPricing.Enabled);
-        Assert.AreEqual(2, geminiPricing.PromptTiers.Count);
-        Assert.AreEqual(2, geminiPricing.CompletionTiers.Count);
-        Assert.AreEqual(2, geminiPricing.CacheTiers.Count);
+        Assert.IsTrue(tieredPricing.Enabled);
+        Assert.AreEqual(2, tieredPricing.PromptTiers.Count);
+        Assert.AreEqual(2, tieredPricing.CompletionTiers.Count);
+        Assert.AreEqual(2, tieredPricing.CacheTiers.Count);
         
         // Check prompt tiers
-        Assert.AreEqual(200000, geminiPricing.PromptTiers[0].Threshold);
-        Assert.AreEqual(1.25m, geminiPricing.PromptTiers[0].Rate);
-        Assert.AreEqual(-1, geminiPricing.PromptTiers[1].Threshold);
-        Assert.AreEqual(2.50m, geminiPricing.PromptTiers[1].Rate);
+        Assert.AreEqual(200000, tieredPricing.PromptTiers[0].Threshold);
+        Assert.AreEqual(1.25m, tieredPricing.PromptTiers[0].Rate);
+        Assert.AreEqual(-1, tieredPricing.PromptTiers[1].Threshold);
+        Assert.AreEqual(2.50m, tieredPricing.PromptTiers[1].Rate);
         
         // Check completion tiers
-        Assert.AreEqual(200000, geminiPricing.CompletionTiers[0].Threshold);
-        Assert.AreEqual(10.00m, geminiPricing.CompletionTiers[0].Rate);
-        Assert.AreEqual(-1, geminiPricing.CompletionTiers[1].Threshold);
-        Assert.AreEqual(15.00m, geminiPricing.CompletionTiers[1].Rate);
+        Assert.AreEqual(200000, tieredPricing.CompletionTiers[0].Threshold);
+        Assert.AreEqual(10.00m, tieredPricing.CompletionTiers[0].Rate);
+        Assert.AreEqual(-1, tieredPricing.CompletionTiers[1].Threshold);
+        Assert.AreEqual(15.00m, tieredPricing.CompletionTiers[1].Rate);
         
         // Check cache tiers
-        Assert.AreEqual(200000, geminiPricing.CacheTiers[0].Threshold);
-        Assert.AreEqual(0.31m, geminiPricing.CacheTiers[0].Rate);
-        Assert.AreEqual(-1, geminiPricing.CacheTiers[1].Threshold);
-        Assert.AreEqual(0.625m, geminiPricing.CacheTiers[1].Rate);
+        Assert.AreEqual(200000, tieredPricing.CacheTiers[0].Threshold);
+        Assert.AreEqual(0.31m, tieredPricing.CacheTiers[0].Rate);
+        Assert.AreEqual(-1, tieredPricing.CacheTiers[1].Threshold);
+        Assert.AreEqual(0.625m, tieredPricing.CacheTiers[1].Rate);
     }
 }

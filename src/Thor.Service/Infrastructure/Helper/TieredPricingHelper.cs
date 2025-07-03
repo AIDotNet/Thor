@@ -83,10 +83,10 @@ public static class TieredPricingHelper
     }
     
     /// <summary>
-    /// 创建Gemini风格的分层定价配置
+    /// 创建分层定价配置模板
     /// </summary>
-    /// <returns>Gemini分层定价配置</returns>
-    public static ModelTieredPricing CreateGeminiTieredPricing()
+    /// <returns>分层定价配置模板</returns>
+    public static ModelTieredPricing CreateTieredPricingTemplate()
     {
         return new ModelTieredPricing
         {

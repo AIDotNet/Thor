@@ -17,10 +17,10 @@ public class TieredPricingIntegrationTests
         // 创建一个测试用的ModelManager实例
         var modelManager = new ModelManager
         {
-            Model = "gemini-2.5-pro",
+            Model = "test-model",
             PromptRate = 1.0m, // 默认费率作为回退
             CompletionRate = 2.0m,
-            TieredPricing = TieredPricingHelper.CreateGeminiTieredPricing()
+            TieredPricing = TieredPricingHelper.CreateTieredPricingTemplate()
         };
         
         Console.WriteLine($"测试模型: {modelManager.Model}");

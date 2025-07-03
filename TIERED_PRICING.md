@@ -1,17 +1,17 @@
-# Gemini 分层定价支持
+# 分层定价支持
 
-本文档说明如何在 Thor AI 网关中配置和使用 Gemini 风格的分层定价功能。
+本文档说明如何在 Thor AI 网关中配置和使用分层定价功能。
 
 ## 概述
 
-分层定价允许根据 token 使用量的不同区间设置不同的费率，这样可以更精确地控制成本，特别是对于像 Gemini 这样按 token 数量分级计费的模型。
+分层定价允许根据 token 使用量的不同区间设置不同的费率，这样可以更精确地控制成本，特别是对于按 token 数量分级计费的模型。
 
 ## 功能特性
 
 - 支持基于 token 数量阈值的分层费率
 - 分别支持提示词、完成词、缓存、音频等不同类型的分层定价
 - 向后兼容现有的固定费率系统
-- 提供 Gemini 风格的预设模板
+- 提供预设模板快速配置
 - 支持无限制层级（threshold = -1）
 
 ## 数据模型
@@ -70,9 +70,9 @@
 
 ## API 使用
 
-### 获取 Gemini 分层定价模板
+### 获取分层定价模板
 ```http
-GET /api/v1/model-manager/tiered-pricing/gemini-template
+GET /api/v1/model-manager/tiered-pricing/template
 ```
 
 响应示例：
@@ -91,8 +91,8 @@ POST /api/v1/model-manager
 Content-Type: application/json
 
 {
-  "model": "gemini-2.5-pro",
-  "description": "Gemini 2.5 Pro with tiered pricing",
+  "model": "gpt-4-turbo",
+  "description": "GPT-4 Turbo with tiered pricing",
   "promptRate": 1.25,
   "completionRate": 10.00,
   "tieredPricing": {
