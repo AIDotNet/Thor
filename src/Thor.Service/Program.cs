@@ -58,7 +58,7 @@ try
     Directory.SetCurrentDirectory(AppContext.BaseDirectory);
 
     // 初始化活动跟踪
-    Thor.Service.Infrastructure.Helper.ActivitySetup.SetupActivityListeners();
+    ActivitySetup.SetupActivityListeners();
 
     var builder = WebApplication.CreateBuilder(new WebApplicationOptions()
     {
