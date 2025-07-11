@@ -86,7 +86,6 @@ public static class HttpContextExtensions
     public static async ValueTask WriteAsEventStreamDataAsync(this HttpContext context,string @event, object value)
     {
         var jsonData = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
-        Console.WriteLine($"event: {@event}\ndata: {jsonData}\n\n");
         await context.WriteAsEventAsync($"event: {@event}\ndata: {jsonData}\n\n");
         await context.Response.Body.FlushAsync();
     }

@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Thor.Abstractions.Anthropic;
@@ -56,7 +57,48 @@ public sealed class AnthropicInput
 
     [JsonIgnore] public AnthropicTooChoiceInput? ToolChoice { get; set; }
 
-    [JsonPropertyName("system")] public List<AnthropicMessageContent>? System { get; set; }
+    [JsonIgnore]
+    public IList<AnthropicMessageContent>? Systems { get; set; }
+
+    [JsonIgnore]
+    public string System { get; set; }
+
+    [JsonPropertyName("system")]
+    public object SystemCalculated
+    {
+        get
+        {
+            if (System is not null && Systems is not null)
+            {
+                throw new ValidationException("System 和 Systems 字段不能同时有值");
+            }
+
+            if (System is not null)
+            {
+                return System;
+            }
+
+            return Systems!;
+        }
+        set
+        {
+            if (value is JsonElement str)
+            {
+                if (str.ValueKind == JsonValueKind.String)
+                {
+                    System = value?.ToString();
+                }
+                else if (str.ValueKind == JsonValueKind.Array)
+                {
+                    Systems = JsonSerializer.Deserialize<IList<AnthropicMessageContent>>(value?.ToString());
+                }
+            }
+            else
+            {
+                System = value?.ToString();
+            }
+        }
+    }
 }
 
 public class AnthropicTooChoiceInput

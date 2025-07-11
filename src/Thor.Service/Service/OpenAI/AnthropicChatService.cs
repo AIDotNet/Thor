@@ -350,9 +350,14 @@ public class AnthropicChatService(
         // }
         //
 
-        if (request.System is { Count: > 0 })
+        if (!string.IsNullOrEmpty(request.System))
         {
-            requestToken += TokenHelper.GetTotalTokens(request.System.Select(x => x.Text).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(request.System);
+        }
+
+        if (request.Systems?.Count > 0)
+        {
+            requestToken += TokenHelper.GetTotalTokens(request.Systems.Select(x => x.Text).ToArray());
         }
 
         if (rate.QuotaType == ModelQuotaType.OnDemand && request.Tools is { Count: > 0 })
@@ -467,9 +472,14 @@ public class AnthropicChatService(
             }
         }
 
-        if (input.System is { Count: > 0 })
+        if (!string.IsNullOrEmpty(input.System))
         {
-            requestToken += TokenHelper.GetTotalTokens(input.System.Select(x => x.Text).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(input.System);
+        }
+
+        if (input.Systems?.Count > 0)
+        {
+            requestToken += TokenHelper.GetTotalTokens(input.Systems.Select(x => x.Text).ToArray());
         }
 
         // 是否第一次输出
@@ -487,6 +497,16 @@ public class AnthropicChatService(
             if (item == null && !string.IsNullOrEmpty(@event))
             {
                 await context.WriteAsEventStreamAsync(@event).ConfigureAwait(false);
+                continue;
+            }
+            else if (item != null && !string.IsNullOrEmpty(@event))
+            {
+                if (@event.Equals("message_start", StringComparison.CurrentCulture))
+                {
+                    item.Usage.input_tokens = requestToken;
+                }
+                
+                await context.WriteAsEventStreamDataAsync(@event, item).ConfigureAwait(false);
                 continue;
             }
 
@@ -516,8 +536,6 @@ public class AnthropicChatService(
                 await context.WriteAsEventAsync(@event).ConfigureAwait(false);
             }
         }
-
-        await context.WriteAsEventStreamEndAsync();
 
         if (rate.QuotaType == ModelQuotaType.OnDemand && responseToken == 0)
         {
