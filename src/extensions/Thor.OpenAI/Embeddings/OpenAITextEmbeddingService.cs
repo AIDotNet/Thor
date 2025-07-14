@@ -20,6 +20,8 @@ public sealed class OpenAITextEmbeddingService(IHttpClientFactory httpClientFact
         var response = await HttpClientFactory.GetHttpClient(options.Address).PostJsonAsync(options?.Address.TrimEnd('/') + "/v1/embeddings",
             createEmbeddingModel, options!.ApiKey);
 
+        var str = await response.Content.ReadAsStringAsync();
+        
         var result =
             await response.Content.ReadFromJsonAsync<EmbeddingCreateResponse>(cancellationToken: cancellationToken);
 

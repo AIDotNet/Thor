@@ -14,7 +14,7 @@ public class ClaudeStreamDto
     public ClaudeChatCompletionDto message { get; set; }
     
 
-    public ClaudeChatCompletionDtoUsage Usage { get; set; }
+    public ClaudeChatCompletionDtoUsage? Usage { get; set; }
 }
 
 

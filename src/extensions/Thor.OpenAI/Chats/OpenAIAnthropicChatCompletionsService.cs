@@ -66,7 +66,10 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
 
         var messageId = Guid.NewGuid().ToString();
         var hasStarted = false;
-        var hasContentBlockStarted = false;
+        var hasTextContentBlockStarted = false;
+        var hasThinkingContentBlockStarted = false;
+        var toolBlocksStarted = new Dictionary<int, bool>(); // 使用索引而不是ID
+        var toolCallIds = new Dictionary<int, string>(); // 存储每个索引对应的ID
         var accumulatedUsage = new ClaudeChatCompletionDtoUsage();
         var isFinished = false;
 
@@ -79,6 +82,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 hasStarted = true;
                 var messageStartEvent = CreateMessageStartEvent(messageId, request.Model);
                 yield return ("message_start", messageStartEvent);
+
+                // 继续
             }
 
             if (openAIResponse.Choices != null && openAIResponse.Choices.Count > 0)
@@ -89,9 +94,9 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 if (!string.IsNullOrEmpty(choice.Delta?.Content))
                 {
                     // 发送content_block_start事件（仅第一次）
-                    if (!hasContentBlockStarted)
+                    if (!hasTextContentBlockStarted)
                     {
-                        hasContentBlockStarted = true;
+                        hasTextContentBlockStarted = true;
                         var contentBlockStartEvent = CreateContentBlockStartEvent();
                         yield return ("content_block_start", contentBlockStartEvent);
                     }
@@ -101,13 +106,51 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     yield return ("content_block_delta", contentDeltaEvent);
                 }
 
+                // 处理工具调用
+                if (choice.Delta?.ToolCalls is { Count: > 0 })
+                {
+                    foreach (var toolCall in choice.Delta.ToolCalls)
+                    {
+                        var toolCallIndex = toolCall.Index; // 使用索引来标识工具调用
+                        
+                        // 发送tool_use content_block_start事件
+                        if (!toolBlocksStarted.ContainsKey(toolCallIndex))
+                        {
+                            toolBlocksStarted[toolCallIndex] = true;
+                            
+                            // 保存工具调用的ID（如果有的话）
+                            if (!string.IsNullOrEmpty(toolCall.Id))
+                            {
+                                toolCallIds[toolCallIndex] = toolCall.Id;
+                            }
+                            else if (!toolCallIds.ContainsKey(toolCallIndex))
+                            {
+                                // 如果没有ID且之前也没有保存过，生成一个新的ID
+                                toolCallIds[toolCallIndex] = Guid.NewGuid().ToString();
+                            }
+                            
+                            var toolBlockStartEvent = CreateToolBlockStartEvent(
+                                toolCallIds[toolCallIndex], 
+                                toolCall.Function?.Name);
+                            yield return ("content_block_start", toolBlockStartEvent);
+                        }
+
+                        // 如果有增量的参数，发送content_block_delta事件
+                        if (!string.IsNullOrEmpty(toolCall.Function?.Arguments))
+                        {
+                            var toolDeltaEvent = CreateToolBlockDeltaEvent(toolCall.Function.Arguments);
+                            yield return ("content_block_delta", toolDeltaEvent);
+                        }
+                    }
+                }
+
                 // 处理推理内容
                 if (!string.IsNullOrEmpty(choice.Delta?.ReasoningContent))
                 {
                     // 对于推理内容，也需要发送对应的事件
-                    if (!hasContentBlockStarted)
+                    if (!hasThinkingContentBlockStarted)
                     {
-                        hasContentBlockStarted = true;
+                        hasThinkingContentBlockStarted = true;
                         var thinkingBlockStartEvent = CreateThinkingBlockStartEvent();
                         yield return ("content_block_start", thinkingBlockStartEvent);
                     }
@@ -122,7 +165,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     isFinished = true;
 
                     // 发送content_block_stop事件
-                    if (hasContentBlockStarted)
+                    if (hasTextContentBlockStarted || hasThinkingContentBlockStarted || toolBlocksStarted.Count > 0)
                     {
                         var contentBlockStopEvent = CreateContentBlockStopEvent();
                         yield return ("content_block_stop", contentBlockStopEvent);
@@ -152,7 +195,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         // 确保流正确结束
         if (!isFinished)
         {
-            if (hasContentBlockStarted)
+            if (hasTextContentBlockStarted || hasThinkingContentBlockStarted || toolBlocksStarted.Count > 0)
             {
                 var contentBlockStopEvent = CreateContentBlockStopEvent();
                 yield return ("content_block_stop", contentBlockStopEvent);
@@ -289,6 +332,26 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
     /// </summary>
     private ThorToolDefinition ConvertAnthropicToolToThor(AnthropicMessageTool anthropicTool)
     {
+        IDictionary<string, ThorToolFunctionPropertyDefinition> values =
+            new Dictionary<string, ThorToolFunctionPropertyDefinition>();
+
+        if (anthropicTool.InputSchema?.Properties != null)
+        {
+            foreach (var property in anthropicTool.InputSchema.Properties)
+            {
+                var propertyValueStr = property.Value?.ToString();
+                if (propertyValueStr != null)
+                {
+                    var propertyDefinition = JsonSerializer.Deserialize<ThorToolFunctionPropertyDefinition>(propertyValueStr);
+                    if (propertyDefinition != null)
+                    {
+                        values.Add(property.Key, propertyDefinition);
+                    }
+                }
+            }
+        }
+
+
         return new ThorToolDefinition
         {
             Type = "function",
@@ -299,14 +362,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 Parameters = new ThorToolFunctionPropertyDefinition
                 {
                     Type = anthropicTool.InputSchema?.Type ?? "object",
-                    Properties = anthropicTool.InputSchema?.Properties?.ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => new ThorToolFunctionPropertyDefinition
-                        {
-                            Type = kvp.Value.ToString(),
-                            Description = kvp.Value.ToString()
-                        }
-                    ) ?? new Dictionary<string, ThorToolFunctionPropertyDefinition>(),
+                    Properties = values,
                     Required = anthropicTool.InputSchema?.Required?.ToList() ?? new List<string>()
                 }
             }
@@ -320,7 +376,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
     {
         return new ThorToolChoice
         {
-            Type = anthropicToolChoice.Type,
+            Type = anthropicToolChoice.Type ?? "auto",
             Function = anthropicToolChoice.Name != null
                 ? new ThorToolChoiceFunctionTool { Name = anthropicToolChoice.Name }
                 : null
@@ -340,7 +396,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             role = "assistant",
             model = openAIResponse.Model ?? originalRequest.Model,
             stop_reason = GetClaudeStopReason(openAIResponse.Choices?.FirstOrDefault()?.FinishReason),
-            stop_sequence = null,
+            stop_sequence = "",
             content = new ClaudeChatCompletionDtoContent[0]
         };
 
@@ -553,6 +609,41 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         return new ClaudeStreamDto
         {
             type = "message_stop"
+        };
+    }
+
+    /// <summary>
+    /// 创建tool block start事件
+    /// </summary>
+    private ClaudeStreamDto CreateToolBlockStartEvent(string? toolId, string? toolName)
+    {
+        return new ClaudeStreamDto
+        {
+            type = "content_block_start",
+            index = 0,
+            content_block = new ClaudeChatCompletionDtoContent_block
+            {
+                type = "tool_use",
+                id = toolId,
+                name = toolName
+            }
+        };
+    }
+
+    /// <summary>
+    /// 创建tool delta事件
+    /// </summary>
+    private ClaudeStreamDto CreateToolBlockDeltaEvent(string partialJson)
+    {
+        return new ClaudeStreamDto
+        {
+            type = "content_block_delta",
+            index = 0,
+            delta = new ClaudeChatCompletionDtoDelta
+            {
+                type = "input_json_delta",
+                partial_json = partialJson
+            }
         };
     }
 }

@@ -503,6 +503,7 @@ public class AnthropicChatService(
             {
                 if (@event.Equals("message_start", StringComparison.CurrentCulture))
                 {
+                    item.Usage ??= new ClaudeChatCompletionDtoUsage();
                     item.Usage.input_tokens = requestToken;
                 }
                 
