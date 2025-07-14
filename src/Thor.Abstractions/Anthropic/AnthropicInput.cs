@@ -43,7 +43,7 @@ public sealed class AnthropicInput
                 }
                 else if (jsonElement.ValueKind == JsonValueKind.Object)
                 {
-                    ToolChoice = jsonElement.Deserialize<AnthropicTooChoiceInput>();
+                    ToolChoice = jsonElement.Deserialize<AnthropicTooChoiceInput>(ThorJsonSerializer.DefaultOptions);
                 }
             }
             else
@@ -57,11 +57,9 @@ public sealed class AnthropicInput
 
     [JsonIgnore] public AnthropicTooChoiceInput? ToolChoice { get; set; }
 
-    [JsonIgnore]
-    public IList<AnthropicMessageContent>? Systems { get; set; }
+    [JsonIgnore] public IList<AnthropicMessageContent>? Systems { get; set; }
 
-    [JsonIgnore]
-    public string System { get; set; }
+    [JsonIgnore] public string System { get; set; }
 
     [JsonPropertyName("system")]
     public object SystemCalculated
@@ -90,7 +88,8 @@ public sealed class AnthropicInput
                 }
                 else if (str.ValueKind == JsonValueKind.Array)
                 {
-                    Systems = JsonSerializer.Deserialize<IList<AnthropicMessageContent>>(value?.ToString());
+                    Systems = JsonSerializer.Deserialize<IList<AnthropicMessageContent>>(value?.ToString(),
+                        ThorJsonSerializer.DefaultOptions);
                 }
             }
             else

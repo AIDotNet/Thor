@@ -39,7 +39,7 @@ public class AnthropicMessageInput
                 }
                 else if (str.ValueKind == JsonValueKind.Array)
                 {
-                    Contents = JsonSerializer.Deserialize<IList<AnthropicMessageContent>>(value?.ToString());
+                    Contents = JsonSerializer.Deserialize<IList<AnthropicMessageContent>>(value?.ToString(),ThorJsonSerializer.DefaultOptions);
                 }
             }
             else

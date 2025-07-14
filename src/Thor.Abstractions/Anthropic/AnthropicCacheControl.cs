@@ -2,7 +2,7 @@
 
 namespace Thor.Abstractions.Anthropic;
 
-public class AnthropicCacheControl
+public sealed class AnthropicCacheControl
 {
     [JsonPropertyName("type")]
     public string Type { get; set; } 

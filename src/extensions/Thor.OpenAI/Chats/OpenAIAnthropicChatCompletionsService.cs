@@ -241,8 +241,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         {
             foreach (var message in anthropicInput.Messages)
             {
-                var thorMessage = ConvertAnthropicMessageToThor(message);
-                openAIRequest.Messages.Add(thorMessage);
+                var thorMessages = ConvertAnthropicMessageToThor(message);
+                openAIRequest.Messages.AddRange(thorMessages);
             }
         }
 
@@ -262,28 +262,35 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
     }
 
     /// <summary>
-    /// 转换Anthropic消息为Thor消息
+    /// 转换Anthropic消息为Thor消息列表
     /// </summary>
-    private ThorChatMessage ConvertAnthropicMessageToThor(AnthropicMessageInput anthropicMessage)
+    private List<ThorChatMessage> ConvertAnthropicMessageToThor(AnthropicMessageInput anthropicMessage)
     {
-        var thorMessage = new ThorChatMessage
-        {
-            Role = anthropicMessage.Role
-        };
-
+        var results = new List<ThorChatMessage>();
+        
+        // 处理简单的字符串内容
         if (anthropicMessage.Content != null)
         {
-            thorMessage.Content = anthropicMessage.Content;
+            var thorMessage = new ThorChatMessage
+            {
+                Role = anthropicMessage.Role,
+                Content = anthropicMessage.Content
+            };
+            results.Add(thorMessage);
+            return results;
         }
-        else if (anthropicMessage.Contents != null && anthropicMessage.Contents.Count > 0)
+        
+        // 处理多模态内容
+        if (anthropicMessage.Contents != null && anthropicMessage.Contents.Count > 0)
         {
-            // 处理多模态内容
-            var contents = new List<ThorChatMessageContent>();
+            var currentContents = new List<ThorChatMessageContent>();
+            var currentToolCalls = new List<ThorToolCall>();
+            
             foreach (var content in anthropicMessage.Contents)
             {
                 if (content.Type == "text")
                 {
-                    contents.Add(ThorChatMessageContent.CreateTextContent(content.Text ?? string.Empty));
+                    currentContents.Add(ThorChatMessageContent.CreateTextContent(content.Text ?? string.Empty));
                 }
                 else if (content.Type == "image")
                 {
@@ -292,12 +299,24 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         var imageUrl = content.Source.Type == "base64"
                             ? $"data:{content.Source.MediaType};base64,{content.Source.Data}"
                             : content.Source.Data;
-                        contents.Add(ThorChatMessageContent.CreateImageUrlContent(imageUrl ?? string.Empty));
+                        currentContents.Add(ThorChatMessageContent.CreateImageUrlContent(imageUrl ?? string.Empty));
                     }
                 }
                 else if (content.Type == "tool_use")
                 {
-                    // 处理工具使用
+                    // 如果有普通内容，先创建内容消息
+                    if (currentContents.Count > 0)
+                    {
+                        var contentMessage = new ThorChatMessage
+                        {
+                            Role = anthropicMessage.Role,
+                            Contents = currentContents
+                        };
+                        results.Add(contentMessage);
+                        currentContents = new List<ThorChatMessageContent>();
+                    }
+                    
+                    // 收集工具调用
                     var toolCall = new ThorToolCall
                     {
                         Id = content.Id,
@@ -308,23 +327,79 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                             Arguments = JsonSerializer.Serialize(content.Input)
                         }
                     };
-                    thorMessage.ToolCalls = new List<ThorToolCall> { toolCall };
+                    currentToolCalls.Add(toolCall);
                 }
                 else if (content.Type == "tool_result")
                 {
-                    thorMessage.ToolCallId = content.ToolUseId;
-                    thorMessage.Content = content.Content?.ToString() ?? string.Empty;
-                    thorMessage.Role = "tool";
+                    // 如果有普通内容，先创建内容消息
+                    if (currentContents.Count > 0)
+                    {
+                        var contentMessage = new ThorChatMessage
+                        {
+                            Role = anthropicMessage.Role,
+                            Contents = currentContents
+                        };
+                        results.Add(contentMessage);
+                        currentContents = new List<ThorChatMessageContent>();
+                    }
+                    
+                    // 如果有工具调用，先创建工具调用消息
+                    if (currentToolCalls.Count > 0)
+                    {
+                        var toolCallMessage = new ThorChatMessage
+                        {
+                            Role = anthropicMessage.Role,
+                            ToolCalls = currentToolCalls
+                        };
+                        results.Add(toolCallMessage);
+                        currentToolCalls = new List<ThorToolCall>();
+                    }
+                    
+                    // 创建工具结果消息
+                    var toolMessage = new ThorChatMessage
+                    {
+                        Role = "tool",
+                        ToolCallId = content.ToolUseId,
+                        Content = content.Content?.ToString() ?? string.Empty
+                    };
+                    results.Add(toolMessage);
                 }
             }
 
-            if (contents.Count > 0)
+            // 处理剩余的内容
+            if (currentContents.Count > 0)
             {
-                thorMessage.Contents = contents;
+                var contentMessage = new ThorChatMessage
+                {
+                    Role = anthropicMessage.Role,
+                    Contents = currentContents
+                };
+                results.Add(contentMessage);
+            }
+            
+            // 处理剩余的工具调用
+            if (currentToolCalls.Count > 0)
+            {
+                var toolCallMessage = new ThorChatMessage
+                {
+                    Role = anthropicMessage.Role,
+                    ToolCalls = currentToolCalls
+                };
+                results.Add(toolCallMessage);
             }
         }
+        
+        // 如果没有任何内容，返回一个空的消息
+        if (results.Count == 0)
+        {
+            results.Add(new ThorChatMessage
+            {
+                Role = anthropicMessage.Role,
+                Content = string.Empty
+            });
+        }
 
-        return thorMessage;
+        return results;
     }
 
     /// <summary>

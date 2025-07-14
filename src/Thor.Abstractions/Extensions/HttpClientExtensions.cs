@@ -141,8 +141,9 @@ public static class HttpClientExtensions
             }
             else
             {
-                string jsonContent = JsonSerializer.Serialize(postData, ThorJsonSerializer.DefaultOptions);
-                var stringContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                var stringContent =
+                    new StringContent(JsonSerializer.Serialize(postData, ThorJsonSerializer.DefaultOptions),
+                        Encoding.UTF8, "application/json");
                 req.Content = stringContent;
             }
         }
