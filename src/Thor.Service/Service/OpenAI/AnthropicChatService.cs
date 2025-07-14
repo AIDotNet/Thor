@@ -506,7 +506,7 @@ public class AnthropicChatService(
                     item.Usage ??= new ClaudeChatCompletionDtoUsage();
                     item.Usage.input_tokens = requestToken;
                 }
-                
+
                 await context.WriteAsEventStreamDataAsync(@event, item).ConfigureAwait(false);
                 continue;
             }
@@ -526,6 +526,12 @@ public class AnthropicChatService(
             {
                 responseToken = item.Usage?.output_tokens ?? item.message?.Usage?.output_tokens ?? 0;
             }
+            else
+            {
+                responseToken +=
+                    TokenHelper.GetTotalTokens(item?.delta?.partial_json ?? item?.delta?.text ?? item?.delta?.thinking
+                        ?? item?.message?.content?.FirstOrDefault()?.text ?? string.Empty);
+            }
 
             responseMessage.Append(item?.delta?.text ?? item?.message?.content?.FirstOrDefault()?.text);
             if (@event.StartsWith("data:"))
@@ -538,17 +544,14 @@ public class AnthropicChatService(
             }
         }
 
-        if (rate.QuotaType == ModelQuotaType.OnDemand && responseToken == 0)
+        responseToken = rate.QuotaType switch
         {
-            responseToken = TokenHelper.GetTokens(responseMessage.ToString());
-        }
-        else if (rate.QuotaType == ModelQuotaType.ByCount)
-        {
-            responseToken = rate.QuotaType == ModelQuotaType.OnDemand
+            ModelQuotaType.OnDemand when responseToken == 0 => TokenHelper.GetTokens(responseMessage.ToString()),
+            ModelQuotaType.ByCount => rate.QuotaType == ModelQuotaType.OnDemand
                 ? TokenHelper.GetTokens(responseMessage.ToString())
-                : 0;
-        }
-
+                : 0,
+            _ => responseToken
+        };
 
         return (requestToken, responseToken);
     }
