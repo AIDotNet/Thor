@@ -494,6 +494,19 @@ public class AnthropicChatService(
                 isFirst = false;
             }
 
+            if (item?.Usage is { output_tokens: > 0 } || item?.message?.Usage?.output_tokens is not null &&
+                item.message.Usage.output_tokens > 0)
+            {
+                responseToken = item.Usage?.output_tokens ?? item.message?.Usage?.output_tokens ?? 0;
+            }
+            else
+            {
+                responseToken +=
+                    TokenHelper.GetTotalTokens(item?.delta?.partial_json ?? item?.delta?.text ?? item?.delta?.thinking
+                        ?? item?.message?.content?.FirstOrDefault()?.text ?? string.Empty);
+            }
+
+            responseMessage.Append(item?.delta?.text ?? item?.message?.content?.FirstOrDefault()?.text);
             if (item == null && !string.IsNullOrEmpty(@event))
             {
                 await context.WriteAsEventStreamAsync(@event).ConfigureAwait(false);
@@ -521,19 +534,6 @@ public class AnthropicChatService(
                 requestToken = item.Usage?.input_tokens ?? item.message.Usage.input_tokens ?? 0;
             }
 
-            if (item?.Usage is { output_tokens: > 0 } || item?.message?.Usage?.output_tokens is not null &&
-                item.message.Usage.output_tokens > 0)
-            {
-                responseToken = item.Usage?.output_tokens ?? item.message?.Usage?.output_tokens ?? 0;
-            }
-            else
-            {
-                responseToken +=
-                    TokenHelper.GetTotalTokens(item?.delta?.partial_json ?? item?.delta?.text ?? item?.delta?.thinking
-                        ?? item?.message?.content?.FirstOrDefault()?.text ?? string.Empty);
-            }
-
-            responseMessage.Append(item?.delta?.text ?? item?.message?.content?.FirstOrDefault()?.text);
             if (@event.StartsWith("data:"))
             {
                 await context.WriteAsEventAsync(@event + "\n\n").ConfigureAwait(false);
