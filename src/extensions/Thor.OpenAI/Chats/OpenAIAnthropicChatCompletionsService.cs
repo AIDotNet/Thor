@@ -112,12 +112,12 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     foreach (var toolCall in choice.Delta.ToolCalls)
                     {
                         var toolCallIndex = toolCall.Index; // 使用索引来标识工具调用
-                        
+
                         // 发送tool_use content_block_start事件
                         if (!toolBlocksStarted.ContainsKey(toolCallIndex))
                         {
                             toolBlocksStarted[toolCallIndex] = true;
-                            
+
                             // 保存工具调用的ID（如果有的话）
                             if (!string.IsNullOrEmpty(toolCall.Id))
                             {
@@ -128,9 +128,9 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                                 // 如果没有ID且之前也没有保存过，生成一个新的ID
                                 toolCallIds[toolCallIndex] = Guid.NewGuid().ToString();
                             }
-                            
+
                             var toolBlockStartEvent = CreateToolBlockStartEvent(
-                                toolCallIds[toolCallIndex], 
+                                toolCallIds[toolCallIndex],
                                 toolCall.Function?.Name);
                             yield return ("content_block_start", toolBlockStartEvent);
                         }
@@ -267,7 +267,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
     private List<ThorChatMessage> ConvertAnthropicMessageToThor(AnthropicMessageInput anthropicMessage)
     {
         var results = new List<ThorChatMessage>();
-        
+
         // 处理简单的字符串内容
         if (anthropicMessage.Content != null)
         {
@@ -279,13 +279,13 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             results.Add(thorMessage);
             return results;
         }
-        
+
         // 处理多模态内容
         if (anthropicMessage.Contents != null && anthropicMessage.Contents.Count > 0)
         {
             var currentContents = new List<ThorChatMessageContent>();
             var currentToolCalls = new List<ThorToolCall>();
-            
+
             foreach (var content in anthropicMessage.Contents)
             {
                 if (content.Type == "text")
@@ -315,7 +315,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         results.Add(contentMessage);
                         currentContents = new List<ThorChatMessageContent>();
                     }
-                    
+
                     // 收集工具调用
                     var toolCall = new ThorToolCall
                     {
@@ -342,7 +342,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         results.Add(contentMessage);
                         currentContents = new List<ThorChatMessageContent>();
                     }
-                    
+
                     // 如果有工具调用，先创建工具调用消息
                     if (currentToolCalls.Count > 0)
                     {
@@ -354,7 +354,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         results.Add(toolCallMessage);
                         currentToolCalls = new List<ThorToolCall>();
                     }
-                    
+
                     // 创建工具结果消息
                     var toolMessage = new ThorChatMessage
                     {
@@ -376,7 +376,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 };
                 results.Add(contentMessage);
             }
-            
+
             // 处理剩余的工具调用
             if (currentToolCalls.Count > 0)
             {
@@ -388,7 +388,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 results.Add(toolCallMessage);
             }
         }
-        
+
         // 如果没有任何内容，返回一个空的消息
         if (results.Count == 0)
         {
@@ -397,6 +397,21 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 Role = anthropicMessage.Role,
                 Content = string.Empty
             });
+        }
+
+        // 如果只有一个text则使用content字段
+        if (results is [{ Contents.Count: 1 }] &&
+            results.FirstOrDefault()?.Contents?.FirstOrDefault()?.Type == "text" &&
+            !string.IsNullOrEmpty(results.FirstOrDefault()?.Contents?.FirstOrDefault()?.Text))
+        {
+            return
+            [
+                new ThorChatMessage
+                {
+                    Role = results[0].Role,
+                    Content = results.FirstOrDefault()?.Contents?.FirstOrDefault()?.Text ?? string.Empty
+                }
+            ];
         }
 
         return results;
@@ -417,7 +432,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 var propertyValueStr = property.Value?.ToString();
                 if (propertyValueStr != null)
                 {
-                    var propertyDefinition = JsonSerializer.Deserialize<ThorToolFunctionPropertyDefinition>(propertyValueStr);
+                    var propertyDefinition =
+                        JsonSerializer.Deserialize<ThorToolFunctionPropertyDefinition>(propertyValueStr);
                     if (propertyDefinition != null)
                     {
                         values.Add(property.Key, propertyDefinition);
