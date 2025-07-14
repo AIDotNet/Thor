@@ -107,10 +107,10 @@ jobs:
           path: src/Thor.Service/wwwroot/
 
       - name: 还原NuGet包
-        run: dotnet restore ${{ env.PROJECT_PATH }}
+        run: dotnet restore ${{ env.PROJECT_PATH }} --runtime ${{ matrix.runtime }}
 
       - name: 构建项目
-        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --runtime ${{ matrix.runtime }} --no-restore
 
       - name: 发布应用 (依赖框架)
         if: matrix.deployment == 'framework-dependent'
