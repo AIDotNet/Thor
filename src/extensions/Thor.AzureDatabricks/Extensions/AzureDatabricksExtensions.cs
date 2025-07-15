@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Thor.Abstractions;
+using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats;
 using Thor.AzureDatabricks.Chats;
 
@@ -14,6 +15,9 @@ public static class AzureDatabricksExtensions
             AzureDatabricksPlatformOptions.PlatformCode);
 
         services.AddKeyedSingleton<IThorChatCompletionsService, AzureDatabricksChatCompletionsService>(
+            AzureDatabricksPlatformOptions.PlatformCode);
+
+        services.AddKeyedSingleton<IAnthropicChatCompletionsService, AzureDatabricksAnthropicChatCompletionsService>(
             AzureDatabricksPlatformOptions.PlatformCode);
 
         return services;

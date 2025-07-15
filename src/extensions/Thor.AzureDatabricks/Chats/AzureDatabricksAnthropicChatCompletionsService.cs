@@ -1,25 +1,28 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Thor.Abstractions.Anthropic;
+
+namespace Thor.AzureDatabricks.Chats;
+
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
 using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-
-namespace Thor.AzureOpenAI.Chats;
+using Thor.Abstractions.Dtos;
 
 /// <summary>
 /// OpenAI到Claude适配器服务
 /// 将Claude格式的请求转换为OpenAI格式，然后将OpenAI的响应转换为Claude格式
 /// </summary>
-public class AzureOpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsService
+public class AzureDatabricksAnthropicChatCompletionsService : IAnthropicChatCompletionsService
 {
     private readonly IThorChatCompletionsService _openAIChatService;
-    private readonly ILogger<AzureOpenAIAnthropicChatCompletionsService> _logger;
+    private readonly ILogger<AzureDatabricksAnthropicChatCompletionsService> _logger;
 
-    public AzureOpenAIAnthropicChatCompletionsService(
+    public AzureDatabricksAnthropicChatCompletionsService(
         IThorChatCompletionsService openAIChatService,
-        ILogger<AzureOpenAIAnthropicChatCompletionsService> logger)
+        ILogger<AzureDatabricksAnthropicChatCompletionsService> logger)
     {
         _openAIChatService = openAIChatService;
         _logger = logger;
@@ -293,13 +296,11 @@ public class AzureOpenAIAnthropicChatCompletionsService : IAnthropicChatCompleti
                 }
                 else if (content.Type == "image")
                 {
-                    if (content.Source != null)
-                    {
-                        var imageUrl = content.Source.Type == "base64"
-                            ? $"data:{content.Source.MediaType};base64,{content.Source.Data}"
-                            : content.Source.Data;
-                        currentContents.Add(ThorChatMessageContent.CreateImageUrlContent(imageUrl ?? string.Empty));
-                    }
+                    if (content.Source == null) continue;
+                    var imageUrl = content.Source.Type == "base64"
+                        ? $"data:{content.Source.MediaType};base64,{content.Source.Data}"
+                        : content.Source.Data;
+                    currentContents.Add(ThorChatMessageContent.CreateImageUrlContent(imageUrl ?? string.Empty));
                 }
                 else if (content.Type == "tool_use")
                 {
