@@ -111,12 +111,12 @@ namespace Thor.AzureOpenAI.Chats
                         foreach (var toolCall in choice.Delta.ToolCalls)
                         {
                             var toolCallIndex = toolCall.Index; // 使用索引来标识工具调用
-                        
+
                             // 发送tool_use content_block_start事件
                             if (!toolBlocksStarted.ContainsKey(toolCallIndex))
                             {
                                 toolBlocksStarted[toolCallIndex] = true;
-                            
+
                                 // 保存工具调用的ID（如果有的话）
                                 if (!string.IsNullOrEmpty(toolCall.Id))
                                 {
@@ -127,9 +127,9 @@ namespace Thor.AzureOpenAI.Chats
                                     // 如果没有ID且之前也没有保存过，生成一个新的ID
                                     toolCallIds[toolCallIndex] = Guid.NewGuid().ToString();
                                 }
-                            
+
                                 var toolBlockStartEvent = CreateToolBlockStartEvent(
-                                    toolCallIds[toolCallIndex], 
+                                    toolCallIds[toolCallIndex],
                                     toolCall.Function?.Name);
                                 yield return ("content_block_start", toolBlockStartEvent);
                             }
@@ -341,7 +341,8 @@ namespace Thor.AzureOpenAI.Chats
                     var propertyValueStr = property.Value?.ToString();
                     if (propertyValueStr != null)
                     {
-                        var propertyDefinition = JsonSerializer.Deserialize<ThorToolFunctionPropertyDefinition>(propertyValueStr);
+                        var propertyDefinition =
+                            JsonSerializer.Deserialize<ThorToolFunctionPropertyDefinition>(propertyValueStr);
                         if (propertyDefinition != null)
                         {
                             values.Add(property.Key, propertyDefinition);
@@ -443,15 +444,29 @@ namespace Thor.AzureOpenAI.Chats
             }
 
             // 处理使用情况统计
-            if (openAIResponse.Usage != null)
+            if (openAIResponse.Usage == null) return claudeResponse;
+            
+            claudeResponse.Usage = new ClaudeChatCompletionDtoUsage();
+            if (openAIResponse.Usage.PromptTokens > 0)
             {
-                claudeResponse.Usage = new ClaudeChatCompletionDtoUsage
-                {
-                    input_tokens = openAIResponse.Usage.PromptTokens,
-                    output_tokens = (int?)openAIResponse.Usage.CompletionTokens,
-                    cache_read_input_tokens = openAIResponse.Usage.PromptTokensDetails?.CachedTokens
-                };
+                claudeResponse.Usage.input_tokens = openAIResponse.Usage.PromptTokens;
             }
+            else if (openAIResponse.Usage.InputTokens > 0)
+            {
+                claudeResponse.Usage.input_tokens = openAIResponse.Usage.InputTokens;
+            }
+
+            if (openAIResponse.Usage.CompletionTokens > 0)
+            {
+                claudeResponse.Usage.output_tokens = (int?)openAIResponse.Usage.CompletionTokens;
+            }
+            else if (openAIResponse.Usage.OutputTokens > 0)
+            {
+                claudeResponse.Usage.output_tokens = (int?)openAIResponse.Usage.OutputTokens;
+            }
+
+            claudeResponse.Usage.cache_read_input_tokens =
+                openAIResponse.Usage.PromptTokensDetails?.CachedTokens ?? 0;
 
             return claudeResponse;
         }

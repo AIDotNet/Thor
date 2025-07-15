@@ -44,7 +44,8 @@ public sealed partial class ChatService(
     UserGroupService userGroupService,
     ILogger<ChatService> logger,
     ModelMapService modelMapService,
-    LoggerService loggerService)
+    LoggerService loggerService,
+    ContextPricingService contextPricingService)
     : AIService(serviceProvider, imageService)
 {
     public async ValueTask EmbeddingAsync(HttpContext context, ThorEmbeddingInput input)
@@ -819,9 +820,14 @@ public sealed partial class ChatService(
                 }
             }
 
-            var quota = requestToken * rate.PromptRate;
+            // 计算上下文长度（使用请求token数作为近似值）
+            var contextLength = requestToken;
+            
+            // 使用上下文定价服务计算费用
+            var pricingResult = contextPricingService.CalculatePricing(rate, requestToken, responseToken, contextLength);
+            var quota = pricingResult.TotalCost;
 
-            // 判断请求token数量是否超过额度
+            // 判断请求费用是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
             result = await openService.ChatCompletionsAsync(request, platformOptions);

@@ -34,9 +34,9 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
     public DbSet<ModelManager> ModelManagers { get; set; }
 
     public DbSet<ModelMap> ModelMaps { get; set; }
-    
+
     public DbSet<UserGroup> UserGroups { get; set; }
-    
+
     public DbSet<Announcement> Announcements { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -113,6 +113,19 @@ public abstract class ThorContext<TContext>(DbContextOptions<TContext> context, 
             options.Property(x => x.Group)
                 .HasConversion((x) => JsonSerializer.Serialize(x, JsonSerializerOptions.Web),
                     (x) => JsonSerializer.Deserialize<string[]>(x, JsonSerializerOptions.Web) ?? Array.Empty<string>());
+        });
+
+        modelBuilder.Entity<ModelManager>(options =>
+        {
+            options.Property(x => x.ContextPricingTiers)
+                .HasColumnName("ContextPricingTiers")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, JsonSerializerOptions.Web),
+                    v => string.IsNullOrEmpty(v)
+                        ? new List<ContextPricingTier>()
+                        : JsonSerializer.Deserialize<List<ContextPricingTier>>(v, JsonSerializerOptions.Web) ??
+                          new List<ContextPricingTier>()
+                );
         });
 
         if (!File.Exists("model-manager.json")) return;

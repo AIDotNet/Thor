@@ -18,11 +18,9 @@ public class TracingMiddleware : IMiddleware
         {
             ActivityStarted = activity => 
             {
-                Console.WriteLine($"Activity started: {activity.DisplayName}, ID: {activity.Id}");
             },
             ActivityStopped = activity => 
             {
-                Console.WriteLine($"Activity stopped: {activity.DisplayName}, ID: {activity.Id}");
             },
             ShouldListenTo = source => source.Name.StartsWith("Thor"),
             Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData

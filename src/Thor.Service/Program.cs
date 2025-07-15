@@ -159,6 +159,7 @@ try
         .AddScoped<UsageService>()
         .AddScoped<AnnouncementService>()
         .AddScoped<IUserContext, DefaultUserContext>()
+        .AddScoped<ContextPricingService>()
         .AddHostedService<StatisticBackgroundTask>()
         .AddHostedService<LoggerBackgroundTask>()
         .AddHostedService<TrackerBackgroundTask>()

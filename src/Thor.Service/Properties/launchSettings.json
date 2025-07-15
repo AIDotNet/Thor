@@ -11,15 +11,7 @@
         "OTEL_EXPORTER_OTLP_PROTOCOL": "grpc"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5045"
-    },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      "applicationUrl": "http://*:5045"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",

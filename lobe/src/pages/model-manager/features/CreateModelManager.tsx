@@ -374,6 +374,131 @@ export default function CreateModelManagerPage({
                     </Col>
                 </Row>
                 
+                <Row gutter={16}>
+                    <Col span={mobile ? 24 : 12}>
+                        <Form.Item name="defaultContextLength" label={t('modelManager.defaultContextLength')}>
+                            <InputNumber 
+                                style={{ width: '100%' }} 
+                                placeholder={t('modelManager.enterDefaultContextLength')}
+                                min={0}
+                                step={512}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                
+                <Divider style={{ margin: '16px 0', borderColor: token.colorBorderSecondary }} />
+                
+                <Typography.Title level={5} style={{ marginBottom: 16, color: token.colorTextSecondary }}>
+                    {t('modelManager.contextPricingTiers')}
+                </Typography.Title>
+                
+                <Form.List name="contextPricingTiers">
+                    {(fields, { add, remove }) => (
+                        <>
+                            {fields.map(({ key, name, ...restField }) => (
+                                <div key={key} style={{ marginBottom: 16, padding: 16, border: `1px solid ${token.colorBorder}`, borderRadius: 8 }}>
+                                    <Row gutter={16}>
+                                        <Col span={mobile ? 24 : 8}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'minContextLength']}
+                                                label={t('modelManager.minContextLength')}
+                                                rules={[{ required: true, message: t('modelManager.minContextLengthRequired') }]}>
+                                                <InputNumber 
+                                                    style={{ width: '100%' }} 
+                                                    placeholder={t('modelManager.enterMinContextLength')}
+                                                    min={0}
+                                                    step={512}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={mobile ? 24 : 8}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'maxContextLength']}
+                                                label={t('modelManager.maxContextLength')}
+                                                rules={[{ required: true, message: t('modelManager.maxContextLengthRequired') }]}>
+                                                <InputNumber 
+                                                    style={{ width: '100%' }} 
+                                                    placeholder={t('modelManager.enterMaxContextLength')}
+                                                    min={0}
+                                                    step={512}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={mobile ? 24 : 8}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'description']}
+                                                label={t('modelManager.tierDescription')}
+                                                rules={[{ required: true, message: t('modelManager.tierDescriptionRequired') }]}>
+                                                <Input placeholder={t('modelManager.enterTierDescription')} />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Row gutter={16}>
+                                        <Col span={mobile ? 24 : 8}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'promptRateMultiplier']}
+                                                label={t('modelManager.promptRateMultiplier')}
+                                                rules={[{ required: true, message: t('modelManager.promptRateMultiplierRequired') }]}>
+                                                <InputNumber 
+                                                    style={{ width: '100%' }} 
+                                                    placeholder={t('modelManager.enterPromptRateMultiplier')}
+                                                    min={0.1}
+                                                    step={0.1}
+                                                    precision={2}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={mobile ? 24 : 8}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'completionRateMultiplier']}
+                                                label={t('modelManager.completionRateMultiplier')}
+                                                rules={[{ required: true, message: t('modelManager.completionRateMultiplierRequired') }]}>
+                                                <InputNumber 
+                                                    style={{ width: '100%' }} 
+                                                    placeholder={t('modelManager.enterCompletionRateMultiplier')}
+                                                    min={0.1}
+                                                    step={0.1}
+                                                    precision={2}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={mobile ? 24 : 8}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'fixedAdditionalCost']}
+                                                label={t('modelManager.fixedAdditionalCost')}>
+                                                <InputNumber 
+                                                    style={{ width: '100%' }} 
+                                                    placeholder={t('modelManager.enterFixedAdditionalCost')}
+                                                    min={0}
+                                                    step={0.1}
+                                                    precision={2}
+                                                />
+                                            </Form.Item>
+                                        </Col>
+                                    </Row>
+                                    <Button 
+                                        type="link" 
+                                        danger 
+                                        onClick={() => remove(name)}
+                                        style={{ marginTop: 8 }}>
+                                        {t('common.remove')}
+                                    </Button>
+                                </div>
+                            ))}
+                            <Button type="dashed" onClick={() => add()} block>
+                                {t('modelManager.addPricingTier')}
+                            </Button>
+                        </>
+                    )}
+                </Form.List>
+                
                 <Divider style={{ margin: '16px 0', borderColor: token.colorBorderSecondary }} />
                 
                 <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>

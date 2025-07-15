@@ -179,12 +179,12 @@ namespace Thor.Provider.SqlServer.Thor
                         new
                         {
                             Id = "CA378C74-19E7-458A-918B-4DBB7AE1729D",
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 443, DateTimeKind.Local).AddTicks(4379),
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 700, DateTimeKind.Local).AddTicks(6849),
                             Creator = "CA378C74-19E7-458A-918B-4DBB7AE1729D",
                             Disabled = false,
                             Groups = "[\"default\"]",
                             IsDelete = false,
-                            Key = "sk-AsRkUA8l49eK5ujcVYzFRzY2pbXuJ8iDPeygki",
+                            Key = "sk-Mx46gOa4PsMb0sUmvp98mOpk8ijVsslwfxk5kn",
                             LimitModels = "[]",
                             Name = "默认Token",
                             RemainQuota = 0L,
@@ -251,7 +251,7 @@ namespace Thor.Provider.SqlServer.Thor
                         {
                             Id = new Guid("ca378c74-19e7-458a-918b-4dbb7ae1729d"),
                             Code = "default",
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 444, DateTimeKind.Local).AddTicks(2062),
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 701, DateTimeKind.Local).AddTicks(7832),
                             Description = "默认用户组",
                             Enable = true,
                             Name = "默认",
@@ -262,7 +262,7 @@ namespace Thor.Provider.SqlServer.Thor
                         {
                             Id = new Guid("ca378c74-19e7-458a-918b-4dbb7ae17291"),
                             Code = "vip",
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 444, DateTimeKind.Local).AddTicks(2429),
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 701, DateTimeKind.Local).AddTicks(8333),
                             Description = "VIP用户组",
                             Enable = true,
                             Name = "VIP",
@@ -348,11 +348,19 @@ namespace Thor.Provider.SqlServer.Thor
                     b.Property<decimal?>("CompletionRate")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ContextPricingTiers")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("ContextPricingTiers");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Creator")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("DefaultContextLength")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -409,9 +417,11 @@ namespace Thor.Provider.SqlServer.Thor
                     b.HasData(
                         new
                         {
-                            Id = new Guid("e81d9a26-506b-4ae3-b8aa-13456da65bd2"),
+                            Id = new Guid("e605cdd6-218d-4802-a4f0-6149b624978c"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3026),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8642),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -426,9 +436,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("9cffc495-547a-41bb-9964-46712a118993"),
+                            Id = new Guid("cb552a9d-5e7c-42b6-831d-ff504cc59402"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3231),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8921),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo 0125 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -443,9 +455,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("a906437f-9f57-477d-8c13-a71ea174db64"),
+                            Id = new Guid("810a3a59-aff4-40eb-b1f1-20075efe30ba"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3233),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8922),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo 0301 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -460,9 +474,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("01af2839-b8a1-49b3-811a-5e102baa995d"),
+                            Id = new Guid("c4ce5289-4270-4f99-8403-0fa334378ed2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3235),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8923),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo 0613 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -477,9 +493,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("f1e8af73-604e-4270-881e-e7120d836319"),
+                            Id = new Guid("960b0527-147b-4827-9723-3c8ae56c2889"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3235),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8924),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo 1106 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -494,9 +512,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("38b51a27-b304-4088-bea7-a03f76e8f3fb"),
+                            Id = new Guid("4505787d-2ff9-46e6-8443-a89e711e7c9c"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3236),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8925),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo 16k 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -511,9 +531,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("8ad35a76-8e9b-43b8-a110-d63b0a9e669c"),
+                            Id = new Guid("27418fb1-34ab-4b41-a24d-b495b47f9f95"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3238),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8927),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo 16k 0613 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -528,9 +550,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("8a69c08f-d2ce-41c0-8c06-428fa60eb187"),
+                            Id = new Guid("76ecc8b3-fc48-4816-80b5-cd92f3025387"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3249),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8928),
+                            DefaultContextLength = 4096,
                             Description = "GPT-3.5 Turbo Instruct 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -545,9 +569,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("660e22c6-a359-4a14-9d71-cbde03286f67"),
+                            Id = new Guid("052f943d-a8d7-4acd-8315-ce6d9644ef27"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3250),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8929),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -562,9 +588,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("ac63ff46-c4f6-416c-ac2c-fbef11290d14"),
+                            Id = new Guid("f2054550-ea25-4a77-a975-de4afaa41949"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3252),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8932),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 0125 预览文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -579,9 +607,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("d405e652-a91e-4e69-97f3-09f1fd939fbf"),
+                            Id = new Guid("5557d04d-b0ed-4c42-b9ce-7b96d1599e93"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3253),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8933),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 0314 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -596,9 +626,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("c39e26cf-777d-4f8a-822c-f21a68ef483b"),
+                            Id = new Guid("64452729-1c6c-481c-b2dd-ccd1db6f160c"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3254),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8933),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 0613 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -613,9 +645,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("1c01ca85-050f-4410-bc9f-11eaaf8936d0"),
+                            Id = new Guid("56cbce17-4b29-4787-a9bf-eb6076a47362"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3255),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8935),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 1106 预览文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -630,9 +664,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("a62c5e7e-195f-40f4-9b6a-405b890507aa"),
+                            Id = new Guid("98bff0bd-647c-4ec3-8bdf-6534425e41b1"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3256),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8936),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 1106 视觉预览模型",
                             Enable = true,
                             Extension = "{}",
@@ -647,9 +683,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("8bb3838c-5dca-4ca8-980d-87e1f6db714f"),
+                            Id = new Guid("6f9c0188-64c7-42aa-9546-698e5361dc82"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3257),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8936),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 32k 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -664,9 +702,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("88c5dd5f-2107-47bb-a1c6-6b179d2ba05d"),
+                            Id = new Guid("415b3686-634e-44e3-9886-a461fea90437"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3261),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8937),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 32k 0314 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -681,9 +721,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("aec66ecc-599b-4c35-b842-98c4e1763fa4"),
+                            Id = new Guid("a9ec7346-689c-4b13-89f1-58d85f68e596"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3262),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8938),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 32k 0613 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -698,9 +740,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("0895255f-4280-4acc-b17a-6748b62d316a"),
+                            Id = new Guid("e0757e90-c643-43cc-aa26-f20ecb6caf64"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3263),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8940),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 全部文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -715,9 +759,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("a491c4b5-f938-4549-a0a4-651cf4eb7f32"),
+                            Id = new Guid("d39e7a18-d8c4-491a-b89d-b885e1cda413"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3264),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8941),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 Turbo 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -732,10 +778,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("7ebcc1c8-ba73-4307-9c9c-a455c20ca2cb"),
+                            Id = new Guid("ce281eda-5d81-496a-b5d2-99eca5bee018"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3266),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8942),
+                            DefaultContextLength = 4096,
                             Description = "Gemini 1.5 Pro 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -750,10 +798,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("954de913-fe77-4472-ba78-1c3d214a16d5"),
+                            Id = new Guid("48fe05bc-b1f3-46a5-a7ca-e5125657c84c"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3267),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8944),
+                            DefaultContextLength = 4096,
                             Description = "Gemini Pro 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -768,10 +818,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("af4dc6d6-0ec9-4148-beab-9590416f27ed"),
+                            Id = new Guid("9d37ce2d-c273-4115-91ca-3403f7b02d65"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3268),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8944),
+                            DefaultContextLength = 4096,
                             Description = "Gemini Pro 视觉模型",
                             Enable = true,
                             Extension = "{}",
@@ -786,10 +838,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("17113c7d-30ea-473f-bc8f-089f0e85f8ed"),
+                            Id = new Guid("847a3eb8-8583-4fe9-95c7-f2d679be522b"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3269),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8945),
+                            DefaultContextLength = 4096,
                             Description = "Gemini 1.5 Flash 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -804,9 +858,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("20cc38db-3808-483a-8b9d-7aa922dd3a06"),
+                            Id = new Guid("6359f1ea-ae2c-4c42-8105-f1794b3653a4"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3273),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8946),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 Turbo 2024-04-09 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -821,9 +877,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("b9e2eb75-8ed1-4e14-a29d-f5d64d87c2ac"),
+                            Id = new Guid("50d19f99-d5db-4338-a53f-f36277011eb2"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3274),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8947),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 Turbo 预览文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -838,9 +896,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("1caef44d-8405-41de-8d48-fd292d09db99"),
+                            Id = new Guid("f29248b9-cccd-4760-b6b0-dd660fb9ae6f"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3280),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8949),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4 视觉预览模型",
                             Enable = true,
                             Extension = "{}",
@@ -855,10 +915,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("117a735f-dcc4-4007-9ed1-bbb445754421"),
+                            Id = new Guid("9ea2714e-fde1-46d3-9a0a-11bf24636cf0"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3281),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8950),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4o 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -873,10 +935,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("eb3e033c-b97d-47bb-93e1-b20924df860e"),
+                            Id = new Guid("fc98100e-cbb1-4cba-9cfc-18de7fa0a2a2"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3282),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8951),
+                            DefaultContextLength = 4096,
                             Description = "ChatGPT 4o 最新文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -891,10 +955,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("757f14b8-2da5-4009-9a55-6f7d2e7dc060"),
+                            Id = new Guid("7f6e882f-3c91-49a5-b017-de8e5b062e75"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3283),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8952),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4o Mini 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -909,10 +975,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("00f7b0e9-41d8-450c-9c60-8ae5bc2faf32"),
+                            Id = new Guid("abc9c0e4-7f13-486b-aeb5-28fcd53830b0"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3285),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8953),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4o Mini 2024-07-18 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -927,10 +995,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("f4fc4c30-f1a3-42b1-8ce3-c27e8e83bfcf"),
+                            Id = new Guid("07758511-291e-49d4-9837-2e2553e079ec"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3286),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8953),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4o 2024-05-13 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -945,10 +1015,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("ebb313a8-4b20-466d-90d4-355980b5fd60"),
+                            Id = new Guid("c0a628d1-562d-4ae6-9d16-a6308d5f87ff"),
                             Available = true,
                             CompletionRate = 4m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3289),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8954),
+                            DefaultContextLength = 4096,
                             Description = "GPT-4o 2024-08-06 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -963,9 +1035,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("a0191355-03e3-4767-8f9f-2451fb5bcac7"),
+                            Id = new Guid("8a67872f-48f6-42db-a511-7fea5e24d9e7"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3290),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8955),
+                            DefaultContextLength = 4096,
                             Description = "Moonshot v1 128k 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -980,9 +1054,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("4d489977-aa4f-48f8-b652-3b16d08be83d"),
+                            Id = new Guid("3190cf1e-8bcc-4f31-8e1b-c5114ba999e6"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3292),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8957),
+                            DefaultContextLength = 4096,
                             Description = "Moonshot v1 32k 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -997,9 +1073,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("c188da00-fd06-44ed-b1f2-2a2b0227b45a"),
+                            Id = new Guid("70d0f28a-0003-468b-b86f-b3b62f6d772a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3293),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8958),
+                            DefaultContextLength = 4096,
                             Description = "Moonshot v1 8k 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1014,9 +1092,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("33e99e88-46b6-49aa-8b81-910c259f246d"),
+                            Id = new Guid("4ad39129-5880-4cf1-b17a-2244bc912d04"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3294),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8959),
+                            DefaultContextLength = 4096,
                             Description = "Text Babbage 001 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1031,9 +1111,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("aef46351-e009-40ff-8acb-6b4e6baca392"),
+                            Id = new Guid("a3c31314-b889-4f21-84b8-962bac75589a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3295),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8961),
+                            DefaultContextLength = 4096,
                             Description = "Text Curie 001 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1048,9 +1130,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("5260a718-9152-4a64-a1f5-98da0ab48ebf"),
+                            Id = new Guid("de271526-fe30-41ec-9be8-e3499cec6b83"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3295),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8962),
+                            DefaultContextLength = 4096,
                             Description = "Text Davinci 002 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1065,9 +1149,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("43eaf784-ae62-4ad6-8c9b-6fc5265b8dbf"),
+                            Id = new Guid("b2b3d871-a6f8-42e9-9960-6717792897aa"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3296),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8962),
+                            DefaultContextLength = 4096,
                             Description = "Text Davinci 003 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1082,9 +1168,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("5a86ee49-da81-45a9-840b-3c6557d09d74"),
+                            Id = new Guid("ff7657b7-0ea1-43d8-846f-8c3db4b9bfcd"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3298),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8963),
+                            DefaultContextLength = 4096,
                             Description = "Text Davinci Edit 001 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1099,9 +1187,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("ece312b6-fb48-4553-8fdc-a3f39e261981"),
+                            Id = new Guid("3a0d6ba0-b47c-4345-9c9d-a648316b132b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3299),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8964),
+                            DefaultContextLength = 4096,
                             Description = "Text Embedding 3 Large 嵌入模型",
                             Enable = true,
                             Extension = "{}",
@@ -1116,9 +1206,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("88612241-2eea-42e9-ad5e-4cc6c36c6c37"),
+                            Id = new Guid("bf832e69-68c9-41a2-b4ee-647ac7ef03e1"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3300),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8966),
+                            DefaultContextLength = 4096,
                             Description = "Text Embedding 3 Small 嵌入模型",
                             Enable = true,
                             Extension = "{}",
@@ -1133,9 +1225,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("bf1eb103-f00e-48c0-a1db-2b2d2f203390"),
+                            Id = new Guid("1a07a18a-b776-41f9-a0d0-f578da1a02ac"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3301),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8967),
+                            DefaultContextLength = 4096,
                             Description = "Text Embedding Ada 002 嵌入模型",
                             Enable = true,
                             Extension = "{}",
@@ -1150,9 +1244,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("bed23d61-9526-48ba-95d4-8e2346d12520"),
+                            Id = new Guid("4dcfe3ef-19b7-4226-af52-db537df504b3"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3302),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8967),
+                            DefaultContextLength = 4096,
                             Description = "TTS 1 语音合成模型",
                             Enable = true,
                             Extension = "{}",
@@ -1166,9 +1262,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("238ef6d3-5f14-4063-8c52-3099e1ca63bf"),
+                            Id = new Guid("0d0ef02d-8cca-4b82-bf92-51805c3c19d4"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3305),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8968),
+                            DefaultContextLength = 4096,
                             Description = "TTS 1 1106 语音合成模型",
                             Enable = true,
                             Extension = "{}",
@@ -1182,9 +1280,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("938b3193-fe3c-4346-9799-79f2ca81bf12"),
+                            Id = new Guid("eb9692d1-56f4-4c70-90eb-43c1a2f9b802"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3306),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8969),
+                            DefaultContextLength = 4096,
                             Description = "TTS 1 HD 语音合成模型",
                             Enable = true,
                             Extension = "{}",
@@ -1198,9 +1298,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("bc32ece1-fa27-4e3e-b715-8e14512dc457"),
+                            Id = new Guid("1c2bacd7-df51-4443-9489-dc054e586b6a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3307),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8970),
+                            DefaultContextLength = 4096,
                             Description = "TTS 1 HD 1106 语音合成模型",
                             Enable = true,
                             Extension = "{}",
@@ -1214,9 +1316,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("0e54dc38-37ed-4e38-9893-7ee0be00f4ce"),
+                            Id = new Guid("557ff8ae-b4a1-4ad3-85f6-38baf11aa91d"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3309),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8971),
+                            DefaultContextLength = 4096,
                             Description = "Whisper 1 语音识别模型",
                             Enable = true,
                             Extension = "{}",
@@ -1230,9 +1334,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("16766eb1-96c6-4732-90cd-4c6673ff0554"),
+                            Id = new Guid("fc45dd43-4ac9-4f0b-9dfa-3ceec906c63a"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3309),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8971),
+                            DefaultContextLength = 4096,
                             Description = "Hunyuan Lite 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1247,10 +1353,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("1c83c5cc-cde7-4785-a9df-bcd3cf7d9988"),
+                            Id = new Guid("961c42dc-0826-4bde-9338-e1ab85c4faff"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3316),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8973),
+                            DefaultContextLength = 4096,
                             Description = "通用文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1265,10 +1373,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("ff42c917-a096-42cd-88df-19212c30b99b"),
+                            Id = new Guid("2c71eacd-d0c9-4a85-a335-3ad5f42c895a"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3317),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8974),
+                            DefaultContextLength = 4096,
                             Description = "通用文本模型 v3",
                             Enable = true,
                             Extension = "{}",
@@ -1283,10 +1393,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("a536b818-0950-4deb-8269-5cd398ef59c5"),
+                            Id = new Guid("998a9334-0945-478c-9f18-52282886a83c"),
                             Available = true,
                             CompletionRate = 2m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3318),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8975),
+                            DefaultContextLength = 4096,
                             Description = "通用文本模型 v3.5",
                             Enable = true,
                             Extension = "{}",
@@ -1301,10 +1413,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("96cfd1e6-3609-4c26-a7e8-a2054a7de326"),
+                            Id = new Guid("b979773f-b512-4d7c-adf8-5a58c9819af2"),
                             Available = true,
                             CompletionRate = 3m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3318),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8976),
+                            DefaultContextLength = 4096,
                             Description = "4.0 超级文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1319,9 +1433,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("d6684434-295f-48f5-ac07-7f56e1b77f4d"),
+                            Id = new Guid("28baffea-7507-4230-80e0-4a3f6952244d"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3319),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8976),
+                            DefaultContextLength = 4096,
                             Description = "ChatGLM Lite 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1336,9 +1452,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("3b1e56ad-d2f8-499f-b328-201532eaf343"),
+                            Id = new Guid("02097089-7af6-4700-a0c9-44b0d1432661"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3320),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8977),
+                            DefaultContextLength = 4096,
                             Description = "ChatGLM Pro 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1353,9 +1471,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("65b4cf71-7e31-493b-870a-9930cacaf38a"),
+                            Id = new Guid("9af53008-a8a6-48d8-ac68-7e72198c1a8e"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3323),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8979),
+                            DefaultContextLength = 4096,
                             Description = "ChatGLM 标准文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1370,9 +1490,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("bc9fab50-fae7-45fe-9082-6db8f1a60733"),
+                            Id = new Guid("71b67347-8846-40a6-ab4f-3e81828848e7"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3323),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8980),
+                            DefaultContextLength = 4096,
                             Description = "ChatGLM Turbo 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1387,9 +1509,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("5b935cf3-2aaa-4fab-88a3-afc54ce7cb2d"),
+                            Id = new Guid("32cb9e7a-4490-4ed1-9a23-c7fcdeda8751"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3324),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8982),
+                            DefaultContextLength = 4096,
                             Description = "Claude 2 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1404,9 +1528,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("8e094a75-2dac-4e1b-93bf-33982a52c170"),
+                            Id = new Guid("5b0fc55b-ac63-4404-9b44-68c09f27f784"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3325),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8983),
+                            DefaultContextLength = 4096,
                             Description = "Claude 2.0 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1421,9 +1547,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("9853563d-39aa-4989-bfca-d3ac239ced4b"),
+                            Id = new Guid("6ae67358-4160-4d2b-bd0a-67ad48517237"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3325),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8984),
+                            DefaultContextLength = 4096,
                             Description = "Claude 2.1 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1438,10 +1566,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("cc6b4817-8afb-4f7f-ba59-e3211b3c7166"),
+                            Id = new Guid("93867b29-5b13-4372-a4d4-bdc0e64f239a"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3327),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8985),
+                            DefaultContextLength = 4096,
                             Description = "Claude 3 Haiku 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1456,10 +1586,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("f3b560aa-2fa7-49c9-81ea-684e8a336669"),
+                            Id = new Guid("a901fcf3-62f6-462b-ab65-c65615e5bf43"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3327),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8986),
+                            DefaultContextLength = 4096,
                             Description = "Claude 3 Haiku 20240307 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1474,10 +1606,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("f9ab50f4-b943-4d5c-ab76-654cde31b4ff"),
+                            Id = new Guid("6bf2c539-aac0-4423-994d-fbbd65943c08"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3328),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8987),
+                            DefaultContextLength = 4096,
                             Description = "Claude 3.5 Sonnet 20240620 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1492,10 +1626,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("2b709dd6-34b8-4cad-8414-30d2b3a11c39"),
+                            Id = new Guid("8e791c74-1434-4a81-a8b1-7f3b6477f222"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3330),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8988),
+                            DefaultContextLength = 4096,
                             Description = "Claude 3 Sonnet 20240229 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1510,10 +1646,12 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("7d09f0d7-f6f8-48f3-b4fe-76a9ce0212c9"),
+                            Id = new Guid("8981e20b-7b7f-4a11-9da7-604c378e8eb2"),
                             Available = true,
                             CompletionRate = 5m,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3331),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8989),
+                            DefaultContextLength = 4096,
                             Description = "Claude 3 Opus 20240229 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1528,9 +1666,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("617a4ff4-c582-4ca3-b46e-1f713d901964"),
+                            Id = new Guid("9b36ede0-5640-4dbf-bc00-c62312f0f905"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3331),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8991),
+                            DefaultContextLength = 4096,
                             Description = "Claude Instant 1 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1545,9 +1685,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("ccbd58de-92a7-4476-a5d8-649f04b3f761"),
+                            Id = new Guid("d7c17f53-064f-411f-9fcc-6267123ed28e"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3332),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8991),
+                            DefaultContextLength = 4096,
                             Description = "Claude Instant 1.2 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1562,9 +1704,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("51b4a390-d82d-4a79-b5e0-65fb3da5b3aa"),
+                            Id = new Guid("aa855bbe-8d98-4d0a-a627-2cdffdae5267"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3333),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8992),
+                            DefaultContextLength = 4096,
                             Description = "DALL-E 2 图像生成模型",
                             Enable = true,
                             Extension = "{}",
@@ -1578,9 +1722,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("256c445d-130a-4e11-85d4-4754f2b0d78c"),
+                            Id = new Guid("4afd0ede-df1b-423e-bb48-f99099dd27cf"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3334),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8993),
+                            DefaultContextLength = 4096,
                             Description = "DALL-E 3 图像生成模型",
                             Enable = true,
                             Extension = "{}",
@@ -1594,9 +1740,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("cb2e52ca-a4a2-4f4a-90bb-b687570e1379"),
+                            Id = new Guid("d2196a66-b780-41ae-a4e0-8a04b217d363"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3334),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8994),
+                            DefaultContextLength = 4096,
                             Description = "GPT Image 图片生成模型",
                             Enable = true,
                             Extension = "{}",
@@ -1610,9 +1758,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("05c0674d-4c8d-413c-a03a-a313ba4e36c5"),
+                            Id = new Guid("e13b4cae-d182-4cf7-ae77-ac17018c024d"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3335),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8995),
+                            DefaultContextLength = 4096,
                             Description = "Embedding 2 嵌入模型",
                             Enable = true,
                             Extension = "{}",
@@ -1627,9 +1777,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("ff2f85ae-d8bc-4356-b82b-7591015439dd"),
+                            Id = new Guid("bf83f136-21e3-42ab-a2c5-342c47071dbf"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3337),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8995),
+                            DefaultContextLength = 4096,
                             Description = "Embedding BERT 512 v1 嵌入模型",
                             Enable = true,
                             Extension = "{}",
@@ -1644,9 +1796,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("f4640912-e305-4d83-b78e-1bbc4eb53e3d"),
+                            Id = new Guid("0e8dfb1a-92c1-4426-9316-477c1db82bf0"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3337),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8996),
+                            DefaultContextLength = 4096,
                             Description = "Embedding S1 v1 嵌入模型",
                             Enable = true,
                             Extension = "{}",
@@ -1660,9 +1814,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("27559ded-3730-4a2f-95e7-4ffb37fe4bbc"),
+                            Id = new Guid("8d355db8-4bf5-4bd7-942b-20c18115890b"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3338),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8998),
+                            DefaultContextLength = 4096,
                             Description = "GLM 3 Turbo 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1677,9 +1833,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("0764b093-22cb-41f7-abea-990007c15fdd"),
+                            Id = new Guid("fcea3017-042f-4119-b020-b8bb216ef314"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3339),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(8999),
+                            DefaultContextLength = 4096,
                             Description = "GLM 4 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1694,9 +1852,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("2d0ad485-f3b8-4172-a255-02e3610d9bab"),
+                            Id = new Guid("ce9bd231-0982-4c5e-90d5-aaf54d8c0f96"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3339),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(9000),
+                            DefaultContextLength = 4096,
                             Description = "GLM 4 全部文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -1711,9 +1871,11 @@ namespace Thor.Provider.SqlServer.Thor
                         },
                         new
                         {
-                            Id = new Guid("48abe2a1-bf67-4c45-8a01-50b1b7739cd7"),
+                            Id = new Guid("de873fe0-2ac6-463d-8df7-175ba3c57bb8"),
                             Available = true,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 486, DateTimeKind.Local).AddTicks(3340),
+                            ContextPricingTiers = "[]",
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 746, DateTimeKind.Local).AddTicks(9000),
+                            DefaultContextLength = 4096,
                             Description = "GLM 4v 文本模型",
                             Enable = true,
                             Extension = "{}",
@@ -2323,13 +2485,13 @@ namespace Thor.Provider.SqlServer.Thor
                         {
                             Id = "CA378C74-19E7-458A-918B-4DBB7AE1729D",
                             ConsumeToken = 0L,
-                            CreatedAt = new DateTime(2025, 6, 17, 0, 34, 23, 441, DateTimeKind.Local).AddTicks(9170),
+                            CreatedAt = new DateTime(2025, 7, 15, 13, 15, 35, 698, DateTimeKind.Local).AddTicks(4175),
                             Email = "239573049@qq.com",
                             Groups = "[\"default\",\"vip\"]",
                             IsDelete = false,
                             IsDisabled = false,
-                            Password = "5c8af64858d54a2d958093785ecc8893",
-                            PasswordHas = "717c1f27b73441f78d515390ad4cd25b",
+                            Password = "280ae857584399bcdc45098d176673f2",
+                            PasswordHas = "7ced69de9ba144dc9f8defe954ca0906",
                             RequestCount = 0L,
                             ResidualCredit = 1000000000L,
                             Role = "admin",

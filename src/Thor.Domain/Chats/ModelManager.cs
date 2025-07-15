@@ -1,4 +1,5 @@
-﻿using Thor.Abstractions;
+﻿using System.Text.Json;
+using Thor.Abstractions;
 using Thor.Service.Domain.Core;
 
 namespace Thor.Service.Domain;
@@ -73,6 +74,16 @@ public sealed class ModelManager : Entity<Guid>
     /// 模型额度最大上文
     /// </summary>
     public string? QuotaMax { get; set; }
+
+    /// <summary>
+    /// 上下文长度定价配置（反序列化后的对象）
+    /// </summary>
+    public List<ContextPricingTier> ContextPricingTiers { get; set; } = new List<ContextPricingTier>();
+
+    /// <summary>
+    /// 默认上下文长度（tokens）
+    /// </summary>
+    public int DefaultContextLength { get; set; } = 4096;
 
     /// <summary>
     /// 模型标签

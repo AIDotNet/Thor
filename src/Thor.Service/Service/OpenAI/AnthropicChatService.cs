@@ -21,7 +21,8 @@ public class AnthropicChatService(
     UserGroupService userGroupService,
     LoggerService loggerService,
     UserService userService,
-    ILogger<AnthropicChatService> logger)
+    ILogger<AnthropicChatService> logger,
+    ContextPricingService contextPricingService)
     : AIService(serviceProvider, imageService)
 {
     public async Task MessageAsync(HttpContext context, AnthropicInput request)
@@ -30,10 +31,10 @@ public class AnthropicChatService(
             Activity.Current?.Source.StartActivity("Anthropic对话补全调用");
 
         var model = request.Model;
+        Exception? lastException = null;
 
         var rateLimit = 0;
 
-        // 用于限流重试，如果限流则重试并且进行重新负载均衡计算
         limitGoto:
 
         try
@@ -57,6 +58,15 @@ public class AnthropicChatService(
                 // 获取渠道通过算法计算权重
                 var channel =
                     CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
+
+                if (channel == null && lastException != null)
+                {
+                    logger.LogError("对话模型请求异常：{lastException}，请求参数：{request}",
+                        lastException, JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
+                    await context.WriteErrorAsync(
+                        lastException.Message, "400");
+                    return;
+                }
 
                 if (channel == null)
                     throw new NotModelException(
@@ -108,7 +118,13 @@ public class AnthropicChatService(
                             rate);
                 }
 
-                var quota = requestToken * rate.PromptRate;
+                // 计算上下文长度（使用请求token数作为近似值）
+                var contextLength = requestToken;
+
+                // 使用上下文定价服务计算费用
+                var pricingResult =
+                    contextPricingService.CalculatePricing(rate, requestToken, responseToken, contextLength);
+                var quota = pricingResult.TotalCost;
 
                 var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
                 quota += responseToken * rate.PromptRate * completionRatio;
@@ -186,8 +202,9 @@ public class AnthropicChatService(
                 await context.WriteErrorAsync($"当前{model}模型未设置倍率,请联系管理员设置倍率", "400");
             }
         }
-        catch (ThorRateLimitException)
+        catch (ThorRateLimitException thorRateLimitException)
         {
+            lastException = thorRateLimitException;
             logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
             rateLimit++;
             // TODO：限流重试次数
@@ -230,6 +247,7 @@ public class AnthropicChatService(
         }
         catch (Exception e)
         {
+            lastException = e;
             // 读取body
             logger.LogError("对话模型请求异常：{e} 准备重试{rateLimit}，请求参数：{request}", e, rateLimit,
                 JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
@@ -251,7 +269,7 @@ public class AnthropicChatService(
     }
 
     private async Task<(int requestToken, int responseToken, int cachedTokens)> ChatCompletionsHandlerAsync(
-        HttpContext context, AnthropicInput request, ChatChannel channel,
+        HttpContext context, AnthropicInput input, ChatChannel channel,
         IAnthropicChatCompletionsService openService, User? user, ModelManager rate)
     {
         int requestToken = 0;
@@ -264,18 +282,49 @@ public class AnthropicChatService(
 
         ClaudeChatCompletionDto result = null;
 
-        // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
-        if (rate.QuotaType == ModelQuotaType.OnDemand && request.Messages.Any(x => x.Contents != null))
+        if (!string.IsNullOrEmpty(input.System))
         {
-            requestToken = TokenHelper.GetTotalTokens(request?.Messages.Where(x => x.Contents != null)
-                .SelectMany(x => x.Contents)
-                .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
+            requestToken += TokenHelper.GetTotalTokens(input.System);
+        }
 
-            requestToken += TokenHelper.GetTotalTokens(request.Messages.Where(x => x.Contents == null)
+        if (input.Systems?.Count > 0)
+        {
+            requestToken += TokenHelper.GetTotalTokens(input.Systems.Select(x => x.Text).ToArray());
+        }
+
+        if (input.Tools != null)
+        {
+            foreach (var tool in input.Tools)
+            {
+                requestToken += TokenHelper.GetTotalTokens(tool.name, tool.Description);
+                requestToken += TokenHelper.GetTotalTokens(tool.InputSchema.Required ?? []);
+                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool.InputSchema.Properties));
+            }
+        }
+
+        // 这里应该用其他的方式来判断是否是vision模型，目前先这样处理
+        if (rate.QuotaType == ModelQuotaType.OnDemand && input.Messages.Any(x => x.Contents != null))
+        {
+            foreach (var content in input?.Messages.Where(x => x.Contents != null)
+                         .SelectMany(x => x.Contents))
+            {
+                requestToken += TokenHelper.GetTotalTokens(content.Text ?? string.Empty);
+                if (content.Content != null)
+                {
+                    requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(content.Content));
+                }
+
+                if (content.Input != null)
+                {
+                    requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(content.Input));
+                }
+            }
+
+            requestToken += TokenHelper.GetTotalTokens(input.Messages.Where(x => x.Contents == null)
                 .Select(x => x.Content).ToArray());
 
             // 解析图片
-            foreach (var message in request.Messages.Where(x => x.Contents != null).SelectMany(x => x.Contents)
+            foreach (var message in input.Messages.Where(x => x.Contents != null).SelectMany(x => x.Contents)
                          .Where(x => x.Type is "image" or "image_url"))
             {
                 var imageUrl = message.Source;
@@ -300,7 +349,7 @@ public class AnthropicChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            result = await openService.ChatCompletionsAsync(request, platformOptions);
+            result = await openService.ChatCompletionsAsync(input, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -322,7 +371,7 @@ public class AnthropicChatService(
         }
         else if (rate.QuotaType == ModelQuotaType.OnDemand)
         {
-            var contentArray = request.Messages.Select(x => x.Content).ToArray();
+            var contentArray = input.Messages.Select(x => x.Content).ToArray();
             requestToken = TokenHelper.GetTotalTokens(contentArray);
 
             var quota = requestToken * rate.PromptRate;
@@ -330,13 +379,13 @@ public class AnthropicChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
-            result = await openService.ChatCompletionsAsync(request, platformOptions);
+            result = await openService.ChatCompletionsAsync(input, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
         }
         else
         {
-            result = await openService.ChatCompletionsAsync(request, platformOptions);
+            result = await openService.ChatCompletionsAsync(input, platformOptions);
 
             await context.Response.WriteAsJsonAsync(result);
         }
@@ -349,27 +398,6 @@ public class AnthropicChatService(
         //         JsonSerializer.Serialize(request.ResponseFormat.JsonSchema.Schema));
         // }
         //
-
-        if (!string.IsNullOrEmpty(request.System))
-        {
-            requestToken += TokenHelper.GetTotalTokens(request.System);
-        }
-
-        if (request.Systems?.Count > 0)
-        {
-            requestToken += TokenHelper.GetTotalTokens(request.Systems.Select(x => x.Text).ToArray());
-        }
-
-        if (rate.QuotaType == ModelQuotaType.OnDemand && request.Tools is { Count: > 0 })
-        {
-            foreach (var tool in request.Tools)
-            {
-                requestToken += TokenHelper.GetTotalTokens(tool.name, tool.Description);
-                requestToken += TokenHelper.GetTotalTokens(tool.InputSchema.Required ?? []);
-                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool.InputSchema.Properties,
-                    ThorJsonSerializer.DefaultOptions));
-            }
-        }
 
         if (result?.Usage?.input_tokens is not null && result.Usage.input_tokens > 0)
         {
@@ -404,35 +432,67 @@ public class AnthropicChatService(
 
         var responseMessage = new StringBuilder();
 
+        requestToken += TokenHelper.GetTotalTokens(input?.System);
+        requestToken += TokenHelper.GetTotalTokens(input?.Systems?.Select(x => x.Text).ToArray() ?? []);
+
+        if (!string.IsNullOrEmpty(input.System))
+        {
+            requestToken += TokenHelper.GetTotalTokens(input.System);
+        }
+
+        if (input.Systems?.Count > 0)
+        {
+            requestToken += TokenHelper.GetTotalTokens(input.Systems.Select(x => x.Text).ToArray());
+        }
+
+        if (input.Tools != null)
+        {
+            foreach (var tool in input.Tools)
+            {
+                requestToken += TokenHelper.GetTotalTokens(tool.name, tool.Description);
+                requestToken += TokenHelper.GetTotalTokens(tool.InputSchema.Required ?? []);
+                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool.InputSchema.Properties));
+            }
+        }
+
         if (input.Messages.Any(x => x.Contents != null) && rate.QuotaType == ModelQuotaType.OnDemand)
         {
-            requestToken = TokenHelper.GetTotalTokens(input?.Messages.Where(x => x.Contents != null)
-                .SelectMany(x => x.Contents)
-                .Where(x => x.Type == "text").Select(x => x.Text).ToArray());
+            foreach (var content in input?.Messages.Where(x => x.Contents != null)
+                         .SelectMany(x => x.Contents))
+            {
+                requestToken += TokenHelper.GetTotalTokens(content.Text ?? string.Empty);
+                if (content.Content != null)
+                {
+                    requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(content.Content));
+                }
+
+                if (content.Input != null)
+                {
+                    requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(content.Input));
+                }
+            }
 
             requestToken += TokenHelper.GetTotalTokens(input.Messages.Where(x => x.Contents == null)
                 .Select(x => x.Content).ToArray());
 
-            // 解析图片
+            requestToken += TokenHelper.GetTotalTokens(input.Messages.Where(x => x.Contents == null)
+                .Select(x => x.Content).ToArray());
+
             foreach (var message in input.Messages.Where(x => x is { Contents: not null }).SelectMany(x => x.Contents)
                          .Where(x => x.Type is "image" or "image_url"))
             {
                 var imageUrl = message.Source;
-                if (imageUrl != null)
+                if (imageUrl == null) continue;
+                var url = imageUrl.MediaType;
+                var detail = "";
+                try
                 {
-                    var url = imageUrl.MediaType;
-                    var detail = "";
-                    // if (!string.IsNullOrEmpty(imageUrl.Detail)) detail = imageUrl.Detail;
-
-                    try
-                    {
-                        var imageTokens = await CountImageTokens(url, detail);
-                        requestToken += imageTokens.Item1;
-                    }
-                    catch (Exception ex)
-                    {
-                        GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
-                    }
+                    var imageTokens = await CountImageTokens(url, detail);
+                    requestToken += imageTokens.Item1;
+                }
+                catch (Exception ex)
+                {
+                    GetLogger<ChatService>().LogError("Error counting image tokens: " + ex.Message);
                 }
             }
 
@@ -460,27 +520,6 @@ public class AnthropicChatService(
         //         input.ResponseFormat.JsonSchema.Description ?? string.Empty,
         //         JsonSerializer.Serialize(input.ResponseFormat.JsonSchema.Schema));
         // }
-
-        if (rate.QuotaType == ModelQuotaType.OnDemand && input.Tools is { Count: > 0 })
-        {
-            foreach (var tool in input.Tools)
-            {
-                requestToken += TokenHelper.GetTotalTokens(tool.name, tool.Description);
-                requestToken += TokenHelper.GetTotalTokens(tool.InputSchema.Required ?? []);
-                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool.InputSchema.Properties,
-                    ThorJsonSerializer.DefaultOptions));
-            }
-        }
-
-        if (!string.IsNullOrEmpty(input.System))
-        {
-            requestToken += TokenHelper.GetTotalTokens(input.System);
-        }
-
-        if (input.Systems?.Count > 0)
-        {
-            requestToken += TokenHelper.GetTotalTokens(input.Systems.Select(x => x.Text).ToArray());
-        }
 
         // 是否第一次输出
         bool isFirst = true;
