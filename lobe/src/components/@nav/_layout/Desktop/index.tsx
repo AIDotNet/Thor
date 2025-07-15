@@ -20,12 +20,13 @@ import {
   ChevronRight,
   Bug,
   PieChart,
-  Megaphone
+  Megaphone,
+  Cherry
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Menu, Typography, Badge, Divider } from "antd";
+import { Menu, Typography, Badge, Divider, Modal, List, Button } from "antd";
 import {
   GeneralSetting,
   InitSetting,
@@ -33,6 +34,7 @@ import {
 import { SlidersOutlined } from "@ant-design/icons";
 import { info } from "../../../../services/UserService";
 import { useTranslation } from "react-i18next";
+import { getTokens } from "../../../../services/TokenService";
 
 const { Text } = Typography;
 
@@ -59,6 +61,8 @@ const Nav = memo(() => {
   const [userRole, setUserRole] = useState<string | null>(null);
   // 管理导航菜单展开状态
   const [openKeys, setOpenKeys] = useState<string[]>([]);
+  const [isTokenModalVisible, setIsTokenModalVisible] = useState(false);
+  const [userTokens, setUserTokens] = useState<any[]>([]);
 
   // 使用 useMemo 并依赖 i18n.language，这样语言变化时菜单会重新生成
   const getMenuItems = useMemo((): MenuItem[] => {
@@ -123,6 +127,16 @@ const Nav = memo(() => {
               navigate("/model-map");
             },
             role: "admin",
+          },
+          {
+            icon: <Cherry />,
+            enable: true,
+            label: "Cherry Studio",
+            key: "cherry-studio",
+            onClick: () => {
+              handleCherryStudioClick();
+            },
+            role: "user,admin",
           }
         ]
       },
@@ -307,6 +321,105 @@ const Nav = memo(() => {
     });
   }
 
+  const handleCherryStudioClick = () => {
+    // Fetch user tokens
+    fetchUserTokens();
+    setIsTokenModalVisible(true);
+  };
+
+  const fetchUserTokens = () => {
+    // Use the actual token service to get user tokens
+    getTokens(1, 100)
+      .then(res => {
+        if (res.success) {
+          const tokens = res.data.items || [];
+          if (tokens.length === 0) {
+            // Create default token if no tokens exist
+            createDefaultToken();
+          } else {
+            setUserTokens(tokens);
+          }
+        } else {
+          console.error("Failed to fetch tokens:", res.message);
+          setUserTokens([]);
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch tokens:", err);
+        setUserTokens([]);
+      });
+  };
+
+  const createDefaultToken = () => {
+    const defaultTokenData = {
+      name: "默认Token",
+      key: "sk-default-token-" + Math.random().toString(36).substring(2, 15),
+      type: "openai",
+      expiredTime: null,
+      unlimitedExpired: true,
+      remainQuota: 1000000,
+      unlimitedQuota: false,
+      modelRateLimits: []
+    };
+
+    // Use the Add service to create default token
+    fetch("/api/v1/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem("token")}`
+      },
+      body: JSON.stringify(defaultTokenData)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        // Refresh token list after creating default token
+        getTokens(1, 100).then(res => {
+          if (res.success) {
+            setUserTokens(res.data.items || []);
+          }
+        });
+      } else {
+        console.error("Failed to create default token:", data.message);
+        setUserTokens([]);
+      }
+    })
+    .catch(err => {
+      console.error("Failed to create default token:", err);
+      setUserTokens([]);
+    });
+  };
+
+  const handleTokenSelect = (token: any) => {
+    const currentDomain = window.location.origin;
+    const tokenData = {
+      id: "token-api-openai-tokennb",
+      baseUrl: currentDomain,
+      apiKey: token.key,
+      name: "Token AI (OpenAI 老格式)",
+      type: "openai"
+    };
+    
+    // Fix btoa encoding error for non-Latin1 characters
+    const jsonString = JSON.stringify(tokenData);
+    const base64Data = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, 
+      function toSolidBytes(match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+    
+    const cherryStudioUrl = `cherrystudio://providers/api-keys?v=1&data=${base64Data}`;
+    
+    // Open the cherrystudio protocol URL
+    window.location.href = cherryStudioUrl;
+    
+    setIsTokenModalVisible(false);
+  };
+
+  const handleTokenModalCancel = () => {
+    setIsTokenModalVisible(false);
+  };
+
   useEffect(() => {
     const path = location.pathname;
     for (let index = 0; index < items.length; index++) {
@@ -373,6 +486,37 @@ const Nav = memo(() => {
         />
       </div>
       <Divider style={{ margin: "8px 0 0 0" }} />
+      
+      <Modal
+        title="选择 Token"
+        open={isTokenModalVisible}
+        onCancel={handleTokenModalCancel}
+        footer={null}
+        width={400}
+      >
+        <List
+          dataSource={userTokens}
+          renderItem={(token) => (
+            <List.Item
+              key={token.id}
+              actions={[
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() => handleTokenSelect(token)}
+                >
+                  选择
+                </Button>
+              ]}
+            >
+              <List.Item.Meta
+                title={token.name}
+                description={token.type}
+              />
+            </List.Item>
+          )}
+        />
+      </Modal>
     </div>
   );
 });

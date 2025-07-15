@@ -6,6 +6,7 @@ import { renderQuota } from "../../utils/render";
 import { Input, Tag } from "@lobehub/ui";
 import CreateToken from "./features/CreateToken";
 import UpdateToken from "./features/UpdateToken";
+import { Add } from "../../services/TokenService";
 
 const Header = styled.header`
 
@@ -102,6 +103,11 @@ export default function TokenPage() {
                   onClick: () => bingLobeChat(item.key)
                 },
                 {
+                  key: 'cherryStudio',
+                  label: <Tag>绑定CherryStudio</Tag>,
+                  onClick: () => bindCherryStudio(item.key)
+                },
+                {
                   key: 'edit',
                   label: '编辑',
                   onClick: () => {
@@ -196,6 +202,29 @@ export default function TokenPage() {
       }
     });
     window.open(`https://lobe-chat.ai-v1.cn?settings=${json}`);
+  }
+
+  function bindCherryStudio(token: string) {
+    const currentDomain = window.location.origin;
+    const tokenData = {
+      id: "token-api-openai-tokennb",
+      baseUrl: currentDomain,
+      apiKey: token,
+      name: "Token AI (OpenAI 老格式)",
+      type: "openai"
+    };
+    
+    // Fix btoa encoding error for non-Latin1 characters
+    const jsonString = JSON.stringify(tokenData);
+    const base64Data = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, 
+      function toSolidBytes(match, p1) {
+        return String.fromCharCode('0x' + p1);
+    }));
+    
+    const cherryStudioUrl = `cherrystudio://providers/api-keys?v=1&data=${base64Data}`;
+    
+    // Open the cherrystudio protocol URL
+    window.location.href = cherryStudioUrl;
   }
 
   function removeToken(id: string) {
