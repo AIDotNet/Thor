@@ -245,12 +245,13 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 {
                     continue;
                 }
-                
+
                 openAIRequest.Messages.AddRange(thorMessages);
             }
 
             openAIRequest.Messages = openAIRequest.Messages
-                .Where(m => !string.IsNullOrWhiteSpace(m.Content) || m.Contents?.Count > 0 || m.ToolCalls?.Count > 0)
+                .Where(m => !string.IsNullOrEmpty(m.Content) || m.Contents?.Count > 0 || m.ToolCalls?.Count > 0 ||
+                            !string.IsNullOrEmpty(m.ToolCallId))
                 .ToList();
         }
 
