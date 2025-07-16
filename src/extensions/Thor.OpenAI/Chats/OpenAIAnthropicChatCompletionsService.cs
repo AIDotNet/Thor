@@ -77,7 +77,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                            cancellationToken))
         {
             // 发送message_start事件
-            if (!hasStarted)
+            if (!hasStarted && openAIResponse.Choices?.Count > 0 &&
+                openAIResponse.Choices.Any(x => x.Delta.ToolCalls?.Count > 0) == false)
             {
                 hasStarted = true;
                 var messageStartEvent = CreateMessageStartEvent(messageId, request.Model);
@@ -86,7 +87,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 // 继续
             }
 
-            if (openAIResponse.Choices != null && openAIResponse.Choices.Count > 0)
+            if (openAIResponse.Choices is { Count: > 0 })
             {
                 var choice = openAIResponse.Choices.First();
 
@@ -691,10 +692,6 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             type = "message_delta",
             Usage = usage,
             delta = new ClaudeChatCompletionDtoDelta
-            {
-                type = "message_delta"
-            },
-            message = new ClaudeChatCompletionDto
             {
                 stop_reason = GetClaudeStopReason(finishReason)
             }

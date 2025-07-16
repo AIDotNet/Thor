@@ -27,6 +27,8 @@ public class ClaudeChatCompletionDtoDelta
     public string? thinking { get; set; }
     
     public string? partial_json { get; set; }
+    
+    public string? stop_reason { get; set; }
 }
 
 
