@@ -114,10 +114,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         var toolCallIndex = toolCall.Index; // 使用索引来标识工具调用
 
                         // 发送tool_use content_block_start事件
-                        if (!toolBlocksStarted.ContainsKey(toolCallIndex))
+                        if (toolBlocksStarted.TryAdd(toolCallIndex, true))
                         {
-                            toolBlocksStarted[toolCallIndex] = true;
-
                             // 保存工具调用的ID（如果有的话）
                             if (!string.IsNullOrEmpty(toolCall.Id))
                             {

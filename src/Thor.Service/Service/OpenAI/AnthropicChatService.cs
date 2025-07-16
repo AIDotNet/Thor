@@ -390,15 +390,6 @@ public class AnthropicChatService(
             await context.Response.WriteAsJsonAsync(result);
         }
 
-
-        // if (rate.QuotaType == ModelQuotaType.OnDemand && request.ResponseFormat?.JsonSchema is not null)
-        // {
-        //     requestToken += TokenHelper.GetTotalTokens(request.ResponseFormat.JsonSchema.Name,
-        //         request.ResponseFormat.JsonSchema.Description ?? string.Empty,
-        //         JsonSerializer.Serialize(request.ResponseFormat.JsonSchema.Schema));
-        // }
-        //
-
         if (result?.Usage?.input_tokens is not null && result.Usage.input_tokens > 0)
         {
             requestToken = result.Usage.input_tokens.Value;
@@ -411,6 +402,7 @@ public class AnthropicChatService(
         else
         {
             responseToken += TokenHelper.GetTotalTokens(result?.content?.Select(x => x.text).ToArray() ?? []);
+            responseToken += TokenHelper.GetTotalTokens(result?.content?.Select(x => x.Thinking).ToArray() ?? []);
         }
 
         if (result?.Usage?.cache_read_input_tokens.HasValue == true)
@@ -543,6 +535,11 @@ public class AnthropicChatService(
                 responseToken +=
                     TokenHelper.GetTotalTokens(item?.delta?.partial_json ?? item?.delta?.text ?? item?.delta?.thinking
                         ?? item?.message?.content?.FirstOrDefault()?.text ?? string.Empty);
+
+                if (!string.IsNullOrEmpty(item?.content_block?.thinking))
+                {
+                    responseToken += TokenHelper.GetTotalTokens(item.content_block.thinking);
+                }
             }
 
             responseMessage.Append(item?.delta?.text ?? item?.message?.content?.FirstOrDefault()?.text);
