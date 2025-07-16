@@ -240,12 +240,22 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             foreach (var message in anthropicInput.Messages)
             {
                 var thorMessages = ConvertAnthropicMessageToThor(message);
+                // 需要过滤 空消息
+                if (thorMessages.Count == 0)
+                {
+                    continue;
+                }
+                
                 openAIRequest.Messages.AddRange(thorMessages);
             }
+
+            openAIRequest.Messages = openAIRequest.Messages
+                .Where(m => !string.IsNullOrWhiteSpace(m.Content) || m.Contents?.Count > 0 || m.ToolCalls?.Count > 0)
+                .ToList();
         }
 
         // 处理tools
-        if (anthropicInput.Tools != null && anthropicInput.Tools.Count > 0)
+        if (anthropicInput.Tools is { Count: > 0 })
         {
             openAIRequest.Tools = anthropicInput.Tools.Select(ConvertAnthropicToolToThor).ToList();
         }
