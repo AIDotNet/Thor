@@ -555,7 +555,7 @@ public class AnthropicChatService(
                     item.Usage ??= new ClaudeChatCompletionDtoUsage();
                     item.Usage.input_tokens = requestToken;
                 }
-
+                
                 await context.WriteAsEventStreamDataAsync(@event, item).ConfigureAwait(false);
                 continue;
             }

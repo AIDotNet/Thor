@@ -66,6 +66,8 @@ try
         ContentRootPath = AppContext.BaseDirectory,
     });
 
+    ThorOptions.Initialize(builder.Configuration);
+    
     // 添加Windows服务支持
     if (OperatingSystem.IsWindows())
     {
@@ -572,7 +574,8 @@ try
             async (LoggerService service, int page, int pageSize, ThorChatLoggerType? type, string? model,
                     DateTime? startTime,
                     DateTime? endTime, string? keyword, string? organizationId, string? userId) =>
-                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword, organizationId, userId))
+                await service.GetAsync(page, pageSize, type, model, startTime, endTime, keyword, organizationId,
+                    userId))
         .WithDescription("获取日志")
         .WithDisplayName("获取日志")
         .WithOpenApi();
