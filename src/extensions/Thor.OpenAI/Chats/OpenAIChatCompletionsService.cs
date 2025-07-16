@@ -46,8 +46,8 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
             logger.LogError("OpenAI对话异常 请求地址：{Address}, StatusCode: {StatusCode} Response: {Response}", options.Address,
                 response.StatusCode, error);
-            
-            throw new BusinessException("OpenAI对话异常", response.StatusCode.ToString());
+
+            throw new BusinessException("OpenAI对话异常:" + error, response.StatusCode.ToString());
         }
 
         var result =
@@ -90,7 +90,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         // 大于等于400的状态码都认为是异常
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
-            var error = await response.Content.ReadAsStringAsync();
+            var error = await response.Content.ReadAsStringAsync(cancellationToken);
             logger.LogError("OpenAI对话异常 , StatusCode: {StatusCode} 错误响应内容：{Content}", response.StatusCode,
                 error);
 
@@ -103,7 +103,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         string? line = string.Empty;
         var first = true;
         var isThink = false;
-        while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+        while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
 
