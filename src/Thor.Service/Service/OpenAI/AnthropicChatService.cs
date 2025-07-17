@@ -45,13 +45,13 @@ public class AnthropicChatService(
                 organizationId = organizationIdHeader.ToString();
             }
 
-            if (ModelManagerService.PromptRate.TryGetValue(request.Model, out var rate))
+            if (ModelManagerService.PromptRate.TryGetValue(model, out var rate))
             {
                 var (token, user) = await tokenService.CheckTokenAsync(context, rate);
 
                 await rateLimitModelService.CheckAsync(model, user.Id);
 
-                TokenService.CheckModel(request.Model, token, context);
+                TokenService.CheckModel(model, token, context);
 
                 request.Model = await modelMapService.ModelMap(request.Model);
 
@@ -70,7 +70,7 @@ public class AnthropicChatService(
 
                 if (channel == null)
                     throw new NotModelException(
-                        $"{request.Model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
+                        $"{model}在分组：{(token?.Groups.FirstOrDefault() ?? user.Groups.FirstOrDefault())} 未找到可用渠道");
 
                 var userGroup = await userGroupService.GetAsync(channel.Groups);
 
@@ -90,7 +90,7 @@ public class AnthropicChatService(
                 }
 
                 // 记录请求模型 / 请求用户
-                logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", request.Model, user?.UserName,
+                logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", model, user?.UserName,
                     channel.Name);
 
                 int requestToken;
@@ -126,7 +126,7 @@ public class AnthropicChatService(
                     contextPricingService.CalculatePricing(rate, requestToken, responseToken, contextLength);
                 var quota = pricingResult.TotalCost;
 
-                var completionRatio = rate.CompletionRate ?? GetCompletionRatio(request.Model);
+                var completionRatio = rate.CompletionRate ?? GetCompletionRatio(model);
                 quota += responseToken * rate.PromptRate * completionRatio;
 
                 // 计算分组倍率
@@ -157,7 +157,7 @@ public class AnthropicChatService(
                         await loggerService.CreateConsumeAsync("/v1/messages",
                             string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
                                 cachedTokens, rate.CacheRate),
-                            request.Model,
+                            model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                             request.Stream is true,
@@ -167,14 +167,14 @@ public class AnthropicChatService(
                     {
                         await loggerService.CreateConsumeAsync("/v1/messages",
                             string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
-                            request.Model,
+                            model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
                             request.Stream is true,
                             (int)sw.ElapsedMilliseconds, organizationId);
 
                         await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                            request.Model);
+                            model);
                     }
                 }
                 else
@@ -183,7 +183,7 @@ public class AnthropicChatService(
                     await loggerService.CreateConsumeAsync("/v1/messages",
                         string.Format(ConsumerTemplateOnDemand, RenderHelper.RenderQuota(rate.PromptRate),
                             userGroup.Rate),
-                        request.Model,
+                        model,
                         requestToken, responseToken, (int)((int)rate.PromptRate * (decimal)userGroup.Rate), token?.Key,
                         user?.UserName, user?.Id,
                         channel.Id,
@@ -193,13 +193,13 @@ public class AnthropicChatService(
 
                     await userService.ConsumeAsync(user!.Id, (long)rate.PromptRate, requestToken, token?.Key,
                         channel.Id,
-                        request.Model);
+                        model);
                 }
             }
             else
             {
                 context.Response.StatusCode = 400;
-                await context.WriteErrorAsync($"当前{request.Model}模型未设置倍率,请联系管理员设置倍率", "400");
+                await context.WriteErrorAsync($"当前{model}模型未设置倍率,请联系管理员设置倍率", "400");
             }
         }
         catch (ThorRateLimitException thorRateLimitException)
@@ -505,13 +505,6 @@ public class AnthropicChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
         }
-
-        // if (rate.QuotaType == ModelQuotaType.OnDemand && input.ResponseFormat?.JsonSchema is not null)
-        // {
-        //     requestToken += TokenHelper.GetTotalTokens(input.ResponseFormat.JsonSchema.Name,
-        //         input.ResponseFormat.JsonSchema.Description ?? string.Empty,
-        //         JsonSerializer.Serialize(input.ResponseFormat.JsonSchema.Schema));
-        // }
 
         // 是否第一次输出
         bool isFirst = true;
