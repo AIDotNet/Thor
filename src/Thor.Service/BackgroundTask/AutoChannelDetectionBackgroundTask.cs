@@ -102,38 +102,98 @@ public sealed class AutoChannelDetectionBackgroundTask(
 
     private async Task TestChannelAsync(ChatChannel channel, ChannelService channelService, IThorContext dbContext)
     {
+        // 标记是否需要清除缓存
+        bool needClearCache = false;
+
         try
         {
             // 3. 检测通道是否需要关闭
             var (succeed, timeout) = await channelService.TestChannelAsync(channel.Id);
-            // 如果检测成功并且通道未关闭则更新状态
+            // 如果检测成功并且通道当前是禁用状态，则启用
             if (succeed)
             {
-                await dbContext.Channels.Where(x => x.Id == channel.Id)
+                // 只有当渠道当前是禁用状态时才需要启用并清除缓存
+                var updateResult = await dbContext.Channels.Where(x => x.Id == channel.Id && x.Disable == true)
                     .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, false));
+
+                if (updateResult > 0)
+                {
+                    logger.LogInformation("AutoChannelDetectionBackgroundTask: 渠道 {ChannelId} 从禁用状态恢复为启用状态", channel.Id);
+                    needClearCache = true; // 状态发生变化，需要清除缓存
+                }
+                // 如果updateResult = 0，说明渠道本身就是启用状态，无需任何操作
             }
             else
             {
                 logger.LogWarning(
                     $"AutoChannelDetectionBackgroundTask: Channel {channel.Id} is timeout: {timeout}");
-                // 5. 如果通道超时则关闭
-                await dbContext.Channels.Where(x => x.Id == channel.Id)
+                // 只有当渠道当前是启用状态时才需要禁用并清除缓存
+                var updateResult = await dbContext.Channels.Where(x => x.Id == channel.Id && x.Disable == false)
                     .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true));
+
+                if (updateResult > 0)
+                {
+                    logger.LogWarning("AutoChannelDetectionBackgroundTask: 渠道 {ChannelId} 从启用状态变更为禁用状态，原因：{Reason}",
+                        channel.Id, timeout > 0 ? $"超时{timeout}ms" : "检测失败");
+                    needClearCache = true; // 状态发生变化，需要清除缓存
+                }
+                // 如果updateResult = 0，说明渠道本身就是禁用状态，无需任何操作
             }
         }
         catch (ChannelException e)
         {
             logger.LogError(e, $"AutoChannelDetectionBackgroundTask Error: {e.Message}");
-            // 5. 如果通道超时则关闭
-            await dbContext.Channels.Where(x => x.Id == channel.Id)
+            // 只有当渠道当前是启用状态时才需要禁用并清除缓存
+            var updateResult = await dbContext.Channels.Where(x => x.Id == channel.Id && x.Disable == false)
                 .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true));
+
+            if (updateResult > 0)
+            {
+                logger.LogWarning("AutoChannelDetectionBackgroundTask: 渠道 {ChannelId} 因异常从启用状态变更为禁用状态，异常：{Exception}",
+                    channel.Id, e.Message);
+                needClearCache = true; // 状态发生变化，需要清除缓存
+            }
+            // 如果updateResult = 0，说明渠道本身就是禁用状态，无需任何操作
         }
         catch (Exception e)
         {
             logger.LogError(e, $"AutoChannelDetectionBackgroundTask Error: {e.Message}");
-            // 5. 如果通道超时则关闭
-            await dbContext.Channels.Where(x => x.Id == channel.Id)
+            // 只有当渠道当前是启用状态时才需要禁用并清除缓存
+            var updateResult = await dbContext.Channels.Where(x => x.Id == channel.Id && x.Disable == false)
                 .ExecuteUpdateAsync(item => item.SetProperty(x => x.Disable, true));
+
+            if (updateResult > 0)
+            {
+                logger.LogWarning("AutoChannelDetectionBackgroundTask: 渠道 {ChannelId} 因异常从启用状态变更为禁用状态，异常：{Exception}",
+                    channel.Id, e.Message);
+                needClearCache = true; // 状态发生变化，需要清除缓存
+            }
+            // 如果updateResult = 0，说明渠道本身就是禁用状态，无需任何操作
+        }
+        finally
+        {
+            // 如果需要清除缓存，则在finally块中执行，确保总是被执行
+            if (needClearCache)
+            {
+                await ClearChannelCacheAsync();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 清除渠道缓存，确保渠道状态变更立即生效
+    /// </summary>
+    private async Task ClearChannelCacheAsync()
+    {
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
+            var cache = scope.ServiceProvider.GetRequiredService<IServiceCache>();
+            await cache.RemoveAsync("CacheKey:Channel");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "清除渠道缓存时发生错误：{ErrorMessage}", ex.Message);
         }
     }
 }
