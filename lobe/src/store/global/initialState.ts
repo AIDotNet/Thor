@@ -6,7 +6,7 @@ export enum SidebarTabKey {
   Channel = "channel",
 
   Chat = "chat",
-  
+
   Vidol = "vidol",
 
   Token = "token",
@@ -16,6 +16,8 @@ export enum SidebarTabKey {
   Product = "product",
 
   Logger = "logger",
+
+  RequestLog = "request-log",
 
   RedeemCode = "redeem-code",
 
@@ -35,7 +37,7 @@ export enum SidebarTabKey {
   UserGroup = 'user-group',
 
   Playground = 'playground',
-  
+
   Usage = 'usage',
 
   Announcement = 'announcement',

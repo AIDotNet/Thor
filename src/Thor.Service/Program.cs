@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.WebSockets;
 using Serilog;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Options;
 using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
@@ -37,9 +39,11 @@ using Thor.Provider;
 using Thor.Qiansail.Extensions;
 using Thor.RabbitMQEvent;
 using Thor.RedisMemory.Cache;
+using Thor.Service;
 using Thor.Service.BackgroundTask;
 using Thor.Service.Eto;
 using Thor.Service.EventBus;
+using Thor.Service.EventHandlers;
 using Thor.Service.Extensions;
 using Thor.Service.Filters;
 using Thor.Service.Infrastructure;
@@ -67,7 +71,7 @@ try
     });
 
     ThorOptions.Initialize(builder.Configuration);
-    
+
     // 添加Windows服务支持
     if (OperatingSystem.IsWindows())
     {
@@ -135,6 +139,7 @@ try
         .AddScoped<IEventHandler<CreateUserEto>, CreateUserEventHandler>()
         .AddScoped<IEventHandler<Tracing>, TracingEventHandler>()
         .AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
+        .AddScoped<IEventHandler<RequestLog>, RequestLogCreatedEventHandler>()
         .AddTransient<JwtHelper>()
         .AddSingleton<OpenTelemetryMiddlewares>()
         .AddSingleton<UnitOfWorkMiddleware>()
@@ -187,6 +192,7 @@ try
         .AddDeepSeekService()
         .AddGeminiService();
 
+    builder.Services.AddScoped<RequestLogService>();
     builder.Services
         .AddCors(options =>
         {
@@ -609,6 +615,23 @@ try
 
     #endregion
 
+    #region RequestLog
+
+    var requestLog = app.MapGroup("/api/v1/request-log")
+        .WithTags("RequestLog")
+        .AddEndpointFilter<ResultFilter>()
+        .RequireAuthorization();
+
+    requestLog.MapGet(string.Empty,
+            async (RequestLogService service, int page, int pageSize, string? userName, DateTime? startTime,
+                    DateTime? endTime) =>
+                await service.GetAsync(page, pageSize, userName, startTime, endTime))
+        .WithDescription("获取请求日志")
+        .WithDisplayName("获取请求日志")
+        .WithOpenApi();
+
+    #endregion
+
     #region User
 
     var user = app.MapGroup("/api/v1/user")
@@ -962,6 +985,11 @@ try
         .WithDescription("获取邀请信息")
         .WithOpenApi();
 
+    system.MapGet("request-log-enabled", (SystemService service) =>
+            service.IsRequestLogEnabled())
+        .WithDescription("Is Request Log Enabled")
+        .WithOpenApi();
+
     #endregion
 
     #region Announcement
@@ -1043,24 +1071,29 @@ try
         .WithDescription("获取用户请求")
         .WithOpenApi();
 
-    app.MapPost("/v1/responses", (ResponsesService responsesService, HttpContext context, ResponsesInput input) =>
-            responsesService.ExecuteAsync(context, input))
+    app.MapPost("/v1/responses",
+            async (ResponsesService responsesService, HttpContext context, ResponsesInput input) =>
+            {
+                await responsesService.ExecuteAsync(context, input);
+            })
         .WithDescription("OpenAI Responses")
         .WithOpenApi();
 
     // 对话补全请求
     app.MapPost("/v1/chat/completions",
             async (ChatService service, HttpContext httpContext, ThorChatCompletionsRequest request) =>
-                await service.ChatCompletionsAsync(httpContext, request))
+            {
+                await service.ChatCompletionsAsync(httpContext, request);
+            })
         .WithGroupName("OpenAI")
         .WithDescription("Get completions from OpenAI")
         .WithOpenApi();
 
     app.MapPost("/v1/messages",
-        (async (HttpContext context, AnthropicChatService service, AnthropicInput input) =>
+        async (HttpContext context, AnthropicChatService service, AnthropicInput input) =>
         {
             await service.MessageAsync(context, input);
-        }));
+        });
 
     // 文本补全接口,不建议使用，使用对话补全即可
     app.MapPost("/v1/completions", async (ChatService service, HttpContext context, CompletionCreateRequest input) =>

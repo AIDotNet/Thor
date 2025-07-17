@@ -21,6 +21,7 @@ using Thor.Infrastructure;
 using Thor.Service.Domain.Core;
 using Thor.Service.Extensions;
 using Thor.Service.Infrastructure;
+using Thor.Service.Infrastructure.Middlewares;
 
 namespace Thor.Service.Service.OpenAI;
 
@@ -42,6 +43,7 @@ public sealed partial class ChatService(
     RateLimitModelService rateLimitModelService,
     UserService userService,
     UserGroupService userGroupService,
+    RequestLogService requestLogService,
     ILogger<ChatService> logger,
     ModelMapService modelMapService,
     LoggerService loggerService,
@@ -307,7 +309,7 @@ public sealed partial class ChatService(
     /// <param name="request"></param>
     /// <returns></returns>
     /// <exception cref="NotModelException"></exception>
-    public async ValueTask ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
+    public async Task ChatCompletionsAsync(HttpContext context, ThorChatCompletionsRequest request)
     {
         using var chatCompletions =
             Activity.Current?.Source.StartActivity("对话补全调用");
@@ -327,7 +329,12 @@ public sealed partial class ChatService(
             request.Temperature = null;
         }
 
+        var log = requestLogService.BeginRequestLog(context.Request.Path, request);
+
+        RequestLogContext.SetCurrent(log);
+
         var rateLimit = 0;
+        string? responseBody = null;
         Exception? lastException = null;
 
         // 用于限流重试，如果限流则重试并且进行重新负载均衡计算
@@ -395,9 +402,13 @@ public sealed partial class ChatService(
 
                 if (request.Stream == true)
                 {
-                    (requestToken, responseToken) =
+                    (requestToken, responseToken, responseBody) =
                         await StreamChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
                             rate);
+                    if (!string.IsNullOrEmpty(responseBody))
+                    {
+                        StreamResponseInterceptor.AddContent(ref responseBody);
+                    }
                 }
                 else
                 {
@@ -405,6 +416,8 @@ public sealed partial class ChatService(
                         await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
                             rate);
                 }
+
+                await requestLogService.EndRequestLog(log, 200);
 
                 var quota = requestToken * rate.PromptRate;
 
@@ -482,6 +495,8 @@ public sealed partial class ChatService(
             {
                 context.Response.StatusCode = 400;
                 await context.WriteErrorAsync($"当前{request.Model}模型未设置倍率,请联系管理员设置倍率", "400");
+                await requestLogService.EndRequestLog(log, 400,
+                    $"当前{request.Model}模型未设置倍率,请联系管理员设置倍率");
             }
         }
         catch (ThorRateLimitException)
@@ -492,6 +507,7 @@ public sealed partial class ChatService(
             // TODO：限流重试次数
             if (rateLimit > 5)
             {
+                await requestLogService.EndRequestLog(log, 429, "对话模型请求限流", lastException);
                 context.Response.StatusCode = 429;
             }
             else
@@ -507,25 +523,32 @@ public sealed partial class ChatService(
                 context.Response.StatusCode = 402;
             }
 
+            await requestLogService.EndRequestLog(log, 402, "抱歉，您的额度不足",
+                insufficientQuotaException);
             await context.WriteErrorAsync(insufficientQuotaException.Message, "402");
         }
         catch (RateLimitException)
         {
             context.Response.StatusCode = 429;
+            await requestLogService.EndRequestLog(log, 429, "抱歉，您的请求过于频繁，请稍后再试");
         }
         catch (UnauthorizedAccessException e)
         {
             context.Response.StatusCode = 401;
+            await requestLogService.EndRequestLog(log, 401, "未授权访问", e);
         }
         catch (OpenAIErrorException error)
         {
             context.Response.StatusCode = 400;
             await context.WriteErrorAsync(error.Message, error.Code);
+            await requestLogService.EndRequestLog(log, 400, error.Message, error);
         }
         catch (NotModelException modelException)
         {
             context.Response.StatusCode = 400;
             await context.WriteErrorAsync(modelException.Message, "400");
+            await requestLogService.EndRequestLog(log, 400, modelException.Message,
+                modelException);
         }
         catch (Exception e)
         {
@@ -536,6 +559,7 @@ public sealed partial class ChatService(
             {
                 context.Response.StatusCode = 400;
                 await context.WriteErrorAsync(e.Message, "500");
+                await requestLogService.EndRequestLog(log, 400, e.Message, e);
             }
             else
             {
@@ -822,15 +846,17 @@ public sealed partial class ChatService(
 
             // 计算上下文长度（使用请求token数作为近似值）
             var contextLength = requestToken;
-            
+
             // 使用上下文定价服务计算费用
-            var pricingResult = contextPricingService.CalculatePricing(rate, requestToken, responseToken, contextLength);
+            var pricingResult =
+                contextPricingService.CalculatePricing(rate, requestToken, responseToken, contextLength);
             var quota = pricingResult.TotalCost;
 
             // 判断请求费用是否超过额度
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
             result = await openService.ChatCompletionsAsync(request, platformOptions);
+            StreamResponseInterceptor.AddContent(result);
 
             await context.Response.WriteAsJsonAsync(result);
 
@@ -861,12 +887,14 @@ public sealed partial class ChatService(
             if (quota > user.ResidualCredit) throw new InsufficientQuotaException("账号余额不足请充值");
 
             result = await openService.ChatCompletionsAsync(request, platformOptions);
+            StreamResponseInterceptor.AddContent(result);
 
             await context.Response.WriteAsJsonAsync(result);
         }
         else
         {
             result = await openService.ChatCompletionsAsync(request, platformOptions);
+            StreamResponseInterceptor.AddContent(result);
 
             await context.Response.WriteAsJsonAsync(result);
         }
@@ -1101,7 +1129,7 @@ public sealed partial class ChatService(
             {
                 // (模型倍率 * (文字输入 + 文字输出 * 补全倍率)
                 quota = (decimal)((requestToken + usage.CompletionTokens * (rate.CompletionRate ?? 1)) *
-                                  rate.PromptRate) ;
+                                  rate.PromptRate);
             }
 
             switch (request.ResponseFormat)
@@ -1308,7 +1336,7 @@ public sealed partial class ChatService(
     /// <param Name="openService"></param>
     /// <param name="rate"></param>
     /// <returns></returns>
-    private async ValueTask<(int requestToken, int responseToken)> StreamChatCompletionsHandlerAsync(
+    private async ValueTask<(int requestToken, int responseToken, string?)> StreamChatCompletionsHandlerAsync(
         HttpContext context,
         ThorChatCompletionsRequest input, ChatChannel channel, IThorChatCompletionsService openService, User user,
         ModelManager rate)
@@ -1461,7 +1489,7 @@ public sealed partial class ChatService(
         }
 
 
-        return (requestToken, responseToken);
+        return (requestToken, responseToken, StreamResponseInterceptor.GetCollectedContent());
     }
 
 

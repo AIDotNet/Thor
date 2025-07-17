@@ -10,6 +10,8 @@ public interface ILoggerDbContext
     DatabaseFacade Database { get; }
     
     DbSet<ChatLogger> Loggers { get; set; }
+    
+    DbSet<RequestLog> RequestLogs { get; set; }
 
     DbSet<StatisticsConsumesNumber> StatisticsConsumesNumbers { get; set; }
 

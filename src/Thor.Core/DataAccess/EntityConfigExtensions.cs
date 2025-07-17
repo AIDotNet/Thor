@@ -249,7 +249,6 @@ public static class EntityConfigExtensions
 
         modelBuilder.Entity<Tracing>(options =>
         {
-            
             options.HasKey(x => x.Id);
             options
                 .Property(e => e.Id).ValueGeneratedOnAdd();
@@ -270,6 +269,19 @@ public static class EntityConfigExtensions
                     item => string.IsNullOrEmpty(item)
                         ? new List<Tracing>()
                         : JsonSerializer.Deserialize<List<Tracing>>(item, JsonSerializerOptions));
+        });
+
+        modelBuilder.Entity<RequestLog>(options =>
+        {
+            options.HasKey(x => x.Id);
+            options
+                .Property(e => e.Id).ValueGeneratedOnAdd();
+
+            options.HasIndex(x => x.Creator);
+
+            options.HasIndex(x => x.ChatLoggerId);
+
+            options.HasIndex(x => x.RoutePath);
         });
 
         return modelBuilder;

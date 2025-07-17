@@ -12,6 +12,7 @@ import Nav from './components/@nav/default'
 import useThemeStore from './store/theme'
 const ProductPage = lazy(() => import('./pages/product/page'))
 const LoggerPage = lazy(() => import('./pages/logger/page'))
+const RequestLogPage = lazy(() => import('./pages/request-log/page'))
 const RedeemCodePage = lazy(() => import('./pages/redeem-code/page'))
 const UserPage = lazy(() => import('./pages/user/page'))
 const CurrentPage = lazy(() => import('./pages/current/page'))
@@ -88,6 +89,11 @@ function App() {
       {
         path: 'logger', element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.logger')} />}>
           <LoggerPage />
+        </Suspense>
+      },
+      {
+        path: 'request-log', element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.requestLog')} />}>
+          <RequestLogPage />
         </Suspense>
       },
       {

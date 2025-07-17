@@ -22,6 +22,7 @@
     "@lobehub/icons": "^1.22.1",
     "@lobehub/ui": "^1.141.3",
     "@tailwindcss/postcss": "^4.1.7",
+    "@uiw/react-json-view": "^2.0.0-alpha.33",
     "antd": "^5.18.3",
     "antd-style": "^3.6.2",
     "echarts": "^5.6.0",

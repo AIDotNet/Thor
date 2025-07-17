@@ -85,4 +85,12 @@ public sealed class SystemService(
             limit = ChatCoreOptions.Invite.Limit
         };
     }
+
+    public object IsRequestLogEnabled()
+    {
+        return new
+        {
+            enabled = ThorOptions.EnableRequestLog
+        };
+    }
 }

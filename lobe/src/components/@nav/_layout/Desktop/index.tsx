@@ -21,7 +21,8 @@ import {
   Bug,
   PieChart,
   Megaphone,
-  Cherry
+  Cherry,
+  FileClock
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
@@ -35,6 +36,7 @@ import { SlidersOutlined } from "@ant-design/icons";
 import { info } from "../../../../services/UserService";
 import { useTranslation } from "react-i18next";
 import { getTokens } from "../../../../services/TokenService";
+import { isRequestLogEnabled } from "../../../../services/SystemService";
 
 const { Text } = Typography;
 
@@ -47,6 +49,7 @@ interface MenuItem {
   role?: string;
   onClick?: () => void;
   disabled?: boolean;
+  hidden?: boolean;
   children?: MenuItem[];
 }
 
@@ -63,6 +66,7 @@ const Nav = memo(() => {
   const [openKeys, setOpenKeys] = useState<string[]>([]);
   const [isTokenModalVisible, setIsTokenModalVisible] = useState(false);
   const [userTokens, setUserTokens] = useState<any[]>([]);
+  const [isRequestLogEnabledState, setIsRequestLogEnabledState] = useState<boolean>(false);
 
   // 使用 useMemo 并依赖 i18n.language，这样语言变化时菜单会重新生成
   const getMenuItems = useMemo((): MenuItem[] => {
@@ -241,6 +245,17 @@ const Nav = memo(() => {
             role: "user,admin",
           },
           {
+            icon: <FileClock />,
+            label: t('sidebar.requestLog'),
+            enable: true,
+            key: SidebarTabKey.RequestLog,
+            onClick: () => {
+              navigate("/request-log");
+            },
+            role: "user,admin",
+            hidden: !isRequestLogEnabledState
+          },
+          {
             icon: <SlidersOutlined />,
             enable: true,
             label: t('sidebar.rateLimit'),
@@ -285,8 +300,13 @@ const Nav = memo(() => {
     ];
     if (userRole) {
       return items.filter((item) => {
+        // 过滤隐藏的顶级菜单项
+        if (item.hidden) return false;
+
         if (item.children) {
           item.children = item.children.filter((child) => {
+            // 过滤隐藏的子菜单项
+            if (child.hidden) return false;
             if (!child.role) return true;
             return child.role.split(",").includes(userRole);
           });
@@ -297,14 +317,15 @@ const Nav = memo(() => {
         return item.role.split(",").includes(userRole);
       });
     }
-    
-    return items;
-  }, [t, i18n.language, navigate, chatDisabled, userRole]); // 依赖 i18n.language 确保语言变化时重新计算
+
+    return items.filter(item => !item.hidden);
+  }, [t, i18n.language, navigate, chatDisabled, userRole, isRequestLogEnabledState]); // 依赖 i18n.language 确保语言变化时重新计算
 
   const [items, setItems] = useState<MenuItem[]>(getMenuItems);
 
   useEffect(() => {
     loadUser();
+    checkRequestLogEnabled();
   }, []);
 
   // 当语言或菜单项定义变化时更新菜单
@@ -318,6 +339,16 @@ const Nav = memo(() => {
       const role = res.data.role;
       if (!role) return;
       setUserRole(role);
+    });
+  }
+
+  function checkRequestLogEnabled() {
+    isRequestLogEnabled().then((res) => {
+      if (res.success) {
+        setIsRequestLogEnabledState(res.data.enabled);
+      }
+    }).catch(() => {
+      setIsRequestLogEnabledState(false);
     });
   }
 

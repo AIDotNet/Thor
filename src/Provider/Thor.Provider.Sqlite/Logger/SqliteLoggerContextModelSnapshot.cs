@@ -119,6 +119,75 @@ namespace Thor.Provider.Logger
                     b.ToTable("Loggers");
                 });
 
+            modelBuilder.Entity("Thor.Domain.Chats.RequestLog", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ChatLoggerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClientIp")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Creator")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("HttpStatusCode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Modifier")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RequestBody")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RequestHeaders")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("RequestTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ResponseBody")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ResponseTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RoutePath")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatLoggerId");
+
+                    b.HasIndex("Creator");
+
+                    b.HasIndex("RoutePath");
+
+                    b.ToTable("RequestLogs");
+                });
+
             modelBuilder.Entity("Thor.Domain.Chats.Tracing", b =>
                 {
                     b.Property<string>("Id")

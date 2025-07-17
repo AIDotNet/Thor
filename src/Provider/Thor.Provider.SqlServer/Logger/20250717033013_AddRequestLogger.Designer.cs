@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Thor.Provider;
 
@@ -11,9 +12,11 @@ using Thor.Provider;
 namespace Thor.Provider.SqlServer.Logger
 {
     [DbContext(typeof(SqlServerLoggerContext))]
-    partial class SqlServerLoggerContextModelSnapshot : ModelSnapshot
+    [Migration("20250717033013_AddRequestLogger")]
+    partial class AddRequestLogger
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

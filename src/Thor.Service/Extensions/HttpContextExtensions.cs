@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Dtos;
+using Thor.Service.Infrastructure;
+using Thor.Service.Infrastructure.Middlewares;
 
 namespace Thor.Service.Extensions;
 
@@ -18,6 +20,12 @@ public static class HttpContextExtensions
         context.Response.ContentType = "text/event-stream;charset=utf-8;";
         context.Response.Headers.TryAdd("Cache-Control", "no-cache");
         context.Response.Headers.TryAdd("Connection", "keep-alive");
+        
+        // 初始化流式响应日志收集
+        if (RequestLogContext.Current != null)
+        {
+            StreamResponseInterceptor.StartCollecting();
+        }
     }
 
     public static string GetContentType(string extension)
@@ -72,7 +80,15 @@ public static class HttpContextExtensions
     public static async ValueTask WriteAsEventStreamDataAsync(this HttpContext context, object value)
     {
         var jsonData = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
-        await context.WriteAsEventAsync($"data: {jsonData}\n\n");
+        var eventData = $"data: {jsonData}\n\n";
+        
+        // 拦截内容用于日志记录
+        if (RequestLogContext.Current != null)
+        {
+            StreamResponseInterceptor.AddContent(ref eventData);
+        }
+        
+        await context.WriteAsEventAsync(eventData);
         await context.Response.Body.FlushAsync();
     }
 
@@ -86,19 +102,35 @@ public static class HttpContextExtensions
     public static async ValueTask WriteAsEventStreamDataAsync(this HttpContext context, string @event, object value)
     {
         var jsonData = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
-        await context.WriteAsEventAsync($"event: {@event}\ndata: {jsonData}\n\n");
+        var eventData = $"event: {@event}\ndata: {jsonData}\n\n";
+        
+        await context.WriteAsEventAsync(eventData);
         await context.Response.Body.FlushAsync();
     }
 
     public static async ValueTask WriteAsEventAsync(this HttpContext context, string value)
     {
+        // 拦截内容用于日志记录
+        if (RequestLogContext.Current != null)
+        {
+            StreamResponseInterceptor.AddContent(ref value);
+        }
+        
         await context.Response.WriteAsync(value, Encoding.UTF8);
         await context.Response.Body.FlushAsync();
     }
 
     public static async ValueTask WriteAsEventStreamAsync(this HttpContext context, string @event)
     {
-        await context.Response.WriteAsync($"{@event}\n", Encoding.UTF8);
+        var eventData = $"{@event}\n";
+        
+        // 拦截内容用于日志记录
+        if (RequestLogContext.Current != null)
+        {
+            StreamResponseInterceptor.AddContent(ref eventData);
+        }
+        
+        await context.Response.WriteAsync(eventData, Encoding.UTF8);
         await context.Response.Body.FlushAsync();
     }
 
@@ -109,7 +141,15 @@ public static class HttpContextExtensions
     /// <returns></returns>
     public static async ValueTask WriteAsEventStreamEndAsync(this HttpContext context)
     {
-        await context.Response.WriteAsync("data: [DONE]\n\n");
+        var endData = "data: [DONE]\n\n";
+        
+        // 拦截内容用于日志记录
+        if (RequestLogContext.Current != null)
+        {
+            StreamResponseInterceptor.AddContent(ref endData);
+        }
+        
+        await context.Response.WriteAsync(endData);
         await context.Response.Body.FlushAsync();
     }
 
@@ -127,8 +167,15 @@ public static class HttpContextExtensions
 
         context.Response.Headers.ContentType = "text/event-stream";
 
-        await context.Response.WriteAsync(
-            "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
+        var errorData = "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n";
+        
+        // 拦截内容用于日志记录
+        if (RequestLogContext.Current != null)
+        {
+            StreamResponseInterceptor.AddContent(ref errorData);
+        }
+
+        await context.Response.WriteAsync(errorData, Encoding.UTF8);
     }
 
     public static async ValueTask WriteStreamErrorAsync(this HttpContext context, string message)
@@ -155,8 +202,15 @@ public static class HttpContextExtensions
 
         context.Response.Headers.ContentType = "text/event-stream";
 
-        await context.Response.WriteAsync(
-            "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n", Encoding.UTF8);
+        var errorData = "data: " + JsonSerializer.Serialize(error, ThorJsonSerializer.DefaultOptions) + "\n\n";
+        
+        // 拦截内容用于日志记录
+        if (RequestLogContext.Current != null)
+        {
+            StreamResponseInterceptor.AddContent(ref errorData);
+        }
+
+        await context.Response.WriteAsync(errorData, Encoding.UTF8);
 
         await context.WriteAsEventStreamEndAsync();
     }

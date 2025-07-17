@@ -124,6 +124,75 @@ namespace Thor.Provider.PostgreSQL.Logger
                     b.ToTable("Loggers");
                 });
 
+            modelBuilder.Entity("Thor.Domain.Chats.RequestLog", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ChatLoggerId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClientIp")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Creator")
+                        .HasColumnType("text");
+
+                    b.Property<long>("DurationMs")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<int>("HttpStatusCode")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Modifier")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RequestBody")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RequestHeaders")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RequestTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ResponseBody")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ResponseTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("RoutePath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChatLoggerId");
+
+                    b.HasIndex("Creator");
+
+                    b.HasIndex("RoutePath");
+
+                    b.ToTable("RequestLogs");
+                });
+
             modelBuilder.Entity("Thor.Domain.Chats.Tracing", b =>
                 {
                     b.Property<string>("Id")
