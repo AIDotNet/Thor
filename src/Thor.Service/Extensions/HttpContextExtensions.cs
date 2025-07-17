@@ -81,13 +81,6 @@ public static class HttpContextExtensions
     {
         var jsonData = JsonSerializer.Serialize(value, ThorJsonSerializer.DefaultOptions);
         var eventData = $"data: {jsonData}\n\n";
-        
-        // 拦截内容用于日志记录
-        if (RequestLogContext.Current != null)
-        {
-            StreamResponseInterceptor.AddContent(ref eventData);
-        }
-        
         await context.WriteAsEventAsync(eventData);
         await context.Response.Body.FlushAsync();
     }
