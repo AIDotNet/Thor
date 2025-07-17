@@ -72,6 +72,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         var toolCallIds = new Dictionary<int, string>(); // 存储每个索引对应的ID
         var accumulatedUsage = new ClaudeChatCompletionDtoUsage();
         var isFinished = false;
+        var currentContentBlockType = ""; // 跟踪当前内容块类型
+        var currentBlockIndex = 0; // 跟踪当前块索引
 
         await foreach (var openAIResponse in _openAIChatService.StreamChatCompletionsAsync(openAIRequest, options,
                            cancellationToken))
@@ -94,16 +96,27 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 // 处理内容
                 if (!string.IsNullOrEmpty(choice.Delta?.Content))
                 {
+                    // 如果当前有其他类型的内容块在运行，先结束它们
+                    if (currentContentBlockType != "text" && !string.IsNullOrEmpty(currentContentBlockType))
+                    {
+                        var stopEvent = CreateContentBlockStopEvent();
+                        yield return ("content_block_stop", stopEvent);
+                        currentContentBlockType = "";
+                    }
+
                     // 发送content_block_start事件（仅第一次）
-                    if (!hasTextContentBlockStarted)
+                    if (!hasTextContentBlockStarted || currentContentBlockType != "text")
                     {
                         hasTextContentBlockStarted = true;
+                        currentContentBlockType = "text";
                         var contentBlockStartEvent = CreateContentBlockStartEvent();
+                        contentBlockStartEvent.index = currentBlockIndex;
                         yield return ("content_block_start", contentBlockStartEvent);
                     }
 
                     // 发送content_block_delta事件
                     var contentDeltaEvent = CreateContentBlockDeltaEvent(choice.Delta.Content);
+                    contentDeltaEvent.index = currentBlockIndex;
                     yield return ("content_block_delta", contentDeltaEvent);
                 }
 
@@ -114,9 +127,19 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     {
                         var toolCallIndex = toolCall.Index; // 使用索引来标识工具调用
 
+                        // 如果当前有文本或thinking内容块在运行，先结束它们
+                        if (currentContentBlockType == "text" || currentContentBlockType == "thinking")
+                        {
+                            var stopEvent = CreateContentBlockStopEvent();
+                            yield return ("content_block_stop", stopEvent);
+                            currentBlockIndex++; // 增加块索引
+                        }
+
                         // 发送tool_use content_block_start事件
                         if (toolBlocksStarted.TryAdd(toolCallIndex, true))
                         {
+                            currentContentBlockType = "tool_use";
+                            
                             // 保存工具调用的ID（如果有的话）
                             if (!string.IsNullOrEmpty(toolCall.Id))
                             {
@@ -131,6 +154,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                             var toolBlockStartEvent = CreateToolBlockStartEvent(
                                 toolCallIds[toolCallIndex],
                                 toolCall.Function?.Name);
+                            toolBlockStartEvent.index = currentBlockIndex;
                             yield return ("content_block_start", toolBlockStartEvent);
                         }
 
@@ -138,6 +162,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         if (!string.IsNullOrEmpty(toolCall.Function?.Arguments))
                         {
                             var toolDeltaEvent = CreateToolBlockDeltaEvent(toolCall.Function.Arguments);
+                            toolDeltaEvent.index = currentBlockIndex;
                             yield return ("content_block_delta", toolDeltaEvent);
                         }
                     }
@@ -146,15 +171,26 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 // 处理推理内容
                 if (!string.IsNullOrEmpty(choice.Delta?.ReasoningContent))
                 {
+                    // 如果当前有其他类型的内容块在运行，先结束它们
+                    if (currentContentBlockType != "thinking" && !string.IsNullOrEmpty(currentContentBlockType))
+                    {
+                        var stopEvent = CreateContentBlockStopEvent();
+                        yield return ("content_block_stop", stopEvent);
+                        currentBlockIndex++; // 增加块索引
+                    }
+
                     // 对于推理内容，也需要发送对应的事件
-                    if (!hasThinkingContentBlockStarted)
+                    if (!hasThinkingContentBlockStarted || currentContentBlockType != "thinking")
                     {
                         hasThinkingContentBlockStarted = true;
+                        currentContentBlockType = "thinking";
                         var thinkingBlockStartEvent = CreateThinkingBlockStartEvent();
+                        thinkingBlockStartEvent.index = currentBlockIndex;
                         yield return ("content_block_start", thinkingBlockStartEvent);
                     }
 
                     var thinkingDeltaEvent = CreateThinkingBlockDeltaEvent(choice.Delta.ReasoningContent);
+                    thinkingDeltaEvent.index = currentBlockIndex;
                     yield return ("content_block_delta", thinkingDeltaEvent);
                 }
 
@@ -163,10 +199,11 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 {
                     isFinished = true;
 
-                    // 发送content_block_stop事件
-                    if (hasTextContentBlockStarted || hasThinkingContentBlockStarted || toolBlocksStarted.Count > 0)
+                    // 发送content_block_stop事件（如果有活跃的内容块）
+                    if (!string.IsNullOrEmpty(currentContentBlockType))
                     {
                         var contentBlockStopEvent = CreateContentBlockStopEvent();
+                        contentBlockStopEvent.index = currentBlockIndex;
                         yield return ("content_block_stop", contentBlockStopEvent);
                     }
 
@@ -194,9 +231,10 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         // 确保流正确结束
         if (!isFinished)
         {
-            if (hasTextContentBlockStarted || hasThinkingContentBlockStarted || toolBlocksStarted.Count > 0)
+            if (!string.IsNullOrEmpty(currentContentBlockType))
             {
                 var contentBlockStopEvent = CreateContentBlockStopEvent();
+                contentBlockStopEvent.index = currentBlockIndex;
                 yield return ("content_block_stop", contentBlockStopEvent);
             }
 

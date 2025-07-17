@@ -6,7 +6,8 @@ public class ClaudeStreamDto
 {
     public string type { get; set; }
     
-    public int index { get; set; }
+    public int? index { get; set; }
+    
     public ClaudeChatCompletionDtoContent_block content_block { get; set; }
     
     public ClaudeChatCompletionDtoDelta? delta { get; set; }
