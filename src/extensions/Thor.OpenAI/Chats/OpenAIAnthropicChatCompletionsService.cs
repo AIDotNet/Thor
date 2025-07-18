@@ -283,16 +283,6 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     continue;
                 }
 
-                // 需要处理一下，如果消息只有一条并且是text，那么不能使用content:[],应该是content：“”
-                if (thorMessages.Count == 1 && thorMessages[0].Contents?.Count == 1 &&
-                    thorMessages.FirstOrDefault()?.Contents?.FirstOrDefault()?.Type == "text" &&
-                    !string.IsNullOrEmpty(thorMessages.FirstOrDefault()?.Contents?.FirstOrDefault()?.Text))
-                {
-                    thorMessages[0].Content = thorMessages[0]!.Contents[0]!.Text;
-                    thorMessages[0].Contents = null; // 清除Contents
-                }
-
-
                 openAIRequest.Messages.AddRange(thorMessages);
             }
 
