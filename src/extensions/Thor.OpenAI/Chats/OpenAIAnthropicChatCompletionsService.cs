@@ -85,8 +85,6 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 hasStarted = true;
                 var messageStartEvent = CreateMessageStartEvent(messageId, request.Model);
                 yield return ("message_start", messageStartEvent);
-
-                // 继续
             }
 
             if (openAIResponse.Choices is { Count: > 0 })
@@ -139,7 +137,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         if (toolBlocksStarted.TryAdd(toolCallIndex, true))
                         {
                             currentContentBlockType = "tool_use";
-                            
+
                             // 保存工具调用的ID（如果有的话）
                             if (!string.IsNullOrEmpty(toolCall.Id))
                             {
@@ -285,6 +283,16 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     continue;
                 }
 
+                // 需要处理一下，如果消息只有一条并且是text，那么不能使用content:[],应该是content：“”
+                if (thorMessages.Count == 1 && thorMessages[0].Contents?.Count == 1 &&
+                    thorMessages.FirstOrDefault()?.Contents?.FirstOrDefault()?.Type == "text" &&
+                    !string.IsNullOrEmpty(thorMessages.FirstOrDefault()?.Contents?.FirstOrDefault()?.Text))
+                {
+                    thorMessages[0].Content = thorMessages[0]!.Contents[0]!.Text;
+                    thorMessages[0].Contents = null; // 清除Contents
+                }
+
+
                 openAIRequest.Messages.AddRange(thorMessages);
             }
 
@@ -329,7 +337,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         }
 
         // 处理多模态内容
-        if (anthropicMessage.Contents != null && anthropicMessage.Contents.Count > 0)
+        if (anthropicMessage.Contents is { Count: > 0 })
         {
             var currentContents = new List<ThorChatMessageContent>();
             var currentToolCalls = new List<ThorToolCall>();
@@ -355,12 +363,25 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     // 如果有普通内容，先创建内容消息
                     if (currentContents.Count > 0)
                     {
-                        var contentMessage = new ThorChatMessage
+                        if (currentContents.Count == 1 && currentContents.Any(x => x.Type == "text"))
                         {
-                            Role = anthropicMessage.Role,
-                            Contents = currentContents
-                        };
-                        results.Add(contentMessage);
+                            var contentMessage = new ThorChatMessage
+                            {
+                                Role = anthropicMessage.Role,
+                                ContentCalculated = currentContents.FirstOrDefault()?.Text
+                            };
+                            results.Add(contentMessage);
+                        }
+                        else
+                        {
+                            var contentMessage = new ThorChatMessage
+                            {
+                                Role = anthropicMessage.Role,
+                                Contents = currentContents
+                            };
+                            results.Add(contentMessage);
+                        }
+
                         currentContents = new List<ThorChatMessageContent>();
                     }
 
