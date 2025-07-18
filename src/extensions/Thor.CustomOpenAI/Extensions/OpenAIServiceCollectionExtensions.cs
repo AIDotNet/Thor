@@ -2,7 +2,9 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Thor.Abstractions;
+using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Audios;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Embeddings;
@@ -67,6 +69,12 @@ public static class OpenAIServiceCollectionExtensions
             .PlatformCode);
 
         services.AddKeyedSingleton<IThorResponsesService, OpenAIResponsesService>(CustomeOpenAIPlatformOptions.PlatformCode);
+
+        // 注册OpenAI到Claude适配器服务
+        services.AddKeyedSingleton<IAnthropicChatCompletionsService>(CustomeOpenAIPlatformOptions.PlatformCode, 
+            (provider, key) => new CustomOpenAIAnthropicChatCompletionsService(
+                provider.GetRequiredKeyedService<IThorChatCompletionsService>(key),
+                provider.GetRequiredService<ILogger<CustomOpenAIAnthropicChatCompletionsService>>()));
 
         services.AddHttpClient(CustomeOpenAIPlatformOptions.PlatformCode,
                 options =>
