@@ -14,7 +14,7 @@ namespace Thor.Abstractions.Dtos
         /// 错误码
         /// </summary>
         [JsonPropertyName("code")]
-        public string? Code { get; set; }
+        public object? Code { get; set; }
 
         /// <summary>
         /// 参数

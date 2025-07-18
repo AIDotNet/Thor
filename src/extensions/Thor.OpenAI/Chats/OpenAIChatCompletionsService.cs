@@ -112,7 +112,7 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
                 logger.LogInformation("OpenAI对话异常 , StatusCode: {StatusCode} Response: {Response}", response.StatusCode,
                     line);
 
-                throw new BusinessException("OpenAI对话异常", line);
+                throw new BusinessException("OpenAI对话异常" + line, "500");
             }
 
             if (line.StartsWith(OpenAIConstant.Data))

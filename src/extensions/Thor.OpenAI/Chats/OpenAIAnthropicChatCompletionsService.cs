@@ -70,10 +70,12 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         var hasThinkingContentBlockStarted = false;
         var toolBlocksStarted = new Dictionary<int, bool>(); // 使用索引而不是ID
         var toolCallIds = new Dictionary<int, string>(); // 存储每个索引对应的ID
+        var toolCallIndexToBlockIndex = new Dictionary<int, int>(); // 工具调用索引到块索引的映射
         var accumulatedUsage = new ClaudeChatCompletionDtoUsage();
         var isFinished = false;
         var currentContentBlockType = ""; // 跟踪当前内容块类型
         var currentBlockIndex = 0; // 跟踪当前块索引
+        var lastContentBlockType = ""; // 跟踪最后一个内容块类型，用于确定停止原因
 
         await foreach (var openAIResponse in _openAIChatService.StreamChatCompletionsAsync(openAIRequest, options,
                            cancellationToken))
@@ -98,7 +100,9 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     if (currentContentBlockType != "text" && !string.IsNullOrEmpty(currentContentBlockType))
                     {
                         var stopEvent = CreateContentBlockStopEvent();
+                        stopEvent.index = currentBlockIndex;
                         yield return ("content_block_stop", stopEvent);
+                        currentBlockIndex++; // 切换内容块时增加索引
                         currentContentBlockType = "";
                     }
 
@@ -107,6 +111,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     {
                         hasTextContentBlockStarted = true;
                         currentContentBlockType = "text";
+                        lastContentBlockType = "text";
                         var contentBlockStartEvent = CreateContentBlockStartEvent();
                         contentBlockStartEvent.index = currentBlockIndex;
                         yield return ("content_block_start", contentBlockStartEvent);
@@ -125,18 +130,31 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     {
                         var toolCallIndex = toolCall.Index; // 使用索引来标识工具调用
 
-                        // 如果当前有文本或thinking内容块在运行，先结束它们
-                        if (currentContentBlockType == "text" || currentContentBlockType == "thinking")
-                        {
-                            var stopEvent = CreateContentBlockStopEvent();
-                            yield return ("content_block_stop", stopEvent);
-                            currentBlockIndex++; // 增加块索引
-                        }
-
                         // 发送tool_use content_block_start事件
                         if (toolBlocksStarted.TryAdd(toolCallIndex, true))
                         {
+                            // 如果当前有文本或thinking内容块在运行，先结束它们
+                            if (currentContentBlockType == "text" || currentContentBlockType == "thinking")
+                            {
+                                var stopEvent = CreateContentBlockStopEvent();
+                                stopEvent.index = currentBlockIndex;
+                                yield return ("content_block_stop", stopEvent);
+                                currentBlockIndex++; // 增加块索引
+                            }
+                            // 如果当前有其他工具调用在运行，也需要结束它们
+                            else if (currentContentBlockType == "tool_use")
+                            {
+                                var stopEvent = CreateContentBlockStopEvent();
+                                stopEvent.index = currentBlockIndex;
+                                yield return ("content_block_stop", stopEvent);
+                                currentBlockIndex++; // 增加块索引
+                            }
+
                             currentContentBlockType = "tool_use";
+                            lastContentBlockType = "tool_use";
+
+                            // 为此工具调用分配一个新的块索引
+                            toolCallIndexToBlockIndex[toolCallIndex] = currentBlockIndex;
 
                             // 保存工具调用的ID（如果有的话）
                             if (!string.IsNullOrEmpty(toolCall.Id))
@@ -160,7 +178,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         if (!string.IsNullOrEmpty(toolCall.Function?.Arguments))
                         {
                             var toolDeltaEvent = CreateToolBlockDeltaEvent(toolCall.Function.Arguments);
-                            toolDeltaEvent.index = currentBlockIndex;
+                            // 使用该工具调用对应的块索引
+                            toolDeltaEvent.index = toolCallIndexToBlockIndex[toolCallIndex];
                             yield return ("content_block_delta", toolDeltaEvent);
                         }
                     }
@@ -173,8 +192,10 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     if (currentContentBlockType != "thinking" && !string.IsNullOrEmpty(currentContentBlockType))
                     {
                         var stopEvent = CreateContentBlockStopEvent();
+                        stopEvent.index = currentBlockIndex;
                         yield return ("content_block_stop", stopEvent);
                         currentBlockIndex++; // 增加块索引
+                        currentContentBlockType = "";
                     }
 
                     // 对于推理内容，也需要发送对应的事件
@@ -182,6 +203,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     {
                         hasThinkingContentBlockStarted = true;
                         currentContentBlockType = "thinking";
+                        lastContentBlockType = "thinking";
                         var thinkingBlockStartEvent = CreateThinkingBlockStartEvent();
                         thinkingBlockStartEvent.index = currentBlockIndex;
                         yield return ("content_block_start", thinkingBlockStartEvent);
@@ -206,7 +228,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     }
 
                     // 发送message_delta事件
-                    var messageDeltaEvent = CreateMessageDeltaEvent(choice.FinishReason, accumulatedUsage);
+                    var messageDeltaEvent = CreateMessageDeltaEvent(GetStopReasonByLastContentType(choice.FinishReason, lastContentBlockType), accumulatedUsage);
                     yield return ("message_delta", messageDeltaEvent);
 
                     // 发送message_stop事件
@@ -236,7 +258,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 yield return ("content_block_stop", contentBlockStopEvent);
             }
 
-            var messageDeltaEvent = CreateMessageDeltaEvent("end_turn", accumulatedUsage);
+            var messageDeltaEvent = CreateMessageDeltaEvent(GetStopReasonByLastContentType("end_turn", lastContentBlockType), accumulatedUsage);
             yield return ("message_delta", messageDeltaEvent);
 
             var messageStopEvent = CreateMessageStopEvent();
@@ -358,7 +380,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                             var contentMessage = new ThorChatMessage
                             {
                                 Role = anthropicMessage.Role,
-                                ContentCalculated = currentContents.FirstOrDefault()?.Text
+                                ContentCalculated = currentContents.FirstOrDefault()?.Text ?? string.Empty
                             };
                             results.Add(contentMessage);
                         }
@@ -624,6 +646,21 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
     }
 
     /// <summary>
+    /// 根据最后的内容块类型和OpenAI的完成原因确定Claude的停止原因
+    /// </summary>
+    private string GetStopReasonByLastContentType(string? openAIFinishReason, string lastContentBlockType)
+    {
+        // 如果最后一个内容块是工具调用，优先返回tool_use
+        if (lastContentBlockType == "tool_use")
+        {
+            return "tool_use";
+        }
+
+        // 否则使用标准的转换逻辑
+        return GetClaudeStopReason(openAIFinishReason);
+    }
+
+    /// <summary>
     /// 创建message_start事件
     /// </summary>
     private ClaudeStreamDto CreateMessageStartEvent(string messageId, string model)
@@ -742,7 +779,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             Usage = usage,
             delta = new ClaudeChatCompletionDtoDelta
             {
-                stop_reason = GetClaudeStopReason(finishReason)
+                stop_reason = finishReason
             }
         };
     }

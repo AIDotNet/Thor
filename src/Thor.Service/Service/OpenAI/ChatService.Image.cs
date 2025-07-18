@@ -214,7 +214,7 @@ partial class ChatService
             if (response.Error != null || response.Results.Count == 0)
             {
                 logger.LogError("图片修改失败：{error}", JsonSerializer.Serialize(response.Error));
-                throw new BusinessException(response.Error?.Message ?? "图片修改失败", response.Error?.Code ?? "500");
+                throw new BusinessException(response.Error?.Message ?? "图片修改失败", response.Error?.Code?.ToString());
             }
 
             await context.Response.WriteAsJsonAsync(response);
@@ -469,7 +469,7 @@ partial class ChatService
             if (response.Error != null || response.Results.Count == 0)
             {
                 logger.LogError("图片生成失败：{error}", JsonSerializer.Serialize(response.Error));
-                throw new BusinessException(response.Error?.Message ?? "图片生成失败", response.Error?.Code ?? "500");
+                throw new BusinessException(response.Error?.Message ?? "图片生成失败", response.Error?.Code?.ToString());
             }
 
             await context.Response.WriteAsJsonAsync(response);
