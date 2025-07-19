@@ -433,6 +433,10 @@ public class AnthropicChatService(
         {
             responseToken += TokenHelper.GetTotalTokens(result?.content?.Select(x => x.text).ToArray() ?? []);
             responseToken += TokenHelper.GetTotalTokens(result?.content?.Select(x => x.Thinking).ToArray() ?? []);
+            responseToken +=
+                TokenHelper.GetTotalTokens(
+                    result?.content?.Where(x => x.input != null).Select(x =>
+                        JsonSerializer.Serialize(x.input, ThorJsonSerializer.DefaultOptions)).ToArray() ?? []);
         }
 
         if (result?.Usage?.cache_read_input_tokens.HasValue == true)
@@ -559,6 +563,9 @@ public class AnthropicChatService(
                 responseToken +=
                     TokenHelper.GetTotalTokens(item?.delta?.partial_json ?? item?.delta?.text ?? item?.delta?.thinking
                         ?? item?.message?.content?.FirstOrDefault()?.text ?? string.Empty);
+
+                responseToken += TokenHelper.GetTotalTokens(item?.message?.content?.Where(x => x.input != null)
+                    .Select(x => JsonSerializer.Serialize(x.input, ThorJsonSerializer.DefaultOptions)).ToArray() ?? []);
 
                 if (!string.IsNullOrEmpty(item?.content_block?.thinking))
                 {
