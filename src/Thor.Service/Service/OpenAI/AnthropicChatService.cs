@@ -226,7 +226,7 @@ public class AnthropicChatService(
             logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 10)
+            if (rateLimit > 50)
             {
                 await requestLogService.EndRequestLog(log, 429, thorRateLimitException.Message, lastException);
                 context.Response.StatusCode = 429;
@@ -280,7 +280,7 @@ public class AnthropicChatService(
                 JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 3)
+            if (rateLimit > 50)
             {
                 context.Response.StatusCode = 400;
                 await requestLogService.EndRequestLog(log, 400, e.Message, lastException);

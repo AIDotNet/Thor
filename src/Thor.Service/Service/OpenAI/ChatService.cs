@@ -505,7 +505,7 @@ public sealed partial class ChatService(
             logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 5)
+            if (rateLimit > 50)
             {
                 await requestLogService.EndRequestLog(log, 429, "对话模型请求限流", lastException);
                 context.Response.StatusCode = 429;
@@ -555,7 +555,7 @@ public sealed partial class ChatService(
             lastException = e;
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 5)
+            if (rateLimit > 50)
             {
                 context.Response.StatusCode = 400;
                 await context.WriteErrorAsync(e.Message, "500");
