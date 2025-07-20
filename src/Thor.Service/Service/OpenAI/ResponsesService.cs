@@ -206,7 +206,7 @@ public sealed class ResponsesService(
             logger.LogWarning("对话模型请求限流：{rateLimit}", rateLimit);
             rateLimit++;
             // TODO：限流重试次数
-            if (rateLimit > 5)
+            if (rateLimit > 10)
             {
                 context.Response.StatusCode = 429;
             }
