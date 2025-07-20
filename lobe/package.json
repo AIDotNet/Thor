@@ -16,7 +16,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.3.7",
+    "@ant-design/icons": "^6.0.0",
     "@ant-design/plots": "^2.3.3",
     "@lobehub/charts": "^2.0.0",
     "@lobehub/icons": "^1.22.1",

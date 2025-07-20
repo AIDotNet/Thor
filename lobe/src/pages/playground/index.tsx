@@ -1,26 +1,27 @@
-import { useEffect, useState } from 'react';
-import { theme, Tabs, Grid } from 'antd';
-import { MessageOutlined, PictureOutlined } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { theme, Tabs, Grid, Button } from 'antd';
+import { MessageOutlined, PictureOutlined, RobotOutlined } from '@ant-design/icons';
 import { Flexbox } from 'react-layout-kit';
 import { useTranslation } from 'react-i18next';
 import { isMobileDevice } from '../../utils/responsive';
 import ChatFeature from './features/chat';
 import ImageFeature from './features/image';
+import ChatGPTInterface from './ChatGPTInterface';
 import { getModelInfo } from '../../services/ModelService';
 const { useBreakpoint } = Grid;
 
-type TabKey = 'chat' | 'image';
+type TabKey = 'chat' | 'image' | 'chatgpt';
 
 export default function Playground() {
     const { token } = theme.useToken();
     const { t } = useTranslation();
     const screens = useBreakpoint();
     const isMobile = !screens.md || isMobileDevice();
-    const [activeTab, setActiveTab] = useState<TabKey>('chat');
+    const [activeTab, setActiveTab] = useState<TabKey>('chatgpt');
 
     const [modelInfo, setModelInfo] = useState<any>(null);
 
-    useEffect(() => {
+    React.useEffect(() => {
         getModelInfo().then((res) => {
             setModelInfo(res.data);
         });
@@ -57,6 +58,16 @@ export default function Playground() {
                     borderBottom: `1px solid ${token.colorBorderSecondary}`
                 }}
                 items={[
+                    {
+                        key: 'chatgpt',
+                        label: (
+                            <span>
+                                <RobotOutlined />
+                                {!isMobile && <span style={{ marginLeft: 8 }}>ChatGPT</span>}
+                            </span>
+                        ),
+                        children: <ChatGPTInterface />
+                    },
                     {
                         key: 'chat',
                         label: (

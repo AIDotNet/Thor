@@ -7,6 +7,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import PwaWrapper from './components/PwaWrapper'
 import { updatePwaThemeColor, listenForThemeUpdates } from './utils/pwa'
+import EnhancedAnnouncement from './components/EnhancedAnnouncement'
 
 import Nav from './components/@nav/default'
 import useThemeStore from './store/theme'
@@ -202,6 +203,7 @@ function App() {
       }}>
       <PwaWrapper>
         <RouterProvider router={router} />
+        <EnhancedAnnouncement />
       </PwaWrapper>
     </ThemeProvider>
   )

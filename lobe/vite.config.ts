@@ -18,6 +18,8 @@ export default defineConfig({
     target: ['edge90', 'chrome90', 'firefox90', 'safari15'],
   },
   server:{
+    host: true,
+    port: 5170,
     proxy: {
       '/api': {
         target: 'http://localhost:5045',
