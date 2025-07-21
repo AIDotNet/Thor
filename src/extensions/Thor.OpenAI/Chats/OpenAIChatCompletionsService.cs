@@ -40,6 +40,12 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             throw new ThorRateLimitException();
         }
 
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            throw new ForbiddenException("OpenAI对话异常: " + error);
+        }
+
         // 大于等于400的状态码都认为是异常
         if (response.StatusCode >= HttpStatusCode.BadRequest)
         {
@@ -85,6 +91,12 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
         if (response.StatusCode == HttpStatusCode.TooManyRequests)
         {
             throw new ThorRateLimitException();
+        }
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+            throw new ForbiddenException("OpenAI对话异常: " + error);
         }
 
         // 大于等于400的状态码都认为是异常

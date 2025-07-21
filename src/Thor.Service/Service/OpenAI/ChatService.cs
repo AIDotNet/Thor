@@ -499,6 +499,23 @@ public sealed partial class ChatService(
                     $"当前{request.Model}模型未设置倍率,请联系管理员设置倍率");
             }
         }
+        catch (ForbiddenException forbiddenException)
+        {
+            lastException = forbiddenException;
+            logger.LogWarning("对话模型请求被禁止：{message}", forbiddenException.Message);
+            rateLimit++;
+
+            if (rateLimit > 50)
+            {
+                await requestLogService.EndRequestLog(log, 403, forbiddenException.Message, lastException);
+                context.Response.StatusCode = 403;
+            }
+            else
+            {
+                request.Model = model;
+                goto limitGoto;
+            }
+        }
         catch (ThorRateLimitException)
         {
             lastException = new ThorRateLimitException("对话模型请求限流");
