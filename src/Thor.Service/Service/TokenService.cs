@@ -242,6 +242,6 @@ public sealed class TokenService(
 
         logger.LogWarning("用户额度不足");
         context.Response.StatusCode = 402;
-        throw new InsufficientQuotaException("额度不足");
+        throw new InsufficientQuotaException("用户额度不足");
     }
 }

@@ -74,7 +74,7 @@ public class ThorToolFunctionPropertyDefinition
     /// 可选。是否允许附加属性。默认值为true。
     /// </summary>
     [JsonPropertyName("additionalProperties")]
-    public bool? AdditionalProperties { get; set; }
+    public object? AdditionalProperties { get; set; }
 
     /// <summary>
     ///  可选。参数描述。
@@ -221,7 +221,7 @@ public class ThorToolFunctionPropertyDefinition
     /// <returns></returns>
     public static ThorToolFunctionPropertyDefinition DefineObject(IDictionary<string, ThorToolFunctionPropertyDefinition>? properties,
                                                                   List<string>? required,
-                                                                  bool? additionalProperties,
+                                                                  object? additionalProperties,
                                                                   string? description,
                                                                   List<string>? @enum)
     {

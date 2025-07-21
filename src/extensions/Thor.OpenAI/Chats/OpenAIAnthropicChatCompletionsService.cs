@@ -228,7 +228,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     }
 
                     // 发送message_delta事件
-                    var messageDeltaEvent = CreateMessageDeltaEvent(GetStopReasonByLastContentType(choice.FinishReason, lastContentBlockType), accumulatedUsage);
+                    var messageDeltaEvent = CreateMessageDeltaEvent(
+                        GetStopReasonByLastContentType(choice.FinishReason, lastContentBlockType), accumulatedUsage);
                     yield return ("message_delta", messageDeltaEvent);
 
                     // 发送message_stop事件
@@ -258,7 +259,9 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 yield return ("content_block_stop", contentBlockStopEvent);
             }
 
-            var messageDeltaEvent = CreateMessageDeltaEvent(GetStopReasonByLastContentType("end_turn", lastContentBlockType), accumulatedUsage);
+            var messageDeltaEvent =
+                CreateMessageDeltaEvent(GetStopReasonByLastContentType("end_turn", lastContentBlockType),
+                    accumulatedUsage);
             yield return ("message_delta", messageDeltaEvent);
 
             var messageStopEvent = CreateMessageStopEvent();
@@ -513,11 +516,19 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                 var propertyValueStr = property.Value?.ToString();
                 if (propertyValueStr != null)
                 {
-                    var propertyDefinition =
-                        JsonSerializer.Deserialize<ThorToolFunctionPropertyDefinition>(propertyValueStr);
-                    if (propertyDefinition != null)
+                    try
                     {
-                        values.Add(property.Key, propertyDefinition);
+                        var propertyDefinition =
+                            JsonSerializer.Deserialize<ThorToolFunctionPropertyDefinition>(propertyValueStr);
+                        if (propertyDefinition != null)
+                        {
+                            values.Add(property.Key, propertyDefinition);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("测试：" + propertyValueStr);
+                        throw;
                     }
                 }
             }
