@@ -232,17 +232,24 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
         {
             if (value is JsonElement jsonElement)
             {
-                if (jsonElement.ValueKind == JsonValueKind.String)
-                {
-                    ToolChoice = new ThorToolChoice
-                    {
-                        Type = jsonElement.GetString()
-                    };
-                }
-                else if (jsonElement.ValueKind == JsonValueKind.Object)
+                // if (jsonElement.ValueKind == JsonValueKind.String)
+                // {
+                //     ToolChoice = new ThorToolChoice
+                //     {
+                //         Type = jsonElement.GetString()
+                //     };
+                // }
+                if (jsonElement.ValueKind == JsonValueKind.Object)
                 {
                     ToolChoice = jsonElement.Deserialize<ThorToolChoice>();
                 }
+            }
+            else if (value is string text)
+            {
+                ToolChoice = new ThorToolChoice
+                {
+                    Type = text
+                };
             }
             else
             {
