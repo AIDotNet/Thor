@@ -1,203 +1,174 @@
-<div align="center"><a name="readme-top"></a>
+<div align="center">
 
 <img height="160" src="https://github.com/AIDotNet/Thor/assets/61819790/a3eb7557-0ff4-4edd-a472-e5a0a745616d">
 
-<h1>Thor(雷神托尔)</h1>
+# Thor - AI Model Management Gateway
 
-Thor(雷神托尔),一个AI大模型管理网关。
+[![License](https://img.shields.io/github/license/AIDotNet/Thor)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/AIDotNet/Thor)](https://github.com/AIDotNet/Thor/stargazers)
+[![Issues](https://img.shields.io/github/issues/AIDotNet/Thor)](https://github.com/AIDotNet/Thor/issues)
+[![Docker](https://img.shields.io/docker/v/aidotnet/thor)](https://hub.docker.com/r/aidotnet/thor)
 
-[![][github-contributors-shield]][github-contributors-link]
-[![][github-forks-shield]][github-forks-link]
-[![][github-stars-shield]][github-stars-link]
-[![][github-issues-shield]][github-issues-link]
-[![][github-license-shield]][github-license-link]
-
-[Changelog](./CHANGELOG.md) · [Report Bug][github-issues-link] · [Request Feature][github-issues-link]
-
-![](https://raw.githubusercontent.com/andreasbm/readme/master/assets/lines/rainbow.png)
+**Thor** is an enterprise-grade AI model management gateway that provides unified API access to manage and orchestrate multiple AI models. Compatible with OpenAI format, featuring comprehensive user management, channel management, billing, and monitoring capabilities.
 
 </div>
 
-[npm-release-shield]: https://img.shields.io/npm/v/@lobehub/chat?color=369eff&labelColor=ffcb47&logo=npm&logoColor=white&style=flat-square
+## 🚀 Core Features
 
-[npm-release-link]: https://www.npmjs.com/package/@lobehub/chat
+- **🔧 Unified Management**: Support for 20+ AI models with unified access and management
+- **💰 Smart Billing**: Precise token-based billing system with cache optimization
+- **📊 Real-time Monitoring**: Detailed usage statistics and performance monitoring
+- **🔐 Access Control**: Complete user management and access control system
+- **⚡ High Performance**: Distributed caching and load balancing support
+- **🐳 Easy Deployment**: One-click Docker deployment
 
-[github-releasedate-shield]: https://img.shields.io/github/release-date/AIDotNet/AIDotNet.API?color=8ae8ff&labelColor=ffcb47&style=flat-square
+## 📈 Data Visualization
 
-[github-releasedate-link]: https://github.com/AIDotNet/AIDotNet.API/releases
+![Data Statistics Preview](https://github.com/user-attachments/assets/eb508d89-6834-4064-95c2-937c939ddbd7)
 
-[github-action-test-shield]: https://img.shields.io/github/actions/workflow/status/AIDotNet/AIDotNet.API/test.yml?color=8ae8ff&label=test&labelColor=ffcb47&logo=githubactions&logoColor=white&style=flat-square
+## 📋 Feature Overview
 
-[github-action-test-link]: https://github.com/AIDotNet/AIDotNet.API/actions/workflows/test.yml
+### Core Features
+- ✅ **User Management** - Complete user registration, login, and permission control system
+- ✅ **Channel Management** - Unified access and management for multiple AI service providers
+- ✅ **Token Management** - API key generation, distribution, and permission control
+- ✅ **Smart Billing** - Accurate token billing with cache optimization support
+- ✅ **Data Analytics** - Real-time usage statistics and visual reports
+- ✅ **Log Auditing** - Complete API call logs and error tracking
+- ✅ **System Configuration** - Flexible system parameter configuration
+- ✅ **Payment Integration** - Alipay balance recharge functionality
 
-[github-action-release-shield]: https://img.shields.io/github/actions/workflow/status/AIDotNet/AIDotNet.API/release.yml?color=8ae8ff&label=release&labelColor=ffcb47&logo=githubactions&logoColor=white&style=flat-square
+### Advanced Features
+- ✅ **Cache Optimization** - Redis distributed cache support
+- ✅ **Load Balancing** - Intelligent channel selection and failover
+- ✅ **Rate Limiting** - API rate limiting based on user groups
+- ✅ **Real-time Monitoring** - System performance and call monitoring
+- ✅ **Multi-language Support** - Chinese/English interface switching
 
-[github-action-release-link]: https://github.com/AIDotNet/AIDotNet.API/actions/workflows/release.yml
+## 🤖 Supported AI Models
 
-[github-contributors-shield]: https://img.shields.io/github/contributors/AIDotNet/AIDotNet.API?color=c4f042&labelColor=ffcb47&style=flat-square
+### OpenAI Compatible Models
+- ✅ **OpenAI GPT Series** (Function Calling supported)
+- ✅ **Azure OpenAI** (Function Calling supported)
+- ✅ **Kimi (Moonshot AI)** (Function Calling supported)
+- ✅ **DeepSeek** (Function Calling supported)
+- ✅ **Claude (Anthropic)** (Cache billing optimization supported)
 
-[github-contributors-link]: https://github.com/AIDotNet/AIDotNet.API/graphs/contributors
+### Chinese AI Models
+- ✅ **Baidu Wenxin Yiyan (ErnieBot)** (Function Calling supported)
+- ✅ **Alibaba Tongyi Qianwen** (Function Calling supported)
+- ✅ **Tencent Hunyuan** (Function Calling supported)
+- ✅ **Zhipu AI GLM Series** (Function Calling supported)
+- ✅ **iFlytek Spark Model** (Function Calling supported)
 
-[github-forks-shield]: https://img.shields.io/github/forks/AIDotNet/AIDotNet.API?color=8ae8ff&labelColor=ffcb47&style=flat-square
+### Open Source Models
+- ✅ **Ollama** (Local deployment open source models)
+- ✅ **SiliconFlow** (Open source model aggregation platform)
 
-[github-forks-link]: https://github.com/AIDotNet/AIDotNet.API/network/members
+### Cloud Service Providers
+- ✅ **Volcano Engine** (ByteDance Cloud Services)
+- ✅ **Amazon Bedrock** (AWS AI Services)
+- ✅ **Google Vertex AI** (GCP AI Services)
+- ✅ **Gitee AI** (Gitee AI Platform)
+- ✅ **MiniMax AI** (SenseTime Technology)
 
-[github-stars-shield]: https://img.shields.io/github/stars/AIDotNet/AIDotNet.API?color=ffcb47&labelColor=ffcb47&style=flat-square
+## 🗄️ Supported Databases
 
-[github-stars-link]: https://github.com/AIDotNet/AIDotNet.API/network/stargazers
+| Database Type | Configuration Value | Description |
+|-----------|--------|------|
+| SQLite | `sqlite` | Lightweight embedded database, default option |
+| PostgreSQL | `postgresql` / `pgsql` | Enterprise-grade open source database |
+| SQL Server | `sqlserver` / `mssql` | Microsoft enterprise database |
+| MySQL | `mysql` | Most popular open source database |
+| Dameng Database | `dm` | Chinese enterprise database |
 
-[github-issues-shield]: https://img.shields.io/github/issues/AIDotNet/AIDotNet.API?color=ff80eb&labelColor=ffcb47&style=flat-square
+> 💡 Modify the `ConnectionStrings:DBType` configuration in `appsettings.json` to switch database types. Database switching will not automatically migrate data.
 
-[github-issues-link]: https://github.com/AIDotNet/AIDotNet.API/issues
-
-[github-license-shield]: https://img.shields.io/github/license/AIDotNet/AIDotNet.API?color=white&labelColor=ffcb47&style=flat-square
-
-[github-license-link]: https://github.com/AIDotNet/AIDotNet.API/blob/main/LICENSE
-
-# Thor(雷神托尔)
-
-Thor(雷神托尔) 是一款强大的人工智能模型管理工具，其主要目的是为了实现多种AI模型的统一管理和使用。通过Thor(雷神托尔)，用户可以轻松地管理和使用众多AI模型，而且Thor(雷神托尔)兼容OpenAI的接口格式，使得使用更加方便。
-
-Thor(雷神托尔)提供了丰富的功能：
-
-1. 管理功能：支持用户管理，渠道管理以及token管理，简化了管理流程。
-2. 数据统计预览：可以清晰地看到各种数据的统计情况，帮助用户更好地了解使用情况。
-3. 日志查看：支持日志查看，方便用户跟踪和解决问题。
-4. 系统设置：可以根据需要进行各种系统设置。
-5. 外部Chat链接接入：支持接入外部Chat链接，提升交互体验。
-6. 支付宝购买账号余额：提供支付宝购买账号余额的功能，方便用户进行充值。
-
-此外，Thor(雷神托尔)还支持多种AI大模型，包括OpenAI、星火大模型、Claudia、智谱AI、Ollama、通义千问（阿里云）、AzureOpenAI以及腾讯混元大模型，满足了用户对各种AI模型的需求。
-
-Thor(雷神托尔)还支持多种数据库，包括SqlServer、PostgreSql、Sqlite以及MySql，用户可以根据自己的需要选择合适的数据库。
-
-清晰的数据统计
-
-![image](https://github.com/user-attachments/assets/eb508d89-6834-4064-95c2-937c939ddbd7)
-
-## 功能实现
-
-- [x] 支持用户管理
-- [x] 支持渠道管理
-- [x] 支持token管理
-- [x] 提供数据统计预览
-- [x] 支持日志查看
-- [x] 支持系统设置
-- [x] 支持接入外部Chat链接
-- [x] 支持支付宝购买账号余额
-- [x] 支持Rabbit消费日志（默认情况下使用本地事件）
-- [x] 支持分布式多级缓存 
-
-# AI大模型支持列表
-
-- [x] OpenAI （支持function）
-- [x] Kimi（月之暗面）（支持function）
-- [x] 星火大模型（支持function）
-- [x] Claudia （支持function）
-- [x] 智谱AI (支持function)
-- [x] 微软Azure（支持function）
-- [x] Ollama（支持function）
-- [x] 通义千问（阿里云）（支持function）
-- [x] 腾讯混元大模型
-- [x] 支持百度大模型(ErnieBot)
-- [x] Gitee AI (支持function)
-- [x] MiniMax AI（支持function）
-- [x] SiliconFlow AI（支持function）
-- [x] DeepSeek AI（支持function）
-- [x] 火山引擎 （支持function） 
-- [x] 亚马逊 （支持function） 
-- [x] 谷歌Claude （支持function） 
-      ( 代理地址：[LocationId]-aiplatform.googleapis.com|[ProjectId]|[LocationId]|rawPredict  ) [这里面填写你的区域/项目id]
-      (密钥：在Google平台创建的大json 就是autu 2.0授权码 )
-
-# 支持数据库
-
-- [x] SqlServer 配置类型[sqlserver,mssql]
-- [x] PostgreSql 配置类型[postgresql,pgsql]
-- [x] Sqlite 配置类型[sqlite,默认]
-- [x] MySql 配置类型[mysql]
-- [x] 达梦数据库 配置类型[dm]
-
-修改`appsettings.json`的`ConnectionStrings:DBType`配置项即可切换数据库类型。请注意切换数据库不会迁移数据。
+## 🏗️ System Architecture
 
 ```mermaid
-graph LR
-    A(用户)
-    A --->|使用 Thor 分发的 key 进行请求| B(Thor)
-    B -->|中继请求| C(OpenAI)
-    B -->|中继请求| D(Azure)
-    B -->|中继请求| E(其他 OpenAI API 格式下游渠道)
-    B -->|中继并修改请求体和返回体| F(非 OpenAI API 格式下游渠道)
+graph TB
+    subgraph "User Layer"
+        U[User/Client]
+        U -->|API Key| T[Thor Gateway]
+    end
+    
+    subgraph "Thor Core"
+        T -->|Load Balancing| CM[Channel Management]
+        T -->|Authentication| UM[User Management]
+        T -->|Billing| BS[Billing System]
+        T -->|Logging| LS[Log System]
+    end
+    
+    subgraph "AI Service Providers"
+        CM -->|OpenAI Format| O[OpenAI]
+        CM -->|Azure Format| AZ[Azure OpenAI]
+        CM -->|Claude Format| C[Anthropic]
+        CM -->|Chinese APIs| CN[Baidu/Alibaba/Tencent]
+        CM -->|Open Source| OS[Ollama/SiliconFlow]
+    end
 ```
 
-## 简单使用
+## 🚀 Quick Start
 
-默认账号密码
-admin admin
+### Prerequisites
+- Docker 20.10+
+- At least 1GB available memory
+- 500MB disk space
 
-### 注意事项
-需要注意的是，如果克隆项目后，项目根目录缺少`data`时，需要手动创建，`docker compose up` 时，需要挂载本地目录`data`。
+### 1. One-Click Docker Deployment
 
-### **国内用户请切换registry.cn-shenzhen.aliyuncs.com/tokengo/thor镜像**
+```bash
+# Create data directory
+mkdir -p ./data
 
-### 环境变量
+# Start service
+docker run -d \
+  --name thor \
+  -p 18080:8080 \
+  -v $(pwd)/data:/data \
+  -e TZ=Asia/Shanghai \
+  -e DBType=sqlite \
+  -e ConnectionStrings:DefaultConnection="data source=/data/token.db" \
+  -e ConnectionStrings:LoggerConnection="data source=/data/logger.db" \
+  -e RunMigrationsAtStartup=true \
+  aidotnet/thor:latest
+```
 
-- DBType
-  sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-- ConnectionStrings:DefaultConnection
-  主数据库连接字符串
-- ConnectionStrings:LoggerConnection
-  日志数据连接字符串
-- CACHE_TYPE
-  缓存类型 Memory|Redis
-- CACHE_CONNECTION_STRING
-  缓存连接字符串 如果是Redis则为Redis连接字符串，Memory则为空
-- HttpClientPoolSize
-  HttpClient连接池大小
-- RunMigrationsAtStartup
-  是否在启动时运行迁移 如果是首次启动则需要设置为true
+### 2. Access System
+- **Admin Panel**: http://localhost:18080
+- **Default Username**: `admin`
+- **Default Password**: `admin`
 
-使用`docker compose`启动服务：
+### 3. Configure Your First AI Channel
+1. Login to admin panel
+2. Go to "Channel Management" page
+3. Click "Create Channel"
+4. Select AI service provider and enter API key
+5. Save and test connection
 
+## 📋 Environment Variables
+
+| Variable Name | Description | Example Value |
+|--------|------|--------|
+| `DBType` | Database type | `sqlite` / `postgresql` / `mysql` / `sqlserver` |
+| `ConnectionStrings:DefaultConnection` | Main database connection string | `data source=/data/token.db` |
+| `ConnectionStrings:LoggerConnection` | Log database connection string | `data source=/data/logger.db` |
+| `CACHE_TYPE` | Cache type | `Memory` / `Redis` |
+| `CACHE_CONNECTION_STRING` | Redis connection string | `localhost:6379` |
+| `HttpClientPoolSize` | HTTP connection pool size | `100` |
+| `RunMigrationsAtStartup` | Run database migrations at startup | `true` |
+
+## 🐳 Docker Compose Configuration
+
+### SQLite Version (Recommended for Beginners)
 ```yaml
 version: '3.8'
-
 services:
   thor:
     image: aidotnet/thor:latest
     ports:
-      - 18080:8080
-    container_name: thor
-    volumes:
-      - ./data:/data
-    environment:
-      - TZ=Asia/Shanghai
-      - DBType=sqlite # sqlite | [postgresql,pgsql] | [sqlserver,mssql] | mysql
-      - ConnectionStrings:DefaultConnection=data source=/data/token.db
-      - ConnectionStrings:LoggerConnection=data source=/data/logger.db
-      - RunMigrationsAtStartup=true
-```
-
-使用docker run启动服务
-
-```sh
-docker run -d -p 18080:8080 --name thor --network=gateway -v $PWD/data:/data -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionStrings:ConnectionString="data source=/data/token.db" -e RunMigrationsAtStartup=true -e ConnectionStrings:LoggerConnectionString="data source=/data/logger.db" aidotnet/thor:latest
-```
-
-### Sqlite构建
-`docker compose`版本
-
-项目根目录创建`docker-compose.yml`文件，内容如下：
-
-```yaml
-version: '3.8'
-
-services:
-  thor:
-    image: aidotnet/thor:latest
-    container_name: thor
-    ports:
-      - 18080:8080
+      - "18080:8080"
     volumes:
       - ./data:/data
     environment:
@@ -207,177 +178,117 @@ services:
       - ConnectionStrings:LoggerConnection=data source=/data/logger.db
       - RunMigrationsAtStartup=true
 ```
-执行如下命令打包镜像
-```shell
-sudo docker compose build
-```
 
-执行以下命令启动服务
-
-```shell
-sudo docker compose up -d
-```
-
-
-docker run版本
-
-```shell
-docker run -d -p 18080:8080 --name ai-dotnet-api-service -v $(pwd)/data:/data -e RunMigrationsAtStartup=true  -e Theme=lobe -e TZ=Asia/Shanghai -e DBType=sqlite -e ConnectionStrings:DefaultConnection=data source=/data/token.db -e ConnectionStrings:LoggerConnection=data source=/data/logger.db aidotnet/thor:latest
-```
-
-然后访问 http://localhost:18080 即可看到服务启动成功。
-
-### PostgreSql构建
-`docker compose`版本
-
-项目根目录创建`docker-compose.yml`文件，内容如下：
-
+### PostgreSQL Version (Production Environment)
 ```yaml
 version: '3.8'
-
 services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: thor
+      POSTGRES_USER: thor
+      POSTGRES_PASSWORD: thor123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   thor:
     image: aidotnet/thor:latest
-    container_name: thor
     ports:
-      - 18080:8080
-    volumes:
-      - ./data:/data
+      - "18080:8080"
+    depends_on:
+      - postgres
     environment:
       - TZ=Asia/Shanghai
       - DBType=postgresql
-      - ConnectionStrings:DefaultConnection=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666
-      - ConnectionStrings:LoggerConnection=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666
+      - ConnectionStrings:DefaultConnection=Host=postgres;Port=5432;Database=thor;Username=thor;Password=thor123
+      - ConnectionStrings:LoggerConnection=Host=postgres;Port=5432;Database=thor_logger;Username=thor;Password=thor123
       - RunMigrationsAtStartup=true
+
+volumes:
+  postgres_data:
 ```
 
-执行如下命令打包镜像
-```shell
-sudo docker compose build
+## 🔧 Development Environment Setup
+
+### Prerequisites
+- .NET 8.0 SDK
+- Node.js 18+
+- Git
+
+### Local Development Steps
+```bash
+# Clone project
+git clone https://github.com/AIDotNet/Thor.git
+cd Thor
+
+# Restore dependencies
+dotnet restore
+
+# Start backend service
+cd src/Thor.Service
+dotnet run --urls "http://localhost:5000"
+
+# Start frontend dev server (new terminal)
+cd lobe
+npm install
+npm run dev
 ```
 
-执行以下命令启动服务
+## 📊 API Usage Examples
 
-```shell
-sudo docker compose up -d
+### OpenAI Compatible Interface
+```bash
+# Chat completions
+curl -X POST http://localhost:18080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "gpt-3.5-turbo",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+
+# Text completions
+curl -X POST http://localhost:18080/v1/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{
+    "model": "text-davinci-003",
+    "prompt": "Once upon a time",
+    "max_tokens": 100
+  }'
 ```
 
-docker run版本
+## 🛠️ Troubleshooting
 
-```shell
-docker run -d \
-  --name thor \
-  -p 18080:8080 \
-  -v $(pwd)/data:/data \
-  -e TZ=Asia/Shanghai \
-  -e DBType=postgresql \
-  -e RunMigrationsAtStartup=true \
-  -e ConnectionStrings:DefaultConnection=Host=127.0.0.1;Port=5432;Database=token;Username=token;Password=dd666666 \
-  -e ConnectionStrings:LoggerConnection=Host=127.0.0.1;Port=5432;Database=logger;Username=token;Password=dd666666 \
-  aidotnet/thor:latest
-```
+### Q: How to reset admin password?
+A: Delete user records in the database, the system will automatically recreate the default admin account.
 
-然后访问 http://localhost:18080 即可看到服务启动成功。
+### Q: Which AI models are supported?
+A: Supports all OpenAI compatible format models, including GPT-3.5, GPT-4, Claude, Wenxin Yiyan, etc.
 
-### SqlServer构建
-`docker compose`版本
+### Q: How to configure HTTPS?
+A: It is recommended to use Nginx reverse proxy to configure HTTPS, Thor itself focuses on API gateway functionality.
 
-项目根目录创建`docker-compose.yml`文件，内容如下：
+### Q: Will data be lost after switching databases?
+A: Switching database types will not automatically migrate data, it is recommended to backup and manually migrate.
 
-```yaml
-version: '3.8'
+## 📞 Technical Support
 
-services:
-  thor:
-    image: aidotnet/thor:latest
-    container_name: thor
-    ports:
-      - 18080:8080
-    volumes:
-      - ./data:/data
-    environment:
-      - TZ=Asia/Shanghai
-      - DBType=sqlserver
-      - ConnectionStrings:DefaultConnection=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666;
-      - ConnectionStrings:LoggerConnection=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666;
-      - RunMigrationsAtStartup=true
-```
+- **GitHub Issues**: [Submit Issues](https://github.com/AIDotNet/Thor/issues)
+- **Documentation**: [View Detailed Documentation](https://github.com/AIDotNet/Thor/wiki)
+- **Community**: [Join Discussion](https://github.com/AIDotNet/Thor/discussions)
 
-执行如下命令打包镜像
-```shell
-sudo docker compose build
-```
+## 🤝 Contributing
 
-执行以下命令启动服务
+Welcome to submit Issues and Pull Requests to help improve Thor!
 
-```shell
-sudo docker compose up -d
-```
+1. Fork the project
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Create Pull Request
 
-docker run版本
+## 📄 License
 
-```shell
-docker run -d \
-  --name thor \
-  -p 18080:8080 \
-  -v $(pwd)/data:/data \
-  -e TZ=Asia/Shanghai \
-  -e RunMigrationsAtStartup=true \
-  -e DBType=sqlserver \
-  -e ConnectionStrings:DefaultConnection=Server=127.0.0.1;Database=token;User Id=sa;Password=dd666666; \
-  -e ConnectionStrings:LoggerConnection=Server=127.0.0.1;Database=logger;User Id=sa;Password=dd666666; \
-  aidotnet/thor:latest
-```
-
-然后访问 http://localhost:18080 即可看到服务启动成功。
-
-### MySql构建
-`docker compose`版本
-
-项目根目录创建`docker-compose.yml`文件，内容如下：
-
-```yaml
-version: '3.8'
-
-services:
-  thor:
-    image: aidotnet/thor:latest
-    container_name: thor
-    ports:
-      - 18080:8080
-    volumes:
-      - ./data:/data
-    environment:
-      - TZ=Asia/Shanghai
-      - DBType=mysql
-      - "ConnectionStrings:DefaultConnection=mysql://root:dd666666@localhost:3306/token"
-      - "ConnectionStrings:LoggerConnection=mysql://root:dd666666@localhost:3306/logger"
-      - RunMigrationsAtStartup=true
-```
-
-执行如下命令打包镜像
-```shell
-sudo docker compose build
-```
-
-执行以下命令启动服务
-
-```shell
-sudo docker compose up -d
-```
-docker run版本
-
-```shell
-docker run -d \
-  --name thor \
-  -p 18080:8080 \
-  -v $(pwd)/data:/data \
-  -e TZ=Asia/Shanghai \
-  -e DBType=mysql \
-  -e "ConnectionStrings:DefaultConnection=mysql://root:dd666666@localhost:3306/token" \
-  -e "ConnectionStrings:LoggerConnection=mysql://root:dd666666@localhost:3306/logger" \
-  -e RunMigrationsAtStartup=true \
-  aidotnet/thor:latest
-```
-
-然后访问 http://localhost:18080 即可看到服务启动成功。
+This project is open source under the [MIT License](LICENSE).
