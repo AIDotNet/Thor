@@ -364,7 +364,7 @@ public sealed class ChannelService(
                     continue; // 跳过无效数据
                 }
 
-                var chatChannel = new Thor.Service.Dto.ChatChannelInput
+                var chatChannel = new ChatChannelInput
                 {
                     Name = channel.Name,
                     Type = channel.Type,
@@ -372,7 +372,7 @@ public sealed class ChannelService(
                     Key = channel.Key,
                     SupportsResponses = channel.SupportsResponses,
                     Models = channel.Models.Split(',').Select(x => x.Trim()).ToList(),
-                    Other = channel.Other,
+                    Order = channel.Order,
                     Groups = channel.Groups.Split(',').Select(x => x.Trim()).ToArray()
                 };
                 // 创建渠道
@@ -410,7 +410,7 @@ public sealed class ChannelService(
                 Address = "https://api.openai.com/v1",
                 Key = "sk-xxxxxxxxxxxx",
                 Models = "gpt-3.5-turbo,gpt-4",
-                Other = "",
+                Order = 1,
                 Groups = "default"
             },
         };
@@ -450,7 +450,7 @@ public sealed class ChannelService(
         /// 
         /// </summary>
         [ExcelColumnName("权重")]
-        public string Other { get; set; } = string.Empty;
+        public int Order { get; set; }
 
         /// <summary>
         /// AI类型

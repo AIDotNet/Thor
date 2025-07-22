@@ -45,4 +45,9 @@ public sealed class ChatChannelInput
     /// </summary>
     /// <returns></returns>
     public bool SupportsResponses { get; set; } = false;
+    
+    /// <summary>
+    /// 权重
+    /// </summary>
+    public int Order { get; set; } = 0;
 }
