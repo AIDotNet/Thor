@@ -103,6 +103,7 @@ public class AnthropicChatService(
                 int requestToken;
                 var responseToken = 0;
                 int cachedTokens = 0;
+                int cacheWriteTokens = 0;
                 string? responseBody = null;
 
                 var sw = Stopwatch.StartNew();
@@ -112,7 +113,7 @@ public class AnthropicChatService(
                     using var activity =
                         Activity.Current?.Source.StartActivity("流式对话", ActivityKind.Internal);
 
-                    (requestToken, responseToken, responseBody) =
+                    (requestToken, responseToken, cachedTokens, cacheWriteTokens, responseBody) =
                         await StreamChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
                             rate).ConfigureAwait(false);
                     if (!string.IsNullOrEmpty(responseBody))
@@ -125,7 +126,7 @@ public class AnthropicChatService(
                     using var activity =
                         Activity.Current?.Source.StartActivity("非流式对话", ActivityKind.Internal);
 
-                    (requestToken, responseToken, cachedTokens) =
+                    (requestToken, responseToken, cachedTokens, cacheWriteTokens) =
                         await ChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
                             rate).ConfigureAwait(false);
                 }
@@ -143,6 +144,12 @@ public class AnthropicChatService(
 
                 var completionRatio = rate.CompletionRate ?? GetCompletionRatio(model);
                 quota += responseToken * rate.PromptRate * completionRatio;
+
+                // 计算缓存写入费用 (cache write tokens are billed at 25% of prompt rate according to Anthropic pricing)
+                if (cacheWriteTokens > 0)
+                {
+                    quota += cacheWriteTokens * rate.PromptRate * 0.25m;
+                }
 
                 // 计算分组倍率
                 quota = (decimal)userGroup!.Rate * quota;
@@ -311,15 +318,17 @@ public class AnthropicChatService(
         }
     }
 
-    private async Task<(int requestToken, int responseToken, int cachedTokens)> ChatCompletionsHandlerAsync(
-        HttpContext context, AnthropicInput input, ChatChannel channel,
-        IAnthropicChatCompletionsService openService, User? user, ModelManager rate)
+    private async Task<(int requestToken, int responseToken, int cachedTokens, int cacheWriteTokens)>
+        ChatCompletionsHandlerAsync(
+            HttpContext context, AnthropicInput input, ChatChannel channel,
+            IAnthropicChatCompletionsService openService, User? user, ModelManager rate)
     {
         int requestToken = 0;
         int responseToken = 0;
 
         // 命中缓存tokens数量
         int cachedTokens = 0;
+        int cacheWriteTokens = 0;
 
         var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
@@ -461,20 +470,27 @@ public class AnthropicChatService(
             cachedTokens = result.Usage.cache_read_input_tokens.Value;
         }
 
+        if (result?.Usage?.cache_creation_input_tokens.HasValue == true)
+        {
+            cacheWriteTokens = result.Usage.cache_creation_input_tokens.Value;
+        }
 
-        return (requestToken, responseToken, cachedTokens);
+        return (requestToken, responseToken, cachedTokens, cacheWriteTokens);
     }
 
-    private async Task<(int requestToken, int responseToken, string?)> StreamChatCompletionsHandlerAsync(
-        HttpContext context,
-        AnthropicInput input, ChatChannel channel, IAnthropicChatCompletionsService openService, User? user,
-        ModelManager rate)
+    private async Task<(int requestToken, int responseToken, int cachedTokens, int cacheWriteTokens, string?)>
+        StreamChatCompletionsHandlerAsync(
+            HttpContext context,
+            AnthropicInput input, ChatChannel channel, IAnthropicChatCompletionsService openService, User? user,
+            ModelManager rate)
     {
         int requestToken = 0;
 
         var platformOptions = new ThorPlatformOptions(channel.Address, channel.Key, channel.Other);
 
         var responseMessage = new StringBuilder();
+        int cachedTokens = 0;
+        int cacheWriteTokens = 0;
 
         requestToken += TokenHelper.GetTotalTokens(input?.System);
         requestToken += TokenHelper.GetTotalTokens(input?.Systems?.Select(x => x.Text).ToArray() ?? []);
@@ -570,6 +586,16 @@ public class AnthropicChatService(
                 isFirst = false;
             }
 
+            if (item?.Usage is { cache_creation_input_tokens: > 0 })
+            {
+                cacheWriteTokens = (int)item.Usage.cache_creation_input_tokens;
+            }
+
+            if (item?.Usage is { cache_read_input_tokens: > 0 })
+            {
+                cachedTokens = (int)item.Usage.cache_read_input_tokens;
+            }
+
             if (item?.Usage is { output_tokens: > 0 } || item?.message?.Usage?.output_tokens is not null &&
                 item.message.Usage.output_tokens > 0)
             {
@@ -637,6 +663,7 @@ public class AnthropicChatService(
             _ => responseToken
         };
 
-        return (requestToken, responseToken, StreamResponseInterceptor.GetCollectedContent());
+        return (requestToken, responseToken, cachedTokens, cacheWriteTokens,
+            StreamResponseInterceptor.GetCollectedContent());
     }
 }
