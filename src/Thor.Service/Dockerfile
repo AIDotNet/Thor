@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+﻿FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER root
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN echo "Asia/Shanghai" > /etc/timezone
@@ -6,14 +6,22 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM node:20.18-alpine3.21 as lobe
+FROM --platform=$BUILDPLATFORM node:20.18-alpine3.21 AS lobe
 WORKDIR /src
-COPY lobe .
-RUN yarn
-RUN npm i  --force
-RUN yarn run build
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# 设置npm镜像源以加速ARM64构建
+RUN npm config set registry https://registry.npmmirror.com
+RUN yarn config set registry https://registry.npmmirror.com
+
+# 复制package文件优先，利用缓存
+COPY lobe/package*.json lobe/yarn.lock* ./
+RUN yarn install --frozen-lockfile --network-timeout 100000 || npm install --force
+
+# 复制源代码并构建
+COPY lobe .
+RUN yarn run build || npm run build
+
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Thor.Service/Thor.Service.csproj", "src/Thor.Service/"]
