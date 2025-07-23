@@ -148,12 +148,12 @@ public class AnthropicChatService(
                 // 计算缓存写入费用 (cache write tokens are billed at 25% of prompt rate according to Anthropic pricing)
                 if (cacheWriteTokens > 0 && rate.CacheRate != null)
                 {
-                    quota += cacheWriteTokens * rate.CacheRate.Value * 0.25m;
+                    quota += cacheWriteTokens * rate.CacheRate.Value;
                 }
                 else if (cacheWriteTokens > 0)
                 {
                     // 直接计算
-                    quota += cacheWriteTokens * rate.PromptRate * 0.25m;
+                    quota += cacheWriteTokens * rate.PromptRate;
                 }
 
                 // 计算分组倍率
@@ -206,7 +206,6 @@ public class AnthropicChatService(
                     }
                     else
                     {
-                        
                         var template = "";
                         if (cacheWriteTokens > 0)
                         {
@@ -216,10 +215,11 @@ public class AnthropicChatService(
                         }
                         else
                         {
-                            template = string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate);
+                            template = string.Format(ConsumerTemplate, rate.PromptRate, completionRatio,
+                                userGroup.Rate);
                         }
-                        
-                        await loggerService.CreateConsumeAsync("/v1/messages",template,
+
+                        await loggerService.CreateConsumeAsync("/v1/messages", template,
                             model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
