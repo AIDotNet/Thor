@@ -18,6 +18,7 @@ public sealed class TracingEventHandler(
     {
         logger.LogInformation("TracingEventHandler 处理事件: {Event}", @event);
 
+        @event.Id = Guid.NewGuid().ToString();
         await loggerDbContext.Tracings.AddAsync(@event);
         await loggerDbContext.SaveChangesAsync();
     }

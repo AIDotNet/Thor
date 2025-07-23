@@ -11,6 +11,7 @@ namespace Thor.Service.EventHandlers
     {
         public async Task HandleAsync(RequestLog @event)
         {
+            @event.Id = Guid.NewGuid().ToString();
             await loggerDbContext.RequestLogs.AddAsync(@event);
 
             await loggerDbContext.SaveChangesAsync();
