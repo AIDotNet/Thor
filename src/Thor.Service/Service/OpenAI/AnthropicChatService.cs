@@ -137,24 +137,31 @@ public class AnthropicChatService(
                 // 计算上下文长度（使用请求token数作为近似值）
                 var contextLength = requestToken;
 
-                // 使用上下文定价服务计算费用
-                var pricingResult =
-                    contextPricingService.CalculatePricing(rate, requestToken, responseToken, contextLength);
-                var quota = pricingResult.TotalCost;
-
+                // 按照Anthropic定价规则计算费用：输入单价 * (文字输入 + 创建缓存Tokens * 1.25 + 命中缓存Tokens * 0.1 + 文字输出 * 补全倍率)
                 var completionRatio = rate.CompletionRate ?? GetCompletionRatio(model);
+                
+                // 计算实际输入tokens（扣除缓存tokens）
+                var actualInputTokens = requestToken - cachedTokens - cacheWriteTokens;
+                
+                var quota = 0m;
+                
+                // 文字输入费用
+                quota += actualInputTokens * rate.PromptRate;
+                
+                // 创建缓存费用 (1.25倍输入单价)
+                if (cacheWriteTokens > 0)
+                {
+                    quota += cacheWriteTokens * rate.PromptRate * 1.25m;
+                }
+                
+                // 命中缓存费用 (0.1倍输入单价)
+                if (cachedTokens > 0)
+                {
+                    quota += cachedTokens * rate.PromptRate * 0.1m;
+                }
+                
+                // 文字输出费用 (输入单价 * 补全倍率)
                 quota += responseToken * rate.PromptRate * completionRatio;
-
-                // 计算缓存写入费用 (cache write tokens are billed at 25% of prompt rate according to Anthropic pricing)
-                if (cacheWriteTokens > 0 && rate.CacheRate != null)
-                {
-                    quota += cacheWriteTokens * rate.CacheRate.Value;
-                }
-                else if (cacheWriteTokens > 0)
-                {
-                    // 直接计算
-                    quota += cacheWriteTokens * rate.PromptRate;
-                }
 
                 // 计算分组倍率
                 quota = (decimal)userGroup!.Rate * quota;
@@ -167,68 +174,34 @@ public class AnthropicChatService(
                 // 判断是否按次
                 if (rate.QuotaType == ModelQuotaType.OnDemand)
                 {
-                    // 如果命中缓存 并且缓存倍率大于0 小于0则不计算缓存
-                    if (cachedTokens > 0 && rate.CacheRate > 0)
+                    var template = "";
+                    if (cacheWriteTokens > 0)
                     {
-                        // 如果命中缓存充值quota
-                        quota = requestToken * rate.CacheRate.Value;
-
-                        quota += responseToken * rate.CacheRate.Value * completionRatio;
-
-                        // 计算分组倍率
-                        quota = (decimal)userGroup!.Rate * quota;
-
-                        // 将quota 四舍五入
-                        quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
-
-                        var template = "";
-
-                        if (cacheWriteTokens > 0)
-                        {
-                            template = string.Format(ConsumerTemplateCacheWriteTokens,
-                                rate.PromptRate, completionRatio, userGroup.Rate,
-                                cachedTokens, rate.CacheRate, cacheWriteTokens);
-                        }
-                        else
-                        {
-                            template = string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio,
-                                userGroup.Rate,
-                                cachedTokens, rate.CacheRate);
-                        }
-
-                        await loggerService.CreateConsumeAsync("/v1/messages",
-                            template,
-                            model,
-                            requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
-                            channel.Name, context.GetIpAddress(), context.GetUserAgent(),
-                            request.Stream is true,
-                            (int)sw.ElapsedMilliseconds, organizationId);
+                        template = string.Format(ConsumerTemplateCacheWriteTokens,
+                            rate.PromptRate, completionRatio, userGroup.Rate,
+                            cachedTokens, rate.CacheRate, cacheWriteTokens);
+                    }
+                    else if (cachedTokens > 0)
+                    {
+                        template = string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio,
+                            userGroup.Rate,
+                            cachedTokens, rate.CacheRate);
                     }
                     else
                     {
-                        var template = "";
-                        if (cacheWriteTokens > 0)
-                        {
-                            template = string.Format(ConsumerTemplateCacheWriteTokens,
-                                rate.PromptRate, completionRatio, userGroup.Rate,
-                                cachedTokens, rate.CacheRate, cacheWriteTokens);
-                        }
-                        else
-                        {
-                            template = string.Format(ConsumerTemplate, rate.PromptRate, completionRatio,
-                                userGroup.Rate);
-                        }
-
-                        await loggerService.CreateConsumeAsync("/v1/messages", template,
-                            model,
-                            requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
-                            channel.Name, context.GetIpAddress(), context.GetUserAgent(),
-                            request.Stream is true,
-                            (int)sw.ElapsedMilliseconds, organizationId);
-
-                        await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
-                            model);
+                        template = string.Format(ConsumerTemplate, rate.PromptRate, completionRatio,
+                            userGroup.Rate);
                     }
+
+                    await loggerService.CreateConsumeAsync("/v1/messages", template,
+                        model,
+                        requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
+                        channel.Name, context.GetIpAddress(), context.GetUserAgent(),
+                        request.Stream is true,
+                        (int)sw.ElapsedMilliseconds, organizationId);
+
+                    await userService.ConsumeAsync(user!.Id, (long)quota, requestToken, token?.Key, channel.Id,
+                        model);
                 }
                 else
                 {
@@ -591,7 +564,7 @@ public class AnthropicChatService(
             // 判断请求token数量是否超过额度
             if (quota > user.ResidualCredit)
             {
-                throw new InsufficientQuotaException("账号余额不足请充值");
+                throw new InsufficientQuotaException("账号���额不足请充值");
             }
         }
         else if (rate.QuotaType == ModelQuotaType.OnDemand)
