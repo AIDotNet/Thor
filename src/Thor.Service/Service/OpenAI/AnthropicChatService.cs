@@ -137,7 +137,7 @@ public class AnthropicChatService(
                 // 计算上下文长度（使用请求token数作为近似值）
                 var contextLength = requestToken;
 
-                // 按照Anthropic定价规则计算费用：输入单价 * (文字输入 + 创建缓存Tokens * 1.25 + 命中缓存Tokens * 0.1 + 文字输出 * 补全倍率)
+                // 按照Anthropic定价规则计算费用：输入单价 * (文字输入 + 创建缓存Tokens * CacheRate + 命中缓存Tokens * 0.1 + 文字输出 * 补全倍率)
                 var completionRatio = rate.CompletionRate ?? GetCompletionRatio(model);
                 
                 // 计算实际输入tokens（扣除缓存tokens）
@@ -148,9 +148,14 @@ public class AnthropicChatService(
                 // 文字输入费用
                 quota += actualInputTokens * rate.PromptRate;
                 
-                // 创建缓存费用 (1.25倍输入单价)
-                if (cacheWriteTokens > 0)
+                // 创建缓存费用 (使用动态的CacheRate倍率)
+                if (cacheWriteTokens > 0 && rate.CacheRate.HasValue)
                 {
+                    quota += cacheWriteTokens * rate.PromptRate * rate.CacheRate.Value;
+                }
+                else if (cacheWriteTokens > 0)
+                {
+                    // 如果没有设置CacheRate，则使用默认的1.25倍率
                     quota += cacheWriteTokens * rate.PromptRate * 1.25m;
                 }
                 
