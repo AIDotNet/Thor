@@ -10,8 +10,8 @@ public abstract class AIService(IServiceProvider serviceProvider, ImageService i
     ///  按量计费模型倍率模板
     /// </summary>
     protected const string ConsumerTemplate = "模型倍率：{0} 补全倍率：{1} 分组倍率：{2}";
-    
-    
+
+
     /// <summary>
     ///  按量计费模型倍率模板
     /// </summary>
@@ -21,6 +21,9 @@ public abstract class AIService(IServiceProvider serviceProvider, ImageService i
     /// 按量计费命中缓存模型
     /// </summary>
     protected const string ConsumerTemplateCache = "模型倍率：{0} 补全倍率：{1} 分组倍率：{2} 命中缓存tokens {3} 缓存倍率：{4}";
+
+    protected const string ConsumerTemplateCacheWriteTokens =
+        "模型倍率：{0} 补全倍率：{1} 分组倍率：{2} 命中缓存tokens {3} 缓存倍率：{4} 写入缓存tokens {5}";
 
     /// <summary>
     /// 按次计费模型倍率模板
@@ -105,15 +108,15 @@ public abstract class AIService(IServiceProvider serviceProvider, ImageService i
         {
             value -= chatChannel.Order;
             if (value > 0) continue;
-            
+
             ChannelAsyncLocal.ChannelIds.Add(chatChannel.Id);
             return chatChannel;
         }
 
         var v = chatChannels.Last();
-        
+
         ChannelAsyncLocal.ChannelIds.Add(v.Id);
-        
+
         return v;
     }
 

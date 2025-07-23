@@ -146,8 +146,13 @@ public class AnthropicChatService(
                 quota += responseToken * rate.PromptRate * completionRatio;
 
                 // 计算缓存写入费用 (cache write tokens are billed at 25% of prompt rate according to Anthropic pricing)
-                if (cacheWriteTokens > 0)
+                if (cacheWriteTokens > 0 && rate.CacheRate != null)
                 {
+                    quota += cacheWriteTokens * rate.CacheRate.Value * 0.25m;
+                }
+                else if (cacheWriteTokens > 0)
+                {
+                    // 直接计算
                     quota += cacheWriteTokens * rate.PromptRate * 0.25m;
                 }
 
@@ -176,9 +181,23 @@ public class AnthropicChatService(
                         // 将quota 四舍五入
                         quota = Math.Round(quota, 0, MidpointRounding.AwayFromZero);
 
+                        var template = "";
+
+                        if (cacheWriteTokens > 0)
+                        {
+                            template = string.Format(ConsumerTemplateCacheWriteTokens,
+                                rate.PromptRate, completionRatio, userGroup.Rate,
+                                cachedTokens, rate.CacheRate, cacheWriteTokens);
+                        }
+                        else
+                        {
+                            template = string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio,
+                                userGroup.Rate,
+                                cachedTokens, rate.CacheRate);
+                        }
+
                         await loggerService.CreateConsumeAsync("/v1/messages",
-                            string.Format(ConsumerTemplateCache, rate.PromptRate, completionRatio, userGroup.Rate,
-                                cachedTokens, rate.CacheRate),
+                            template,
                             model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
@@ -187,8 +206,20 @@ public class AnthropicChatService(
                     }
                     else
                     {
-                        await loggerService.CreateConsumeAsync("/v1/messages",
-                            string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate),
+                        
+                        var template = "";
+                        if (cacheWriteTokens > 0)
+                        {
+                            template = string.Format(ConsumerTemplateCacheWriteTokens,
+                                rate.PromptRate, completionRatio, userGroup.Rate,
+                                cachedTokens, rate.CacheRate, cacheWriteTokens);
+                        }
+                        else
+                        {
+                            template = string.Format(ConsumerTemplate, rate.PromptRate, completionRatio, userGroup.Rate);
+                        }
+                        
+                        await loggerService.CreateConsumeAsync("/v1/messages",template,
                             model,
                             requestToken, responseToken, (int)quota, token?.Key, user?.UserName, user?.Id, channel.Id,
                             channel.Name, context.GetIpAddress(), context.GetUserAgent(),
@@ -586,14 +617,20 @@ public class AnthropicChatService(
                 isFirst = false;
             }
 
-            if (item?.Usage is { cache_creation_input_tokens: > 0 })
+            if (item?.Usage is { cache_creation_input_tokens: > 0 } ||
+                item?.message?.Usage?.cache_creation_input_tokens is not null &&
+                item.message.Usage.cache_creation_input_tokens > 0)
             {
-                cacheWriteTokens = (int)item.Usage.cache_creation_input_tokens;
+                cacheWriteTokens = (item.Usage?.cache_creation_input_tokens ??
+                                    item.message.Usage.cache_creation_input_tokens) ?? 0;
             }
 
-            if (item?.Usage is { cache_read_input_tokens: > 0 })
+            if (item?.Usage is { cache_read_input_tokens: > 0 } ||
+                item?.message?.Usage?.cache_read_input_tokens is not null &&
+                item.message.Usage.cache_read_input_tokens > 0)
             {
-                cachedTokens = (int)item.Usage.cache_read_input_tokens;
+                cachedTokens =
+                    (item.Usage?.cache_read_input_tokens ?? item.message?.Usage?.cache_read_input_tokens) ?? 0;
             }
 
             if (item?.Usage is { output_tokens: > 0 } || item?.message?.Usage?.output_tokens is not null &&

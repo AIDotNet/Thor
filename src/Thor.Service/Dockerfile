@@ -1,4 +1,4 @@
-﻿FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER root
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN echo "Asia/Shanghai" > /etc/timezone
@@ -6,12 +6,19 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-FROM --platform=$BUILDPLATFORM node:20.18-alpine3.21 AS lobe
+FROM node:20.18-alpine3.21 AS lobe
 WORKDIR /src
 
 # 设置npm镜像源以加速ARM64构建
 RUN npm config set registry https://registry.npmmirror.com
 RUN yarn config set registry https://registry.npmmirror.com
+
+# 安装必需的工具
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    libc6-compat
 
 # 复制package文件优先，利用缓存
 COPY lobe/package*.json lobe/yarn.lock* ./
@@ -21,7 +28,7 @@ RUN yarn install --frozen-lockfile --network-timeout 100000 || npm install --for
 COPY lobe .
 RUN yarn run build || npm run build
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Thor.Service/Thor.Service.csproj", "src/Thor.Service/"]
@@ -70,9 +77,10 @@ RUN dotnet build "./Thor.Service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
+ARG TARGETARCH
 RUN dotnet publish "./Thor.Service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY --from=lobe /src/dist ./wwwroot
