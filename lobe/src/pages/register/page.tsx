@@ -539,7 +539,7 @@ const RegisterPage = memo(() => {
                       placeholder={t('register.verificationCodePlaceholder')}
                       size="large"
                       addonAfter={
-                        !enableEmailRegister ? null : (
+                        enableEmailRegister ? (
                           <Button 
                             type="link" 
                             disabled={countDown > 0}
@@ -550,7 +550,7 @@ const RegisterPage = memo(() => {
                               ? t('register.resendCode', { count: countDown }) 
                               : t('register.getVerificationCode')}
                           </Button>
-                        )
+                        ) : null
                       }
                     />
                   </Form.Item>
