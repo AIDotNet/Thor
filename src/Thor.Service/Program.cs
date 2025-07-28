@@ -630,6 +630,20 @@ try
         .WithDisplayName("获取请求日志")
         .WithOpenApi();
 
+    requestLog.MapDelete("{id}",
+            async (RequestLogService service, string id) =>
+                await service.DeleteAsync(id))
+        .WithDescription("删除请求日志")
+        .WithDisplayName("删除请求日志")
+        .WithOpenApi();
+
+    requestLog.MapDelete("batch",
+            async (RequestLogService service, string[] ids) =>
+                await service.DeleteBatchAsync(ids))
+        .WithDescription("批量删除请求日志")
+        .WithDisplayName("批量删除请求日志")
+        .WithOpenApi();
+
     #endregion
 
     #region User
