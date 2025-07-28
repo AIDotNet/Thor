@@ -133,5 +133,66 @@ namespace Thor.Service.Service
 
             return new PagingDto<RequestLog>(total, result);
         }
+
+        /// <summary>
+        /// 删除请求日志
+        /// </summary>
+        /// <param name="id">请求日志ID</param>
+        /// <returns></returns>
+        public async Task<bool> DeleteAsync(string id)
+        {
+            var requestLog = await _loggerDbContext.RequestLogs
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (requestLog == null)
+            {
+                return false;
+            }
+
+            // 权限控制：非管理员只能删除自己的日志
+            if (!UserContext.IsAdmin && requestLog.Creator != UserContext.CurrentUserId)
+            {
+                throw new UnauthorizedAccessException("您只能删除自己的请求日志");
+            }
+
+            _loggerDbContext.RequestLogs.Remove(requestLog);
+            await _loggerDbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        /// <summary>
+        /// 批量删除请求日志
+        /// </summary>
+        /// <param name="ids">请求日志ID列表</param>
+        /// <returns></returns>
+        public async Task<int> DeleteBatchAsync(string[] ids)
+        {
+            if (ids == null || ids.Length == 0)
+            {
+                return 0;
+            }
+
+            var query = _loggerDbContext.RequestLogs
+                .Where(x => ids.Contains(x.Id));
+
+            // 权限控制：非管理员只能删除自己的日志
+            if (!UserContext.IsAdmin)
+            {
+                query = query.Where(x => x.Creator == UserContext.CurrentUserId);
+            }
+
+            var requestLogs = await query.ToListAsync();
+            
+            if (requestLogs.Count == 0)
+            {
+                return 0;
+            }
+
+            _loggerDbContext.RequestLogs.RemoveRange(requestLogs);
+            await _loggerDbContext.SaveChangesAsync();
+
+            return requestLogs.Count;
+        }
     }
 }

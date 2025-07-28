@@ -1,4 +1,4 @@
-import { get } from "../utils/fetch"
+import { get, del, delJson } from "../utils/fetch"
 
 const prefix = "/api/v1/request-log"
 const systemPrefix = "/api/v1/system"
@@ -51,4 +51,22 @@ export const getRequestLogs = async (page: number = 1, pageSize: number = 20,
  */
 export const getRequestLogDetail = async (id: string) => {
     return get(`${prefix}/${id}`);
+}
+
+/**
+ * 删除单个请求日志
+ * @param id 日志ID
+ * @returns Promise
+ */
+export const deleteRequestLog = async (id: string) => {
+    return del(`${prefix}/${id}`);
+}
+
+/**
+ * 批量删除请求日志
+ * @param ids 日志ID数组
+ * @returns Promise
+ */
+export const batchDeleteRequestLogs = async (ids: string[]) => {
+    return delJson(`${prefix}/batch`, ids);
 }

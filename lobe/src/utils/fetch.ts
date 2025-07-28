@@ -134,3 +134,12 @@ export const del = (url: string, options?: any) => {
     ...options,
   });
 };
+
+export const delJson = (url: string, data: any) => {
+  return del(url, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+};

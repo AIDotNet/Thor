@@ -29,9 +29,11 @@ import {
   CloseCircleOutlined,
   ClockCircleOutlined,
   EyeOutlined,
-  CopyOutlined
+  CopyOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined
 } from "@ant-design/icons";
-import { getRequestLogs } from "../../services/RequestLogService";
+import { getRequestLogs, deleteRequestLog, batchDeleteRequestLogs } from "../../services/RequestLogService";
 import dayjs from "dayjs";
 import JsonView from '@uiw/react-json-view';
 import { Highlighter } from "@lobehub/ui";
@@ -48,6 +50,8 @@ export default function RequestLogPage() {
   const [filterVisible, setFilterVisible] = useState<boolean>(true);
   const [detailModalVisible, setDetailModalVisible] = useState<boolean>(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   const [input, setInput] = useState({
     page: 1,
@@ -201,19 +205,31 @@ export default function RequestLogPage() {
     {
       title: "操作",
       key: "action",
-      width: 100,
+      width: 150,
       render: (_: any, record: any) => (
-        <Button
-          type="link"
-          size="small"
-          icon={<EyeOutlined />}
-          onClick={() => {
-            setSelectedRecord(record);
-            setDetailModalVisible(true);
-          }}
-        >
-          详情
-        </Button>
+        <Space size="small">
+          <Button
+            type="link"
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => {
+              setSelectedRecord(record);
+              setDetailModalVisible(true);
+            }}
+          >
+            详情
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            loading={deleteLoading}
+            onClick={() => handleDeleteSingle(record.id)}
+          >
+            删除
+          </Button>
+        </Space>
       ),
     },
   ];
@@ -275,6 +291,65 @@ export default function RequestLogPage() {
       message.success('复制成功');
     }).catch(() => {
       message.error('复制失败');
+    });
+  };
+
+  const handleDeleteSingle = (id: string) => {
+    Modal.confirm({
+      title: '确认删除',
+      icon: <ExclamationCircleOutlined />,
+      content: '确定要删除这条请求日志吗？此操作不可恢复。',
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          setDeleteLoading(true);
+          const result = await deleteRequestLog(id);
+          if (result.success && result.data) {
+            message.success('删除成功');
+            loadData();
+          } else {
+            message.error('删除失败：' + (result.message || '未知错误'));
+          }
+        } catch (error: any) {
+          message.error('删除失败：' + error.message);
+        } finally {
+          setDeleteLoading(false);
+        }
+      },
+    });
+  };
+
+  const handleBatchDelete = () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning('请选择要删除的记录');
+      return;
+    }
+
+    Modal.confirm({
+      title: '确认批量删除',
+      icon: <ExclamationCircleOutlined />,
+      content: `确定要删除选中的 ${selectedRowKeys.length} 条请求日志吗？此操作不可恢复。`,
+      okText: '确定',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          setDeleteLoading(true);
+          const result = await batchDeleteRequestLogs(selectedRowKeys as string[]);
+          if (result.success) {
+            const deletedCount = result.data;
+            message.success(`成功删除 ${deletedCount} 条记录`);
+            setSelectedRowKeys([]);
+            loadData();
+          } else {
+            message.error('批量删除失败：' + (result.message || '未知错误'));
+          }
+        } catch (error: any) {
+          message.error('批量删除失败：' + error.message);
+        } finally {
+          setDeleteLoading(false);
+        }
+      },
     });
   };
 
@@ -419,6 +494,16 @@ export default function RequestLogPage() {
             >
               刷新
             </Button>
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              onClick={handleBatchDelete}
+              disabled={selectedRowKeys.length === 0}
+              loading={deleteLoading}
+            >
+              批量删除 {selectedRowKeys.length > 0 && `(${selectedRowKeys.length})`}
+            </Button>
           </Space>
 
           <Text type="secondary">
@@ -440,6 +525,14 @@ export default function RequestLogPage() {
             columns={columns}
             dataSource={data}
             rowKey={(record) => record.id || Math.random().toString()}
+            rowSelection={{
+              type: 'checkbox',
+              selectedRowKeys,
+              onChange: setSelectedRowKeys,
+              getCheckboxProps: (record: any) => ({
+                name: record.id,
+              }),
+            }}
             pagination={{
               total: total,
               pageSize: input.pageSize,
