@@ -82,11 +82,6 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             throw new UnauthorizedAccessException();
         }
 
-        if (response.StatusCode == HttpStatusCode.PaymentRequired)
-        {
-            throw new PaymentRequiredException();
-        }
-
         // 如果限流则抛出限流异常
         if (response.StatusCode == HttpStatusCode.TooManyRequests)
         {

@@ -82,21 +82,10 @@ public sealed class OpenAIChatCompletionsService(ILogger<OpenAIChatCompletionsSe
             throw new UnauthorizedAccessException();
         }
 
-        if (response.StatusCode == HttpStatusCode.PaymentRequired)
-        {
-            throw new PaymentRequiredException();
-        }
-
         // 如果限流则抛出限流异常
         if (response.StatusCode == HttpStatusCode.TooManyRequests)
         {
             throw new ThorRateLimitException();
-        }
-
-        if (response.StatusCode == HttpStatusCode.Forbidden)
-        {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-            throw new ForbiddenException("OpenAI对话异常: " + error);
         }
 
         // 大于等于400的状态码都认为是异常
