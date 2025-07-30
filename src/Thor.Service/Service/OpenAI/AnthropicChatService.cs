@@ -65,13 +65,23 @@ public class AnthropicChatService(
 
                 if (channel == null && lastException != null)
                 {
-                    logger.LogError("对话模型请求异常：{lastException}，请求参数：{request}",
-                        lastException, JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
-                    await context.WriteErrorAsync(
-                        lastException.Message, "400");
-                    await requestLogService.EndRequestLog(log, 400,
-                        $"对话模型请求异常：{lastException.Message}",
-                        lastException);
+                    try
+                    {
+                        logger.LogError("对话模型请求异常：{lastException}，请求参数：{request}",
+                            lastException, JsonSerializer.Serialize(request, ThorJsonSerializer.DefaultOptions));
+
+                        await requestLogService.EndRequestLog(log, 400,
+                            $"对话模型请求异常：{lastException.Message}",
+                            lastException);
+                        
+                        await context.WriteErrorAsync(
+                            lastException.Message, "400");
+
+                    }
+                    catch (Exception e)
+                    {
+                    }
+
                     return;
                 }
 

@@ -56,13 +56,14 @@ public sealed class ChannelService(
         Token? token, bool isResponses = false)
     {
         var group = token?.Groups ?? (user).Groups;
-        return (await GetChannelsAsync()).Where(x =>
+        var result = (await GetChannelsAsync()).Where(x =>
             x.Models.Contains(model)
             && x.SupportsResponses == isResponses // 是否支持Responses
             // 防止重试重复分配 - 确保渠道ID不在已使用列表中
-            && !ChannelAsyncLocal.ChannelIds.Contains(x.Id) 
-            // 分组权限检查
-            && (group.Length == 0 || x.Groups.Select(g => g.ToLower()).Intersect(group.Select(g => g.ToLower())).Any()));
+            && !ChannelAsyncLocal.ChannelIds.Contains(x.Id)).ToList();
+
+        return result.Where(x => x.Groups.Any(g => group.Contains(g, StringComparer.OrdinalIgnoreCase)))
+            .OrderByDescending(x => x.Order);
     }
 
     /// <summary>
