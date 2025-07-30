@@ -525,7 +525,25 @@ const RegisterPage = memo(() => {
                   />
                 </Form.Item>
                 
-                {/* 验证码输入字段 - 根据邮箱验证开关控制显示 */}
+                {/* 获取验证码按钮 - 在邮箱输入框下方显示 */}
+                {enableEmailRegister && (
+                  <div style={{ marginBottom: 16, marginTop: -8 }}>
+                    <Button 
+                      type="primary"
+                      ghost
+                      disabled={countDown > 0}
+                      onClick={handleGetCode}
+                      size="large"
+                      style={{ width: '100%' }}
+                    >
+                      {countDown > 0 
+                        ? t('register.resendCode', { count: countDown }) 
+                        : t('register.getVerificationCode')}
+                    </Button>
+                  </div>
+                )}
+                
+                {/* 验证码输入字段 - 移除右侧按钮 */}
                 {enableEmailRegister && (
                   <Form.Item
                     name="code"
@@ -538,20 +556,6 @@ const RegisterPage = memo(() => {
                       prefix={<SafetyOutlined />}
                       placeholder={t('register.verificationCodePlaceholder')}
                       size="large"
-                      addonAfter={
-                        enableEmailRegister ? (
-                          <Button 
-                            type="link" 
-                            disabled={countDown > 0}
-                            onClick={handleGetCode}
-                            style={{ padding: 0, height: 'auto', width: '100%' }}
-                          >
-                            {countDown > 0 
-                              ? t('register.resendCode', { count: countDown }) 
-                              : t('register.getVerificationCode')}
-                          </Button>
-                        ) : null
-                      }
                     />
                   </Form.Item>
                 )}
