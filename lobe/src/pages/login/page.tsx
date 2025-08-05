@@ -34,7 +34,7 @@ const BrandSide = styled.div<{ theme: CustomTheme }>`
   justify-content: center;
   align-items: center;
   padding: 40px;
-  color: white;
+  color: ${props => props.theme.colorTextLightSolid || 'white'};
   position: relative;
   overflow: hidden;
   @media (max-width: 992px) {
@@ -91,7 +91,7 @@ const RegisterLink = styled(Text)<{ theme: CustomTheme }>`
 const AnimatedShape = styled.div`
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: ${props => props.theme?.colorBgMask || 'rgba(255, 255, 255, 0.1)'};
   animation: float 15s infinite ease-in-out;
   
   &:nth-child(1) {
@@ -136,7 +136,7 @@ const FeatureIcon = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: ${props => props.theme?.colorBgMask || 'rgba(255, 255, 255, 0.2)'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,7 +156,7 @@ const SocialButton = styled(Button)`
   
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 12px ${props => props.theme?.colorBgMask || 'rgba(0,0,0,0.1)'};
   }
 `;
 
@@ -273,7 +273,7 @@ const Login = memo(() => {
                         {t('login.brandSlogan')}
                     </Paragraph>
 
-                    <Divider style={{ backgroundColor: 'rgba(255,255,255,0.2)', margin: '30px 0' }} />
+                    <Divider style={{ backgroundColor: themeToken.colorBorderSecondary || 'rgba(255,255,255,0.2)', margin: '30px 0' }} />
 
                     <FeatureItem>
                         <FeatureIcon>🚀</FeatureIcon>

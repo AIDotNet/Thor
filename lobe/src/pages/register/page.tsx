@@ -33,7 +33,7 @@ const BrandSide = styled.div<{ theme: CustomTheme }>`
   justify-content: center;
   align-items: center;
   padding: 40px;
-  color: white;
+  color: ${props => props.theme?.token?.colorTextLightSolid || 'white'};
   position: relative;
   overflow: hidden;
   
@@ -109,7 +109,7 @@ const LoginLink = styled(Text) <{ theme: CustomTheme }>`
 const AnimatedShape = styled.div`
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: ${props => props.theme?.colcorBgMask || 'rgba(255, 255, 255, 0.1)'};
   animation: float 15s infinite ease-in-out;
   
   &:nth-child(1) {
@@ -153,7 +153,7 @@ const FeatureIcon = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: ${props => props.theme?.colorBgMask || 'rgba(255, 255, 255, 0.2)'};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -209,7 +209,7 @@ const Explosion = styled.div<{ top: string; left: string }>`
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: #ff4d4f;
+  background-color: ${props => props.theme?.colorError || '#ff4d4f'};
   animation: explode 0.5s ease-out forwards;
   z-index: 1001;
   
@@ -217,12 +217,12 @@ const Explosion = styled.div<{ top: string; left: string }>`
     0% {
       transform: scale(0);
       opacity: 1;
-      box-shadow: 0 0 20px 10px rgba(255, 77, 79, 0.8);
+      box-shadow: 0 0 20px 10px ${props => props.theme?.colorErrorBg || 'rgba(255, 77, 79, 0.8)'};
     }
     100% {
       transform: scale(20);
       opacity: 0;
-      box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
+      box-shadow: 0 0 0 0 ${props => props.theme?.colorErrorBg || 'rgba(255, 77, 79, 0)'};
     }
   }
 `;
@@ -433,22 +433,22 @@ const RegisterPage = memo(() => {
         <AnimatedShape />
 
         <BrandContent>
-          <Title level={1} style={{ color: 'white', marginTop: 24 }}>
+          <Title level={1} style={{ color: themeToken.colorTextLightSolid || 'white', marginTop: 24 }}>
             TokenAI 
           </Title>
-          <Paragraph style={{ color: 'rgba(255,255,255,0.8)', fontSize: 16, marginBottom: 40 }}>
+          <Paragraph style={{ color: themeToken.colorTextSecondary || 'rgba(255,255,255,0.8)', fontSize: 16, marginBottom: 40 }}>
             {t('register.brandSlogan')}
           </Paragraph>
 
-          <Divider style={{ backgroundColor: 'rgba(255,255,255,0.2)', margin: '30px 0' }} />
+          <Divider style={{ backgroundColor: themeToken.colorBorderSecondary || 'rgba(255,255,255,0.2)', margin: '30px 0' }} />
 
           <FeatureItem>
             <FeatureIcon>🚀</FeatureIcon>
             <div>
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+              <Text style={{ color: themeToken.colorTextLightSolid || 'white', fontWeight: 'bold', fontSize: 16 }}>
                 {t('register.feature1Title')}
               </Text>
-              <Paragraph style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>
+              <Paragraph style={{ color: themeToken.colorTextSecondary || 'rgba(255,255,255,0.8)', margin: 0 }}>
                 {t('register.feature1Desc')}
               </Paragraph>
             </div>
