@@ -22,7 +22,8 @@ import {
   PieChart,
   Megaphone,
   Cherry,
-  FileClock
+  FileClock,
+  Database
 } from "lucide-react";
 import './index.css'
 import { SidebarTabKey } from "../../../../store/global/initialState";
@@ -282,6 +283,16 @@ const Nav = memo(() => {
             key: SidebarTabKey.UserGroup,
             onClick: () => {
               navigate("/user-group");
+            },
+            role: "admin",
+          },
+          {
+            icon: <Database />,
+            label: t('sidebar.tracing'),
+            enable: true,
+            key: SidebarTabKey.Tracing,
+            onClick: () => {
+              navigate("/tracing");
             },
             role: "admin",
           },

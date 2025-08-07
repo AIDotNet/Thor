@@ -41,4 +41,6 @@ export enum SidebarTabKey {
   Usage = 'usage',
 
   Announcement = 'announcement',
+
+  Tracing = 'tracing',
 }

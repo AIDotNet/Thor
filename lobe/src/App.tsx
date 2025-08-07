@@ -34,6 +34,7 @@ const UserGroupPage = lazy(() => import('./pages/user-group/page'))
 const PlaygroundPage = lazy(() => import('./pages/playground'))
 const UsagePage = lazy(() => import('./pages/usage/page'))
 const AnnouncementPage = lazy(() => import('./pages/announcement/page'))
+const TracingPage = lazy(() => import('./pages/tracing/page'))
 
 function App() {
   const { themeMode, toggleTheme } = useThemeStore();
@@ -145,6 +146,11 @@ function App() {
       {
         path: 'announcement', element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.announcement')} />}>
           <AnnouncementPage />
+        </Suspense>
+      },
+      {
+        path: 'tracing', element: <Suspense fallback={<FullscreenLoading title={t('pageTitle.loading.tracing')} />}>
+          <TracingPage />
         </Suspense>
       }
     ]

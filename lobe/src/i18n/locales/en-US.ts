@@ -108,7 +108,8 @@ const enUS = {
       business: 'Business Service',
       playground: 'Playground',
       usage: 'Usage',
-      announcement: 'Announcements'
+      announcement: 'Announcements',
+      tracing: 'Tracing'
     },
 
     // Page Title
@@ -136,7 +137,8 @@ const enUS = {
         doc: 'Loading Documentation',
         model: 'Loading Model Page',
         usage: 'Loading Usage Page',
-        announcement: 'Loading Announcements Page'
+        announcement: 'Loading Announcements Page',
+        tracing: 'Loading Tracing Page'
       }
     },
 
