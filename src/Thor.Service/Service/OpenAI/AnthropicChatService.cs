@@ -73,10 +73,9 @@ public class AnthropicChatService(
                         await requestLogService.EndRequestLog(log, 400,
                             $"对话模型请求异常：{lastException.Message}",
                             lastException);
-                        
+
                         await context.WriteErrorAsync(
                             lastException.Message, "400");
-
                     }
                     catch (Exception e)
                     {
@@ -589,7 +588,7 @@ public class AnthropicChatService(
         bool isFirst = true;
         int responseToken = 0;
 
-        await foreach (var (@event, item) in openService.StreamChatCompletionsAsync(input, platformOptions))
+        await foreach (var (@eventName, value, item) in openService.StreamChatCompletionsAsync(input, platformOptions))
         {
             if (isFirst)
             {
@@ -634,41 +633,13 @@ public class AnthropicChatService(
             }
 
             responseMessage.Append(item?.delta?.text ?? item?.message?.content?.FirstOrDefault()?.text);
-            if (item == null && !string.IsNullOrEmpty(@event))
-            {
-                await context.WriteAsEventStreamAsync(@event).ConfigureAwait(false);
-                continue;
-            }
-            else if (item != null && !string.IsNullOrEmpty(@event))
-            {
-                if (@event.Equals("message_start", StringComparison.CurrentCulture))
-                {
-                    item.Usage ??= new ClaudeChatCompletionDtoUsage();
-                    item.Usage.input_tokens = requestToken;
-                }
-
-                await context.WriteAsEventStreamDataAsync(@event, item).ConfigureAwait(false);
-                continue;
-            }
-
-            if (item == null)
-            {
-                continue;
-            }
 
             if (item?.Usage is { input_tokens: > 0 } || item?.message?.Usage is { input_tokens: > 0 })
             {
-                requestToken = item.Usage?.input_tokens ?? item.message.Usage.input_tokens ?? 0;
+                requestToken = item.Usage?.input_tokens ?? item.message?.Usage?.input_tokens ?? 0;
             }
 
-            if (@event.StartsWith("data:"))
-            {
-                await context.WriteAsEventAsync(@event + "\n\n").ConfigureAwait(false);
-            }
-            else
-            {
-                await context.WriteAsEventAsync(@event).ConfigureAwait(false);
-            }
+            await context.WriteAsEventStreamDataAsync(eventName, value);
         }
 
         responseToken = rate.QuotaType switch

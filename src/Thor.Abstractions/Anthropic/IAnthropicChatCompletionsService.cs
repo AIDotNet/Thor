@@ -20,7 +20,7 @@ public interface IAnthropicChatCompletionsService
     /// <param name="options">平台参数对象</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns></returns>
-    IAsyncEnumerable<(string?, ClaudeStreamDto?)> StreamChatCompletionsAsync(AnthropicInput request,
+    IAsyncEnumerable<(string, string, ClaudeStreamDto?)> StreamChatCompletionsAsync(AnthropicInput request,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default);
 }

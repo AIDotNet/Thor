@@ -5,7 +5,6 @@ using Thor.Abstractions;
 using Thor.Abstractions.Anthropic;
 using Thor.Abstractions.Chats;
 using Thor.Abstractions.Chats.Dtos;
-using Thor.Abstractions.Dtos;
 
 namespace Thor.OpenAI.Chats;
 
@@ -57,7 +56,7 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
     /// <summary>
     /// 流式对话补全
     /// </summary>
-    public async IAsyncEnumerable<(string?, ClaudeStreamDto?)> StreamChatCompletionsAsync(AnthropicInput request,
+    public async IAsyncEnumerable<(string, string, ClaudeStreamDto?)> StreamChatCompletionsAsync(AnthropicInput request,
         ThorPlatformOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
@@ -86,7 +85,34 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             {
                 hasStarted = true;
                 var messageStartEvent = CreateMessageStartEvent(messageId, request.Model);
-                yield return ("message_start", messageStartEvent);
+                yield return ("message_start",
+                    JsonSerializer.Serialize(messageStartEvent, ThorJsonSerializer.DefaultOptions), messageStartEvent);
+            }
+
+            // 更新使用情况统计
+            if (openAIResponse.Usage != null)
+            {
+                // 使用最新的token计数（OpenAI通常在最后的响应中提供完整的统计）
+                if (openAIResponse.Usage.PromptTokens.HasValue)
+                {
+                    accumulatedUsage.input_tokens = openAIResponse.Usage.PromptTokens.Value;
+                }
+
+                if (openAIResponse.Usage.CompletionTokens.HasValue)
+                {
+                    accumulatedUsage.output_tokens = (int)openAIResponse.Usage.CompletionTokens.Value;
+                }
+
+                if (openAIResponse.Usage.PromptTokensDetails?.CachedTokens.HasValue == true)
+                {
+                    accumulatedUsage.cache_read_input_tokens =
+                        openAIResponse.Usage.PromptTokensDetails.CachedTokens.Value;
+                }
+
+                // 记录调试信息
+                _logger.LogDebug("OpenAI Usage更新: Input={InputTokens}, Output={OutputTokens}, CacheRead={CacheRead}",
+                    accumulatedUsage.input_tokens, accumulatedUsage.output_tokens,
+                    accumulatedUsage.cache_read_input_tokens);
             }
 
             if (openAIResponse.Choices is { Count: > 0 })
@@ -101,7 +127,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     {
                         var stopEvent = CreateContentBlockStopEvent();
                         stopEvent.index = currentBlockIndex;
-                        yield return ("content_block_stop", stopEvent);
+                        yield return ("content_block_stop",
+                            JsonSerializer.Serialize(stopEvent, ThorJsonSerializer.DefaultOptions), stopEvent);
                         currentBlockIndex++; // 切换内容块时增加索引
                         currentContentBlockType = "";
                     }
@@ -114,13 +141,17 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         lastContentBlockType = "text";
                         var contentBlockStartEvent = CreateContentBlockStartEvent();
                         contentBlockStartEvent.index = currentBlockIndex;
-                        yield return ("content_block_start", contentBlockStartEvent);
+                        yield return ("content_block_start",
+                            JsonSerializer.Serialize(contentBlockStartEvent, ThorJsonSerializer.DefaultOptions),
+                            contentBlockStartEvent);
                     }
 
                     // 发送content_block_delta事件
                     var contentDeltaEvent = CreateContentBlockDeltaEvent(choice.Delta.Content);
                     contentDeltaEvent.index = currentBlockIndex;
-                    yield return ("content_block_delta", contentDeltaEvent);
+                    yield return ("content_block_delta",
+                        JsonSerializer.Serialize(contentDeltaEvent, ThorJsonSerializer.DefaultOptions),
+                        contentDeltaEvent);
                 }
 
                 // 处理工具调用
@@ -138,7 +169,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                             {
                                 var stopEvent = CreateContentBlockStopEvent();
                                 stopEvent.index = currentBlockIndex;
-                                yield return ("content_block_stop", stopEvent);
+                                yield return ("content_block_stop",
+                                    JsonSerializer.Serialize(stopEvent, ThorJsonSerializer.DefaultOptions), stopEvent);
                                 currentBlockIndex++; // 增加块索引
                             }
                             // 如果当前有其他工具调用在运行，也需要结束它们
@@ -146,7 +178,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                             {
                                 var stopEvent = CreateContentBlockStopEvent();
                                 stopEvent.index = currentBlockIndex;
-                                yield return ("content_block_stop", stopEvent);
+                                yield return ("content_block_stop",
+                                    JsonSerializer.Serialize(stopEvent, ThorJsonSerializer.DefaultOptions), stopEvent);
                                 currentBlockIndex++; // 增加块索引
                             }
 
@@ -171,7 +204,9 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                                 toolCallIds[toolCallIndex],
                                 toolCall.Function?.Name);
                             toolBlockStartEvent.index = currentBlockIndex;
-                            yield return ("content_block_start", toolBlockStartEvent);
+                            yield return ("content_block_start",
+                                JsonSerializer.Serialize(toolBlockStartEvent, ThorJsonSerializer.DefaultOptions),
+                                toolBlockStartEvent);
                         }
 
                         // 如果有增量的参数，发送content_block_delta事件
@@ -180,7 +215,9 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                             var toolDeltaEvent = CreateToolBlockDeltaEvent(toolCall.Function.Arguments);
                             // 使用该工具调用对应的块索引
                             toolDeltaEvent.index = toolCallIndexToBlockIndex[toolCallIndex];
-                            yield return ("content_block_delta", toolDeltaEvent);
+                            yield return ("content_block_delta",
+                                JsonSerializer.Serialize(toolDeltaEvent, ThorJsonSerializer.DefaultOptions),
+                                toolDeltaEvent);
                         }
                     }
                 }
@@ -193,7 +230,8 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     {
                         var stopEvent = CreateContentBlockStopEvent();
                         stopEvent.index = currentBlockIndex;
-                        yield return ("content_block_stop", stopEvent);
+                        yield return ("content_block_stop",
+                            JsonSerializer.Serialize(stopEvent, ThorJsonSerializer.DefaultOptions), stopEvent);
                         currentBlockIndex++; // 增加块索引
                         currentContentBlockType = "";
                     }
@@ -206,12 +244,16 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                         lastContentBlockType = "thinking";
                         var thinkingBlockStartEvent = CreateThinkingBlockStartEvent();
                         thinkingBlockStartEvent.index = currentBlockIndex;
-                        yield return ("content_block_start", thinkingBlockStartEvent);
+                        yield return ("content_block_start",
+                            JsonSerializer.Serialize(thinkingBlockStartEvent, ThorJsonSerializer.DefaultOptions),
+                            thinkingBlockStartEvent);
                     }
 
                     var thinkingDeltaEvent = CreateThinkingBlockDeltaEvent(choice.Delta.ReasoningContent);
                     thinkingDeltaEvent.index = currentBlockIndex;
-                    yield return ("content_block_delta", thinkingDeltaEvent);
+                    yield return ("content_block_delta",
+                        JsonSerializer.Serialize(thinkingDeltaEvent, ThorJsonSerializer.DefaultOptions),
+                        thinkingDeltaEvent);
                 }
 
                 // 处理结束
@@ -224,28 +266,31 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
                     {
                         var contentBlockStopEvent = CreateContentBlockStopEvent();
                         contentBlockStopEvent.index = currentBlockIndex;
-                        yield return ("content_block_stop", contentBlockStopEvent);
+                        yield return ("content_block_stop",
+                            JsonSerializer.Serialize(contentBlockStopEvent, ThorJsonSerializer.DefaultOptions),
+                            contentBlockStopEvent);
                     }
 
                     // 发送message_delta事件
                     var messageDeltaEvent = CreateMessageDeltaEvent(
                         GetStopReasonByLastContentType(choice.FinishReason, lastContentBlockType), accumulatedUsage);
-                    yield return ("message_delta", messageDeltaEvent);
+
+                    // 记录最终Usage统计
+                    _logger.LogDebug(
+                        "流式响应结束，最终Usage: Input={InputTokens}, Output={OutputTokens}, CacheRead={CacheRead}",
+                        accumulatedUsage.input_tokens, accumulatedUsage.output_tokens,
+                        accumulatedUsage.cache_read_input_tokens);
+
+                    yield return ("message_delta",
+                        JsonSerializer.Serialize(messageDeltaEvent, ThorJsonSerializer.DefaultOptions),
+                        messageDeltaEvent);
 
                     // 发送message_stop事件
                     var messageStopEvent = CreateMessageStopEvent();
-                    yield return ("message_stop", messageStopEvent);
+                    yield return ("message_stop",
+                        JsonSerializer.Serialize(messageStopEvent, ThorJsonSerializer.DefaultOptions),
+                        messageStopEvent);
                 }
-            }
-
-            // 更新使用情况统计
-            if (openAIResponse.Usage != null)
-            {
-                accumulatedUsage.input_tokens = openAIResponse.Usage.PromptTokens ?? accumulatedUsage.input_tokens;
-                accumulatedUsage.output_tokens =
-                    (int?)(openAIResponse.Usage.CompletionTokens ?? accumulatedUsage.output_tokens);
-                accumulatedUsage.cache_read_input_tokens = openAIResponse.Usage.PromptTokensDetails?.CachedTokens ??
-                                                           accumulatedUsage.cache_read_input_tokens;
             }
         }
 
@@ -256,16 +301,20 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             {
                 var contentBlockStopEvent = CreateContentBlockStopEvent();
                 contentBlockStopEvent.index = currentBlockIndex;
-                yield return ("content_block_stop", contentBlockStopEvent);
+                yield return ("content_block_stop",
+                    JsonSerializer.Serialize(contentBlockStopEvent, ThorJsonSerializer.DefaultOptions),
+                    contentBlockStopEvent);
             }
 
             var messageDeltaEvent =
                 CreateMessageDeltaEvent(GetStopReasonByLastContentType("end_turn", lastContentBlockType),
                     accumulatedUsage);
-            yield return ("message_delta", messageDeltaEvent);
+            yield return ("message_delta",
+                JsonSerializer.Serialize(messageDeltaEvent, ThorJsonSerializer.DefaultOptions), messageDeltaEvent);
 
             var messageStopEvent = CreateMessageStopEvent();
-            yield return ("message_stop", messageStopEvent);
+            yield return ("message_stop", JsonSerializer.Serialize(messageStopEvent, ThorJsonSerializer.DefaultOptions),
+                messageStopEvent);
         }
     }
 

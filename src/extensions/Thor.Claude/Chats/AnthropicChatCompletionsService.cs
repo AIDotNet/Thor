@@ -71,7 +71,7 @@ public class AnthropicChatCompletionsService(ILogger<AnthropicChatCompletionsSer
         return value;
     }
 
-    public async IAsyncEnumerable<(string?, ClaudeStreamDto?)> StreamChatCompletionsAsync(AnthropicInput input,
+    public async IAsyncEnumerable<(string, string, ClaudeStreamDto?)> StreamChatCompletionsAsync(AnthropicInput input,
         ThorPlatformOptions? options = null,
         CancellationToken cancellationToken = default)
     {
@@ -115,12 +115,10 @@ public class AnthropicChatCompletionsService(ILogger<AnthropicChatCompletionsSer
 
         using StreamReader reader = new(await response.Content.ReadAsStreamAsync(cancellationToken));
         string? line = string.Empty;
-        var first = true;
-        var isThink = false;
 
-        string? toolId = null;
-        string? toolName = null;
         string? data = null;
+        string eventType = string.Empty;
+
         while ((line = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false)) != null)
         {
             line += Environment.NewLine;
@@ -133,37 +131,25 @@ public class AnthropicChatCompletionsService(ILogger<AnthropicChatCompletionsSer
                 throw new Exception("OpenAI对话异常" + line);
             }
 
-            if (line.StartsWith(OpenAIConstant.Data))
-            {
-                data = line[OpenAIConstant.Data.Length..].Trim();
-            }
-
             if (string.IsNullOrWhiteSpace(line))
             {
                 continue;
             }
 
-            if (data == OpenAIConstant.Done)
+            if (line.StartsWith("event:"))
             {
-                break;
-            }
-
-            if (line.StartsWith(':'))
-            {
-                yield return (line, null);
+                eventType = line;
                 continue;
             }
 
-            if (string.IsNullOrWhiteSpace(data))
-            {
-                yield return (line, null);
-                continue;
-            }
+            if (!line.StartsWith(OpenAIConstant.Data)) continue;
+
+            data = line[OpenAIConstant.Data.Length..].Trim();
 
             var result = JsonSerializer.Deserialize<ClaudeStreamDto>(data,
                 ThorJsonSerializer.DefaultOptions);
 
-            yield return (line, result);
+            yield return (eventType, line, result);
         }
     }
 }
