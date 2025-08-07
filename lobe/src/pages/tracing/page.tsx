@@ -25,7 +25,7 @@ import {
   WarningOutlined,
   CalendarOutlined,
   DatabaseOutlined,
-  CleaningServicesOutlined,
+  ClearOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import {
@@ -365,7 +365,7 @@ export default function TracingPage() {
         <Card style={{ ...styles.operationCard, ...styles.warningOperation }}>
           <div style={styles.operationHeader}>
             <div style={styles.operationTitle}>
-              <CleaningServicesOutlined />
+              <ClearOutlined />
               清理过期记录
             </div>
             <Badge count={statistics.totalCount > 10000 ? '推荐' : 0} />
@@ -375,7 +375,7 @@ export default function TracingPage() {
           </div>
           <Button
             type="primary"
-            icon={<CleaningServicesOutlined />}
+            icon={<ClearOutlined />}
             onClick={() => setCleanupModalVisible(true)}
             disabled={statistics.totalCount === 0}
           >
@@ -428,7 +428,7 @@ export default function TracingPage() {
       <Modal
         title={
           <Space>
-            <CleaningServicesOutlined />
+            <ClearOutlined />
             清理过期记录
           </Space>
         }
@@ -443,7 +443,7 @@ export default function TracingPage() {
             type="primary"
             loading={cleanupLoading}
             onClick={handleCleanup}
-            icon={<CleaningServicesOutlined />}
+            icon={<ClearOutlined />}
           >
             确认清理
           </Button>,

@@ -1,44 +1,5 @@
-import axios from "axios";
+import { get, del } from "../utils/fetch";
 import { message } from "antd";
-
-const api = axios.create({
-  timeout: 120000,
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-api.interceptors.response.use(
-  (response) => {
-    if (response.data.success === false) {
-      message.error(response.data.message || "请求失败");
-      return Promise.reject(new Error(response.data.message || "请求失败"));
-    }
-    return response;
-  },
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      window.location.href = "/login";
-      return Promise.reject(error);
-    }
-    
-    const errorMessage = error.response?.data?.message || error.message || "请求失败";
-    message.error(errorMessage);
-    return Promise.reject(error);
-  }
-);
 
 export interface TracingStatistics {
   totalCount: number;
@@ -60,12 +21,13 @@ export interface ApiResponse<T> {
  */
 export async function getTracingStatistics(): Promise<ApiResponse<TracingStatistics>> {
   try {
-    const response = await api.get("/api/v1/tracing/statistics");
+    const data = await get("/api/v1/tracing/statistics");
     return {
       success: true,
-      data: response.data,
+      data: data,
     };
   } catch (error: any) {
+    message.error(error.message || "获取统计信息失败");
     return {
       success: false,
       data: {
@@ -84,12 +46,13 @@ export async function getTracingStatistics(): Promise<ApiResponse<TracingStatist
  */
 export async function cleanupTracings(retainDays: number = 30): Promise<ApiResponse<{ deletedCount: number; message: string }>> {
   try {
-    const response = await api.delete(`/api/v1/tracing/cleanup?retainDays=${retainDays}`);
+    const data = await del(`/api/v1/tracing/cleanup?retainDays=${retainDays}`);
     return {
       success: true,
-      data: response.data,
+      data: data,
     };
   } catch (error: any) {
+    message.error(error.message || "清理记录失败");
     return {
       success: false,
       data: { deletedCount: 0, message: "清理失败" },
@@ -103,12 +66,13 @@ export async function cleanupTracings(retainDays: number = 30): Promise<ApiRespo
  */
 export async function deleteTracingsByDate(beforeDate: string): Promise<ApiResponse<{ deletedCount: number; message: string }>> {
   try {
-    const response = await api.delete(`/api/v1/tracing/by-date?beforeDate=${encodeURIComponent(beforeDate)}`);
+    const data = await del(`/api/v1/tracing/by-date?beforeDate=${encodeURIComponent(beforeDate)}`);
     return {
       success: true,
-      data: response.data,
+      data: data,
     };
   } catch (error: any) {
+    message.error(error.message || "删除记录失败");
     return {
       success: false,
       data: { deletedCount: 0, message: "删除失败" },
@@ -122,12 +86,13 @@ export async function deleteTracingsByDate(beforeDate: string): Promise<ApiRespo
  */
 export async function deleteTracingsByChatLoggerId(chatLoggerId: string): Promise<ApiResponse<{ deletedCount: number; message: string }>> {
   try {
-    const response = await api.delete(`/api/v1/tracing/by-chatloggerid/${encodeURIComponent(chatLoggerId)}`);
+    const data = await del(`/api/v1/tracing/by-chatloggerid/${encodeURIComponent(chatLoggerId)}`);
     return {
       success: true,
-      data: response.data,
+      data: data,
     };
   } catch (error: any) {
+    message.error(error.message || "删除记录失败");
     return {
       success: false,
       data: { deletedCount: 0, message: "删除失败" },
@@ -141,12 +106,13 @@ export async function deleteTracingsByChatLoggerId(chatLoggerId: string): Promis
  */
 export async function deleteTracingsByTraceId(traceId: string): Promise<ApiResponse<{ deletedCount: number; message: string }>> {
   try {
-    const response = await api.delete(`/api/v1/tracing/by-traceid/${encodeURIComponent(traceId)}`);
+    const data = await del(`/api/v1/tracing/by-traceid/${encodeURIComponent(traceId)}`);
     return {
       success: true,
-      data: response.data,
+      data: data,
     };
   } catch (error: any) {
+    message.error(error.message || "删除记录失败");
     return {
       success: false,
       data: { deletedCount: 0, message: "删除失败" },
