@@ -359,8 +359,8 @@ public class AnthropicChatService(
             foreach (var tool in input.Tools)
             {
                 requestToken += TokenHelper.GetTotalTokens(tool.name, tool.Description);
-                requestToken += TokenHelper.GetTotalTokens(tool.InputSchema.Required ?? []);
-                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool.InputSchema.Properties));
+                requestToken += TokenHelper.GetTotalTokens(tool?.InputSchema?.Required ?? []);
+                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool?.InputSchema?.Properties));
             }
         }
 
@@ -520,8 +520,8 @@ public class AnthropicChatService(
             foreach (var tool in input.Tools)
             {
                 requestToken += TokenHelper.GetTotalTokens(tool.name, tool.Description);
-                requestToken += TokenHelper.GetTotalTokens(tool.InputSchema.Required ?? []);
-                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool.InputSchema.Properties));
+                requestToken += TokenHelper.GetTotalTokens(tool?.InputSchema?.Required ?? []);
+                requestToken += TokenHelper.GetTotalTokens(JsonSerializer.Serialize(tool?.InputSchema?.Properties));
             }
         }
 

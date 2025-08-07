@@ -296,4 +296,7 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
     {
         throw new NotImplementedException();
     }
+    
+    [JsonPropertyName("web_search_options")]
+    public ThorChatWebSearchOptions? WebSearchOptions { get; set; } = null;
 }

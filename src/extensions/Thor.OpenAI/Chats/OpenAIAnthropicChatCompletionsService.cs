@@ -37,6 +37,17 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
             // 转换请求格式：Claude -> OpenAI
             var openAIRequest = ConvertAnthropicToOpenAI(request);
 
+            if (openAIRequest.Model.StartsWith("gpt-5"))
+            {
+                openAIRequest.MaxCompletionTokens = request.MaxTokens;
+                openAIRequest.MaxTokens = null;
+            }
+            else if (openAIRequest.Model.StartsWith("o3-mini") || openAIRequest.Model.StartsWith("o4-mini"))
+            {
+                openAIRequest.MaxCompletionTokens = request.MaxTokens;
+                openAIRequest.MaxTokens = null;
+                openAIRequest.Temperature = null;
+            }
             // 调用OpenAI服务
             var openAIResponse =
                 await _openAIChatService.ChatCompletionsAsync(openAIRequest, options, cancellationToken);
@@ -63,6 +74,17 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         var openAIRequest = ConvertAnthropicToOpenAI(request);
         openAIRequest.Stream = true;
 
+        if (openAIRequest.Model.StartsWith("gpt-5"))
+        {
+            openAIRequest.MaxCompletionTokens = request.MaxTokens;
+            openAIRequest.MaxTokens = null;
+        }
+        else if (openAIRequest.Model.StartsWith("o3-mini") || openAIRequest.Model.StartsWith("o4-mini"))
+        {
+            openAIRequest.MaxCompletionTokens = request.MaxTokens;
+            openAIRequest.MaxTokens = null;
+            openAIRequest.Temperature = null;
+        }
         var messageId = Guid.NewGuid().ToString();
         var hasStarted = false;
         var hasTextContentBlockStarted = false;
@@ -369,8 +391,18 @@ public class OpenAIAnthropicChatCompletionsService : IAnthropicChatCompletionsSe
         // 处理tools
         if (anthropicInput.Tools is { Count: > 0 })
         {
-            openAIRequest.Tools = anthropicInput.Tools.Select(ConvertAnthropicToolToThor).ToList();
+            openAIRequest.Tools = anthropicInput.Tools.Where(x => x.name != "web_search")
+                .Select(ConvertAnthropicToolToThor).ToList();
         }
+
+        // 判断是否存在web_search
+        if (anthropicInput.Tools?.Any(x => x.name == "web_search") == true)
+        {
+            openAIRequest.WebSearchOptions = new ThorChatWebSearchOptions()
+            {
+            };
+        }
+
 
         // 处理tool_choice
         if (anthropicInput.ToolChoice != null)

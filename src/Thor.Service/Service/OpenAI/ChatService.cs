@@ -322,13 +322,18 @@ public sealed partial class ChatService(
             request.MaxCompletionTokens = null;
         }
 
-        if (request.Model.StartsWith("o3-mini") || request.Model.StartsWith("o4-mini"))
+        if (request.Model.StartsWith("gpt-5"))
+        {
+            request.MaxCompletionTokens = request.MaxTokens;    
+            request.MaxTokens = null;
+        }
+        else if (request.Model.StartsWith("o3-mini") || request.Model.StartsWith("o4-mini"))
         {
             request.MaxCompletionTokens = request.MaxTokens;
             request.MaxTokens = null;
             request.Temperature = null;
         }
-
+        
         var log = requestLogService.BeginRequestLog(context.Request.Path, request);
 
         RequestLogContext.SetCurrent(log);
