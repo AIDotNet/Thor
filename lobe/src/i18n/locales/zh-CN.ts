@@ -169,7 +169,8 @@ const zhCN = {
       business: '运营服务',
       playground: '操场',
       usage: '使用情况',
-      announcement: '公告管理'
+      announcement: '公告管理',
+      tracing: '链路跟踪'
     },
 
     // 页面标题
@@ -197,7 +198,8 @@ const zhCN = {
         doc: '加载文档页面中',
         model: '加载模型页面中',
         usage: '加载使用情况页面中',
-        announcement: '加载公告管理页面中'
+        announcement: '加载公告管理页面中',
+        tracing: '加载链路跟踪页面中'
       }
     },
 

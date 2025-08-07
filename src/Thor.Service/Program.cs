@@ -1173,19 +1173,64 @@ try
 
     #region Tracing
 
-    // 添加链路跟踪API端点
-    app.MapGet("/api/v1/tracing/current", () =>
+    var tracing = app.MapGroup("/api/v1/tracing")
+        .WithTags("Tracing")
+        .AddEndpointFilter<ResultFilter>()
+        .RequireAuthorization(new AuthorizeAttribute()
         {
-            var tracing = Thor.Service.Infrastructure.Helper.TracingService.CurrentRootTracing;
-            if (tracing == null)
+            Roles = RoleConstant.Admin
+        });
+
+    // 添加链路跟踪API端点
+    tracing.MapGet("current", () =>
+        {
+            var currentTracing = Thor.Service.Infrastructure.Helper.TracingService.CurrentRootTracing;
+            if (currentTracing == null)
             {
                 return Results.NotFound("当前请求没有跟踪信息");
             }
 
-            return Results.Ok(tracing);
+            return Results.Ok(currentTracing);
         })
-        .WithTags("Tracing")
         .WithDescription("获取当前请求的链路跟踪信息")
+        .AllowAnonymous()
+        .WithOpenApi();
+
+    tracing.MapGet("statistics", async (ILoggerDbContext loggerDbContext) =>
+            await TracingService.GetTracingStatistics(loggerDbContext))
+        .WithDescription("获取Tracing统计信息")
+        .WithOpenApi();
+
+    tracing.MapDelete("cleanup", async (ILoggerDbContext loggerDbContext, int retainDays = 30) =>
+        {
+            var deletedCount = await TracingService.CleanupTracings(loggerDbContext, retainDays);
+            return Results.Ok(new { DeletedCount = deletedCount, Message = $"已删除 {deletedCount} 条超过 {retainDays} 天的Tracing记录" });
+        })
+        .WithDescription("清理指定天数之前的Tracing记录")
+        .WithOpenApi();
+
+    tracing.MapDelete("by-date", async (ILoggerDbContext loggerDbContext, DateTime beforeDate) =>
+        {
+            var deletedCount = await TracingService.DeleteTracingsBefore(loggerDbContext, beforeDate);
+            return Results.Ok(new { DeletedCount = deletedCount, Message = $"已删除 {deletedCount} 条 {beforeDate:yyyy-MM-dd} 之前的Tracing记录" });
+        })
+        .WithDescription("删除指定日期之前的Tracing记录")
+        .WithOpenApi();
+
+    tracing.MapDelete("by-chatloggerid/{chatLoggerId}", async (ILoggerDbContext loggerDbContext, string chatLoggerId) =>
+        {
+            var deletedCount = await TracingService.DeleteTracingsByChatLoggerId(loggerDbContext, chatLoggerId);
+            return Results.Ok(new { DeletedCount = deletedCount, Message = $"已删除ChatLoggerId为 {chatLoggerId} 的 {deletedCount} 条Tracing记录" });
+        })
+        .WithDescription("删除指定ChatLoggerId的Tracing记录")
+        .WithOpenApi();
+
+    tracing.MapDelete("by-traceid/{traceId}", async (ILoggerDbContext loggerDbContext, string traceId) =>
+        {
+            var deletedCount = await TracingService.DeleteTracingsByTraceId(loggerDbContext, traceId);
+            return Results.Ok(new { DeletedCount = deletedCount, Message = $"已删除TraceId为 {traceId} 的 {deletedCount} 条Tracing记录" });
+        })
+        .WithDescription("删除指定TraceId的Tracing记录")
         .WithOpenApi();
 
     #endregion

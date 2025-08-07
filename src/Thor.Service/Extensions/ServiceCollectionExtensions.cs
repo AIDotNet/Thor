@@ -52,6 +52,10 @@ public static class ServiceCollectionExtensions
             .Get<ChatCoreOptions>();
         builder.Configuration.GetSection(TrackerOptions.Tracker)
             .Get<TrackerOptions>();
+        
+        // 添加TracingOptions配置
+        builder.Services.Configure<TracingOptions>(
+            builder.Configuration.GetSection(TracingOptions.SectionName));
 
         var cacheType = Environment.GetEnvironmentVariable("CACHE_TYPE");
         var connectionString = Environment.GetEnvironmentVariable("CACHE_CONNECTION_STRING");

@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Options;
 using Thor.Domain.Chats;
 using Thor.Service.Infrastructure.Helper;
+using Thor.Service.Options;
 
 namespace Thor.Service.Infrastructure.Middlewares;
 
@@ -10,6 +12,12 @@ namespace Thor.Service.Infrastructure.Middlewares;
 public class TracingMiddleware : IMiddleware
 {
     private static readonly ActivitySource ActivitySource = new("Thor.Service");
+    private readonly TracingOptions _tracingOptions;
+
+    public TracingMiddleware(IOptions<TracingOptions> tracingOptions)
+    {
+        _tracingOptions = tracingOptions.Value;
+    }
     
     static TracingMiddleware()
     {
@@ -32,6 +40,13 @@ public class TracingMiddleware : IMiddleware
     /// </summary>
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
+        // 检查是否启用Tracing中间件
+        if (!_tracingOptions.Enable || !_tracingOptions.EnableMiddleware)
+        {
+            await next(context);
+            return;
+        }
+
         // 清除之前可能存在的链路信息
         TracingService.ClearCurrentTracing();
         
