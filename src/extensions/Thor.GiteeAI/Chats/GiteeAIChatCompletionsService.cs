@@ -8,7 +8,7 @@ using Thor.Abstractions.Chats.Dtos;
 using Thor.Abstractions.Exceptions;
 using Thor.Abstractions.Extensions;
 
-namespace Thor.DeepSeek.Chats;
+namespace Thor.GiteeAI.Chats;
 
 public class GiteeAIChatCompletionsService : IThorChatCompletionsService
 {

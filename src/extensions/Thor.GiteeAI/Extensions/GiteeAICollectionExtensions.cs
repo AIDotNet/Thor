@@ -6,6 +6,7 @@ using Thor.Abstractions.Embeddings;
 using Thor.Abstractions.Images;
 using Thor.DeepSeek.Chats;
 using Thor.DeepSeek.Embeddings;
+using Thor.GiteeAI.Chats;
 
 namespace Thor.DeepSeek.Extensions;
 

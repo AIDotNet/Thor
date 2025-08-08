@@ -324,7 +324,7 @@ public sealed partial class ChatService(
 
         if (request.Model.StartsWith("gpt-5"))
         {
-            request.MaxCompletionTokens = request.MaxTokens;    
+            request.MaxCompletionTokens = request.MaxTokens;
             request.MaxTokens = null;
         }
         else if (request.Model.StartsWith("o3-mini") || request.Model.StartsWith("o4-mini"))
@@ -333,7 +333,7 @@ public sealed partial class ChatService(
             request.MaxTokens = null;
             request.Temperature = null;
         }
-        
+
         var log = requestLogService.BeginRequestLog(context.Request.Path, request);
 
         RequestLogContext.SetCurrent(log);
@@ -407,6 +407,11 @@ public sealed partial class ChatService(
 
                 if (request.Stream == true)
                 {
+                    request.StreamOptions = new ThorStreamOptions()
+                    {
+                        IncludeUsage = true
+                    };
+
                     (requestToken, responseToken, responseBody) =
                         await StreamChatCompletionsHandlerAsync(context, request, channel, chatCompletionsService, user,
                             rate);
