@@ -260,8 +260,6 @@ public sealed class ChannelService(
 
         var chatRequest = new ThorChatCompletionsRequest()
         {
-            TopP = 0.7f,
-            Temperature = 0.95f,
             MaxTokens = 1,
             Messages = [ThorChatMessage.CreateUserMessage("hello")]
         };
