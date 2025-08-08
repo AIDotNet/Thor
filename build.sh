@@ -142,7 +142,7 @@ for runtime in "${runtimes[@]}"; do
                 --no-build \
                 --output "$OUTPUT_PATH" \
                 /p:PublishSingleFile=true \
-                /p:PublishReadyToRun=true
+                $(if [[ "$runtime" == osx-* ]]; then echo /p:PublishReadyToRun=false; else echo /p:PublishReadyToRun=true; fi)
         else
             dotnet publish "$PROJECT_PATH" \
                 --configuration "$CONFIGURATION" \
@@ -151,7 +151,7 @@ for runtime in "${runtimes[@]}"; do
                 --no-build \
                 --output "$OUTPUT_PATH" \
                 /p:PublishSingleFile=true \
-                /p:PublishReadyToRun=true \
+                $(if [[ "$runtime" == osx-* ]]; then echo /p:PublishReadyToRun=false; else echo /p:PublishReadyToRun=true; fi) \
                 /p:IncludeNativeLibrariesForSelfExtract=true
         fi
         

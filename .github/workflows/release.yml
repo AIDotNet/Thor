@@ -129,7 +129,7 @@ jobs:
             --no-build \
             --output ./publish/${{ matrix.runtime }}-fd/ \
             /p:PublishSingleFile=true \
-            /p:PublishReadyToRun=$READY_TO_RUN
+            /p:PublishReadyToRun=${{ matrix.runtime != 'osx-x64' && matrix.runtime != 'osx-arm64' }}
 
       - name: 发布应用 (自包含)
         if: matrix.deployment == 'self-contained'
@@ -149,7 +149,7 @@ jobs:
             --no-build \
             --output ./publish/${{ matrix.runtime }}-sc/ \
             /p:PublishSingleFile=true \
-            /p:PublishReadyToRun=$READY_TO_RUN \
+            /p:PublishReadyToRun=${{ matrix.runtime != 'osx-x64' && matrix.runtime != 'osx-arm64' }} \
             /p:IncludeNativeLibrariesForSelfExtract=true
 
       - name: 创建发布包

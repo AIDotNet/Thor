@@ -136,7 +136,8 @@ for %%r in (%runtimes%) do (
                 --no-build ^
                 --output "!OUTPUT_PATH!" ^
                 /p:PublishSingleFile=true ^
-                /p:PublishReadyToRun=true
+                ^ 
+                % (if "%%r"=="osx-x64" (echo /p:PublishReadyToRun=false) else (echo /p:PublishReadyToRun=true))
         ) else (
             dotnet publish "%PROJECT_PATH%" ^
                 --configuration %CONFIGURATION% ^
@@ -145,7 +146,8 @@ for %%r in (%runtimes%) do (
                 --no-build ^
                 --output "!OUTPUT_PATH!" ^
                 /p:PublishSingleFile=true ^
-                /p:PublishReadyToRun=true ^
+                ^ 
+                % (if "%%r"=="osx-x64" (echo /p:PublishReadyToRun=false) else (echo /p:PublishReadyToRun=true)) ^
                 /p:IncludeNativeLibrariesForSelfExtract=true
         )
         
