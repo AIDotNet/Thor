@@ -17,6 +17,28 @@ public class AnthropicToOpenAI
             Stream = anthropicInput.Stream,
             Messages = new List<ThorChatMessage>(anthropicInput.Messages.Count)
         };
+
+        // high medium minimal low
+        if (openAIRequest.Model.EndsWith("-high") ||
+            openAIRequest.Model.EndsWith("-medium") ||
+            openAIRequest.Model.EndsWith("-minimal") ||
+            openAIRequest.Model.EndsWith("-low"))
+        {
+            openAIRequest.ReasoningEffort = openAIRequest.Model switch
+            {
+                var model when model.EndsWith("-high") => "high",
+                var model when model.EndsWith("-medium") => "medium",
+                var model when model.EndsWith("-minimal") => "minimal",
+                var model when model.EndsWith("-low") => "low",
+                _ => "medium"
+            };
+
+            openAIRequest.Model = openAIRequest.Model.Replace("-high", "")
+                .Replace("-medium", "")
+                .Replace("-minimal", "")
+                .Replace("-low", "");
+        }
+
         if (openAIRequest.Stream == true)
         {
             openAIRequest.StreamOptions = new ThorStreamOptions()
