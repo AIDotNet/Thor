@@ -472,6 +472,26 @@ partial class ChatService
                 throw new BusinessException(response.Error?.Message ?? "图片生成失败", response.Error?.Code?.ToString());
             }
 
+            // 根据请求格式转换，如果请求格式是base64，但是返回格式是url，则需要转换
+            if (request.ResponseFormat?.Equals("b64_json", StringComparison.OrdinalIgnoreCase) == true &&
+                response.Results.Any(x => string.IsNullOrEmpty(x.B64)))
+            {
+                var client = HttpClientFactory.GetHttpClient("default");
+                foreach (var dataResult in response.Results.Where(dataResult => string.IsNullOrEmpty(dataResult.B64) && !string.IsNullOrEmpty(dataResult.Url)))
+                {
+                    try
+                    {
+                        var imageBytes = await client.GetByteArrayAsync(dataResult.Url);
+                        dataResult.B64 = Convert.ToBase64String(imageBytes);
+                        dataResult.Url = null;
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError("图片转换失败：{e}", e);
+                    }
+                }
+            }
+
             await context.Response.WriteAsJsonAsync(response);
 
             sw.Stop();
