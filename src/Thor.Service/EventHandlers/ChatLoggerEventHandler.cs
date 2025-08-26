@@ -2,7 +2,7 @@
 using Thor.Core.DataAccess;
 using Thor.Domain.Chats;
 
-namespace Thor.Service.EventBus;
+namespace Thor.Service.EventHandlers;
 
 public sealed class ChatLoggerEventHandler(
     ILogger<ChatLoggerEventHandler> logger,
@@ -11,6 +11,7 @@ public sealed class ChatLoggerEventHandler(
 {
     public async Task HandleAsync(ChatLogger @event)
     {
+        @event.Id = Guid.NewGuid().ToString("N") + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         @event.CreatedAt = DateTime.Now;
         await loggerDbContext.Loggers.AddAsync(@event);
         await loggerDbContext.SaveChangesAsync();

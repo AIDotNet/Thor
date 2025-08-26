@@ -2,7 +2,7 @@
 using Thor.Service.Eto;
 using Thor.Service.Service;
 
-namespace Thor.Service.EventBus;
+namespace Thor.Service.EventHandlers;
 
 /// <summary>
 /// 创建用户事件处理器

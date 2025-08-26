@@ -3,7 +3,7 @@ using Thor.Core.DataAccess;
 using Thor.Service.Eto;
 using Thor.Service.Service;
 
-namespace Thor.Service.EventBus;
+namespace Thor.Service.EventHandlers;
 
 /// <summary>
 /// 当模型映射缓存更新事件触发时，更新模型管理器缓存
