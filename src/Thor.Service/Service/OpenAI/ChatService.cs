@@ -279,7 +279,7 @@ public sealed partial class ChatService(
         catch (Exception e)
         {
             GetLogger<ChatService>().LogError(e.Message);
-            await context.WriteErrorAsync(e.Message);
+            await context.WriteOpenAIErrorAsync(e.Message);
         }
     }
 
@@ -552,7 +552,7 @@ public sealed partial class ChatService(
 
             await requestLogService.EndRequestLog(log, 402, "抱歉，您的额度不足",
                 insufficientQuotaException);
-            await context.WriteErrorAsync(insufficientQuotaException.Message, "402");
+            await context.WriteOpenAIErrorAsync(insufficientQuotaException.Message, "402");
         }
         catch (RateLimitException)
         {
@@ -573,7 +573,7 @@ public sealed partial class ChatService(
         catch (NotModelException modelException)
         {
             context.Response.StatusCode = 400;
-            await context.WriteErrorAsync(modelException.Message, "400");
+            await context.WriteOpenAIErrorAsync(modelException.Message, "400");
             await requestLogService.EndRequestLog(log, 400, modelException.Message,
                 modelException);
         }
@@ -585,7 +585,7 @@ public sealed partial class ChatService(
             if (rateLimit > 50)
             {
                 context.Response.StatusCode = 400;
-                await context.WriteErrorAsync(e.Message, "500");
+                await context.WriteOpenAIErrorAsync(e.Message, "500");
                 await requestLogService.EndRequestLog(log, 400, e.Message, e);
             }
             else
@@ -1344,7 +1344,7 @@ public sealed partial class ChatService(
         catch (Exception e)
         {
             logger.LogError("对话模型请求异常：{e}", e);
-            await context.WriteErrorAsync(e.Message);
+            await context.WriteOpenAIErrorAsync(e.Message);
         }
     }
 

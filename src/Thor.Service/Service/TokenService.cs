@@ -173,7 +173,8 @@ public sealed class TokenService(
             }
             catch (Exception e)
             {
-                logger.LogError(e, "解析Token 失败");
+                logger.LogError(e,
+                    $"解析Token失败 token:{key} IP:{context.GetIpAddress()} UserAgent:{context.Request.Headers.UserAgent}");
                 context.Response.StatusCode = 401;
                 throw new UnauthorizedAccessException();
             }
