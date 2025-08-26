@@ -42,7 +42,6 @@ using Thor.RedisMemory.Cache;
 using Thor.Service;
 using Thor.Service.BackgroundTask;
 using Thor.Service.Eto;
-using Thor.Service.EventBus;
 using Thor.Service.EventHandlers;
 using Thor.Service.Extensions;
 using Thor.Service.Filters;
@@ -137,7 +136,6 @@ try
         .AddHttpContextAccessor()
         .AddScoped<IEventHandler<ChatLogger>, ChatLoggerEventHandler>()
         .AddScoped<IEventHandler<CreateUserEto>, CreateUserEventHandler>()
-        .AddScoped<IEventHandler<Tracing>, TracingEventHandler>()
         .AddScoped<IEventHandler<UpdateModelManagerCache>, ModelManagerEventHandler>()
         .AddScoped<IEventHandler<RequestLog>, RequestLogCreatedEventHandler>()
         .AddTransient<JwtHelper>()
