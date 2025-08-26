@@ -17,20 +17,9 @@ public sealed class LoggerService(
 {
     public async ValueTask CreateAsync(ChatLogger logger)
     {
-        var tracing = TracingExtensions.GetCurrentRootTracing();
-
-        if (string.IsNullOrEmpty(logger.Id))
-        {
-            logger.Id = Guid.NewGuid().ToString("N") + Random.Shared.Next(1000, 9999);
-        }
-
+        logger.Id = Guid.NewGuid().ToString("N") + Random.Shared.Next(1000, 9999);
         logger.CreatedAt = DateTime.Now;
         await eventBus.PublishAsync(logger);
-        if (tracing != null)
-        {
-            tracing.ChatLoggerId = logger.Id;
-            await tracingEventBus.PublishAsync(tracing);
-        }
     }
 
     /// <summary>

@@ -87,31 +87,4 @@ public static class ServiceCollectionExtensions
 
         return builder;
     }
-
-    /// <summary>
-    /// 添加链路跟踪服务
-    /// </summary>
-    /// <param name="services">服务集合</param>
-    /// <returns>服务集合</returns>
-    public static IServiceCollection AddTracingService(this IServiceCollection services)
-    {
-        // 注册链路跟踪中间件
-        services.AddTransient<TracingMiddleware>();
-        
-        // 确保 Activity 跟踪器已启用
-        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
-        Activity.ForceDefaultIdFormat = true;
-        
-        return services;
-    }
-
-    /// <summary>
-    /// 使用链路跟踪中间件
-    /// </summary>
-    /// <param name="app">应用程序</param>
-    /// <returns>应用程序</returns>
-    public static IApplicationBuilder UseTracingMiddleware(this IApplicationBuilder app)
-    {
-        return app.UseMiddleware<TracingMiddleware>();
-    }
 }
