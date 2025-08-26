@@ -54,7 +54,7 @@ public static class OpenAIServiceCollectionExtensions
             "text-search-ada-doc-001"
         ]);
 
-        services.AddKeyedSingleton<IThorChatCompletionsService, OpenAIChatCompletionsService>(CustomeOpenAIPlatformOptions
+        services.AddKeyedSingleton<IThorChatCompletionsService, OpenAiChatCompletionsService>(CustomeOpenAIPlatformOptions
             .PlatformCode);
 
         services.AddKeyedSingleton<IThorTextEmbeddingService, OpenAITextEmbeddingService>(

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Net;
 using System.Text;
 
 namespace Thor.Abstractions;
@@ -40,31 +41,41 @@ public static class HttpClientFactory
 
     private static readonly ConcurrentDictionary<string, Lazy<List<HttpClient>>> HttpClientPool = new();
 
+    private static SocketsHttpHandler socketsHttpHandler = new SocketsHttpHandler
+    {
+        PooledConnectionLifetime = TimeSpan.FromMinutes(30),
+        PooledConnectionIdleTimeout = TimeSpan.FromMinutes(30),
+        EnableMultipleHttp2Connections = true,
+        // 使用h2
+
+
+        MaxConnectionsPerServer = int.MaxValue,
+        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Brotli,
+        // 连接超时5分钟
+        ConnectTimeout = TimeSpan.FromMinutes(5),
+        MaxAutomaticRedirections = 3,
+        AllowAutoRedirect = true,
+
+        Expect100ContinueTimeout = TimeSpan.FromMinutes(30),
+    };
+
     public static HttpClient GetHttpClient(string key)
     {
-        return HttpClientPool.GetOrAdd(key, k => new Lazy<List<HttpClient>>(() =>
+        return HttpClientPool.GetOrAdd(key, _ => new Lazy<List<HttpClient>>(() =>
         {
             var clients = new List<HttpClient>(PoolSize);
 
             for (var i = 0; i < PoolSize; i++)
             {
-                clients.Add(new HttpClient(new SocketsHttpHandler
+                clients.Add(new HttpClient(socketsHttpHandler)
                 {
-                    PooledConnectionLifetime = TimeSpan.FromMinutes(30),
-                    PooledConnectionIdleTimeout = TimeSpan.FromMinutes(30),
-                    EnableMultipleHttp2Connections = true,
-                    // 连接超时5分钟
-                    ConnectTimeout = TimeSpan.FromMinutes(5),
-                    MaxAutomaticRedirections = 3,
-                    AllowAutoRedirect = true,
-                    Expect100ContinueTimeout = TimeSpan.FromMinutes(30),
-                })
-                {
+                    DefaultRequestVersion = HttpVersion.Version20,
+                    DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower,
                     Timeout = TimeSpan.FromMinutes(30),
                     DefaultRequestHeaders =
                     {
                         { "User-Agent", "Thor" },
-                    }
+                    },
                 });
             }
 
