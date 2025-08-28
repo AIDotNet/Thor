@@ -302,6 +302,7 @@ try
             if (File.Exists(brPath))
             {
                 context.Response.Headers.Append("Content-Encoding", "br");
+                context.Response.Headers.Append("Cache-Control", "public, max-age=31536000");
                 context.Response.Headers.Append("Content-Type", "application/javascript");
 
                 await context.Response.SendFileAsync(brPath);
@@ -314,6 +315,7 @@ try
             if (File.Exists(gzPath))
             {
                 context.Response.Headers.Append("Content-Encoding", "gzip");
+                context.Response.Headers.Append("Cache-Control", "public, max-age=31536000");
                 context.Response.Headers.Append("Content-Type", "application/javascript");
                 await context.Response.SendFileAsync(gzPath);
                 return;
@@ -327,6 +329,7 @@ try
             if (File.Exists(path))
             {
                 context.Response.Headers.Append("Content-Type", "text/css");
+                context.Response.Headers.Append("Cache-Control", "public, max-age=31536000");
                 await context.Response.SendFileAsync(path);
                 return;
             }
@@ -345,6 +348,7 @@ try
                 if (File.Exists(path))
                 {
                     context.Response.StatusCode = 200;
+                    context.Response.Headers.Append("Cache-Control", "public, max-age=31536000");
                     context.Response.Headers.Append("Content-Type",
                         HttpContextExtensions.GetContentType(Path.GetExtension(path)));
                     await context.Response.SendFileAsync(path);
@@ -357,6 +361,7 @@ try
                 if (File.Exists(path))
                 {
                     context.Response.StatusCode = 200;
+                    context.Response.Headers.Append("Cache-Control", "public, max-age=31536000");
                     await context.Response.SendFileAsync(path);
                     return;
                 }

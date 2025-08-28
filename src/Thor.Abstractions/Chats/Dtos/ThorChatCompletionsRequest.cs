@@ -287,6 +287,8 @@ public class ThorChatCompletionsRequest : IOpenAiModels.ITemperature, IOpenAiMod
 
     [JsonPropertyName("thinking")] public ThorChatClaudeThinking? Thinking { get; set; }
 
+    [JsonPropertyName("enable_thinking")] public bool? EnableThinking { get; set; }
+
     [JsonPropertyName("web_search_options")]
     public ThorChatWebSearchOptions? WebSearchOptions { get; set; } = null;
 

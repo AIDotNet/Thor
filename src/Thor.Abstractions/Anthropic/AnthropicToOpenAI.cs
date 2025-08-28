@@ -39,6 +39,12 @@ public class AnthropicToOpenAI
                 .Replace("-low", "");
         }
 
+        if (openAIRequest.Model.EndsWith("-thinking"))
+        {
+            openAIRequest.EnableThinking = true;
+            openAIRequest.Model = openAIRequest.Model.Replace("-thinking", "");
+        }
+
         if (openAIRequest.Stream == true)
         {
             openAIRequest.StreamOptions = new ThorStreamOptions()
