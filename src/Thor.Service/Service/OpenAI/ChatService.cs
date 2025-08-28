@@ -362,6 +362,34 @@ public sealed partial class ChatService(
                 TokenService.CheckModel(request.Model, token, context);
 
                 request.Model = await modelMapService.ModelMap(request.Model);
+                
+                // high medium minimal low
+                if (request.Model.EndsWith("-high") ||
+                    request.Model.EndsWith("-medium") ||
+                    request.Model.EndsWith("-minimal") ||
+                    request.Model.EndsWith("-low"))
+                {
+                    request.ReasoningEffort = request.Model switch
+                    {
+                        var s when s.EndsWith("-high") => "high",
+                        var s when s.EndsWith("-medium") => "medium",
+                        var s when s.EndsWith("-minimal") => "minimal",
+                        var s when s.EndsWith("-low") => "low",
+                        _ => "medium"
+                    };
+
+                    request.Model = request.Model.Replace("-high", "")
+                        .Replace("-medium", "")
+                        .Replace("-minimal", "")
+                        .Replace("-low", "");
+                }
+
+                if (request.Model.EndsWith("-thinking"))
+                {
+                    request.EnableThinking = true;
+                    request.Model = request.Model.Replace("-thinking", "");
+                }
+
 
                 // 获取渠道通过算法计算权重
                 var channel =
