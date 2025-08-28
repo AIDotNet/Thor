@@ -363,34 +363,6 @@ public sealed partial class ChatService(
 
                 request.Model = await modelMapService.ModelMap(request.Model);
                 
-                // high medium minimal low
-                if (request.Model.EndsWith("-high") ||
-                    request.Model.EndsWith("-medium") ||
-                    request.Model.EndsWith("-minimal") ||
-                    request.Model.EndsWith("-low"))
-                {
-                    request.ReasoningEffort = request.Model switch
-                    {
-                        var s when s.EndsWith("-high") => "high",
-                        var s when s.EndsWith("-medium") => "medium",
-                        var s when s.EndsWith("-minimal") => "minimal",
-                        var s when s.EndsWith("-low") => "low",
-                        _ => "medium"
-                    };
-
-                    request.Model = request.Model.Replace("-high", "")
-                        .Replace("-medium", "")
-                        .Replace("-minimal", "")
-                        .Replace("-low", "");
-                }
-
-                if (request.Model.EndsWith("-thinking"))
-                {
-                    request.EnableThinking = true;
-                    request.Model = request.Model.Replace("-thinking", "");
-                }
-
-
                 // 获取渠道通过算法计算权重
                 var channel =
                     CalculateWeight(await channelService.GetChannelsContainsModelAsync(request.Model, user, token));
@@ -422,6 +394,32 @@ public sealed partial class ChatService(
                     throw new BusinessException($"并未实现：{channel.Type} 的服务", "400");
                 }
 
+                // high medium minimal low
+                if (request.Model.EndsWith("-high") ||
+                    request.Model.EndsWith("-medium") ||
+                    request.Model.EndsWith("-minimal") ||
+                    request.Model.EndsWith("-low"))
+                {
+                    request.ReasoningEffort = request.Model switch
+                    {
+                        var s when s.EndsWith("-high") => "high",
+                        var s when s.EndsWith("-medium") => "medium",
+                        var s when s.EndsWith("-minimal") => "minimal",
+                        var s when s.EndsWith("-low") => "low",
+                        _ => "medium"
+                    };
+
+                    request.Model = request.Model.Replace("-high", "")
+                        .Replace("-medium", "")
+                        .Replace("-minimal", "")
+                        .Replace("-low", "");
+                }
+
+                if (request.Model.EndsWith("-thinking"))
+                {
+                    request.EnableThinking = true;
+                    request.Model = request.Model.Replace("-thinking", "");
+                }
 
                 // 记录请求模型 / 请求用户
                 logger.LogInformation("请求模型：{model} 请求用户：{user} 请求分配渠道 ：{name}", request.Model, user?.UserName,
