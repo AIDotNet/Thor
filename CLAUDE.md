@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Thor is an enterprise-grade AI model management gateway that provides unified API access to manage and orchestrate multiple AI models. It's built with .NET 9 and React, supporting 20+ AI models with comprehensive user management, channel management, billing, and monitoring capabilities.
+Thor is an enterprise-grade AI model management gateway that provides unified API access to manage and orchestrate multiple AI models. It's built with .NET 10 and React, supporting 20+ AI models with comprehensive user management, channel management, billing, and monitoring capabilities.
 
 ## Build and Development Commands
 
-### Backend (.NET 9)
+### Backend (.NET 10)
 ```bash
 # Main service project
 dotnet run --project src/Thor.Service/Thor.Service.csproj --urls "http://localhost:5000"

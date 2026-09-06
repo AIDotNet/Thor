@@ -212,7 +212,7 @@ volumes:
 ## 🔧 开发环境搭建
 
 ### 前置要求
-- .NET 8.0 SDK
+- .NET 10.0 SDK
 - Node.js 18+
 - Git
 

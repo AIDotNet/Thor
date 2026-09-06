@@ -16,7 +16,7 @@ if %errorlevel% neq 0 (
 set SERVICE_NAME=ThorService
 set DISPLAY_NAME=Thor AI Gateway Service
 set DESCRIPTION="Thor AI Gateway Service for managing AI model access"
-set BIN_PATH=%~dp0src\Thor.Service\bin\Release\net8.0\publish\Thor.Service.exe
+set BIN_PATH=%~dp0src\Thor.Service\bin\Release\net10.0\publish\Thor.Service.exe
 
 echo 正在检查服务是否已存在...
 

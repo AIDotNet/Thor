@@ -16,7 +16,7 @@ echo.
 echo 检查必要工具...
 dotnet --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [错误] 未找到.NET SDK，请先安装.NET 9.0 SDK
+    echo [错误] 未找到.NET SDK，请先安装.NET 10.0 SDK
     exit /b 1
 )
 
