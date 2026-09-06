@@ -1,13 +1,13 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
+        <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="DM.Microsoft.EntityFrameworkCore" Version="8.0.0.33671" />
+      <PackageReference Include="DM.Microsoft.EntityFrameworkCore" Version="9.0.0.43760" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.2" />
     </ItemGroup>
 

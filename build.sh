@@ -22,7 +22,7 @@ echo
 echo -e "${YELLOW}检查必要工具...${NC}"
 
 if ! command -v dotnet &> /dev/null; then
-    echo -e "${RED}[错误] 未找到.NET SDK，请先安装.NET 9.0 SDK${NC}"
+    echo -e "${RED}[错误] 未找到.NET SDK，请先安装.NET 10.0 SDK${NC}"
     exit 1
 fi
 

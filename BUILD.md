@@ -13,7 +13,7 @@
 ## 📋 前置要求
 
 ### 开发环境
-- **.NET 9.0 SDK** - 后端项目构建
+- **.NET 10.0 SDK** - 后端项目构建
 - **Node.js 20+** - 前端项目构建
 - **npm** - 前端包管理器
 
@@ -176,7 +176,7 @@ git push origin v1.0.0
 ## ❓ 常见问题
 
 ### Q: 构建失败，提示找不到.NET SDK
-A: 请确保安装了.NET 9.0 SDK，可从[官网](https://dotnet.microsoft.com/download)下载
+A: 请确保安装了.NET 10.0 SDK，可从[官网](https://dotnet.microsoft.com/download)下载
 
 ### Q: 前端构建失败
 A: 确保Node.js版本为20+，删除`lobe/node_modules`目录后重新运行
